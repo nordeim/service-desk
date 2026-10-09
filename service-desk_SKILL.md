@@ -7,9 +7,9 @@ description: >
   functionality. Distilled through the session-5 remediation (2026-10-09).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.3.0
+version: 2.4.0
 last_updated: 2026-10-09
-project_state: 53 unit tests + 90 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–5)
+project_state: 54 unit tests + 107 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–6)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -124,7 +124,7 @@ All tokens live in `src/app/globals.css` (Tailwind v4 CSS-first — there is NO 
   --background: #f8fafc;  --foreground: #0f172a;
   --card: #ffffff;        --card-foreground: #0f172a;
   --sidebar: #fafafa;     /* measured — NOT white */
-  --primary: #0891b2;     --ring: #06b6d4;
+  --primary: #0891b2;     --ring: #0a0a0a;  # near-black (session 6; was cyan #06b6d4)
   --navy-950: #0a1628;    --navy-900: #0f2744;  --navy-800: #1a3a5c;
   --amber-500: #f59e0b;   --emerald-500: #10b981;
   /* …full palette in the file */
@@ -317,7 +317,7 @@ Bash gates (in order — every commit):
 ```bash
 bun run lint          # ESLint 9 flat — zero warnings tolerated
 bun run typecheck     # tsc --noEmit
-bun run test          # Vitest — 53 unit tests
+bun run test          # Vitest — 54 unit tests
 bun run build         # production standalone build
 bun run test:e2e      # 57 E2E (needs the prior build)
 bash scripts/smoke-test.sh   # 11-step API contract on :3999
@@ -361,6 +361,10 @@ Manual/visual checks:
 16. **Class NAMES are not parity — computed values are.** (Session 5.) Tailwind v4 renamed `shadow-sm`→`shadow-xs`; the reference (v3 scale) writes `shadow-sm` for the light `0 1px 2px/0.05` step. Copying the NAME onto a v4 build rendered one step HEAVIER on 11 controls. An intermediate "fix" based on the name (outline→shadow-sm) was caught and reverted by a computed re-measure. Every shadow/font/spacing comparison goes through `getComputedStyle`.
 17. **Probe the font family, not just sizes/weights.** (Session 5.) Four sessions pinned typography at every level EXCEPT the family. The reference loads NO webfont (`document.fonts` empty) — our next/font Inter was a session-1 assumption causing ~10% text-width deltas everywhere. One probe settled it; `--font-sans` is now pinned to the reference's exact stack.
 18. **Disambiguate by scope before measuring.** (Session 5.) The sidebar nav items share text with page controls ("Submit Ticket" nav vs form submit). An unscoped `querySelectorAll('button,a').find(...)` matched the NAV anchor (circle-plus w-5) and nearly shipped a wrong submit-icon fix. Always scope to `main`/the form — same class as the existing parity-probe scolding rule.
+19. **Probe the SCALES, not just instances.** (Session 6.) The radius scale had never been probed in five sessions — the shadcn v4 calc chain (`--radius: 0.625rem` → sm/md/lg/xl = 6/8/10/14px) rendered every rounded control +2px vs the reference's v3 defaults (2/6/8/12px) with IDENTICAL class names. Like the session-5 font: a scale-level probe (one matched element per radius class) settles it. Scales to probe: font-family, radius, shadow, spacing, ring.
+20. **Focus states are parity surface.** (Session 6.) "Invisible at rest" base-generation divergences become visible the moment a keyboard user Tabs. The new-gen `focus-visible:ring-[3px] ring-ring/50 + border-ring` tail renders a 3px translucent ring + border change; the reference's old-gen renders solid 1px near-black, no border change. Pin the focused COMPUTED state per control type.
+21. **A reference's custom classes can be inert per-surface — verify each.** (Session 6.) The reference's `focus:border-cyan-500 focus:ring-cyan-500` customs: INERT on text inputs (near-black ring + unchanged border wins), border-only active on textareas, fully active on select triggers. Only paired computed measurements per surface reveal the matrix; class diffs cannot.
+22. **Exercise the interaction in a pin, not just the rest state.** (Session 6.) The double-emoji category-trigger bug (`🖥️🖥️ Hardware Issue`) survived five sessions because every pin read the at-rest placeholder — none SELECTED an option and read the trigger. Selected states, open states, and focus states all need pins that drive them.
 
 ---
 
@@ -509,7 +513,7 @@ Rules: never introduce a z above 50 for page chrome; portals own 50+; the dev ov
 | `--accent` | `#f1f5f9` | hover surfaces |
 | `--destructive` | `#ef4444` / fg `#fff` | destructive actions |
 | `--border` | `#e2e8f0` | hairlines |
-| `--ring` | `#06b6d4` | focus rings |
+| `--ring` | `#0a0a0a` | focus rings (near-black, reference-measured session 6; cyan accents use explicit `*-cyan-500` utilities) |
 | `--navy-950` | `#0a1628` | darkest surface |
 | `--navy-900` | `#0f2744` | dark surface |
 | `--navy-800` | `#1a3a5c` | dark surface |
@@ -595,7 +599,7 @@ Session-4 application of this loop: full 5-page DOM diff + live geometry probes 
 
 ```bash
 # gates (in order)
-bun run lint && bun run typecheck && bun run test && bun run build && bun run test:e2e  # 90 E2E
+bun run lint && bun run typecheck && bun run test && bun run build && bun run test:e2e  # 107 E2E
 bash scripts/smoke-test.sh
 
 # db

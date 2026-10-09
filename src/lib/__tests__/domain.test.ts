@@ -3,6 +3,7 @@ import {
   CATEGORY_EMOJI,
   CATEGORY_LABELS,
   PRIORITY_LABELS,
+  PRIORITY_SELECT_CLASS,
   STATUS_LABELS,
   TICKET_CATEGORIES,
   TICKET_PRIORITIES,
@@ -33,8 +34,17 @@ describe("constants", () => {
       "email",
       "other",
     ]);
-    expect(CATEGORY_LABELS.hardware).toBe("🖥️ Hardware Issue");
+    // Session 6: the reference renders the emoji in its OWN span (gap-2
+    // flex row) next to a plain label — the label map must be emoji-free
+    // (the old emoji-prefixed values rendered "🖥️🖥️ Hardware Issue" in the
+    // category trigger once the emoji span was added).
+    expect(CATEGORY_LABELS.hardware).toBe("Hardware Issue");
+    expect(CATEGORY_LABELS.other).toBe("Other");
+    expect(CATEGORY_EMOJI.hardware).toBe("🖥️");
     expect(CATEGORY_EMOJI.other).toBe("📋");
+    for (const label of Object.values(CATEGORY_LABELS)) {
+      expect(label).not.toMatch(/[🖥️💿🌐🔐📧📋]/u);
+    }
   });
 
   it("pins the four priorities and statuses", () => {
@@ -42,6 +52,15 @@ describe("constants", () => {
     expect([...TICKET_STATUSES]).toEqual(["open", "in_progress", "resolved", "closed"]);
     expect(PRIORITY_LABELS.urgent).toBe("Urgent - Critical");
     expect(STATUS_LABELS.in_progress).toBe("In Progress");
+  });
+
+  it("pins the per-priority select colors (session 6: reference renders each priority option + trigger value in its own color)", () => {
+    expect(PRIORITY_SELECT_CLASS).toEqual({
+      low: "text-slate-600",
+      medium: "text-blue-600",
+      high: "text-orange-600",
+      urgent: "text-red-600",
+    });
   });
 
   it("type-guards reject unknown values", () => {

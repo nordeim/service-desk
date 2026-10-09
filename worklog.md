@@ -207,3 +207,36 @@ Stage Summary:
 - All 8 session-5 findings fixed and E2E-pinned (90 E2E total: +17 parity tests); 2 false gaps caught and reverted by the verification protocol; parity re-verified live against the reference (paired measurements)
 - Deliverables: 11 source files + 3 test/spec updates + remediation-plan-session5.md + refreshed screenshots + 5 updated docs
 - Ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 12
+Agent: main (Super Z)
+Task: Session 6 — refresh repo, review session_5/session_6 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git pull: 67ebad4 adds docs/session_6.md (the session-5 execution narrative — confirms session 5 shipped at 0b65112)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.3.0 + session_5.md + remediation-plan-session5.md + session_6.md + worklog — all aligned with the codebase (env contract, db path, .env.example, skills/ exclusion in all 4 configs re-verified)
+- Baseline gates at 67ebad4: lint ✓ typecheck ✓ 53 unit ✓ build ✓ 90/90 E2E ✓ smoke 11/11 ✓; audit of session-5 commit 0b65112 clean (14 source files match the documented plan)
+- Fresh gap analysis vs live reference (agent-browser, explicit-origin dump helper scripts/s6-dump.sh, paired computed probes, both sites): all 5 pages + mobile + dropdown-open + FOCUS states — three never-probed surfaces: the RADIUS SCALE, focus-visible interaction states, select dropdown open states
+- 9 findings: the radius-scale trap (shadcn v4 calc chain renders rounded-sm/md/lg/xl at 6/8/10/14px vs the reference's v3 defaults 2/6/8/12px — +2px app-wide, identical class names); the focus-state matrix (3px translucent-cyan new-gen rings vs solid 1px near-black; --ring was cyan; auth inputs wrong generation + at-rest shadow); the double-emoji category-trigger bug (🖥️🖥️ Hardware Issue — no pin ever exercised a selection); select dropdown contracts (emoji-span options, per-priority colors, trigger follows selection); split signup line; Google button at-rest shadow
+- Wrote + validated docs/remediation-plan-session6.md (9 gaps + per-surface focus matrix + non-gaps ledger + risks)
+
+Stage Summary:
+- Repo at 67ebad4 + plan; 9 gaps (3 HIGH: radius scale, focus states, double-emoji bug) queued for TDD execution
+
+---
+Task ID: 13
+Agent: main (Super Z)
+Task: Session 6 — TDD remediation, verification, docs, SKILL.md v2.4.0, commit + push
+
+Work Log:
+- TDD: 2 unit pins (emoji-free CATEGORY_LABELS + PRIORITY_SELECT_CLASS) + 16 E2E session-6 tests written first, all verified RED (plus G5b discovered mid-cycle: auth inputs' at-rest shadow-xs → shadow-none ×6)
+- Implemented: G4 radius tokens pinned to v3 literals in @theme inline (sm 2px / md 6px / lg 8px / xl 12px); G5+G5b focus tails swapped on Button/Input/Textarea (focus-visible:ring-1 ring-ring) + SelectTrigger (plain focus:ring-1) + --ring #06b6d4→#0a0a0a + auth inputs' older generation (ring-2 slate-400 + ring-offset-2 + ring-offset-white + shadow-none) + base transitions to transition-colors; G1 whole-line signup links (login + signup) with inner font-medium span; G2 Google shadow-none; G3+G6 emoji-free labels + emoji-span structure on options + trigger; G7+G8 PRIORITY_SELECT_CLASS map on options + trigger; session-4 cyan-focus pins superseded per computed evidence (text inputs drop the inert customs; selects + textarea border keep the active ones)
+- Test-authoring fixes during red→green: lab() color representations accepted (v4 emits palette colors as lab()); transition-colors races one-shot evaluates → auto-retrying toHaveCSS/expect.poll; Tab-loop checks activeElement itself (BODY textContent contains the page); select test uses .focus() (our Radix moves focus into the open dropdown); auth.spec signup-link name updated to the whole-line accessible name
+- Gates: lint ✓ typecheck ✓ 54 unit ✓ build ✓ 107/107 E2E ✓ smoke 11/11 ✓
+- Live re-verification (paired, both sites): radius table identical (12/6/6/8/2px); focus matrix identical (1px near-black rings, 2px slate-400 + white offset on auth, cyan select ring); category trigger single emoji + gap-2 option structure; priority colors + High→orange trigger; Google no at-rest shadow; whole-line signup link; mobile menu re-tested (trigger hit-tests to BUTTON at 8px radius, 20px/12px/600 sheet, overlay + Escape close, nav-tap auto-close, zero console errors)
+- VLM composite sweep (7 composites): login/ticket-detail/mobile-dashboard IDENTICAL; dashboard + mobile-menu claims = the documented "/"-no-highlight divergence (re-verified the reference DOES highlight at /mytickets) + data; submit + mytickets claims refuted by DOM (trigger texts + placeholder identical; stat tiles 48px = 48px)
+- Refreshed docs/screenshots/ (7 shots); updated README/AGENTS (session-6 contracts)/CLAUDE (radius + focus rules)/PAD (distribution + known-issues row + token table)/service-desk_SKILL.md v2.4.0 (lessons 19-22); session_6.md retrospective appended; this worklog
+
+Stage Summary:
+- All 9 session-6 findings fixed and E2E-pinned (107 E2E total: +17 parity tests, 61→78); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py

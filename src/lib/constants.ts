@@ -20,12 +20,17 @@ export type TicketCategory = (typeof TICKET_CATEGORIES)[number];
 
 /** Label shown in dropdowns (matches the reference app's copy). */
 export const CATEGORY_LABELS: Record<TicketCategory, string> = {
-  hardware: "🖥️ Hardware Issue",
-  software: "💿 Software Issue",
-  network: "🌐 Network/Internet",
-  access: "🔐 Access/Permissions",
-  email: "📧 Email Issue",
-  other: "📋 Other",
+  // Emoji-free labels (session 6): the reference renders the emoji in its
+  // OWN span (flex gap-2) next to a plain label — both in the dropdown
+  // options and the trigger value. Emoji-prefixed values here rendered
+  // "🖥️🖥️ Hardware Issue" once the emoji span was added (the session-6
+  // double-emoji bug).
+  hardware: "Hardware Issue",
+  software: "Software Issue",
+  network: "Network/Internet",
+  access: "Access/Permissions",
+  email: "Email Issue",
+  other: "Other",
 };
 
 /** Emoji tile rendered on ticket cards / detail pages. */
@@ -43,6 +48,19 @@ export const PRIORITY_LABELS: Record<TicketPriority, string> = {
   medium: "Medium - Normal",
   high: "High - Important",
   urgent: "Urgent - Critical",
+};
+
+/**
+ * Per-priority text color for the submit form's priority select (session 6,
+ * live-measured on the reference): each dropdown OPTION and the TRIGGER value
+ * render in the priority's own color. The mytickets priority FILTER options
+ * stay plain — the reference renders those without color.
+ */
+export const PRIORITY_SELECT_CLASS: Record<TicketPriority, string> = {
+  low: "text-slate-600",
+  medium: "text-blue-600",
+  high: "text-orange-600",
+  urgent: "text-red-600",
 };
 
 export const STATUS_LABELS: Record<TicketStatus, string> = {

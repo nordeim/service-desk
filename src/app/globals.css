@@ -51,13 +51,22 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Radius scale (session 6): pinned to the reference's Tailwind v3
+     DEFAULTS — rounded-sm=2px, rounded-md=6px, rounded-lg=8px,
+     rounded-xl=12px. The shadcn v4 calc chain off --radius: 0.625rem
+     rendered 6/8/10/14px — exactly +2px on every rounded control while the
+     class NAMES were identical on both sites (computed-value parity, like
+     the session-5 font pin). rounded-2xl/full keep the Tailwind defaults
+     (16px/9999px — identical on v3 and v4). */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 }
 
 :root {
+  /* Kept for documentation only — the radius tokens above are pinned to
+     the reference's v3 values and no longer derive from --radius. */
   --radius: 0.625rem;
 
   /* Light slate theme (matches the reference app). */
@@ -79,7 +88,12 @@
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #06b6d4;
+  /* Ring color (session 6): the reference's --ring is old-shadcn's default
+     near-black hsl(0 0% 3.9%) — its focused buttons/inputs render a 1px
+     near-black ring (rgb(10,10,10)), measured live. Our cyan --ring was a
+     session-1 assumption; the cyan accents come from explicit color
+     utilities (ring-cyan-500), not the token. */
+  --ring: #0a0a0a;
 
   /* Sidebar (reference-measured: #fafafa content bg, not white). */
   --sidebar: #fafafa;

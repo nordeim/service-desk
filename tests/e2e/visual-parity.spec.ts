@@ -552,12 +552,14 @@ test.describe("session 4: submit form details", () => {
     await expect(grid).toHaveClass(/gap-6/);
   });
 
-  test("form controls use the reference cyan focus + shadow-xs (v4 = the reference v3 shadow-sm)", async ({ page }) => {
+  test("form controls use the reference shadow-xs + select/textarea cyan border focus (session-6 supersede)", async ({ page }) => {
     await page.goto("/submitticket");
     const title = page.locator("input#title");
     await expect(title).toHaveClass(/border-slate-300/);
-    await expect(title).toHaveClass(/focus:border-cyan-500/);
-    await expect(title).toHaveClass(/focus:ring-cyan-500/);
+    // Session-6 computed supersede: the reference's cyan focus customs are
+    // INERT on text inputs (its focused title input renders a 1px near-black
+    // ring + unchanged slate-300 border) — pinned in the session-6 block.
+    await expect(title).not.toHaveClass(/focus:border-cyan-500/);
     await expect(title).toHaveClass(/shadow-xs/);
     const category = page.locator("button#category");
     await expect(category).toHaveClass(/shadow-xs/);
@@ -800,5 +802,288 @@ test.describe("session 5: icon contracts", () => {
     await expect(btn.locator("svg")).toHaveClass(/w-4/);
     await expect(btn.locator("svg")).toHaveClass(/mr-2/);
     await expect(btn.locator("svg")).not.toHaveClass(/lucide-circle-plus/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session 6 (docs/remediation-plan-session6.md)
+// New probe surfaces: the radius SCALE (never probed in sessions 1-5 — the
+// shadcn v4 calc chain rendered every rounded control +2px vs the reference's
+// Tailwind v3 defaults), focus-visible interaction states (computed), select
+// dropdown open states, and the login signup-line structure.
+// ---------------------------------------------------------------------------
+
+test.describe("session 6: radius scale (reference v3 defaults)", () => {
+  // Reference computed: rounded-sm=2px, rounded-md=6px, rounded-lg=8px,
+  // rounded-xl=12px. Our shadcn v4 calc chain (--radius: 0.625rem) rendered
+  // 6/8/10/14px — +2px on every rounded control (class names identical).
+  test("stat cards render rounded-xl at the reference 12px", async ({ page }) => {
+    await page.goto("/dashboard");
+    const card = page.locator("main div.rounded-xl").first();
+    await expect(card).toHaveCSS("border-radius", "12px");
+  });
+
+  test("buttons and badges render rounded-md at the reference 6px", async ({ page }) => {
+    await page.goto("/submitticket");
+    const back = page.getByRole("link", { name: /Back to Dashboard/ });
+    await expect(back).toHaveCSS("border-radius", "6px");
+    await page.goto("/dashboard");
+    // The first badge inside the recent-tickets card body (status badge).
+    const badge = page.locator("main span.rounded-md").first();
+    await expect(badge).toHaveCSS("border-radius", "6px");
+  });
+
+  test("the mobile SidebarTrigger renders rounded-lg at the reference 8px", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/dashboard");
+    const trigger = page.locator("header button").first();
+    await expect(trigger).toHaveCSS("border-radius", "8px");
+  });
+
+  test("select options render rounded-sm at the reference 2px", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.locator("button#category").click();
+    const option = page.getByRole("option").first();
+    await expect(option).toHaveCSS("border-radius", "2px");
+  });
+});
+
+test.describe("session 6: login footer + Google button", () => {
+  // Reference: the whole "Need an account? Sign up" line is ONE control —
+  // `text-sm text-slate-500 hover:text-slate-700 transition-colors` with an
+  // inner `font-medium text-slate-700` span. Ours split it across a <p> and
+  // an inner link (hover darkened only "Sign up", to slate-900).
+  test("the signup line is one link with the reference whole-line hover", async ({ page }) => {
+    await page.goto("/login");
+    const line = page.locator('a[href="/signup"]');
+    await expect(line).toHaveCount(1);
+    await expect(line).toHaveText(/Need an account\?\s*Sign up/);
+    await expect(line).toHaveClass(/text-sm/);
+    await expect(line).toHaveClass(/text-slate-500/);
+    await expect(line).toHaveClass(/hover:text-slate-700/);
+    await expect(line).toHaveClass(/transition-colors/);
+    const span = line.locator("span");
+    await expect(span).toHaveText("Sign up");
+    await expect(span).toHaveClass(/font-medium/);
+    await expect(span).toHaveClass(/text-slate-700/);
+  });
+
+  // Reference: the Google button is a raw custom button — NO at-rest shadow
+  // (computed none). Ours inherited `shadow-xs` from the outline variant base.
+  test("Google button renders no at-rest shadow (reference: none)", async ({ page }) => {
+    await page.goto("/login");
+    const google = page.getByRole("button", { name: /Continue with Google/ });
+    const shadow = await google.evaluate((el) => getComputedStyle(el).boxShadow);
+    // No visible layer: the pre-fix value carried rgba(0, 0, 0, 0.05) 0 1px 2px.
+    expect(shadow).not.toContain("rgba(0, 0, 0, 0.05)");
+    expect(shadow).not.toMatch(/rgba\(0, 0, 0, 0\.0[1-9]\)/);
+  });
+});
+
+test.describe("session 6: select dropdown structure + colors", () => {
+  // Reference option content: <span class="flex items-center gap-2">
+  //   <span>🖥️</span>Hardware Issue</span> — the emoji isolated in its own
+  // span with an 8px gap; ours was a single "emoji space label" text node.
+  test("category options wrap the emoji in the reference flex gap-2 span", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.locator("button#category").click();
+    const option = page.getByRole("option").first();
+    const wrapper = option.locator("span.flex.items-center.gap-2");
+    await expect(wrapper).toHaveCount(1);
+    await expect(wrapper.locator("span").first()).toHaveText("🖥️");
+    await expect(option).toHaveText(/🖥️Hardware Issue/);
+    await expect(option).not.toHaveText(/🖥️\s*🖥️/);
+  });
+
+  // Session-6 bug: selecting a category rendered "🖥️🖥️ Hardware Issue" —
+  // CATEGORY_EMOJI + a label that already contained the emoji.
+  test("category trigger renders exactly one emoji after selection", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.locator("button#category").click();
+    await page.getByRole("option").first().click();
+    const trigger = page.locator("button#category");
+    await expect(trigger).toHaveText(/🖥️Hardware Issue/);
+    await expect(trigger).not.toHaveText(/🖥️\s*🖥️/);
+  });
+
+  // Reference priority options are color-coded (measured):
+  // low=slate-600, medium=blue-600, high=orange-600, urgent=red-600.
+  test("priority options carry the reference per-priority colors", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.locator("button#priority").click();
+    const expected: Record<string, string> = {
+      "Low - Can wait": "text-slate-600",
+      "Medium - Normal": "text-blue-600",
+      "High - Important": "text-orange-600",
+      "Urgent - Critical": "text-red-600",
+    };
+    for (const [label, cls] of Object.entries(expected)) {
+      const option = page.getByRole("option", { name: label, exact: true });
+      // The first span is the check-icon indicator container — the label
+      // span is the one carrying the text-* color class.
+      await expect(option.locator("span[class*='text-']").first()).toHaveClass(new RegExp(cls));
+    }
+  });
+
+  // Session-6: the reference trigger renders the SELECTED priority's color
+  // (select High → text-orange-600). Session-3's blue pin was measured at the
+  // Medium default — correct at rest, incomplete for other values.
+  test("priority trigger renders the selected priority's color", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.locator("button#priority").click();
+    await page.getByRole("option", { name: "High - Important", exact: true }).click();
+    const value = page.locator("button#priority span span");
+    await expect(value.first()).toHaveClass(/text-orange-600/);
+    await page.locator("button#priority").click();
+    await page.getByRole("option", { name: "Urgent - Critical", exact: true }).click();
+    await expect(page.locator("button#priority span span").first()).toHaveClass(/text-red-600/);
+  });
+});
+
+// Color-representation note: Tailwind v4 emits palette colors as lab()
+// functions (slate-400 renders `lab(65.5349 -2.25151 -14.5072)`, not
+// rgb(148,163,184)) — the same visible color in a different representation
+// (tokens authored as literal hex, like --ring #0a0a0a, stay rgb). The
+// session-6 pins accept either representation; both are deterministic.
+const ACCEPT: Record<string, string[]> = {
+  slate300: ["#cbd5e1", "rgb(203, 213, 225)", "lab(84.7652 -1.94535 -7.93337)"],
+  slate400: ["#94a3b8", "rgb(148, 163, 184)", "lab(65.5349 -2.25151 -14.5072)"],
+  cyan500: ["#06b6d4", "rgb(6, 182, 212)", "lab(67.805 -35.3952 -30.2018)"],
+  white: ["#ffffff", "rgb(255, 255, 255)"],
+};
+const colorIs = (actual: string, key: keyof typeof ACCEPT) =>
+  ACCEPT[key].includes(actual);
+// Anchored regex for auto-retrying toHaveCSS (colors transition over 150 ms —
+// a one-shot evaluate can catch the interpolation mid-flight).
+const colorRegex = (key: keyof typeof ACCEPT) =>
+  new RegExp(`^(${ACCEPT[key].map((c) => c.replace(/[()]/g, "\\$&")).join("|")})$`);
+
+test.describe("session 6: focus states (reference computed)", () => {
+  // Reference ground truth (live-measured, both sites):
+  //   app text inputs  -> 1px near-black ring (rgb(10,10,10)), border UNCHANGED
+  //     (their `focus:border-cyan-500 focus:ring-cyan-500` customs are inert)
+  //   textarea         -> 1px near-black ring + CYAN border (border custom active)
+  //   select trigger   -> 1px CYAN ring + cyan border (customs active)
+  //   buttons          -> 1px near-black ring, border unchanged
+  //   auth inputs      -> 2px slate-400 ring + 2px white offset + slate-400
+  //     border + NO at-rest shadow (their older input generation has none)
+  test("app inputs focus to the reference 1px near-black ring, border unchanged", async ({ page }) => {
+    await page.goto("/submitticket");
+    const title = page.locator("input#title");
+    const before = await title.evaluate((el) => {
+      const ctx = document.createElement("canvas").getContext("2d")!;
+      ctx.fillStyle = "#000";
+      ctx.fillStyle = getComputedStyle(el).borderColor;
+      return ctx.fillStyle as string;
+    });
+    await title.click();
+    await expect(title).toHaveCSS("box-shadow", /0px 0px 0px 1px/);
+    const ringColor = await title.evaluate((el) => {
+      const raw = getComputedStyle(el).boxShadow;
+      const m = raw.match(/(lab|oklch|rgb|rgba|hsl)\([^)]+\) 0px 0px 0px 1px/);
+      if (!m) return "NO RING LAYER: " + raw;
+      const ctx = document.createElement("canvas").getContext("2d")!;
+      ctx.fillStyle = "#000";
+      ctx.fillStyle = m[0].split(" 0px")[0];
+      return ctx.fillStyle as string;
+    });
+    expect(ringColor).toBe("#0a0a0a"); // near-black --ring (session 6)
+    // Border UNCHANGED on focus — expect.poll rides out the 150 ms
+    // transition-colors fade (a one-shot evaluate catches it mid-flight).
+    await expect
+      .poll(() => title.evaluate((el) => getComputedStyle(el).borderColor))
+      .toBe(before);
+    await expect(title).toHaveCSS("border-color", colorRegex("slate300"));
+  });
+
+  test("app inputs drop the inert cyan focus customs (session-4 supersede)", async ({ page }) => {
+    await page.goto("/submitticket");
+    const title = page.locator("input#title");
+    await expect(title).not.toHaveClass(/focus:border-cyan-500/);
+    await expect(title).not.toHaveClass(/focus:ring-cyan-500/);
+    // The selects + textarea customs ARE active on the reference — kept.
+    const category = page.locator("button#category");
+    await expect(category).toHaveClass(/focus:border-cyan-500/);
+    await expect(category).toHaveClass(/focus:ring-cyan-500/);
+    const description = page.locator("textarea#description");
+    await expect(description).toHaveClass(/focus:border-cyan-500/);
+    await expect(description).not.toHaveClass(/focus:ring-cyan-500/);
+  });
+
+  test("the description textarea focuses to a near-black ring with the cyan border", async ({ page }) => {
+    await page.goto("/submitticket");
+    const description = page.locator("textarea#description");
+    await description.click();
+    await expect(description).toHaveCSS("box-shadow", /0px 0px 0px 1px/);
+    await expect(description).toHaveCSS("border-color", colorRegex("cyan500")); // cyan border (custom active on ref)
+  });
+
+  test("select triggers focus to the reference cyan ring", async ({ page }) => {
+    await page.goto("/submitticket");
+    const category = page.locator("button#category");
+    // .focus() not .click(): our Radix generation moves focus INTO the open
+    // dropdown, so a click-assertion races the focus hand-off. The base
+    // `focus:ring-1` is plain-focus scoped (reference parity) — applies to
+    // programmatic focus too.
+    await category.focus();
+    await expect(category).toHaveCSS("box-shadow", /0px 0px 0px 1px/);
+    await expect(category).toHaveCSS("border-color", colorRegex("cyan500"));
+  });
+
+  test("buttons keyboard-focus to the reference 1px near-black ring", async ({ page }) => {
+    await page.goto("/submitticket");
+    // Real keyboard events so :focus-visible matches (buttons need keyboard
+    // interaction). NB: check activeElement ITSELF — the BODY's textContent
+    // contains the whole page (including "Back to Dashboard").
+    for (let i = 0; i < 20; i++) {
+      const hit = await page.evaluate(() => {
+        const a = document.activeElement;
+        return (
+          a instanceof HTMLAnchorElement &&
+          !!a.textContent?.includes("Back to Dashboard")
+        );
+      });
+      if (hit) break;
+      await page.keyboard.press("Tab");
+    }
+    const back = page.getByRole("link", { name: /Back to Dashboard/ });
+    const shadow = await back.evaluate((el) => getComputedStyle(el).boxShadow);
+    expect(shadow).toContain("0px 0px 0px 1px");
+    const focused = await back.evaluate((el) => el.matches(":focus-visible"));
+    expect(focused).toBe(true);
+    const ringColor = await back.evaluate((el) => {
+      const raw = getComputedStyle(el).boxShadow;
+      const m = raw.match(/(lab|oklch|rgb|rgba|hsl)\([^)]+\) 0px 0px 0px 1px/);
+      if (!m) return "NO RING LAYER: " + raw;
+      const ctx = document.createElement("canvas").getContext("2d")!;
+      ctx.fillStyle = "#000";
+      ctx.fillStyle = m[0].split(" 0px")[0];
+      return ctx.fillStyle as string;
+    });
+    expect(ringColor).toBe("#0a0a0a");
+    // The ghost back button's border stays borderless (no border change).
+    await expect(back).toHaveCSS("border-top-width", "0px");
+  });
+
+  test("auth inputs render no at-rest shadow (reference auth generation)", async ({ page }) => {
+    await page.goto("/login");
+    const email = page.locator('input[type="email"]');
+    const shadow = await email.evaluate((el) => getComputedStyle(el).boxShadow);
+    expect(shadow).not.toContain("rgba(0, 0, 0, 0.05)");
+  });
+
+  test("auth inputs focus to the reference 2px slate-400 ring + white offset", async ({ page }) => {
+    await page.goto("/login");
+    const email = page.locator('input[type="email"]');
+    await email.click();
+    // 2px white offset + 2px slate-400 ring (offset+ring => spread 4px).
+    await expect(email).toHaveCSS("box-shadow", /0px 0px 0px 2px.*0px 0px 0px 4px/);
+    const layers = await email.evaluate((el) =>
+      (getComputedStyle(el).boxShadow.match(/(lab|oklch|rgb|rgba|hsl)\([^)]+\)/g) ?? [])
+    );
+    // The offset layer is white; the ring layer is slate-400.
+    expect(layers.some((c) => colorIs(c, "white"))).toBe(true);
+    expect(layers.some((c) => colorIs(c, "slate400"))).toBe(true);
+    await expect(email).toHaveCSS("border-color", colorRegex("slate400")); // custom active
   });
 });

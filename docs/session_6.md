@@ -148,3 +148,43 @@ Dry-run OK (`9c3f446..0b65112 → main`). Real push:
 - Mobile nav verified on both sites (reference's own trigger-block defect not copied); final VLM composite: **IDENTICAL**
 
 **Suggested next:** watch the CI run on GitHub for the new 90-test suite, and review `docs/remediation-plan-session5.md` §F — the six process lessons (esp. the origin-derivation near-miss). Happy to iterate on any micro-detail you spot against the reference.
+
+---
+
+# Session 6 Retrospective
+
+**Date:** 2026-10-09 · **Scope:** session-6 parity audit + remediation · **Repo state at start:** `67ebad4` (session-5 code + this briefing) · **At end:** all 9 findings fixed, 107/107 E2E, pushed to `main`.
+
+## What this session delivered
+
+- **The radius-scale trap (HIGH, app-wide).** Like the session-5 font, the radius scale had never been probed: the vendored shadcn v4 `globals.css` wired `--radius-sm/md/lg/xl` as a calc chain off `--radius: 0.625rem`, rendering 6/8/10/14px where the reference renders Tailwind v3 defaults 2/6/8/12px — **+2px on every rounded control in the app** (39 `rounded-xl` + 25 `rounded-md` + 8 `rounded-lg` + 1 `rounded-sm` call sites), with IDENTICAL class names on both sites. Tokens pinned to the v3 literals in `@theme inline`; `rounded-2xl`/`full` were already identical.
+- **The focus-state matrix (HIGH).** Every interactive base rendered the new-gen `focus-visible:ring-[3px] ring-ring/50 + border-ring` tail (3px translucent-cyan ring + cyan border on focus) while the reference's old-shadcn generation renders solid rings with no border change. Measured matrix, then fixed per surface: buttons/app-inputs/textareas = 1px near-black `ring-ring` (`--ring` flipped from cyan `#06b6d4` to the reference's near-black `#0a0a0a`); select triggers = 1px cyan (their `focus:ring-1` base is plain-focus scoped — ring on click); auth inputs = their older generation (2px slate-400 + 2px white offset + no at-rest shadow). The reference's own cyan focus customs turned out to be **inert on text inputs, border-only on textareas, fully active on selects** — our copied customs were corrected per surface (documented supersede of the session-4 pins).
+- **The double-emoji bug (HIGH).** Selecting a category rendered `🖥️🖥️ Hardware Issue` — `CATEGORY_EMOJI[c]` + `CATEGORY_LABELS[c]` where the label already contained the emoji. Survived five sessions because no E2E pin ever exercised a selection and read the trigger. Labels are now emoji-free (single source of truth) and both the options and the trigger render the reference's `span.flex.gap-2 > (emoji span + label)` structure.
+- **Select dropdown contracts (MED).** Priority options render per-priority colors (slate/blue/orange/red) and the trigger renders the SELECTED priority's color (session-3's always-blue pin was measured at the Medium default — superseded with the full map). The mytickets filter options stay plain (the reference renders those without color — verified).
+- **Login micro-contracts (MED).** The "Need an account? Sign up" line is now ONE anchor with the reference's whole-line hover (was a `<p>` + inner link with a different hover); the Google button renders no at-rest shadow (`shadow-none` — the reference's raw button has none; the outline variant keeps its light shadow where the reference DOES render it: CTA + Cancel).
+- **2 unit pins + 18 E2E pins added** (visual-parity 61→78, suite 90→107); session-4's text-input cyan pins superseded with computed evidence.
+
+## Audit & verification
+
+- Baseline at `67ebad4`: lint ✓ typecheck ✓ 53 unit ✓ build ✓ 90/90 E2E ✓ smoke 11/11 ✓; session-5 commit `0b65112` audited clean (all 14 source files match the documented plan).
+- New probe surfaces this session: **border-radius scale**, **focus-visible states**, **select dropdown open states** — the three blind spots left after five sessions.
+- Mobile navigation re-verified on both sites post-fix: trigger hit-tests to BUTTON (radius now 8px = reference), sheet geometry 20px/12px/600 identical, overlay close via real pointer events, Escape close, nav-tap auto-close, zero console errors. The reference's toast-viewport-blocked trigger defect remains deliberately not copied.
+- VLM composite sweep (7 composites): login / ticket-detail / mobile-dashboard = **IDENTICAL**; all other claims were data, the documented `/`-no-highlight divergence (the reference DOES highlight the active item on real routes — re-verified at /mytickets — just never at its `/` root), the documented sort/scope superset, or refuted by DOM/computed probes (stat tiles 48px = 48px; trigger texts + placeholder identical).
+- Full gate after all fixes: lint ✓ typecheck ✓ **54 unit** ✓ build ✓ **107/107 E2E** ✓ smoke 11/11 ✓.
+
+## Process lessons (in `docs/remediation-plan-session6.md` §5)
+
+1. Probe the SCALES (font, radius, shadow, spacing, ring), not just instances — the radius trap hid behind identical class names for five sessions.
+2. Focus states are parity surface — "invisible at rest" divergences are visible to every keyboard user.
+3. A reference's custom classes can be inert per-surface — verify each control type's computed behavior.
+4. Tailwind v4 emits palette colors as `lab()` — color pins must accept both representations (or normalize).
+5. `transition-colors` races one-shot computed reads — use auto-retrying assertions.
+6. Never match `activeElement` by page-wide `textContent` (BODY contains everything).
+7. Exercise the interaction in the pin (select, focus, open) — rest-state-only pins missed the double-emoji bug for five sessions.
+
+## Artifacts
+
+- `docs/remediation-plan-session6.md` — the full inventory, per-surface focus matrix, ledgers, execution log, and lessons.
+- `tests/e2e/visual-parity.spec.ts` — +17 session-6 tests (78 total; one session-4 test superseded in place).
+- `docs/screenshots/` — 7 refreshed dev-server captures; `compare-s6/` composites.
+- README / AGENTS (session-6 contracts) / CLAUDE (radius + focus rules) / PAD (test distribution + known-issues row + token table) / `service-desk_SKILL.md` v2.4.0 (lessons 19–22) — all updated.

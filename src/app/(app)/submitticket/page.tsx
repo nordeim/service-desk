@@ -23,6 +23,7 @@ import {
   CATEGORY_EMOJI,
   CATEGORY_LABELS,
   PRIORITY_LABELS,
+  PRIORITY_SELECT_CLASS,
   TICKET_CATEGORIES,
   TICKET_PRIORITIES,
   type TicketCategory,
@@ -181,7 +182,10 @@ export default function SubmitTicketPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 aria-invalid={!!errors.title}
-                className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
+                className="border-slate-300 shadow-xs"
+                /* Session-6 supersede: the reference's cyan focus customs are INERT
+                    on text inputs (measured: 1px near-black ring + unchanged
+                    border) — see the session-6 focus pins. */
               />
               {errors.title ? <p className="text-xs text-red-600">{errors.title}</p> : null}
             </div>
@@ -199,9 +203,10 @@ export default function SubmitTicketPage() {
                     aria-invalid={!!errors.category}
                   >
                     <SelectValue placeholder="Select category">
-                      {/* Reference (measured session 3): the selected category
-                          renders as emoji-span + label inside a flex row; the
-                          priority value renders blue. */}
+                      {/* Reference (measured sessions 3+6): the selected
+                          category renders as emoji-span + PLAIN label inside
+                          a flex gap-2 row — exactly one emoji (the labels in
+                          CATEGORY_LABELS are emoji-free). */}
                       {category ? (
                         <span className="flex items-center gap-2">
                           <span>{CATEGORY_EMOJI[category as TicketCategory]}</span>
@@ -211,9 +216,14 @@ export default function SubmitTicketPage() {
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
+                    {/* Reference (measured session 6): the OPTIONS use the same
+                        emoji-span + gap-2 wrapper as the trigger value. */}
                     {TICKET_CATEGORIES.map((c) => (
                       <SelectItem key={c} value={c}>
-                        {CATEGORY_LABELS[c]}
+                        <span className="flex items-center gap-2">
+                          <span>{CATEGORY_EMOJI[c]}</span>
+                          {CATEGORY_LABELS[c]}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -231,13 +241,21 @@ export default function SubmitTicketPage() {
                     className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
                   >
                     <SelectValue>
-                      <span className="text-blue-600">{PRIORITY_LABELS[priority as TicketPriority]}</span>
+                      {/* Reference (measured session 6): the trigger renders
+                          the SELECTED priority's color (session 3's blue pin
+                          was measured at the Medium default — blue IS
+                          medium's color). */}
+                      <span className={PRIORITY_SELECT_CLASS[priority as TicketPriority]}>
+                        {PRIORITY_LABELS[priority as TicketPriority]}
+                      </span>
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
+                    {/* Reference (measured session 6): every option carries
+                        its priority color. */}
                     {TICKET_PRIORITIES.map((p) => (
                       <SelectItem key={p} value={p}>
-                        {PRIORITY_LABELS[p]}
+                        <span className={PRIORITY_SELECT_CLASS[p]}>{PRIORITY_LABELS[p]}</span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -252,7 +270,7 @@ export default function SubmitTicketPage() {
               <Textarea
                 id="description"
                 placeholder="Describe the issue in detail. Include any error messages, steps to reproduce, etc."
-                className="min-h-[120px] border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
+                className="min-h-[120px] border-slate-300 focus:border-cyan-500 shadow-xs"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 aria-invalid={!!errors.description}

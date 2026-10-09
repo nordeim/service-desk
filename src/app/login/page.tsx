@@ -87,7 +87,7 @@ export default function LoginPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-xs transition-all duration-200 font-medium text-base"
+                    className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-xs shadow-none transition-all duration-200 font-medium text-base"
                     onClick={() =>
                       setError("Google sign-in is not configured in this deployment. Use email and password.")
                     }
@@ -143,7 +143,7 @@ export default function LoginPage() {
                             type="email"
                             autoComplete="email"
                             placeholder="you@example.com"
-                            className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
+                            className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 ring-offset-white rounded-xl shadow-none placeholder:text-slate-600"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -169,7 +169,7 @@ export default function LoginPage() {
                             type="password"
                             autoComplete="current-password"
                             placeholder="••••••••"
-                            className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
+                            className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 ring-offset-white rounded-xl shadow-none placeholder:text-slate-600"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -206,15 +206,19 @@ export default function LoginPage() {
                         >
                           Forgot password?
                         </Link>
-                        <p className="text-sm text-slate-500">
+                        {/* Reference (measured session 6): the WHOLE line is one
+                            control — `text-sm text-slate-500 hover:text-slate-700
+                            transition-colors` with an inner font-medium
+                            text-slate-700 span; hovering darkens the line. We
+                            render an anchor (real-href superset) instead of
+                            their button. */}
+                        <Link
+                          href="/signup"
+                          className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                        >
                           Need an account?{" "}
-                          <Link
-                            href="/signup"
-                            className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
-                          >
-                            Sign up
-                          </Link>
-                        </p>
+                          <span className="font-medium text-slate-700">Sign up</span>
+                        </Link>
                       </div>
                     </div>
                   </form>

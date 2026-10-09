@@ -12,8 +12,8 @@ Run from the repo root. Bun is the documented runtime (Node ≥ 20 works for eve
 | `bun run build` | Production standalone build (`.next/standalone/server.js` + static + public) |
 | `bun run start` | Boot the standalone server in production mode |
 | `bun run lint` / `bun run typecheck` | ESLint 9 flat / `tsc --noEmit` |
-| `bun run test` | Vitest unit suite (53 tests — auth, validation, db-path, utils incl. formatDate) |
-| `bun run test:e2e` | Playwright E2E (90 tests) — boots the **production standalone server** on :3100 with an isolated `db/e2e.db`; requires a prior `bun run build` |
+| `bun run test` | Vitest unit suite (54 tests — auth, validation, db-path, utils incl. formatDate + priority-select colors) |
+| `bun run test:e2e` | Playwright E2E (107 tests) — boots the **production standalone server** on :3100 with an isolated `db/e2e.db`; requires a prior `bun run build` |
 | `bash scripts/smoke-test.sh` | API smoke: throwaway server on :3999, exercises auth + CRUD + guards |
 | CI (`.github/workflows/ci.yml`) | GitHub Actions on push/PR to main: verify job (lint → typecheck → unit → build) + e2e job (Playwright against the restored standalone build) |
 | `bun run db:push` / `db:seed` | Push `prisma/schema.prisma` → `db/custom.db` / idempotent seed (4 users, 11 tickets) |
@@ -105,6 +105,16 @@ Clean-check order: `bun run lint typecheck test build` — then `bun run test:e2
 - Quick-stat value badges carry `hover:bg-primary/80` (the reference's old-shadcn base).
 - The 404 Go Home control carries the reference focus tail: `duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500`.
 
+## Session-6 parity contracts (pinned by `tests/e2e/visual-parity.spec.ts`; inventory in `docs/remediation-plan-session6.md`)
+
+- **The radius scale is Tailwind v3 defaults:** `--radius-sm/md/lg/xl` pinned in `@theme inline` to 0.125/0.375/0.5/0.75rem (2/6/8/12px). The shadcn v4 calc chain off `--radius: 0.625rem` rendered 6/8/10/14px — +2px on every rounded control with IDENTICAL class names (computed-value parity, like the session-5 font pin). `rounded-2xl`/`rounded-full` keep Tailwind defaults (16px/9999px — same on v3/v4).
+- **Focus-visible states match the reference's old-shadcn generation:** Button/Input/Textarea bases carry `focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring` (1px near-black ring, NO border change); the SelectTrigger base carries plain `focus:outline-none focus:ring-1` (ring on click too). `--ring` is near-black `#0a0a0a` (the reference's hsl(0 0% 3.9%)) — NOT cyan.
+- **The reference's cyan focus customs are per-surface:** INERT on text inputs (title/search render 1px near-black ring + unchanged slate-300 border — we dropped them there), ACTIVE on select triggers (cyan ring + cyan border) and the textarea BORDER (cyan border, near-black ring). Auth inputs (login/signup/forgotpassword) use their older generation: `focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 ring-offset-white` + `focus:border-slate-400` + `shadow-none` (no at-rest shadow).
+- **Select dropdowns:** category OPTIONS and the trigger value render `<span class="flex items-center gap-2"><span>{emoji}</span>{label}</span>` — `CATEGORY_LABELS` values are emoji-free (emoji-prefixed labels rendered a double emoji once the span was added). Priority options AND the trigger value render the selected priority's color via `PRIORITY_SELECT_CLASS` (low=slate-600, medium=blue-600, high=orange-600, urgent=red-600); the mytickets priority FILTER options stay plain (the reference renders those without color).
+- **Login footer:** the whole "Need an account? Sign up" line is ONE anchor (`text-sm text-slate-500 hover:text-slate-700 transition-colors`) with an inner `font-medium text-slate-700` span — hovering darkens the line (not just the link). Same pattern on the signup page's "Already have an account?" line.
+- **The Google button renders NO at-rest shadow** (`shadow-none` on the call site — the reference's raw button has none; the outline variant base keeps `shadow-xs` for the CTA/Cancel which DO render it).
+- E2E color pins accept both `rgb()` and `lab()` representations — Tailwind v4 emits palette colors as lab() functions (slate-400 → `lab(65.5349 -2.25151 -14.5072)`); literal-hex tokens stay rgb.
+
 ## Environment
 
 `.env.example` documents every variable; `.env` is gitignored. `AUTH_SECRET` = `openssl rand -hex 32` (required in production — the dev fallback logs a loud warning). `DATABASE_URL="file:../db/custom.db"` → `<repo>/db/custom.db`. Production deployments should switch to an absolute `file:` URL (see `docs/DEPLOYMENT.md`).
@@ -114,7 +124,7 @@ Clean-check order: `bun run lint typecheck test build` — then `bun run test:e2
 - `Project_Architecture_Document.md` — the full engineering reference (ADRs, layer model, security architecture).
 - `docs/DEPLOYMENT.md` — standalone build + production environment contract.
 - `docs/Tailwind-V4-Validation-Report.md` — the v3→v4 migration facts behind the CSS-first rules above.
-- `docs/remediation-plan-session2.md` / `-session3.md` / `-session4.md` / `-session5.md` — the session-2 (25 findings), session-3 (12 + known-issue closure), session-4 (16 incl. the nav-wrapper fix + designed 404), and session-5 (8 incl. the icon-button padding + shadow-scale trap + system font stack) gap inventories and how each was verified against the live reference.
+- `docs/remediation-plan-session2.md` … `-session6.md` — the per-session gap inventories and how each was verified against the live reference: session 2 (25 findings), session 3 (12 + known-issue closure), session 4 (16 incl. the nav-wrapper fix + designed 404), session 5 (8 incl. the icon-button padding + shadow-scale trap + system font stack), session 6 (9 incl. the radius-scale trap, focus-state matrix, select dropdown contracts, and the double-emoji bug).
 - `docs/how-to-git-push-using-ssh-wrapper_SKILL.md` + `docs/ssh_git_wrapper_v3.py` — how pushes to `git@github.com:nordeim/service-desk.git` work without a resident `~/.ssh` identity.
 - `docs/screenshots/` — the 7-shot dev-server capture set (desktop × 5, mobile × 2).
 - `skills/` — the in-repo skill catalog (`skills/skills-catalog.md`) used to build this clone.

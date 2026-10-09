@@ -65,7 +65,7 @@ export default function MyTicketsPage() {
             <Input
               type="search"
               placeholder="Search tickets..."
-              className="pl-10 bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
+              className="pl-10 bg-transparent border-slate-300 shadow-xs"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search tickets"

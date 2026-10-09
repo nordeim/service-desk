@@ -361,7 +361,7 @@ Indexes: `Ticket(createdById, createdAt DESC)` (My Tickets + Recent Tickets), `T
 |---|---|---|
 | `--background` | `#f8fafc` | Page base; page areas layer the reference gradient `from-slate-50 via-white to-blue-50/30` |
 | `--sidebar` | `#fafafa` | Sidebar panel — measured, NOT white |
-| `--primary` / `--ring` | `#0891b2` / `#06b6d4` | Primary actions, focus rings |
+| `--primary` / `--ring` | `#0891b2` / `#0a0a0a` | Primary actions; focus rings (near-black — the reference's old-shadcn default, session 6; cyan accents come from explicit `*-cyan-500` utilities) |
 | `--navy-950/900/800` | `#0a1628/#0f2744/#1a3a5c` | Login logo badge, dark theme surfaces |
 | `--amber-500` | `#f59e0b` | "Open" quick-stat badge |
 | `--emerald-500` | `#10b981` | Resolved accents, success toasts |
@@ -430,14 +430,14 @@ Single role today: **authenticated user**. Ownership is the authorization unit �
 | Category | Files | Tests | Location | Framework |
 |---|---|---|---|---|
 | Unit — auth (session/crypto/rate-limit) | 1 | 11 | `src/lib/__tests__/auth.test.ts` | Vitest |
-| Unit — domain (constants + validation) | 1 | 18 | `src/lib/__tests__/domain.test.ts` | Vitest |
+| Unit — domain (constants + validation) | 1 | 19 | `src/lib/__tests__/domain.test.ts` | Vitest |
 | Unit — utils (date/duration formatting incl. `formatDate`) | 1 | 9 | `src/lib/__tests__/utils.test.ts` | Vitest |
 | Unit — db-path URL contract | 1 | 15 | `tests/db-path.test.ts` | Vitest |
 | E2E — auth surface (logged-out) | 1 | 6 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E — dashboard (incl. clean-hydration pin) | 1 | 8 | `tests/e2e/dashboard.spec.ts` | Playwright |
 | E2E — ticket lifecycle | 1 | 5 | `tests/e2e/tickets.spec.ts` | Playwright |
 | E2E — mobile + desktop navigation | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
-| E2E — visual parity (session-2 through session-5 contracts) | 1 | 61 | `tests/e2e/visual-parity.spec.ts` | Playwright |
+| E2E — visual parity (session-2 through session-6 contracts) | 1 | 78 | `tests/e2e/visual-parity.spec.ts` | Playwright |
 | E2E — shared session setup project | 1 | 1 | `tests/e2e/auth.setup.ts` | Playwright |
 | API smoke | 1 | 11 steps | `scripts/smoke-test.sh` | bash + curl |
 
@@ -448,6 +448,8 @@ Single role today: **authenticated user**. Ownership is the authorization unit �
 > Session-4 additions: 16 more parity tests (nav wrapper structure + live 12px icon-label gap + 20px icons + semibold labels — the biggest fix of the project, present since session 1; active-nav hover gradient; badge shadow + per-surface compact padding; submit-label typography + plain-text asterisk; md:grid-cols-2 grid; cyan-focus form controls; ghost back buttons; rounded-lg mobile trigger; Google-logo wrapper; tracking-wider revert; the designed 404). The session-3 info-panel tracking assertion was flipped to `tracking-wider` after re-measuring the live reference.
 >
 > Session-5 additions: 17 more parity tests pinning reference-COMPUTED values that class names cannot express: icon-button 16px horizontal padding (the `has-[>svg]:px-3` trap), the v3-name shadow step (`shadow-sm` on the reference = `shadow-xs` on the v4 scale — 11 controls flipped), the system font stack (the reference loads no webfont; next/font Inter removed), `mr-2` icon spacings, the CTA arrow's translate-x-1 slide, quick-stat badge hover, the 404 focus ring. Two session-era assertions flipped with documented supersede: session-4 `shadow-sm` pins → `shadow-xs`; session-3's submit-icon pin re-confirmed (a session-5 probe had misidentified the sidebar nav item).
+>
+> Session-6 additions: 18 more parity tests on three never-probed surfaces: the **radius scale** (the shadcn v4 calc chain off `--radius: 0.625rem` rendered rounded-sm/md/lg/xl at 6/8/10/14px vs the reference's v3 defaults 2/6/8/12px — +2px on every rounded control, class names identical; tokens pinned to the v3 literals), the **focus-state matrix** (Button/Input/Textarea render the old-shadcn 1px near-black `ring-ring`; `--ring` flipped from cyan to the reference's near-black; auth inputs render their older 2px slate-400 + white-offset generation with no at-rest shadow; the reference's cyan focus customs verified inert on text inputs — dropped there — and active on selects + the textarea border), and the **select dropdown open states** (category options + trigger render the emoji in its own gap-2 span — this also fixed the double-emoji bug in the selected trigger, never caught before because no pin exercised a selection; priority options + trigger render per-priority colors). Plus the whole-line signup link and the shadow-less Google button. Color pins accept both rgb() and lab() (Tailwind v4 emits palette colors as lab()). One session-4 pin superseded with computed evidence (text-input cyan customs).
 
 ### 7.2 Test Patterns
 
@@ -551,6 +553,7 @@ Main-only trunk with atomic Conventional Commits. Feature branches are short-liv
 | RESOLVED | Session-3 parity gaps (12 findings: emoji tile + no arrow + category badge + datetime on dashboard recent rows; capitalized badges; missing entrance animations; submit-form details; login caption; search icon size; info-panel tracking; opaque `<main>`) + a hydration error (`<div>`-in-`<p>` Skeleton) | Parity risk on every page + a console error on every dashboard load | Fixed — all E2E-pinned; inventory in `docs/remediation-plan-session3.md` |
 | RESOLVED | Session-4 parity gaps (16 findings: sidebar nav labels pushed to the right edge with 16px icons since session 1 — the missing inner flex wrapper; nav labels not semibold; badge shadow + per-surface padding; submit-form labels/asterisk/grid; shadow-sm + cyan-focus form controls; outline back buttons; rounded-md mobile trigger; bare Google logo; tracking-wide info labels; no designed 404) | Parity risk on every page (the nav gap was the largest single visual divergence of the project) | Fixed — all E2E-pinned; inventory in `docs/remediation-plan-session4.md` |
 | RESOLVED | Session-5 parity gaps (8 findings: icon-bearing buttons at 12px padding via `has-[>svg]:px-3`; the v3→v4 shadow-scale naming trap app-wide — every copied `shadow-sm` rendered one step heavy; next/font Inter vs the reference's webfont-free system stack (~10% text-width deltas); missing `mr-2` on back/comment icons; CTA arrow 2px vs 4px slide; quick-stat badge hover; 404 focus ring; two false gaps caught by computed re-measure — the outline shadow and the submit-icon nav-item misidentification) | Parity risk on every control | Fixed — all E2E-pinned (90 E2E); inventory in `docs/remediation-plan-session5.md` |
+| RESOLVED | Session-6 parity gaps (9 findings: the radius-scale trap — the shadcn v4 calc chain rendered every rounded control +2px vs the reference's v3 defaults (never probed in 5 sessions, like the font before it); the focus-state matrix (3px translucent-cyan new-gen rings vs the reference's solid 1px near-black + per-surface inert/active cyan customs); auth inputs carrying an at-rest shadow + wrong ring generation; the double-emoji bug in the selected category trigger; select dropdown option structure + per-priority colors; priority trigger always-blue; the split signup line; the Google button's at-rest shadow) | Parity risk on every rounded control + every keyboard interaction | Fixed — all E2E-pinned (107 E2E); inventory in `docs/remediation-plan-session6.md` |
 
 ---
 

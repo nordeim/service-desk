@@ -20,7 +20,9 @@ test.describe("login page", () => {
     await expect(page.getByLabel("Password")).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Forgot password?" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Sign up", exact: true })).toBeVisible();
+    // Session 6: the reference renders the WHOLE "Need an account? Sign up"
+    // line as one control — our anchor's accessible name is the full line.
+    await expect(page.getByRole("link", { name: /Need an account\?\s*Sign up/ })).toBeVisible();
   });
 
   test("rejects a wrong password with a visible error", async ({ page }) => {

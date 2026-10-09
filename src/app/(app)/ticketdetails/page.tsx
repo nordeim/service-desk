@@ -273,7 +273,7 @@ export default function TicketDetailsPage() {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     aria-label="Add a comment or update"
-                    className="min-h-24 border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
+                    className="min-h-24 border-slate-300 focus:border-cyan-500 shadow-xs"
                   />
                   <div className="flex items-center justify-between">
                     <Button

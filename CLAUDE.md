@@ -9,7 +9,7 @@ last_updated: 2026-10-09
 
 Full-stack IT ticketing portal (Next.js 16 App Router standalone · React 19 · TypeScript strict · Tailwind CSS v4 CSS-first · shadcn/ui · Prisma 6 + SQLite · Vitest + Playwright). A visual-parity, feature-superset clone of the base44 ServiceDesk reference app, maintained as a single deployable process with zero external services.
 
-**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (90 specs against the production standalone build) when UI/auth behavior changes. CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
+**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (107 specs against the production standalone build) when UI/auth behavior changes. CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
 
 ## Foundational Principles
 
@@ -51,6 +51,8 @@ Full-stack IT ticketing portal (Next.js 16 App Router standalone · React 19 · 
 - Variant utilities outrank plain utilities in the cascade (order-independent). This is why the active nav item uses `text-white!` — a plain `text-white` loses to `data-[active=true]:text-sidebar-accent-foreground`. If you override a variant-styled primitive, use the `!` modifier and say why in a comment.
 - Design tokens (`--navy-950`, `--cyan-500`, `--amber-500`…) mirror the reference app's `:root` block — keep the `:root` palette literal hex and in sync with the `.dark` block.
 - **Font: the system stack, no webfont** (session 5). The reference loads no webfont; `--font-sans` is pinned in `@theme inline` to the reference's computed stack (`ui-sans-serif, system-ui, …` — Tailwind 4.3's default is a different string). Do NOT reintroduce next/font Inter or `antialiased`.
+- **Radius scale: Tailwind v3 defaults** (session 6). `--radius-sm/md/lg/xl` are pinned to 0.125/0.375/0.5/0.75rem — the shadcn v4 calc chain off `--radius: 0.625rem` renders +2px on every rounded control. Do NOT reintroduce the calc chain.
+- **Focus states are part of parity** (session 6): the Button/Input/Textarea bases use `focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring` (near-black `--ring: #0a0a0a`); the SelectTrigger base uses plain `focus:ring-1`. Do NOT restore the new-gen `ring-[3px] ring-ring/50` tail. The reference's cyan focus customs are inert on text inputs, active on selects + the textarea border — see AGENTS.md session-6 contracts.
 
 ### Data Layer (Prisma + SQLite)
 
@@ -77,14 +79,14 @@ bun run dev                     # http://localhost:3000  (demo@servicedesk.app /
 | `bun run build` | Production standalone build |
 | `bun run start` | Boot standalone server |
 | `bun run lint` / `bun run typecheck` | ESLint / tsc |
-| `bun run test` / `bun run test:e2e` | 53 unit / 90 E2E (needs prior build) |
+| `bun run test` / `bun run test:e2e` | 54 unit / 107 E2E (needs prior build) |
 | `bash scripts/smoke-test.sh` | API smoke on a throwaway server |
 | `bun run db:push` / `db:seed` / `db:reset` | Schema push / idempotent seed / reset |
 
 ## Testing Strategy
 
 - **Unit (Vitest, `*.test.ts`)**: pure seams only — auth sign/verify + scrypt + rate limiting, input validation, constants vocabulary, db-path resolution, date/duration formatting (`formatDate` date-only, `formatDateTime`, `formatDuration`). No DOM, no DB.
-- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (61 tests) pins the reference-measured design contracts (sessions 2–5; session 5 added the computed-value pins: 16px icon-button padding, the v3-name shadow step, mr-2 spacings, the system font stack). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
+- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (78 tests) pins the reference-measured design contracts (sessions 2–6; session 6 added the computed-value pins: the v3 radius scale, the focus-state matrix, select dropdown structure + priority colors, the whole-line signup link, the shadow-less Google button). Color pins accept both rgb() and lab() representations (v4 emits palette colors as lab()). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
 - **Smoke (`scripts/smoke-test.sh`)**: API contract on a throwaway server — health, login, CRUD, comments, guards (401/400).
 - Bug fixes require a failing test first (unit for domain seams, E2E for UI contract). The mobile-navigation spec is the highest-regression-risk chrome — run it after any sidebar/sheet/Tailwind change; run visual-parity after any page-layout change.
 

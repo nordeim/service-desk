@@ -89,7 +89,7 @@ export default function SignupPage() {
                         id="name"
                         autoComplete="name"
                         placeholder="Jane Doe"
-                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
+                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 ring-offset-white rounded-xl shadow-none placeholder:text-slate-600"
                         value={form.name}
                         onChange={update("name")}
                         required
@@ -108,7 +108,7 @@ export default function SignupPage() {
                         type="email"
                         autoComplete="email"
                         placeholder="you@example.com"
-                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
+                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 ring-offset-white rounded-xl shadow-none placeholder:text-slate-600"
                         value={form.email}
                         onChange={update("email")}
                         required
@@ -129,7 +129,7 @@ export default function SignupPage() {
                         type="password"
                         autoComplete="new-password"
                         placeholder="At least 8 characters, letters + numbers"
-                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
+                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 ring-offset-white rounded-xl shadow-none placeholder:text-slate-600"
                         value={form.password}
                         onChange={update("password")}
                         required
@@ -159,12 +159,16 @@ export default function SignupPage() {
                   {loading ? "Creating account…" : "Sign up"}
                 </Button>
 
-                <p className="text-center text-sm text-slate-500">
+                {/* Same whole-line pattern as the login signup line
+                    (session 6) — the reference renders one control with the
+                    hover on the line. */}
+                <Link
+                  href="/login"
+                  className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                >
                   Already have an account?{" "}
-                  <Link href="/login" className="font-medium text-slate-700 hover:text-slate-900 transition-colors">
-                    Sign in
-                  </Link>
-                </p>
+                  <span className="font-medium text-slate-700">Sign in</span>
+                </Link>
               </form>
             </div>
           </div>
