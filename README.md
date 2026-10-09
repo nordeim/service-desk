@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?logo=prisma&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-53%20unit%20%2B%2057%20E2E-brightgreen)
+![Tests](https://img.shields.io/badge/tests-53%20unit%20%2B%2073%20E2E-brightgreen)
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 
 A production-ready IT support ticketing portal — a feature-parity **superset** clone of the [base44 ServiceDesk reference app](https://service-desk-332a5ae4.base44.app/), rebuilt on Next.js 16 + React 19 + Prisma/SQLite. Users sign in, submit tickets across six issue categories, track status/priority, converse in comment threads, and manage their own ticket lifecycle.
@@ -14,7 +14,7 @@ A production-ready IT support ticketing portal — a feature-parity **superset**
 
 The portal solves a everyday enterprise problem: employees need a single place to report IT issues (hardware, software, network, access, email) and follow them to resolution, while the sidebar keeps live global stats visible. The clone reproduces the reference app's visual design (measured from its live DOM and computed styles — not guessed) and extends it with a working signup flow, password-reset request, file attachments, owner-side status control, search/filter/sort, and a full test pyramid.
 
-**Verification status:** `lint` ✓ · `typecheck` ✓ · 53 Vitest unit tests ✓ · production build ✓ · 57 Playwright E2E tests ✓ · API smoke script ✓ · CI (GitHub Actions, on push/PR to main) ✓
+**Verification status:** `lint` ✓ · `typecheck` ✓ · 53 Vitest unit tests ✓ · production build ✓ · 73 Playwright E2E tests ✓ · API smoke script ✓ · CI (GitHub Actions, on push/PR to main) ✓
 
 ## Key Features
 
@@ -29,9 +29,9 @@ The portal solves a everyday enterprise problem: employees need a single place t
 | 🔍 **Search & filters** | Full-text search, status/priority filters, newest/oldest/priority sort, My/All scope |
 | 📊 **Live stats** | Sidebar quick stats (global) + dashboard cards (yours) + average resolution time |
 | 📱 **Responsive chrome** | shadcn/ui off-canvas mobile sidebar with overlay, Escape, and auto-close on navigate |
-| 🎨 **Parity-pinned design** | 29 E2E parity tests pin the reference's measured classes (gradient quick stats, flat recent rows with FileText tiles, detail grid, login card, lowercase badges, entrance animations) |
+| 🎨 **Parity-pinned design** | 45 E2E parity tests pin the reference's measured classes (adjacent nav icon/label layout, gradient quick stats, flat recent rows with FileText tiles, detail grid, login card, lowercase badges, entrance animations, badge shadow + per-surface padding, cyan-focus form controls) |
 | 🏃 **Entrance animations** | Reference-measured rise-in (opacity + 20px slide, spring easing) on cards/rows — disabled under `prefers-reduced-motion` |
-| 🧪 **Test pyramid** | 53 unit + 57 E2E tests + API smoke + GitHub Actions CI, pinned to the UI contract |
+| 🧪 **Test pyramid** | 53 unit + 73 E2E tests + API smoke + GitHub Actions CI, pinned to the UI contract |
 
 ## Architecture
 
@@ -132,12 +132,12 @@ bun run lint && bun run typecheck && bun run test
 
 ```bash
 bun run test               # Vitest unit: 53 tests (auth HMAC/scrypt/rate-limit, validation, db-path, utils incl. formatDate)
-bun run test:e2e           # Playwright E2E (57 tests): builds nothing — boots the PRODUCTION standalone server
+bun run test:e2e           # Playwright E2E (73 tests): builds nothing — boots the PRODUCTION standalone server
                            # on :3100 with an isolated db/e2e.db (schema pushed + seeded by global setup)
 bash scripts/smoke-test.sh # API surface against a throwaway standalone server on :3999
 ```
 
-E2E notes: the suite signs the demo user in **once** (setup project → saved `storageState`) because the auth endpoints are rate-limited (10 attempts/IP/15 min). `tests/e2e/auth.spec.ts` opts out of the shared session to test the logged-out surface. The mobile-navigation spec pins the off-canvas sheet contract (open, overlay close, Escape close, auto-close on navigate, desktop gradient parity). `tests/e2e/visual-parity.spec.ts` (29 tests) pins the session-2 + session-3 remediation contracts measured from the live reference: gradient quick-stats rows, flat divide-y recent tickets with FileText icon tiles + arrows + date-only dates, lowercase badges, the detail page's `lg:grid-cols-3` layout with gradient card header, `text-4xl` page headings, the non-sticky mobile header, the login card shell, the reference entrance animation (`animate-rise-in`, disabled under `prefers-reduced-motion`), and the submit form details (circle-alert header icon, blue priority value, upload dropzone, inline footer). `tests/e2e/dashboard.spec.ts` also pins a clean hydration (no console hydration-mismatch errors).
+E2E notes: the suite signs the demo user in **once** (setup project → saved `storageState`) because the auth endpoints are rate-limited (10 attempts/IP/15 min). `tests/e2e/auth.spec.ts` opts out of the shared session to test the logged-out surface. The mobile-navigation spec pins the off-canvas sheet contract (open, overlay close, Escape close, auto-close on navigate, desktop gradient parity). `tests/e2e/visual-parity.spec.ts` (45 tests) pins the session-2 through session-4 remediation contracts measured from the live reference: gradient quick-stats rows, flat divide-y recent tickets with FileText icon tiles + arrows + date-only dates, lowercase badges, the detail page's `lg:grid-cols-3` layout with gradient card header, `text-4xl` page headings, the non-sticky mobile header, the login card shell, the reference entrance animation (`animate-rise-in`, disabled under `prefers-reduced-motion`), and the submit form details (circle-alert header icon, blue priority value, upload dropzone, inline footer). `tests/e2e/dashboard.spec.ts` also pins a clean hydration (no console hydration-mismatch errors).
 
 ### CI
 

@@ -437,13 +437,15 @@ Single role today: **authenticated user**. Ownership is the authorization unit �
 | E2E — dashboard (incl. clean-hydration pin) | 1 | 8 | `tests/e2e/dashboard.spec.ts` | Playwright |
 | E2E — ticket lifecycle | 1 | 5 | `tests/e2e/tickets.spec.ts` | Playwright |
 | E2E — mobile + desktop navigation | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
-| E2E — visual parity (session-2 + session-3 contracts) | 1 | 29 | `tests/e2e/visual-parity.spec.ts` | Playwright |
+| E2E — visual parity (session-2 through session-4 contracts) | 1 | 45 | `tests/e2e/visual-parity.spec.ts` | Playwright |
 | E2E — shared session setup project | 1 | 1 | `tests/e2e/auth.setup.ts` | Playwright |
 | API smoke | 1 | 11 steps | `scripts/smoke-test.sh` | bash + curl |
 
 > Session-2 additions: the first 18 visual-parity tests pin the reference-measured design contracts (gradient quick stats, flat recent rows, detail grid + gradient header, `text-4xl` headings, non-sticky mobile header, login shell). The two tickets.spec locator defects (non-retrying `count()`; toast-announcer strict-mode ambiguity) were fixed with `toHaveCount` and `{ exact: true }` respectively — the patterns are documented in AGENTS.md.
 >
 > Session-3 additions: 11 more parity tests (recent-row FileText tile + arrow + date-only dates, lowercase badges, entrance animations incl. `prefers-reduced-motion`, submit-form details, login caption removal, search icon size, info-panel tracking, main-element classes), the clean-hydration pin in dashboard.spec (a `<div>`-in-`<p>` Skeleton broke hydration — fixed with an inline span skeleton), and `formatDate` unit tests. Raw `evaluate(getComputedStyle)` assertions were hardened to auto-retrying `toHaveCSS` after a one-off full-suite flake.
+>
+> Session-4 additions: 16 more parity tests (nav wrapper structure + live 12px icon-label gap + 20px icons + semibold labels — the biggest fix of the project, present since session 1; active-nav hover gradient; badge shadow + per-surface compact padding; submit-label typography + plain-text asterisk; md:grid-cols-2 grid; cyan-focus/shadow-sm form controls; ghost back buttons; rounded-lg mobile trigger; Google-logo wrapper; tracking-wider revert; the designed 404). The session-3 info-panel tracking assertion was flipped to `tracking-wider` after re-measuring the live reference.
 
 ### 7.2 Test Patterns
 
@@ -545,6 +547,7 @@ Main-only trunk with atomic Conventional Commits. Feature branches are short-liv
 | RESOLVED | Visual parity gaps vs the live reference (25 findings, session 2: flat quick stats, card-style recent list, flex detail layout, old login shell, `text-3xl` headings, sticky mobile header) | Parity risk on every page | Fixed — every contract E2E-pinned by `visual-parity.spec.ts`; inventory in `docs/remediation-plan-session2.md` |
 | RESOLVED | tickets.spec flakiness (2 locator defects: non-retrying `count()` racing async search; `getByText` strict-mode ambiguity vs the Radix toast announcer) | 2 tests failing intermittently in full runs | Fixed with `toHaveCount` + `{ exact: true }` (session 2) |
 | RESOLVED | Session-3 parity gaps (12 findings: emoji tile + no arrow + category badge + datetime on dashboard recent rows; capitalized badges; missing entrance animations; submit-form details; login caption; search icon size; info-panel tracking; opaque `<main>`) + a hydration error (`<div>`-in-`<p>` Skeleton) | Parity risk on every page + a console error on every dashboard load | Fixed — all E2E-pinned; inventory in `docs/remediation-plan-session3.md` |
+| RESOLVED | Session-4 parity gaps (16 findings: sidebar nav labels pushed to the right edge with 16px icons since session 1 — the missing inner flex wrapper; nav labels not semibold; badge shadow + per-surface padding; submit-form labels/asterisk/grid; shadow-sm + cyan-focus form controls; outline back buttons; rounded-md mobile trigger; bare Google logo; tracking-wide info labels; no designed 404) | Parity risk on every page (the nav gap was the largest single visual divergence of the project) | Fixed — all E2E-pinned; inventory in `docs/remediation-plan-session4.md` |
 
 ---
 

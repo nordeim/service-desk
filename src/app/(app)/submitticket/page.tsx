@@ -140,7 +140,9 @@ export default function SubmitTicketPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
       <div className="max-w-3xl mx-auto">
         <div className="mb-8">
-          <Button asChild variant="outline" className="mb-4 hover:bg-slate-100">
+          {/* Reference (measured session 4): the back control is the GHOST
+              variant — borderless at rest, just the hover:bg-slate-100 wash. */}
+          <Button asChild variant="ghost" className="mb-4 hover:bg-slate-100">
             <Link href="/dashboard">
               <ArrowLeft className="w-4 h-4" aria-hidden />
               Back to Dashboard
@@ -166,8 +168,12 @@ export default function SubmitTicketPage() {
 
           <div className="p-8 space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">
-                Issue Title <span className="text-red-500">*</span>
+              {/* Reference (measured session 4): form labels are
+                  text-slate-700 font-semibold with a PLAIN-TEXT asterisk
+                  ("Issue Title *" — one text node, so the Label base's flex
+                  gap never splits it). */}
+              <Label htmlFor="title" className="text-slate-700 font-semibold">
+                Issue Title *
               </Label>
               <Input
                 id="title"
@@ -175,17 +181,23 @@ export default function SubmitTicketPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 aria-invalid={!!errors.title}
+                className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
               />
               {errors.title ? <p className="text-xs text-red-600">{errors.title}</p> : null}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Reference (session 4): md:grid-cols-2 gap-6 (stacks until md). */}
+            <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="category">
-                  Category <span className="text-red-500">*</span>
+                <Label htmlFor="category" className="text-slate-700 font-semibold">
+                  Category *
                 </Label>
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger id="category" className="w-full" aria-invalid={!!errors.category}>
+                  <SelectTrigger
+                    id="category"
+                    className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
+                    aria-invalid={!!errors.category}
+                  >
                     <SelectValue placeholder="Select category">
                       {/* Reference (measured session 3): the selected category
                           renders as emoji-span + label inside a flex row; the
@@ -210,11 +222,14 @@ export default function SubmitTicketPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="priority">
-                  Priority <span className="text-red-500">*</span>
+                <Label htmlFor="priority" className="text-slate-700 font-semibold">
+                  Priority *
                 </Label>
                 <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger id="priority" className="w-full">
+                  <SelectTrigger
+                    id="priority"
+                    className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
+                  >
                     <SelectValue>
                       <span className="text-blue-600">{PRIORITY_LABELS[priority as TicketPriority]}</span>
                     </SelectValue>
@@ -231,13 +246,13 @@ export default function SubmitTicketPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">
-                Description <span className="text-red-500">*</span>
+              <Label htmlFor="description" className="text-slate-700 font-semibold">
+                Description *
               </Label>
               <Textarea
                 id="description"
                 placeholder="Describe the issue in detail. Include any error messages, steps to reproduce, etc."
-                className="min-h-[120px]"
+                className="min-h-[120px] border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 aria-invalid={!!errors.description}
@@ -248,7 +263,7 @@ export default function SubmitTicketPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Attachments (optional)</Label>
+              <Label className="text-slate-700 font-semibold">Attachments (optional)</Label>
               {/* Reference dropzone (measured session 3): dashed div + hidden
                   input + label-for (icon mb-2, sub-text mt-1, no hover bg).
                   Superset: drag-and-drop handlers live on the wrapper div. */}

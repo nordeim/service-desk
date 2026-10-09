@@ -34,7 +34,10 @@ export function AppSidebarChrome({
               sticky — the scroll container below keeps it in place). */}
           <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 py-4 md:hidden shadow-sm">
             <div className="flex items-center gap-4">
-              <SidebarTrigger />
+              {/* Reference (measured session 4): the mobile trigger is
+                  rounded-lg with the slate hover wash (not the ghost
+                  default's rounded-md / hover:bg-accent). */}
+              <SidebarTrigger className="hover:bg-slate-100 p-2 rounded-lg transition-colors duration-200" />
               <h1 className="text-xl font-bold text-slate-900">ServiceDesk</h1>
             </div>
           </header>

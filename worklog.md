@@ -136,3 +136,40 @@ Stage Summary:
 - All 12 session-3 findings + hydration bug fixed and E2E-pinned; 57 E2E + 53 unit + smoke green; CI added; parity verified against the live reference
 - Deliverables: remediated codebase (14 source files + 2 test files + ci.yml + globals.css), docs/remediation-plan-session3.md, refreshed screenshots, 5 updated docs
 - Ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 8
+Agent: main (Super Z)
+Task: Session 4 — refresh repo, review session_3 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git pull: c02276c adds docs/session_3.md (session-3 retrospective)
+- Baseline gates at c02276c: lint ✓ typecheck ✓ 53 unit ✓ build ✓ 57/57 E2E ✓ smoke 11/11 ✓
+- Audit of session-3 commit 6d7d21b (code-review-checklist + verification-and-review-protocol skills): source clean; the suspected ci.yml trigger corruption (`branches: ain]`) was a DISPLAY ARTIFACT — the Bash tool output renderer eats `[m` sequences (byte-level proof via bracket substitution + PyYAML); CI file is correct
+- Fresh gap analysis vs live reference (agent-browser, 2 sessions): DOM dumps for all 5 pages + sidebar + login + the reference's 404 both sites; live geometry probes; 9 VLM composite claims checked — 5 refuted (stat-card tints, CTA colors, input width, login card/logo/labels, filter-bar replacement)
+- HEADLINE FINDING: sidebar nav layout wrong since session 1 — the reference wraps icon+label in an inner `div.flex.items-center.gap-3`; without it our `justify-between` pushed labels 132px right AND `[&>svg]:size-4` shrank icons to 16px (ref: 12px gap, 20px icons, 600-weight labels). Verified by geometry + VLM on BOTH sites; missed by 3 sessions of screenshot composites
+- 16 findings total (nav structure ×3, badges shadow/compact-padding ×3, submit labels/grid/cyan-focus controls ×3, ghost back buttons, rounded-lg mobile trigger, Google-logo wrapper, tracking-wider revert, designed 404 page) + 3 reference-site defects deliberately NOT copied (toast viewport blocks their mobile trigger; /signup + /forgotpassword dead-ends) + display-name divergence documented (account name vs email local-part — the reference has no name concept)
+- Mobile navigation verified on BOTH sites: reference trigger partially BLOCKED by its own toast viewport (elementFromPoint proof); clone trigger fully clickable (Radix region pointer-events:none), sheet opens, overlay/Escape close, nav-tap navigates + auto-closes, zero console errors
+- Wrote + validated docs/remediation-plan-session4.md (16 gaps + ledgers + risks)
+
+Stage Summary:
+- Repo at c02276c + plan. 16 gaps (1 HIGH: the nav wrapper), 2 reference defects to avoid, 1 divergence documented.
+
+---
+Task ID: 9
+Agent: main (Super Z)
+Task: Session 4 — remediation execution (TDD), verification, docs, SKILL.md v2.2.0, commit + push
+
+Work Log:
+- TDD: 16 red session-4 parity tests written first (all verified red against the pre-fix build); the session-3 tracking assertion flipped wide→wider (reference re-measured)
+- Implemented all 16: nav items wrapped in the reference's inner `flex items-center gap-3` div (fixes label position + 20px icons in one change) + `font-semibold` labels + active-item hover gradient (`hover:text-cyan-700!` needed vs `text-white!`); badge atoms gained `shadow hover:bg-primary/80` + a `compact` padding prop (px-2.5 py-0.5 on dashboard rows + detail priority); submit form (labels `text-slate-700 font-semibold` with ONE-text-node plain asterisks, `md:grid-cols-2 gap-6`, cyan-focus + shadow-sm controls, bg-transparent selects); ghost back buttons both pages; mobile trigger `rounded-lg hover:bg-slate-100 p-2`; Google-logo `-ml-4` wrapper; info labels tracking-wider (revert); NEW src/app/not-found.tsx replicating the reference's designed 404 (text-7xl font-light 404 + divider + Page Not Found + path-aware message + Go Home)
+- Fixed 1 test-authoring defect: the mobile-trigger negative regex matched the unrelated `dark:hover:bg-accent/50` — lookbehind `(?<!dark:)` added
+- Gates: lint ✓ typecheck ✓ 53 unit ✓ build ✓ 73/73 E2E ✓ smoke 11/11 ✓
+- Live re-verification: nav geometry IDENTICAL to reference on desktop AND mobile sheet (icon 20px, gap 12px, label weight 600, wrapper flex gap-3, justify-between no-op); badge computed shadow + 2px/10px compact padding; submit label weight 600 + "Issue Title *"; back button border 0px; input shadow + slate-300 border; grid 2-col/24px gap; 404 renders with all contracts; zero console errors on every page
+- Refreshed docs/screenshots/ (7 shots); final side-by-side composites rebuilt — VLM confirms the nav layout now matches (residual color claim refuted: identical from-cyan-500 to-blue-600 on both, E2E-pinned)
+- Updated README/AGENTS (session-4 contracts section)/CLAUDE/PAD (known-issues row + test distribution)/service-desk_SKILL.md (v2.2.0 + lessons 11-15)
+
+Stage Summary:
+- All 16 session-4 findings fixed and E2E-pinned; 73 E2E + 53 unit + smoke green; parity re-verified live against the reference
+- Deliverables: 7 source files + 2 new files (not-found.tsx, remediation-plan-session4.md) + spec updates + refreshed screenshots + 5 updated docs
+- Ready for commit + push via ssh_git_wrapper_v3.py

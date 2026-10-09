@@ -18,34 +18,48 @@ import {
 } from "@/lib/constants";
 import { cn, formatDate } from "@/lib/utils";
 
+// Reference badge base (measured session 4): every default-variant badge
+// carries `shadow` + `hover:bg-primary/80` (the old shadcn Badge base). The
+// outline CategoryBadge has NEITHER — do not add them there.
 const STATUS_BADGE_CLASSES: Record<TicketStatus, string> = {
-  open: "bg-amber-100 text-amber-800 border-amber-300 border font-medium px-3 py-1",
-  in_progress: "bg-blue-100 text-blue-700 border-transparent font-medium px-3 py-1",
-  resolved: "bg-emerald-100 text-emerald-800 border-emerald-300 border font-medium px-3 py-1",
-  closed: "bg-slate-100 text-slate-600 border-slate-300 border font-medium px-3 py-1",
+  open: "bg-amber-100 text-amber-800 border-amber-300 border font-medium shadow hover:bg-primary/80",
+  in_progress: "bg-blue-100 text-blue-700 border-transparent font-medium shadow hover:bg-primary/80",
+  resolved: "bg-emerald-100 text-emerald-800 border-emerald-300 border font-medium shadow hover:bg-primary/80",
+  closed: "bg-slate-100 text-slate-600 border-slate-300 border font-medium shadow hover:bg-primary/80",
 };
 
 const PRIORITY_BADGE_CLASSES: Record<TicketPriority, string> = {
-  low: "bg-slate-100 text-slate-600 font-medium px-3 py-1",
-  medium: "bg-blue-100 text-blue-700 font-medium px-3 py-1",
-  high: "bg-orange-100 text-orange-700 font-medium px-3 py-1",
-  urgent: "bg-red-100 text-red-700 font-medium px-3 py-1",
+  low: "bg-slate-100 text-slate-600 font-medium shadow hover:bg-primary/80",
+  medium: "bg-blue-100 text-blue-700 font-medium shadow hover:bg-primary/80",
+  high: "bg-orange-100 text-orange-700 font-medium shadow hover:bg-primary/80",
+  urgent: "bg-red-100 text-red-700 font-medium shadow hover:bg-primary/80",
 };
+
+// Padding is per-surface (reference, session 4): mytickets cards + the detail
+// status badge use px-3 py-1; dashboard recent rows + the detail priority
+// badge use the base-compact px-2.5 py-0.5.
+const BADGE_PAD_REGULAR = "px-3 py-1";
+const BADGE_PAD_COMPACT = "px-2.5 py-0.5";
 
 export function StatusBadge({
   status,
   detail = false,
+  compact = false,
 }: {
   status: TicketStatus;
   /** detail=true renders the reference's larger detail-page treatment
    *  (text-sm font-bold) instead of the row treatment (text-xs font-medium). */
   detail?: boolean;
+  /** compact=true renders the small px-2.5 py-0.5 padding (dashboard recent
+   *  rows; measured session 4) instead of the regular px-3 py-1. */
+  compact?: boolean;
 }) {
   const extra = detail ? "text-sm! font-bold" : "";
+  const pad = compact ? BADGE_PAD_COMPACT : BADGE_PAD_REGULAR;
   // Reference renders badge text lowercase ("open", "in progress") —
   // no capitalize (measured session 3).
   return (
-    <Badge className={cn(STATUS_BADGE_CLASSES[status], extra)}>
+    <Badge className={cn(STATUS_BADGE_CLASSES[status], extra, pad)}>
       {status.replace("_", " ")}
     </Badge>
   );
@@ -54,14 +68,19 @@ export function StatusBadge({
 export function PriorityBadge({
   priority,
   showWord = false,
+  compact = false,
 }: {
   priority: TicketPriority;
   /** showWord=true appends " priority" — the reference detail page puts the
    *  word inside the badge ("medium priority"), rows keep it bare. */
   showWord?: boolean;
+  /** compact=true renders the small px-2.5 py-0.5 padding — the reference
+   *  detail page uses it on the priority badge (session 4). */
+  compact?: boolean;
 }) {
+  const pad = compact ? BADGE_PAD_COMPACT : BADGE_PAD_REGULAR;
   return (
-    <Badge className={cn(PRIORITY_BADGE_CLASSES[priority])}>
+    <Badge className={cn(PRIORITY_BADGE_CLASSES[priority], pad)}>
       {showWord ? `${priority.replace("_", " ")} priority` : priority}
     </Badge>
   );
@@ -153,8 +172,10 @@ export function RecentTicketRow({ ticket }: { ticket: TicketCardData }) {
           </div>
           <p className="text-sm text-slate-600 line-clamp-1 mb-3">{ticket.description}</p>
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={ticket.status as TicketStatus} />
-            <PriorityBadge priority={ticket.priority as TicketPriority} />
+            {/* Reference (session 4): dashboard recent-row badges use the
+                compact px-2.5 py-0.5 padding. */}
+            <StatusBadge status={ticket.status as TicketStatus} compact />
+            <PriorityBadge priority={ticket.priority as TicketPriority} compact />
             <span className="text-xs text-slate-500 font-medium">{formatDate(ticket.createdAt)}</span>
           </div>
         </div>

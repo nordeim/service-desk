@@ -9,7 +9,7 @@ last_updated: 2026-10-09
 
 Full-stack IT ticketing portal (Next.js 16 App Router standalone · React 19 · TypeScript strict · Tailwind CSS v4 CSS-first · shadcn/ui · Prisma 6 + SQLite · Vitest + Playwright). A visual-parity, feature-superset clone of the base44 ServiceDesk reference app, maintained as a single deployable process with zero external services.
 
-**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (57 specs against the production standalone build) when UI/auth behavior changes. CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
+**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (73 specs against the production standalone build) when UI/auth behavior changes. CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
 
 ## Foundational Principles
 
@@ -76,14 +76,14 @@ bun run dev                     # http://localhost:3000  (demo@servicedesk.app /
 | `bun run build` | Production standalone build |
 | `bun run start` | Boot standalone server |
 | `bun run lint` / `bun run typecheck` | ESLint / tsc |
-| `bun run test` / `bun run test:e2e` | 50 unit / 46 E2E (needs prior build) |
+| `bun run test` / `bun run test:e2e` | 53 unit / 73 E2E (needs prior build) |
 | `bash scripts/smoke-test.sh` | API smoke on a throwaway server |
 | `bun run db:push` / `db:seed` / `db:reset` | Schema push / idempotent seed / reset |
 
 ## Testing Strategy
 
 - **Unit (Vitest, `*.test.ts`)**: pure seams only — auth sign/verify + scrypt + rate limiting, input validation, constants vocabulary, db-path resolution, date/duration formatting (`formatDate` date-only, `formatDateTime`, `formatDuration`). No DOM, no DB.
-- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (29 tests) pins the reference-measured design contracts (sessions 2–3). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
+- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (45 tests) pins the reference-measured design contracts (sessions 2–4). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
 - **Smoke (`scripts/smoke-test.sh`)**: API contract on a throwaway server — health, login, CRUD, comments, guards (401/400).
 - Bug fixes require a failing test first (unit for domain seams, E2E for UI contract). The mobile-navigation spec is the highest-regression-risk chrome — run it after any sidebar/sheet/Tailwind change; run visual-parity after any page-layout change.
 

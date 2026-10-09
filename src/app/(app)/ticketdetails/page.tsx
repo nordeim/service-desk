@@ -161,7 +161,9 @@ export default function TicketDetailsPage() {
             together inside ONE motion wrapper. */}
         <div className="animate-rise-in motion-reduce:animate-none">
         <div className="mb-6">
-          <Button asChild variant="outline" className="mb-4 hover:bg-slate-100">
+          {/* Reference (measured session 4): the back control is the GHOST
+              variant — borderless at rest, just the hover:bg-slate-100 wash. */}
+          <Button asChild variant="ghost" className="mb-4 hover:bg-slate-100">
             <Link href="/mytickets">
               <ArrowLeft className="w-4 h-4" aria-hidden />
               Back to Tickets
@@ -183,7 +185,10 @@ export default function TicketDetailsPage() {
                     <StatusBadge status={ticket.status as TicketStatus} detail />
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <PriorityBadge priority={ticket.priority as never} showWord />
+                    {/* Reference (session 4): the detail priority badge uses the
+                        compact px-2.5 py-0.5 padding (the status badge above
+                        keeps the larger text-sm treatment). */}
+                    <PriorityBadge priority={ticket.priority as never} showWord compact />
                     <CategoryBadge category={ticket.category as never} />
                   </div>
                 </div>
@@ -268,7 +273,7 @@ export default function TicketDetailsPage() {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     aria-label="Add a comment or update"
-                    className="min-h-24 border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
+                    className="min-h-24 border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
                   />
                   <div className="flex items-center justify-between">
                     <Button
@@ -295,21 +300,21 @@ export default function TicketDetailsPage() {
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
                     Created By
                   </p>
                   <p className="text-sm text-slate-900 font-medium">{ticket.createdBy.email}</p>
                 </div>
                 <Separator className="h-[1px] w-full" />
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
                     Created On
                   </p>
                   <p className="text-sm text-slate-900 font-medium">{formatDateTime(ticket.createdAt)}</p>
                 </div>
                 <Separator className="h-[1px] w-full" />
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
                     Last Updated
                   </p>
                   <p className="text-sm text-slate-900 font-medium">{formatDateTime(ticket.updatedAt)}</p>

@@ -4,17 +4,17 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled after the session-2 remediation (2026-10-09).
+  functionality. Distilled through the session-4 remediation (2026-10-09).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.1.0
+version: 2.2.0
 last_updated: 2026-10-09
-project_state: 53 unit tests + 57 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–3)
+project_state: 53 unit tests + 73 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–4)
 ---
 
 # ServiceDesk — Complete Engineering Skill
 
-> **Purpose:** A single-source-of-truth reference for any coding agent working on this codebase: every design decision, anti-pattern, debugging procedure, parity contract, and lesson learned from sessions 1–2. Every claim here is either **Verified** (executed this session), **Reasoned** (code inspection), or marked as convention.
+> **Purpose:** A single-source-of-truth reference for any coding agent working on this codebase: every design decision, anti-pattern, debugging procedure, parity contract, and lesson learned from sessions 1–4. Every claim here is either **Verified** (executed this session), **Reasoned** (code inspection), or marked as convention.
 
 ---
 
@@ -351,6 +351,11 @@ Manual/visual checks:
 8. **Inline env pins beat ambient env.** The sandbox exports `DATABASE_URL`; the npm scripts pin it inline. Determinism > DRY here.
 9. **Data-level differences are not parity gaps.** Ticket titles, counts, dates, and user names differ between the reference and any clone by construction. Filter them out of every comparison.
 10. **The superset rule needs a home.** Superset additions (sort/scope row, Update Status card, attachments section) are placed to not alter reference-visible structure — extra elements go below/beside reference structure, never inside its measured containers.
+11. **A wrapper div can be load-bearing twice.** (Session 4.) The reference wraps nav icon+label in an inner `flex items-center gap-3` div. Without it, the anchor's `justify-between` pushed labels to the right edge (132px vs 12px) AND the button base's `[&>svg]:size-4` direct-child selector shrank the icons — one missing div, two visible bugs, invisible to three sessions of screenshot composites. Structure matters as much as classes; diff the DOM tree, not just utility lists.
+12. **VLM comparisons are not sensitive to intra-element layout.** (Session 4.) Three sessions of "IDENTICAL" composites missed a 132px label displacement inside the nav buttons. Geometric assertions (boundingBox deltas) catch what visual diffing cannot — pin them in E2E.
+13. **Verify "obvious" regressions before fixing them.** (Session 4.) The CI workflow appeared corrupted (`branches: ain]`); byte-level verification proved the tool-output renderer eats `[m` sequences and the file was correct. The reverse also holds: a passing VLM check is not evidence of parity.
+14. **Per-surface badge padding.** (Session 4.) The reference renders the SAME badge component at `px-3 py-1` on mytickets/detail-status but `px-2.5 py-0.5` on dashboard rows and detail-priority. Measure per call site, not per component.
+15. **The reference has its own bugs — never copy them.** (Session 4.) Its toast viewport blocks its own mobile menu trigger (`pointer-events: auto` band over the header); its signup/forgot-password are dead-ends; its active-nav misses the root route. Parity means matching the DESIGN, not reproducing the defects.
 
 ---
 
@@ -578,6 +583,8 @@ The six-phase workflow every change follows (from CLAUDE.md):
 Session-2 application of this loop: 25 findings → remediation plan (docs/remediation-plan-session2.md) → plan validated against source → 18 red parity tests → implementation (9 groups: tests, chrome, sidebar, dashboard, mytickets, detail, submit, login, housekeeping) → 46/46 E2E green → computed-style re-verification on both sites → docs + this skill.
 
 Session-3 application of this loop: fresh DOM/computed-style diff + a MutationObserver motion probe → 12 findings + 1 latent hydration bug (`<div>`-in-`<p>` Skeleton) → remediation plan (docs/remediation-plan-session3.md) → 11 red parity tests + clean-hydration pin + `formatDate` unit tests → implementation (recent-row rework, lowercase badges, CSS entrance animations + `prefers-reduced-motion`, submit-form details, login caption, search icon, info-panel tracking, transparent `<main>`, CI workflow) → 57/57 E2E green → live re-verification (all contracts + zero console errors) → docs + this skill (v2.1.0).
+
+Session-4 application of this loop: full 5-page DOM diff + live geometry probes + VLM lead-generation (9 claims, 5 refuted) → 16 findings — the headline one being the **sidebar nav layout bug present since session 1** (the missing inner `flex items-center gap-3` wrapper made `justify-between` push labels to the right edge AND let `[&>svg]:size-4` shrink icons to 16px) → remediation plan (docs/remediation-plan-session4.md) → 16 red parity tests → implementation (nav wrapper + semibold labels + active hover gradient, badge shadow + compact padding, submit labels/grid/cyan-focus controls, ghost back buttons, rounded-lg mobile trigger, Google-logo wrapper, tracking-wider revert, reference-designed 404 page) → 73/73 E2E green → live re-verification (12px gap / 20px icons / weight 600 on desktop AND mobile, zero console errors) → docs + this skill (v2.2.0).
 
 ## Appendix B: Quick Reference Card
 

@@ -392,13 +392,15 @@ test.describe("session 3: chrome details", () => {
     await expect(icon).toHaveClass(/h-5/);
   });
 
-  test("info panel labels use tracking-wide (reference)", async ({ page }) => {
+  test("info panel labels use tracking-wider (reference, re-measured session 4)", async ({ page }) => {
     await page.goto("/mytickets");
     await page.locator('a[href*="/ticketdetails"]').first().click();
     await page.waitForURL(/\/ticketdetails\?id=/);
     const label = page.locator("main p.text-xs").filter({ hasText: /^Created By$/ });
-    await expect(label).toHaveClass(/tracking-wide/);
-    await expect(label).not.toHaveClass(/tracking-wider/);
+    // Session 4 re-measure: the live reference renders tracking-wider on all
+    // three info labels (session 3's tracking-wide reading is superseded).
+    await expect(label).toHaveClass(/tracking-wider/);
+    await expect(label).not.toHaveClass(/tracking-wide(?!r)/);
   });
 
   test("main element uses the reference classes (transparent, no bg-background)", async ({ page }) => {
@@ -408,5 +410,222 @@ test.describe("session 3: chrome details", () => {
     await expect(main).toHaveClass(/flex-col/);
     await expect(main).not.toHaveClass(/bg-background/);
     await expect(main).not.toHaveClass(/relative/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session-4 contracts (docs/remediation-plan-session4.md) — measured from the
+// live reference on 2026-10-09: the sidebar nav item structure (inner
+// flex wrapper → adjacent icon/label, 20px icons, semibold labels — the
+// single biggest parity fix of the project, present since session 1), badge
+// shadow + per-surface padding, submit-form labels (semibold slate-700,
+// plain-text asterisk), the md:grid-cols-2 form grid, cyan-focus/shadow-sm
+// form controls, ghost back buttons, the rounded-lg mobile trigger, the
+// Google-logo wrapper, the tracking-wider revert, and the designed 404 page.
+// ---------------------------------------------------------------------------
+
+test.describe("session 4: sidebar nav structure", () => {
+  test("nav items wrap icon+label in the reference flex row (adjacent, not pushed right)", async ({ page }) => {
+    await page.goto("/dashboard");
+    // Scope to the DESKTOP sidebar — the hidden mobile sheet renders its own copy.
+    const nav = page.locator('[data-sidebar="sidebar"]:not([data-mobile]) [data-sidebar="menu"]');
+    await expect(nav.locator("a")).toHaveCount(3);
+
+    for (const link of await nav.locator("a").all()) {
+      // The reference structure: anchor > ONE wrapper child > svg + span.
+      const wrapper = link.locator("> div, > span").first();
+      await expect(wrapper).toHaveClass(/flex/);
+      await expect(wrapper).toHaveClass(/items-center/);
+      await expect(wrapper).toHaveClass(/gap-3/);
+      // The svg lives INSIDE the wrapper (shielded from the button base's
+      // [&>svg]:size-4 direct-child selector → keeps its w-5 h-5 = 20px).
+      const icon = wrapper.locator("svg").first();
+      await expect(icon).toHaveClass(/w-5/);
+      await expect(icon).toHaveClass(/h-5/);
+      // Label span is semibold (reference: font-semibold).
+      const label = wrapper.locator("span").first();
+      await expect(label).toHaveClass(/font-semibold/);
+    }
+
+    // Live geometry: the label starts within 16px of the icon's right edge
+    // (reference: 12px gap; the pre-fix bug pushed it ~132px to the edge).
+    const first = nav.locator("a").first();
+    const iconBox = await first.locator("svg").first().boundingBox();
+    const labelBox = await first.locator("span").first().boundingBox();
+    expect(iconBox).not.toBeNull();
+    expect(labelBox).not.toBeNull();
+    const gap = labelBox!.x - (iconBox!.x + iconBox!.width);
+    expect(gap).toBeGreaterThan(0);
+    expect(gap).toBeLessThanOrEqual(16);
+  });
+
+  test("nav icons render at the reference 20px size", async ({ page }) => {
+    await page.goto("/dashboard");
+    const icon = page.locator('[data-sidebar="sidebar"]:not([data-mobile]) [data-sidebar="menu"] a svg').first();
+    // w-5 h-5 = 20px once the wrapper shields it from [&>svg]:size-4.
+    await expect(icon).toHaveCSS("width", "20px");
+    await expect(icon).toHaveCSS("height", "20px");
+  });
+
+  test("active nav item carries the reference hover gradient", async ({ page }) => {
+    await page.goto("/dashboard");
+    const active = page.locator('[data-sidebar="sidebar"]:not([data-mobile]) [data-sidebar="menu"] a').first();
+    await expect(active).toHaveClass(/bg-gradient-to-r/);
+    await expect(active).toHaveClass(/from-cyan-500/);
+    // Reference: the active item hovers to the light cyan-blue gradient.
+    await expect(active).toHaveClass(/hover:bg-gradient-to-r/);
+    await expect(active).toHaveClass(/hover:from-cyan-50/);
+    await expect(active).toHaveClass(/hover:to-blue-50/);
+  });
+
+  test("mobile sheet nav uses the same wrapper structure", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/dashboard");
+    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+    const sheet = page.locator('[data-mobile="true"][data-sidebar="sidebar"]');
+    await expect(sheet).toBeVisible();
+    const link = sheet.locator("a").first();
+    const wrapper = link.locator("> div, > span").first();
+    await expect(wrapper).toHaveClass(/gap-3/);
+    await expect(wrapper.locator("span").first()).toHaveClass(/font-semibold/);
+  });
+});
+
+test.describe("session 4: badges", () => {
+  test("status and priority badges carry the reference shadow", async ({ page }) => {
+    await page.goto("/mytickets");
+    const card = page.locator('a[href*="/ticketdetails"]').first();
+    const status = card.locator("span").filter({ hasText: /^(open|in progress|resolved|closed)$/ }).first();
+    await expect(status).toHaveClass(/shadow(?!-)/);
+    await expect(status).toHaveClass(/hover:bg-primary\/80/);
+    const priority = card.locator("span").filter({ hasText: /^(low|medium|high|urgent)$/ }).first();
+    await expect(priority).toHaveClass(/shadow(?!-)/);
+  });
+
+  test("dashboard recent-row badges use the compact reference padding", async ({ page }) => {
+    await page.goto("/dashboard");
+    const row = page.locator("div.divide-y a").first();
+    const status = row.locator("span").filter({ hasText: /^(open|in progress|resolved|closed)$/ }).first();
+    await expect(status).toHaveClass(/px-2\.5/);
+    await expect(status).not.toHaveClass(/px-3(?!\.)/);
+    const priority = row.locator("span").filter({ hasText: /^(low|medium|high|urgent)$/ }).first();
+    await expect(priority).toHaveClass(/py-0\.5/);
+  });
+
+  test("detail page: status badge large, priority badge compact (reference)", async ({ page }) => {
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    const status = page
+      .locator("main span")
+      .filter({ hasText: /^(open|in progress|resolved|closed)$/ })
+      .first();
+    await expect(status).toHaveClass(/text-sm/);
+    await expect(status).toHaveClass(/px-3/);
+    const priority = page.locator("main span").filter({ hasText: / priority$/ }).first();
+    await expect(priority).toHaveClass(/px-2\.5/);
+    await expect(priority).not.toHaveClass(/px-3(?!\.)/);
+  });
+});
+
+test.describe("session 4: submit form details", () => {
+  test("form labels are semibold slate-700 with a plain-text asterisk", async ({ page }) => {
+    await page.goto("/submitticket");
+    const title = page.locator("label[for='title']");
+    await expect(title).toHaveClass(/text-slate-700/);
+    await expect(title).toHaveClass(/font-semibold/);
+    // The asterisk is plain text (reference) — no red span inside any label.
+    await expect(page.locator("form label span.text-red-500")).toHaveCount(0);
+    await expect(title).toHaveText(/Issue Title \*$/);
+  });
+
+  test("category and priority sit in the reference md:grid-cols-2 gap-6 grid", async ({ page }) => {
+    await page.goto("/submitticket");
+    // The category/priority grid is the only div.grid inside the form.
+    const grid = page.locator("form div.grid");
+    await expect(grid).toHaveCount(1);
+    await expect(grid).toHaveClass(/md:grid-cols-2/);
+    await expect(grid).toHaveClass(/gap-6/);
+  });
+
+  test("form controls use the reference cyan focus + shadow-sm", async ({ page }) => {
+    await page.goto("/submitticket");
+    const title = page.locator("input#title");
+    await expect(title).toHaveClass(/border-slate-300/);
+    await expect(title).toHaveClass(/focus:border-cyan-500/);
+    await expect(title).toHaveClass(/focus:ring-cyan-500/);
+    await expect(title).toHaveClass(/shadow-sm/);
+    const category = page.locator("button#category");
+    await expect(category).toHaveClass(/shadow-sm/);
+    await expect(category).toHaveClass(/focus:border-cyan-500/);
+  });
+
+  test("back buttons are the reference ghost variant (borderless at rest)", async ({ page }) => {
+    await page.goto("/submitticket");
+    const back = page.getByRole("link", { name: /Back to Dashboard/ });
+    await expect(back).toHaveClass(/hover:bg-slate-100/);
+    // Ghost: no border, no background at rest (the outline variant had both).
+    await expect(back).not.toHaveClass(/border(?!-)/);
+    await expect(back).not.toHaveClass(/bg-background/);
+
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    const backDetail = page.getByRole("link", { name: /Back to Tickets/ });
+    await expect(backDetail).not.toHaveClass(/border(?!-)/);
+  });
+});
+
+test.describe("session 4: mytickets + comment controls", () => {
+  test("search input and filters use shadow-sm + transparent bg (reference)", async ({ page }) => {
+    await page.goto("/mytickets");
+    const search = page.getByLabel("Search tickets");
+    await expect(search).toHaveClass(/shadow-sm/);
+    await expect(search).toHaveClass(/bg-transparent/);
+    await expect(search).not.toHaveClass(/bg-white/);
+    const filter = page.getByRole("combobox").first();
+    await expect(filter).toHaveClass(/shadow-sm/);
+  });
+
+  test("comment textarea carries shadow-sm (reference)", async ({ page }) => {
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    const textarea = page.getByLabel("Add a comment or update");
+    await expect(textarea).toHaveClass(/shadow-sm/);
+  });
+});
+
+test.describe("session 4: chrome details", () => {
+  test("mobile sidebar trigger is rounded-lg with the slate hover (reference)", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/dashboard");
+    const trigger = page.locator("header button[data-sidebar='trigger']");
+    await expect(trigger).toHaveClass(/rounded-lg/);
+    await expect(trigger).toHaveClass(/hover:bg-slate-100/);
+    // The light-mode hover:bg-accent from the ghost base is overridden; the
+    // dark-mode variant (dark:hover:bg-accent/50) is a different utility and
+    // survives tw-merge — the lookbehind excludes it.
+    await expect(trigger).not.toHaveClass(/(?<!dark:)hover:bg-accent(?!-)/);
+  });
+
+  test("login Google logo sits in the reference -ml-4 wrapper", async ({ page }) => {
+    await page.goto("/login");
+    const wrapper = page.locator("button").filter({ hasText: /Continue with Google/ }).locator("> div").first();
+    await expect(wrapper).toHaveClass(/-ml-4/);
+    await expect(wrapper).toHaveClass(/transition-transform/);
+  });
+});
+
+test.describe("session 4: 404 page", () => {
+  test("unmatched routes render the reference-designed 404", async ({ page }) => {
+    await page.goto("/this-page-does-not-exist");
+    await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Page Not Found" })).toBeVisible();
+    await expect(page.getByText(/could not be found/)).toBeVisible();
+    await expect(page.getByRole("link", { name: /Go Home/ })).toBeVisible();
+    // The reference typography: text-7xl font-light slate-300.
+    await expect(page.getByRole("heading", { name: "404" })).toHaveClass(/text-7xl/);
+    await expect(page.getByRole("heading", { name: "404" })).toHaveClass(/font-light/);
   });
 });

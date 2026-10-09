@@ -122,17 +122,24 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
                             // base SidebarMenuButton carries `data-[active=true]:text-sidebar-accent-foreground`,
                             // and Tailwind v4 orders variant utilities AFTER plain utilities,
                             // so a plain `text-white` would lose the cascade to the dark accent color.
-                            "bg-gradient-to-r from-cyan-500 to-blue-600 text-white! shadow-lg shadow-cyan-500/30"
+                            // `hover:text-cyan-700!` needs the `!` for the same reason (session 4:
+                            // the reference hovers the active item to the light cyan-blue gradient).
+                            "bg-gradient-to-r from-cyan-500 to-blue-600 text-white! shadow-lg shadow-cyan-500/30 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 hover:text-cyan-700!"
                           : "text-slate-600 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 hover:text-cyan-700"
                       }`}
                     >
-                      <Link
-                        href={item.href}
-                        className="flex items-center gap-3"
-                        onClick={() => setOpenMobile(false)}
-                      >
-                        <item.icon className="w-5 h-5" aria-hidden />
-                        <span>{item.title}</span>
+                      <Link href={item.href} onClick={() => setOpenMobile(false)}>
+                        {/* Reference structure (measured session 4): the icon
+                            and label sit inside ONE flex wrapper — the anchor's
+                            `justify-between` becomes a no-op (single child) and
+                            the button base's `[&>svg]:size-4` direct-child
+                            selector no longer matches, so the icon keeps its
+                            w-5 h-5 (20px, reference size). The label span is
+                            font-semibold (reference: weight 600). */}
+                        <div className="flex items-center gap-3">
+                          <item.icon className="w-5 h-5" aria-hidden />
+                          <span className="font-semibold">{item.title}</span>
+                        </div>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

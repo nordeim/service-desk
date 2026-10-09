@@ -13,7 +13,7 @@ Run from the repo root. Bun is the documented runtime (Node ≥ 20 works for eve
 | `bun run start` | Boot the standalone server in production mode |
 | `bun run lint` / `bun run typecheck` | ESLint 9 flat / `tsc --noEmit` |
 | `bun run test` | Vitest unit suite (53 tests — auth, validation, db-path, utils incl. formatDate) |
-| `bun run test:e2e` | Playwright E2E (57 tests) — boots the **production standalone server** on :3100 with an isolated `db/e2e.db`; requires a prior `bun run build` |
+| `bun run test:e2e` | Playwright E2E (73 tests) — boots the **production standalone server** on :3100 with an isolated `db/e2e.db`; requires a prior `bun run build` |
 | `bash scripts/smoke-test.sh` | API smoke: throwaway server on :3999, exercises auth + CRUD + guards |
 | CI (`.github/workflows/ci.yml`) | GitHub Actions on push/PR to main: verify job (lint → typecheck → unit → build) + e2e job (Playwright against the restored standalone build) |
 | `bun run db:push` / `db:seed` | Push `prisma/schema.prisma` → `db/custom.db` / idempotent seed (4 users, 11 tickets) |
@@ -81,6 +81,21 @@ Clean-check order: `bun run lint typecheck test build` — then `bun run test:e2
 - `<main>` (SidebarInset) renders exactly `flex-1 flex flex-col` — transparent; the app gradient wrapper paints through.
 - Hydration is clean (no console hydration-mismatch errors on any page).
 
+## Session-4 parity contracts (same spec file; inventory in `docs/remediation-plan-session4.md`)
+
+- **Sidebar nav items wrap icon+label in ONE inner `flex items-center gap-3` div** (reference structure). This is load-bearing twice over: the anchor's `justify-between` becomes a no-op (single child — without the wrapper the label gets pushed to the right edge), and the button base's `[&>svg]:size-4` direct-child selector no longer matches, so the icon keeps its `w-5 h-5` (20px). Labels are `font-semibold` (600).
+- Active nav item hovers to the light gradient (`hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 hover:text-cyan-700!`) — same as inactive; the `!` is required because `text-white!` is important.
+- Status/priority badges carry `shadow` + `hover:bg-primary/80` (the reference's old-shadcn base); the outline CategoryBadge carries NEITHER.
+- Badge padding is per-surface: mytickets cards + detail status = `px-3 py-1`; dashboard recent rows + detail priority = `px-2.5 py-0.5` (the `compact` prop on the badge atoms).
+- Submit-form labels: `text-slate-700 font-semibold` with a plain-text asterisk (ONE text node — the Label base is flex, so a separate span child would get an 8px gap); the reference has NO red asterisk span.
+- Submit grid: `md:grid-cols-2 gap-6`. Non-login form controls (mytickets search/filters, submit title/selects, comment textarea): `shadow-sm border-slate-300 focus:border-cyan-500 focus:ring-cyan-500`; mytickets controls are `bg-transparent` (not white).
+- Back controls are the GHOST Button variant (borderless at rest) — not outline.
+- The mobile SidebarTrigger is `rounded-lg hover:bg-slate-100 p-2` (overriding the ghost base via tw-merge).
+- Detail info labels are `tracking-wider` (session-4 re-measure — the reference renders wider on all 3 labels; session 3's `wide` reading is superseded).
+- Unmatched routes render the reference-designed 404 (`src/app/not-found.tsx`): `text-7xl font-light` 404, `h-0.5 w-16` divider, "Page Not Found", path-aware message, Go Home → `/dashboard`.
+- The reference's own toast viewport BLOCKS its mobile trigger (`pointer-events: auto` band over the header) — our Radix viewport region is `pointer-events: none` by construction. Do not "fix" ours to match.
+- Display names use the account name (greeting/footer/comments); the reference shows the email local-part because base44 auth has no name concept (its `/signup` is a 404, `/forgotpassword` empty). Superset divergence — documented.
+
 ## Environment
 
 `.env.example` documents every variable; `.env` is gitignored. `AUTH_SECRET` = `openssl rand -hex 32` (required in production — the dev fallback logs a loud warning). `DATABASE_URL="file:../db/custom.db"` → `<repo>/db/custom.db`. Production deployments should switch to an absolute `file:` URL (see `docs/DEPLOYMENT.md`).
@@ -90,7 +105,7 @@ Clean-check order: `bun run lint typecheck test build` — then `bun run test:e2
 - `Project_Architecture_Document.md` — the full engineering reference (ADRs, layer model, security architecture).
 - `docs/DEPLOYMENT.md` — standalone build + production environment contract.
 - `docs/Tailwind-V4-Validation-Report.md` — the v3→v4 migration facts behind the CSS-first rules above.
-- `docs/remediation-plan-session2.md` / `docs/remediation-plan-session3.md` — the session-2 (25 findings) and session-3 (12 findings + known-issue closure) gap inventories and how each was verified against the live reference.
+- `docs/remediation-plan-session2.md` / `-session3.md` / `-session4.md` — the session-2 (25 findings), session-3 (12 findings + known-issue closure), and session-4 (16 findings incl. the nav-wrapper fix + designed 404) gap inventories and how each was verified against the live reference.
 - `docs/how-to-git-push-using-ssh-wrapper_SKILL.md` + `docs/ssh_git_wrapper_v3.py` — how pushes to `git@github.com:nordeim/service-desk.git` work without a resident `~/.ssh` identity.
 - `docs/screenshots/` — the 7-shot dev-server capture set (desktop × 5, mobile × 2).
 - `skills/` — the in-repo skill catalog (`skills/skills-catalog.md`) used to build this clone.
