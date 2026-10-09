@@ -65,14 +65,14 @@ export default function MyTicketsPage() {
             <Input
               type="search"
               placeholder="Search tickets..."
-              className="pl-10 bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
+              className="pl-10 bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search tickets"
             />
           </div>
           <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
-            <SelectTrigger className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm" aria-label="Filter by status">
+            <SelectTrigger className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs" aria-label="Filter by status">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -84,7 +84,7 @@ export default function MyTicketsPage() {
             </SelectContent>
           </Select>
           <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-            <SelectTrigger className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm" aria-label="Filter by priority">
+            <SelectTrigger className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs" aria-label="Filter by priority">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

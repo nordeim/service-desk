@@ -144,7 +144,7 @@ export default function SubmitTicketPage() {
               variant — borderless at rest, just the hover:bg-slate-100 wash. */}
           <Button asChild variant="ghost" className="mb-4 hover:bg-slate-100">
             <Link href="/dashboard">
-              <ArrowLeft className="w-4 h-4" aria-hidden />
+              <ArrowLeft className="w-4 h-4 mr-2" aria-hidden />
               Back to Dashboard
             </Link>
           </Button>
@@ -181,7 +181,7 @@ export default function SubmitTicketPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 aria-invalid={!!errors.title}
-                className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
+                className="border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
               />
               {errors.title ? <p className="text-xs text-red-600">{errors.title}</p> : null}
             </div>
@@ -195,7 +195,7 @@ export default function SubmitTicketPage() {
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger
                     id="category"
-                    className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
+                    className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
                     aria-invalid={!!errors.category}
                   >
                     <SelectValue placeholder="Select category">
@@ -228,7 +228,7 @@ export default function SubmitTicketPage() {
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger
                     id="priority"
-                    className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
+                    className="w-full bg-transparent border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
                   >
                     <SelectValue>
                       <span className="text-blue-600">{PRIORITY_LABELS[priority as TicketPriority]}</span>
@@ -252,7 +252,7 @@ export default function SubmitTicketPage() {
               <Textarea
                 id="description"
                 placeholder="Describe the issue in detail. Include any error messages, steps to reproduce, etc."
-                className="min-h-[120px] border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
+                className="min-h-[120px] border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 aria-invalid={!!errors.description}
@@ -319,7 +319,7 @@ export default function SubmitTicketPage() {
 
             {/* Reference (measured session 3): the footer is an inline
                 justify-end row inside the form body — no border-t card
-                footer. Cancel first, then the gradient submit with Send. */}
+                footer. Cancel first, then the gradient submit with Send (mr-2). */}
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" asChild>
                 <Link href="/dashboard">Cancel</Link>

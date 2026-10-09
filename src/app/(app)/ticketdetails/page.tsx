@@ -165,7 +165,7 @@ export default function TicketDetailsPage() {
               variant — borderless at rest, just the hover:bg-slate-100 wash. */}
           <Button asChild variant="ghost" className="mb-4 hover:bg-slate-100">
             <Link href="/mytickets">
-              <ArrowLeft className="w-4 h-4" aria-hidden />
+              <ArrowLeft className="w-4 h-4 mr-2" aria-hidden />
               Back to Tickets
             </Link>
           </Button>
@@ -273,7 +273,7 @@ export default function TicketDetailsPage() {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     aria-label="Add a comment or update"
-                    className="min-h-24 border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-sm"
+                    className="min-h-24 border-slate-300 focus:border-cyan-500 focus:ring-cyan-500 shadow-xs"
                   />
                   <div className="flex items-center justify-between">
                     <Button
@@ -281,7 +281,7 @@ export default function TicketDetailsPage() {
                       disabled={posting || !comment.trim()}
                       className="ml-auto bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
                     >
-                      <Send className="w-4 h-4" aria-hidden />
+                      <Send className="w-4 h-4 mr-2" aria-hidden />
                       {posting ? "Adding…" : "Add Comment"}
                     </Button>
                   </div>

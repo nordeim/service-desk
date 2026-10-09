@@ -13,7 +13,7 @@ Run from the repo root. Bun is the documented runtime (Node ≥ 20 works for eve
 | `bun run start` | Boot the standalone server in production mode |
 | `bun run lint` / `bun run typecheck` | ESLint 9 flat / `tsc --noEmit` |
 | `bun run test` | Vitest unit suite (53 tests — auth, validation, db-path, utils incl. formatDate) |
-| `bun run test:e2e` | Playwright E2E (73 tests) — boots the **production standalone server** on :3100 with an isolated `db/e2e.db`; requires a prior `bun run build` |
+| `bun run test:e2e` | Playwright E2E (90 tests) — boots the **production standalone server** on :3100 with an isolated `db/e2e.db`; requires a prior `bun run build` |
 | `bash scripts/smoke-test.sh` | API smoke: throwaway server on :3999, exercises auth + CRUD + guards |
 | CI (`.github/workflows/ci.yml`) | GitHub Actions on push/PR to main: verify job (lint → typecheck → unit → build) + e2e job (Playwright against the restored standalone build) |
 | `bun run db:push` / `db:seed` | Push `prisma/schema.prisma` → `db/custom.db` / idempotent seed (4 users, 11 tickets) |
@@ -96,6 +96,15 @@ Clean-check order: `bun run lint typecheck test build` — then `bun run test:e2
 - The reference's own toast viewport BLOCKS its mobile trigger (`pointer-events: auto` band over the header) — our Radix viewport region is `pointer-events: none` by construction. Do not "fix" ours to match.
 - Display names use the account name (greeting/footer/comments); the reference shows the email local-part because base44 auth has no name concept (its `/signup` is a 404, `/forgotpassword` empty). Superset divergence — documented.
 
+## Session-5 parity contracts (pinned by `tests/e2e/visual-parity.spec.ts`; inventory in `docs/remediation-plan-session5.md`)
+
+- **Icon-bearing Buttons render px-4 (16px) horizontal padding** — the Button size variants carry NO `has-[>svg]:px-*` (the reference's old base has no `:has(> svg)` adaptation; with it, every direct-svg button shrank to 12px).
+- **The v3→v4 shadow naming trap:** the reference's `shadow-sm` (Tailwind v3 name) COMPUTES to the light `0 1px 2px 0/0.05` step — which is `shadow-xs` on the v4 scale. Form controls, submit buttons, the mobile header, and the Google button's hover therefore use `shadow-xs` on our build; `shadow-md/lg/xl/2xl` and bare `shadow` kept their values (names unchanged). Parity is the COMPUTED box-shadow, never the class name.
+- **The font is the system stack** — the reference loads NO webfont (`document.fonts` empty); `--font-sans` is pinned in `@theme inline` to `ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", …` (Tailwind 4.3's default `--font-sans` is a different, older vendor list). No `antialiased` (the reference leaves smoothing at `auto`).
+- Back-button arrows + the Add Comment svg carry `mr-2` (16px icon-to-text spacing); the View All CTA arrow slides `group-hover:translate-x-1` (4px); the form submit button is `Send w-4 h-4 mr-2` (session-3 was right — the "CirclePlus" reading was the sidebar NAV item, which also reads "Submit Ticket": scope probes to `main`/the form).
+- Quick-stat value badges carry `hover:bg-primary/80` (the reference's old-shadcn base).
+- The 404 Go Home control carries the reference focus tail: `duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500`.
+
 ## Environment
 
 `.env.example` documents every variable; `.env` is gitignored. `AUTH_SECRET` = `openssl rand -hex 32` (required in production — the dev fallback logs a loud warning). `DATABASE_URL="file:../db/custom.db"` → `<repo>/db/custom.db`. Production deployments should switch to an absolute `file:` URL (see `docs/DEPLOYMENT.md`).
@@ -105,7 +114,7 @@ Clean-check order: `bun run lint typecheck test build` — then `bun run test:e2
 - `Project_Architecture_Document.md` — the full engineering reference (ADRs, layer model, security architecture).
 - `docs/DEPLOYMENT.md` — standalone build + production environment contract.
 - `docs/Tailwind-V4-Validation-Report.md` — the v3→v4 migration facts behind the CSS-first rules above.
-- `docs/remediation-plan-session2.md` / `-session3.md` / `-session4.md` — the session-2 (25 findings), session-3 (12 findings + known-issue closure), and session-4 (16 findings incl. the nav-wrapper fix + designed 404) gap inventories and how each was verified against the live reference.
+- `docs/remediation-plan-session2.md` / `-session3.md` / `-session4.md` / `-session5.md` — the session-2 (25 findings), session-3 (12 + known-issue closure), session-4 (16 incl. the nav-wrapper fix + designed 404), and session-5 (8 incl. the icon-button padding + shadow-scale trap + system font stack) gap inventories and how each was verified against the live reference.
 - `docs/how-to-git-push-using-ssh-wrapper_SKILL.md` + `docs/ssh_git_wrapper_v3.py` — how pushes to `git@github.com:nordeim/service-desk.git` work without a resident `~/.ssh` identity.
 - `docs/screenshots/` — the 7-shot dev-server capture set (desktop × 5, mobile × 2).
 - `skills/` — the in-repo skill catalog (`skills/skills-catalog.md`) used to build this clone.

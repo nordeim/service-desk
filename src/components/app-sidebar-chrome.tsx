@@ -32,7 +32,7 @@ export function AppSidebarChrome({
         <SidebarInset className="flex-1 flex flex-col">
           {/* Mobile-only top bar (reference: md:hidden, backdrop blur, no
               sticky — the scroll container below keeps it in place). */}
-          <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 py-4 md:hidden shadow-sm">
+          <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 py-4 md:hidden shadow-xs">
             <div className="flex items-center gap-4">
               {/* Reference (measured session 4): the mobile trigger is
                   rounded-lg with the slate hover wash (not the ghost

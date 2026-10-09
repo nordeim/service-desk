@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-4 remediation (2026-10-09).
+  functionality. Distilled through the session-5 remediation (2026-10-09).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.2.0
+version: 2.3.0
 last_updated: 2026-10-09
-project_state: 53 unit tests + 73 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–4)
+project_state: 53 unit tests + 90 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–5)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -160,7 +160,7 @@ Two **mandatory** v4 rules (both verified the hard way):
 
 ### 4.4 Typography and motion
 
-Inter (next/font), `tracking-tight` on headings. Dates: `formatDateTime` → "Oct 9, 2026 at 12:47 AM" (separate Intl parts joined with " at" — reference format). Durations: `formatDuration` → "3d 4h" / "N/A". Motion: 300–500ms `transition-all` on cards/links; sheet slide-in 500ms; hover lift + arrow slide on mytickets ticket cards only (dashboard recent rows are flat — no arrow).
+The system font stack — the reference loads NO webfont (session 5); `--font-sans` is pinned to `ui-sans-serif, system-ui, sans-serif, …`, smoothing `auto`. `tracking-tight` on headings. Dates: `formatDateTime` → "Oct 9, 2026 at 12:47 AM" (separate Intl parts joined with " at" — reference format). Durations: `formatDuration` → "3d 4h" / "N/A". Motion: 300–500ms `transition-all` on cards/links; sheet slide-in 500ms; hover lift + arrow slide on mytickets ticket cards only (dashboard recent rows are flat — no arrow).
 
 ---
 
@@ -287,6 +287,8 @@ Each entry below was hit and verified in this codebase (sessions 1–2):
 14. **Badge base ordering:** the Badge component forces `text-xs`; overriding font size needs `text-sm!` (plain `text-sm` loses the ordering) — hit on the detail status badge.
 15. **Async cookies/params:** `cookies()`, `params`, `searchParams` must be awaited (Next 16) — a non-awaited call returns a Promise, not the value.
 16. **Rate-limiter budget in E2E:** per-test logins trip 429s; the setup project's shared `storageState` exists for this reason.
+17. **`has-[>svg]:px-*` on Button size variants:** shrinks every icon-bearing button to 12px padding (the reference renders 16px) — removed from the vendored base (session 5).
+18. **Copying a reference class NAME across Tailwind majors:** `shadow-sm` means different VALUES in v3 vs v4. Convert to the computed value first (`getComputedStyle().boxShadow`).
 
 ---
 
@@ -356,6 +358,9 @@ Manual/visual checks:
 13. **Verify "obvious" regressions before fixing them.** (Session 4.) The CI workflow appeared corrupted (`branches: ain]`); byte-level verification proved the tool-output renderer eats `[m` sequences and the file was correct. The reverse also holds: a passing VLM check is not evidence of parity.
 14. **Per-surface badge padding.** (Session 4.) The reference renders the SAME badge component at `px-3 py-1` on mytickets/detail-status but `px-2.5 py-0.5` on dashboard rows and detail-priority. Measure per call site, not per component.
 15. **The reference has its own bugs — never copy them.** (Session 4.) Its toast viewport blocks its own mobile menu trigger (`pointer-events: auto` band over the header); its signup/forgot-password are dead-ends; its active-nav misses the root route. Parity means matching the DESIGN, not reproducing the defects.
+16. **Class NAMES are not parity — computed values are.** (Session 5.) Tailwind v4 renamed `shadow-sm`→`shadow-xs`; the reference (v3 scale) writes `shadow-sm` for the light `0 1px 2px/0.05` step. Copying the NAME onto a v4 build rendered one step HEAVIER on 11 controls. An intermediate "fix" based on the name (outline→shadow-sm) was caught and reverted by a computed re-measure. Every shadow/font/spacing comparison goes through `getComputedStyle`.
+17. **Probe the font family, not just sizes/weights.** (Session 5.) Four sessions pinned typography at every level EXCEPT the family. The reference loads NO webfont (`document.fonts` empty) — our next/font Inter was a session-1 assumption causing ~10% text-width deltas everywhere. One probe settled it; `--font-sans` is now pinned to the reference's exact stack.
+18. **Disambiguate by scope before measuring.** (Session 5.) The sidebar nav items share text with page controls ("Submit Ticket" nav vs form submit). An unscoped `querySelectorAll('button,a').find(...)` matched the NAV anchor (circle-plus w-5) and nearly shipped a wrong submit-icon fix. Always scope to `main`/the form — same class as the existing parity-probe scolding rule.
 
 ---
 
@@ -590,7 +595,7 @@ Session-4 application of this loop: full 5-page DOM diff + live geometry probes 
 
 ```bash
 # gates (in order)
-bun run lint && bun run typecheck && bun run test && bun run build && bun run test:e2e
+bun run lint && bun run typecheck && bun run test && bun run build && bun run test:e2e  # 90 E2E
 bash scripts/smoke-test.sh
 
 # db

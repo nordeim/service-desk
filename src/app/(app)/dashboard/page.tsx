@@ -213,7 +213,7 @@ function DashboardContent({ userName }: { userName: string }) {
           >
             <Link href="/mytickets">
               View All Tickets
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" aria-hidden />
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden />
             </Link>
           </Button>
         </div>

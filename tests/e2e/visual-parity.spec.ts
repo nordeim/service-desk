@@ -379,8 +379,12 @@ test.describe("session 3: submit form details", () => {
     // Footer: inline row with pt-4 inside the body — no border-t card footer.
     await expect(page.locator("div.flex.justify-end.gap-3.pt-4")).toHaveCount(1);
     await expect(page.locator("main .border-t")).toHaveCount(0);
-    // Submit button carries the Send icon.
+    // Submit button carries the Send icon (mr-2) — session-5 re-CONFIRMED
+    // against the actual form button (an earlier session-5 probe had
+    // misidentified the sidebar NAV item, which also reads "Submit Ticket"
+    // and carries circle-plus; nav items live outside main — scope probes).
     await expect(page.locator('button[type="submit"] svg.lucide-send')).toHaveCount(1);
+    await expect(page.locator('button[type="submit"] svg.lucide-send')).toHaveClass(/mr-2/);
   });
 });
 
@@ -548,15 +552,15 @@ test.describe("session 4: submit form details", () => {
     await expect(grid).toHaveClass(/gap-6/);
   });
 
-  test("form controls use the reference cyan focus + shadow-sm", async ({ page }) => {
+  test("form controls use the reference cyan focus + shadow-xs (v4 = the reference v3 shadow-sm)", async ({ page }) => {
     await page.goto("/submitticket");
     const title = page.locator("input#title");
     await expect(title).toHaveClass(/border-slate-300/);
     await expect(title).toHaveClass(/focus:border-cyan-500/);
     await expect(title).toHaveClass(/focus:ring-cyan-500/);
-    await expect(title).toHaveClass(/shadow-sm/);
+    await expect(title).toHaveClass(/shadow-xs/);
     const category = page.locator("button#category");
-    await expect(category).toHaveClass(/shadow-sm/);
+    await expect(category).toHaveClass(/shadow-xs/);
     await expect(category).toHaveClass(/focus:border-cyan-500/);
   });
 
@@ -577,22 +581,22 @@ test.describe("session 4: submit form details", () => {
 });
 
 test.describe("session 4: mytickets + comment controls", () => {
-  test("search input and filters use shadow-sm + transparent bg (reference)", async ({ page }) => {
+  test("search input and filters use shadow-xs + transparent bg (reference)", async ({ page }) => {
     await page.goto("/mytickets");
     const search = page.getByLabel("Search tickets");
-    await expect(search).toHaveClass(/shadow-sm/);
+    await expect(search).toHaveClass(/shadow-xs/);
     await expect(search).toHaveClass(/bg-transparent/);
     await expect(search).not.toHaveClass(/bg-white/);
     const filter = page.getByRole("combobox").first();
-    await expect(filter).toHaveClass(/shadow-sm/);
+    await expect(filter).toHaveClass(/shadow-xs/);
   });
 
-  test("comment textarea carries shadow-sm (reference)", async ({ page }) => {
+  test("comment textarea carries shadow-xs (reference)", async ({ page }) => {
     await page.goto("/mytickets");
     await page.locator('a[href*="/ticketdetails"]').first().click();
     await page.waitForURL(/\/ticketdetails\?id=/);
     const textarea = page.getByLabel("Add a comment or update");
-    await expect(textarea).toHaveClass(/shadow-sm/);
+    await expect(textarea).toHaveClass(/shadow-xs/);
   });
 });
 
@@ -627,5 +631,174 @@ test.describe("session 4: 404 page", () => {
     // The reference typography: text-7xl font-light slate-300.
     await expect(page.getByRole("heading", { name: "404" })).toHaveClass(/text-7xl/);
     await expect(page.getByRole("heading", { name: "404" })).toHaveClass(/font-light/);
+  });
+});
+
+test.describe("session 5: quick-stat badges", () => {
+  test("quick-stat value badges carry the reference hover:bg-primary/80", async ({ page }) => {
+    await page.goto("/dashboard");
+    // The three sidebar quick-stat value badges (Open/In Progress/Total).
+    for (const sel of ["bg-amber-500", "bg-blue-500", "bg-slate-600"]) {
+      const badge = page.locator(`[data-sidebar="sidebar"] [class*="${sel}"]`);
+      await expect(badge).toHaveClass(/hover:bg-primary\/80/);
+    }
+  });
+});
+
+test.describe("session 5: icon-button padding (reference px-4)", () => {
+  // Session-5 headline: the vendored Button base's `has-[>svg]:px-3` shrank
+  // every direct-svg button to 12px horizontal padding; the reference's old
+  // shadcn base renders px-4 (16px) for icon+text buttons.
+  test("submit-page back button renders 16px horizontal padding", async ({ page }) => {
+    await page.goto("/submitticket");
+    const back = page.getByRole("link", { name: /Back to Dashboard/ });
+    await expect(back).toHaveCSS("padding-left", "16px");
+    await expect(back).toHaveCSS("padding-right", "16px");
+  });
+
+  test("dashboard CTA (View All Tickets) renders 16px horizontal padding", async ({ page }) => {
+    await page.goto("/dashboard");
+    const cta = page.getByRole("link", { name: /View All Tickets/ });
+    await expect(cta).toHaveCSS("padding-left", "16px");
+  });
+
+  test("dashboard Report New Issue renders 16px horizontal padding", async ({ page }) => {
+    await page.goto("/dashboard");
+    const cta = page.getByRole("link", { name: /Report New Issue/ });
+    await expect(cta).toHaveCSS("padding-left", "16px");
+  });
+
+  test("detail-page Add Comment renders 16px horizontal padding", async ({ page }) => {
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    const btn = page.getByRole("button", { name: /Add Comment/ });
+    await expect(btn).toHaveCSS("padding-left", "16px");
+  });
+
+  test("submit-page Submit Ticket button renders 16px horizontal padding", async ({ page }) => {
+    await page.goto("/submitticket");
+    const btn = page.getByRole("button", { name: /Submit Ticket/, exact: true });
+    await expect(btn).toHaveCSS("padding-left", "16px");
+  });
+});
+
+test.describe("session 5: outline button shadow", () => {
+  test("outline CTA computes the reference (v3-name) shadow value", async ({ page }) => {
+    await page.goto("/dashboard");
+    const cta = page.getByRole("link", { name: /View All Tickets/ });
+    // Session-5 computed re-measure: the reference's outline `shadow-sm` is a
+    // Tailwind v3 class name — it COMPUTES to the light 0 1px 2px 0px / 0.05
+    // single layer (= `shadow-xs` on the v4 scale). Parity is the value.
+    await expect(cta).toHaveCSS(
+      "box-shadow",
+      /rgba\(0, 0, 0, 0\.05\) 0px 1px 2px 0px/
+    );
+  });
+});
+
+test.describe("session 5: 404 focus contract", () => {
+  test("Go Home carries the reference focus ring + 200ms transition", async ({ page }) => {
+    await page.goto("/no-such-page-s5");
+    const goHome = page.getByRole("link", { name: /Go Home/ });
+    await expect(goHome).toHaveClass(/focus:ring-2/);
+    await expect(goHome).toHaveClass(/focus:ring-offset-2/);
+    await expect(goHome).toHaveClass(/focus:ring-slate-500/);
+    await expect(goHome).toHaveClass(/duration-200/);
+  });
+});
+
+test.describe("session 5: v3/v4 shadow-scale trap", () => {
+  // The reference's `shadow-sm` (Tailwind v3 name) computes to the light
+  // 0 1px 2px/0.05 step — which is `shadow-xs` on the Tailwind v4 scale.
+  // These tests pin the COMPUTED values so the naming trap never regresses.
+  test("mobile header computes the reference light shadow", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/dashboard");
+    const header = page.locator("header").first();
+    await expect(header).toHaveCSS(
+      "box-shadow",
+      /rgba\(0, 0, 0, 0\.05\) 0px 1px 2px 0px/
+    );
+  });
+
+  test("login sign-in button computes the reference light shadow", async ({ page }) => {
+    await page.goto("/login");
+    const btn = page.getByRole("button", { name: /^Sign in$/, exact: true });
+    await expect(btn).toHaveCSS(
+      "box-shadow",
+      /rgba\(0, 0, 0, 0\.05\) 0px 1px 2px 0px/
+    );
+  });
+
+  test("login Google button hovers to the light shadow (v3-name trap)", async ({ page }) => {
+    await page.goto("/login");
+    const google = page.getByRole("button", { name: /Continue with Google/ });
+    await expect(google).toHaveClass(/hover:shadow-xs/);
+    await expect(google).not.toHaveClass(/(?<!hover:shadow-x)hover:shadow-sm(?!-)/);
+  });
+});
+
+test.describe("session 5: typography (font family)", () => {
+  // Session-5 computed finding: the reference loads NO webfont — its body
+  // computes Tailwind's default system stack. The next/font Inter was an
+  // unmeasured session-1 assumption and a real family-level divergence
+  // (~10% text-width deltas on button labels).
+  test("body renders the reference system font stack (no Inter webfont)", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.locator("body")).toHaveCSS(
+      "font-family",
+      /^ui-sans-serif, system-ui, sans-serif/
+    );
+    await expect(page.locator("body")).not.toHaveCSS("font-family", /Inter/);
+  });
+
+  test("body text smoothing matches the reference (auto, not antialiased)", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.locator("body")).toHaveCSS("-webkit-font-smoothing", "auto");
+  });
+});
+
+test.describe("session 5: icon contracts", () => {
+  // Reference icon inventory (live-measured this session):
+  //   back buttons + Add Comment carry `mr-2` on the svg; the View All CTA
+  //   arrow slides translate-x-1; the submit button's icon is CirclePlus w-5
+  //   (session 3 misattributed the comment button's Send icon to it).
+  test("back-button arrows carry the reference mr-2", async ({ page }) => {
+    await page.goto("/submitticket");
+    const back = page.getByRole("link", { name: /Back to Dashboard/ });
+    await expect(back.locator("svg")).toHaveClass(/mr-2/);
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    const back2 = page.getByRole("link", { name: /Back to Tickets/ });
+    await expect(back2.locator("svg")).toHaveClass(/mr-2/);
+  });
+
+  test("Add Comment svg carries the reference mr-2", async ({ page }) => {
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    const btn = page.getByRole("button", { name: /Add Comment/ });
+    await expect(btn.locator("svg")).toHaveClass(/mr-2/);
+  });
+
+  test("View All CTA arrow slides translate-x-1 (reference)", async ({ page }) => {
+    await page.goto("/dashboard");
+    const cta = page.getByRole("link", { name: /View All Tickets/ });
+    await expect(cta.locator("svg")).toHaveClass(/group-hover:translate-x-1(?!-)/);
+    await expect(cta.locator("svg")).not.toHaveClass(/translate-x-0\.5/);
+  });
+
+  test("submit button icon is the reference Send w-4 mr-2 (form button, not the nav item)", async ({ page }) => {
+    await page.goto("/submitticket");
+    // Scope to the FORM button — the sidebar nav link also reads "Submit
+    // Ticket" (circle-plus w-5) and lives outside main. Parity target: the
+    // form's submit control: Send w-4 h-4 mr-2.
+    const btn = page.locator("form button[type='submit']");
+    await expect(btn.locator("svg")).toHaveClass(/lucide-send/);
+    await expect(btn.locator("svg")).toHaveClass(/w-4/);
+    await expect(btn.locator("svg")).toHaveClass(/mr-2/);
+    await expect(btn.locator("svg")).not.toHaveClass(/lucide-circle-plus/);
   });
 });

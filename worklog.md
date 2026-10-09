@@ -173,3 +173,37 @@ Stage Summary:
 - All 16 session-4 findings fixed and E2E-pinned; 73 E2E + 53 unit + smoke green; parity re-verified live against the reference
 - Deliverables: 7 source files + 2 new files (not-found.tsx, remediation-plan-session4.md) + spec updates + refreshed screenshots + 5 updated docs
 - Ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 10
+Agent: main (Super Z)
+Task: Session 5 — refresh repo, review session_4 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git pull: 9c3f446 adds docs/session_4.md (session-4 retrospective, pushed by the repo owner)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.2.0 + session_4.md + remediation-plan-session4.md + worklog — all aligned with the codebase (env, db path, .env.example, skills/ exclusion re-verified)
+- Baseline gates at 9c3f446: lint ✓ typecheck ✓ 53 unit ✓ build ✓ 73/73 E2E ✓ smoke 11/11 ✓; audit of session-4 commit c0a5a39 clean (all changes match the plan)
+- Fresh gap analysis vs live reference (agent-browser, both sites): DOM dumps for all 5 pages + sidebar + 404 both sites; paired live measurements; 11 VLM composite claims checked — 8 refuted (stat tiles, form indentation, dropzone, login spacing/inputs/links, footer icons, page bg); mobile navigation verified on BOTH sites (reference trigger still blocked by its own toast viewport — elementFromPoint proof; clone trigger fully clickable, sheet geometry 20px/12px/600, overlay + Escape close, nav-tap auto-close, zero console errors)
+- OPERATOR-ERROR LESSON: the DOM-dump helper derived its target origin from location.origin while the browser was on the REFERENCE — "clone login" attempts were silently executed against the reference (its base44 API answered Security verification required). The clone was never broken; the helper now takes an explicit origin + asserts it
+- Wrote + validated docs/remediation-plan-session5.md: 8 findings (icon-button 12px padding via has-[>svg]:px-3; v3→v4 shadow-scale naming trap across 11 controls; next/font Inter vs the reference's webfont-free system stack; missing mr-2 on back/comment icons; CTA 2px slide; quick-stat hover:bg-primary/80; 404 focus ring) + 2 false gaps caught by computed re-measure (outline shadow; submit-icon nav-item misidentification)
+
+Stage Summary:
+- Repo at 9c3f446 + plan. 8 gaps (2 HIGH: icon-button padding, font family), 2 false gaps reverted with evidence, 8 VLM claims refuted.
+
+---
+Task ID: 11
+Agent: main (Super Z)
+Task: Session 5 — remediation execution (TDD), verification, docs, SKILL.md v2.3.0, commit + push
+
+Work Log:
+- TDD: 17 red session-5 parity tests written first (8 core + 3 shadow-trap + 2 typography + 4 icon contracts; all verified red, incl. 1 authored-wrong test caught by the computed re-measure and fixed)
+- Implemented G1: quick-stat badges + hover:bg-primary/80; G2: Button size variants stripped of has-[>svg]:px-* (icon buttons 12px→16px, back buttons 189px→197px); G3′: 11 shadow-sm→shadow-xs flips (form controls, submit buttons, mobile header, Google hover, Card base) + session-4 E2E class-pins flipped; G4: 404 Go Home focus ring + duration-200; G5: Inter next/font removed, --font-sans pinned to the reference's computed system stack in @theme inline, antialiased dropped; G6: mr-2 on back arrows ×2 + Add Comment svg; G7: CTA arrow translate-x-1; G8 REVERTED (probe had matched the sidebar NAV item "Submit Ticket" — the reference's real form button is Send w-4 h-4 mr-2; session-3 pin restored)
+- Gates: lint ✓ typecheck ✓ 53 unit ✓ build ✓ 90/90 E2E ✓ smoke 11/11 ✓
+- Live re-verification (paired, both sites): back buttons 197px = 197px; submit buttons 160px = 160px (send w-4 h-4 mr-2 both); all fixed controls' computed shadows = rgba(0,0,0,0.05) 0px 1px 2px 0px; body font ui-sans-serif stack + smoothing auto on both; zero console errors on every page; mobile menu re-tested (trigger BUTTON at hit point, 20px/12px/600, overlay close via real pointer events, nav-tap auto-close)
+- Refreshed docs/screenshots/ (7 shots); final VLM dashboard composite: IDENTICAL
+- Updated README/AGENTS (session-5 contracts section + reference)/CLAUDE (font rule)/PAD (test distribution + known-issues row)/service-desk_SKILL.md v2.3.0 (lessons 16-18)
+
+Stage Summary:
+- All 8 session-5 findings fixed and E2E-pinned (90 E2E total: +17 parity tests); 2 false gaps caught and reverted by the verification protocol; parity re-verified live against the reference (paired measurements)
+- Deliverables: 11 source files + 3 test/spec updates + remediation-plan-session5.md + refreshed screenshots + 5 updated docs
+- Ready for commit + push via ssh_git_wrapper_v3.py

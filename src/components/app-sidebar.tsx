@@ -161,19 +161,21 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
             <div className="px-4 py-3 space-y-3">
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200/50">
                 <span className="text-sm font-medium text-slate-700">Open</span>
-                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent bg-amber-500 text-white font-bold shadow-md">
+                {/* Reference (measured session 5): the quick-stat value
+                    badges carry the old-shadcn hover wash. */}
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent hover:bg-primary/80 bg-amber-500 text-white font-bold shadow-md">
                   {stats ? stats.open : "…"}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200/50">
                 <span className="text-sm font-medium text-slate-700">In Progress</span>
-                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent bg-blue-500 text-white font-bold shadow-md">
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent hover:bg-primary/80 bg-blue-500 text-white font-bold shadow-md">
                   {stats ? stats.in_progress : "…"}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200/50">
                 <span className="text-sm font-medium text-slate-700">Total</span>
-                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent bg-slate-600 text-white font-bold shadow-md">
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent hover:bg-primary/80 bg-slate-600 text-white font-bold shadow-md">
                   {stats ? stats.total : "…"}
                 </span>
               </div>

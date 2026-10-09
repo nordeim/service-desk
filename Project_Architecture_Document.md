@@ -437,7 +437,7 @@ Single role today: **authenticated user**. Ownership is the authorization unit �
 | E2E — dashboard (incl. clean-hydration pin) | 1 | 8 | `tests/e2e/dashboard.spec.ts` | Playwright |
 | E2E — ticket lifecycle | 1 | 5 | `tests/e2e/tickets.spec.ts` | Playwright |
 | E2E — mobile + desktop navigation | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
-| E2E — visual parity (session-2 through session-4 contracts) | 1 | 45 | `tests/e2e/visual-parity.spec.ts` | Playwright |
+| E2E — visual parity (session-2 through session-5 contracts) | 1 | 61 | `tests/e2e/visual-parity.spec.ts` | Playwright |
 | E2E — shared session setup project | 1 | 1 | `tests/e2e/auth.setup.ts` | Playwright |
 | API smoke | 1 | 11 steps | `scripts/smoke-test.sh` | bash + curl |
 
@@ -445,7 +445,9 @@ Single role today: **authenticated user**. Ownership is the authorization unit �
 >
 > Session-3 additions: 11 more parity tests (recent-row FileText tile + arrow + date-only dates, lowercase badges, entrance animations incl. `prefers-reduced-motion`, submit-form details, login caption removal, search icon size, info-panel tracking, main-element classes), the clean-hydration pin in dashboard.spec (a `<div>`-in-`<p>` Skeleton broke hydration — fixed with an inline span skeleton), and `formatDate` unit tests. Raw `evaluate(getComputedStyle)` assertions were hardened to auto-retrying `toHaveCSS` after a one-off full-suite flake.
 >
-> Session-4 additions: 16 more parity tests (nav wrapper structure + live 12px icon-label gap + 20px icons + semibold labels — the biggest fix of the project, present since session 1; active-nav hover gradient; badge shadow + per-surface compact padding; submit-label typography + plain-text asterisk; md:grid-cols-2 grid; cyan-focus/shadow-sm form controls; ghost back buttons; rounded-lg mobile trigger; Google-logo wrapper; tracking-wider revert; the designed 404). The session-3 info-panel tracking assertion was flipped to `tracking-wider` after re-measuring the live reference.
+> Session-4 additions: 16 more parity tests (nav wrapper structure + live 12px icon-label gap + 20px icons + semibold labels — the biggest fix of the project, present since session 1; active-nav hover gradient; badge shadow + per-surface compact padding; submit-label typography + plain-text asterisk; md:grid-cols-2 grid; cyan-focus form controls; ghost back buttons; rounded-lg mobile trigger; Google-logo wrapper; tracking-wider revert; the designed 404). The session-3 info-panel tracking assertion was flipped to `tracking-wider` after re-measuring the live reference.
+>
+> Session-5 additions: 17 more parity tests pinning reference-COMPUTED values that class names cannot express: icon-button 16px horizontal padding (the `has-[>svg]:px-3` trap), the v3-name shadow step (`shadow-sm` on the reference = `shadow-xs` on the v4 scale — 11 controls flipped), the system font stack (the reference loads no webfont; next/font Inter removed), `mr-2` icon spacings, the CTA arrow's translate-x-1 slide, quick-stat badge hover, the 404 focus ring. Two session-era assertions flipped with documented supersede: session-4 `shadow-sm` pins → `shadow-xs`; session-3's submit-icon pin re-confirmed (a session-5 probe had misidentified the sidebar nav item).
 
 ### 7.2 Test Patterns
 
@@ -548,6 +550,7 @@ Main-only trunk with atomic Conventional Commits. Feature branches are short-liv
 | RESOLVED | tickets.spec flakiness (2 locator defects: non-retrying `count()` racing async search; `getByText` strict-mode ambiguity vs the Radix toast announcer) | 2 tests failing intermittently in full runs | Fixed with `toHaveCount` + `{ exact: true }` (session 2) |
 | RESOLVED | Session-3 parity gaps (12 findings: emoji tile + no arrow + category badge + datetime on dashboard recent rows; capitalized badges; missing entrance animations; submit-form details; login caption; search icon size; info-panel tracking; opaque `<main>`) + a hydration error (`<div>`-in-`<p>` Skeleton) | Parity risk on every page + a console error on every dashboard load | Fixed — all E2E-pinned; inventory in `docs/remediation-plan-session3.md` |
 | RESOLVED | Session-4 parity gaps (16 findings: sidebar nav labels pushed to the right edge with 16px icons since session 1 — the missing inner flex wrapper; nav labels not semibold; badge shadow + per-surface padding; submit-form labels/asterisk/grid; shadow-sm + cyan-focus form controls; outline back buttons; rounded-md mobile trigger; bare Google logo; tracking-wide info labels; no designed 404) | Parity risk on every page (the nav gap was the largest single visual divergence of the project) | Fixed — all E2E-pinned; inventory in `docs/remediation-plan-session4.md` |
+| RESOLVED | Session-5 parity gaps (8 findings: icon-bearing buttons at 12px padding via `has-[>svg]:px-3`; the v3→v4 shadow-scale naming trap app-wide — every copied `shadow-sm` rendered one step heavy; next/font Inter vs the reference's webfont-free system stack (~10% text-width deltas); missing `mr-2` on back/comment icons; CTA arrow 2px vs 4px slide; quick-stat badge hover; 404 focus ring; two false gaps caught by computed re-measure — the outline shadow and the submit-icon nav-item misidentification) | Parity risk on every control | Fixed — all E2E-pinned (90 E2E); inventory in `docs/remediation-plan-session5.md` |
 
 ---
 

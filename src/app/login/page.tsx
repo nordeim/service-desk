@@ -87,7 +87,7 @@ export default function LoginPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200 font-medium text-base"
+                    className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-xs transition-all duration-200 font-medium text-base"
                     onClick={() =>
                       setError("Google sign-in is not configured in this deployment. Use email and password.")
                     }
@@ -195,7 +195,7 @@ export default function LoginPage() {
                       <Button
                         type="submit"
                         disabled={loading}
-                        className="w-full h-11 sm:h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"
+                        className="w-full h-11 sm:h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-xs rounded-xl transition-all duration-200"
                       >
                         {loading ? "Signing in…" : "Sign in"}
                       </Button>

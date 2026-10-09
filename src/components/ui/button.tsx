@@ -14,6 +14,10 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         outline:
+          // Reference (re-measured session 5, computed): the reference's outline
+          // `shadow-sm` is a Tailwind v3 class name — it COMPUTES to the light
+          // 0 1px 2px/0.05 step, which is `shadow-xs` on the v4 scale. Parity
+          // is the computed value, not the class name.
           "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
@@ -21,9 +25,13 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        // Reference (measured session 5): the old-shadcn base has NO
+        // :has(> svg) padding adaptation — its :has(> svg) specificity
+        // (0,1,1) used to beat the plain px-4 (0,1,0), shrinking every
+        // icon-bearing button to 12px while the reference renders 16px.
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md gap-1.5 px-3",
+        lg: "h-10 rounded-md px-6",
         icon: "size-9",
       },
     },
