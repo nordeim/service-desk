@@ -1594,14 +1594,17 @@ test.describe("session 10: the login card's in-card view swaps", () => {
     await page.goto("/login");
     await page.getByRole("button", { name: "Forgot password?" }).click();
 
-    // Back button: whole-line classes + the -mb-2 nudge + h-4 arrow.
+    // Back button: whole-line classes + the session-12 computed-parity
+    // margins (was -mb-2, the reference's v3 class — it computes an 8px
+    // overlap on our v4 build; see the session-12 space-y block below) + h-4 arrow.
     const back = page.getByRole("button", { name: /Back to sign in/ });
     await expect(back).toHaveClass(/text-sm/);
     await expect(back).toHaveClass(/text-slate-500/);
     await expect(back).toHaveClass(/hover:text-slate-700/);
     await expect(back).toHaveClass(/font-medium/);
     await expect(back).toHaveClass(/transition-colors/);
-    await expect(back).toHaveClass(/-mb-2/);
+    await expect(back).toHaveClass(/mb-2/);
+    await expect(back).toHaveClass(/sm:mb-4/);
     await expect(back.locator("svg")).toHaveClass(/h-4/);
 
     // The h2 + subtext block.
@@ -1988,5 +1991,122 @@ test.describe("session 11: BreadcrumbList JSON-LD structured data", () => {
       () => document.querySelector('script[type="application/ld+json"]')?.textContent ?? null,
     );
     expect(ld).toBeNull();
+  });
+});
+
+test.describe("session 12: the per-route social URL set (canonical + og:url + twitter:url)", () => {
+  // The reference's platform emits <link rel=canonical> + <meta property="og:url">
+  // + <meta name="twitter:url"> on EVERY route (live-measured on /login, /signup,
+  // /forgotpassword, / — session 12). Our s8 sweep measured their og set, wrote
+  // "og:url derives from the per-route canonical" as a comment, and never pinned
+  // our side — the belief was false (Next emits og:url ONLY from openGraph.url;
+  // the twitter metadata type has no url field at all). These pins go red until
+  // the route-head helper ships the set on all 7 routes.
+  const routes: [string, string][] = [
+    ["/dashboard", "/dashboard"],
+    ["/mytickets", "/mytickets"],
+    ["/submitticket", "/submitticket"],
+    ["/ticketdetails", "/ticketdetails"],
+    ["/login", "/login"],
+    ["/signup", "/signup"],
+    ["/forgotpassword", "/forgotpassword"],
+  ];
+
+  for (const [path, slug] of routes) {
+    test(`${slug} carries canonical + og:url + twitter:url (all three equal)`, async ({ page }) => {
+      await page.goto(path);
+      const canonical = page.locator('link[rel="canonical"]');
+      await expect(canonical, `no canonical on ${path}`).toHaveCount(1);
+      const href = await canonical.getAttribute("href");
+      expect(href, `canonical href on ${path}`).toMatch(new RegExp(`${slug}/?$`));
+
+      // og:url: emitted only from openGraph.url — nothing derives it from
+      // the canonical (the s8-era false belief).
+      const ogUrl = page.locator('meta[property="og:url"]');
+      await expect(ogUrl, `no og:url on ${path}`).toHaveCount(1);
+      await expect(ogUrl).toHaveAttribute("content", href!);
+
+      // twitter:url: no twitter metadata field exists for it — it rides
+      // metadata.other and must equal the canonical.
+      const twUrl = page.locator('meta[name="twitter:url"]');
+      await expect(twUrl, `no twitter:url on ${path}`).toHaveCount(1);
+      await expect(twUrl).toHaveAttribute("content", href!);
+    });
+  }
+
+  test("the per-route openGraph replace preserves the og set (site_name + image)", async ({ page }) => {
+    // Next's metadata merge REPLACES a child's openGraph wholesale — a route
+    // that adds openGraph.url would silently drop og:site_name/og:image if the
+    // route-head helper ever misses a field. Pin the survival on one route.
+    await page.goto("/login");
+    await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "ServiceDesk");
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute("content", "website");
+    const ogImage = page.locator('meta[property="og:image"]:not([property="og:image:width"])');
+    await expect(ogImage).toHaveCount(1);
+    const img = await ogImage.getAttribute("content");
+    expect(img).toMatch(/\/icon\.png/);
+  });
+});
+
+test.describe("session 12: the login view back buttons compute the reference's gaps (space-y trap-log #4)", () => {
+  // The reference (v3) ships -mb-2 on the view back buttons as DIRECT children
+  // of the space-y view containers — v3's space-y puts margin-top on later
+  // siblings, so the -8px shrinks the following block's top margin to a
+  // 8-16px gap. v4's space-y puts margin-bottom on earlier children — the
+  // utility beats the :where()-wrapped rule and the next block gets NO
+  // margin-top, so the same -mb-2 computed an 8px OVERLAP on our build for
+  // two sessions. The fix ships the v4 classes that compute the reference's
+  // measured gaps (mb-2 sm:mb-4 / mb-2 — the shadow-xs doctrine: parity is
+  // the COMPUTED value, never the class name).
+
+  test("the reset view's back button computes the reference's 16px gap at >=sm", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Forgot password?" }).click();
+    const back = page.getByRole("button", { name: /Back to sign in/ });
+    await expect(back).toBeVisible();
+
+    // Computed margin-bottom: 16px (mb-4 at >=sm) — beats the :where()-wrapped
+    // space-y rule, exactly as -mb-2 beat it before the fix.
+    const mb = await back.evaluate((el) => getComputedStyle(el).marginBottom);
+    expect(mb, "back button margin-bottom at >=sm").toBe("16px");
+
+    // The measured contract: the next block's top sits 16px below the
+    // button's bottom (the reference's collapsed gap) — never an overlap.
+    const gap = await page.evaluate(() => {
+      const back = [...document.querySelectorAll("button")].find((b) =>
+        /Back to sign in/.test(b.textContent ?? ""),
+      );
+      const next = back!.nextElementSibling!;
+      return Math.round(next.getBoundingClientRect().top - back!.getBoundingClientRect().bottom);
+    });
+    expect(gap, "back-bottom → next-top gap at >=sm").toBe(16);
+  });
+
+  test("the reset view's back button computes 8px below sm", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Forgot password?" }).click();
+    const back = page.getByRole("button", { name: /Back to sign in/ });
+    const mb = await back.evaluate((el) => getComputedStyle(el).marginBottom);
+    expect(mb, "back button margin-bottom below sm").toBe("8px");
+  });
+
+  test("the signup view's back button computes the reference's 8px gap", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Need an account/ }).click();
+    const back = page.getByRole("button", { name: /Back to sign in/ });
+    await expect(back).toBeVisible();
+
+    const mb = await back.evaluate((el) => getComputedStyle(el).marginBottom);
+    expect(mb, "signup view back margin-bottom").toBe("8px");
+
+    const gap = await page.evaluate(() => {
+      const back = [...document.querySelectorAll("button")].find((b) =>
+        /Back to sign in/.test(b.textContent ?? ""),
+      );
+      const next = back!.nextElementSibling!;
+      return Math.round(next.getBoundingClientRect().top - back!.getBoundingClientRect().bottom);
+    });
+    expect(gap, "signup view back-bottom → next-top gap").toBe(8);
   });
 });

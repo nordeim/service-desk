@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 
 import { BreadcrumbJsonLd } from "@/components/breadcrumb-jsonld";
+import { routeHead } from "@/lib/route-head";
 
 // Per-route document titles (session 7) — see dashboard/layout.tsx for the
 // rationale (client-island pages + reference per-route title pattern).
 export const metadata: Metadata = {
   title: "Ticket Details",
-  // Session 8: per-route canonical (the reference sets one on every route).
   // The page is query-driven (?id=…) — the bare route is the stable URL.
-  alternates: { canonical: "/ticketdetails" },
+  // Session 12: the per-route social URL set (canonical + og:url +
+  // twitter:url, the reference's per-route platform head) rides routeHead.
+  ...routeHead("/ticketdetails"),
 };
 
 export default function TicketDetailsLayout({ children }: { children: React.ReactNode }) {

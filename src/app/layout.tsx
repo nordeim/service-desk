@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SITE_URL } from "@/lib/route-head";
 import "./globals.css";
 
 // Reference parity (measured session 5): the reference app loads NO webfont —
@@ -9,7 +10,7 @@ import "./globals.css";
 // reference also leaves font smoothing at `auto` (no `antialiased`).
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "ServiceDesk | IT Support Portal",
     template: "%s | ServiceDesk",
@@ -19,9 +20,12 @@ export const metadata: Metadata = {
   description:
     "An IT ticketing system to log, track, prioritize, and resolve technical issues efficiently.",
   // Session 8: the reference ships a full social/PWA meta set per route —
-  // og:title/description/url/type/site_name/image, twitter:card
+  // og:title/description/type/site_name/image, twitter:card
   // summary_large_image, apple-mobile-web-app-*. og:title follows the title
-  // template above; og:url derives from each route's canonical.
+  // template above. Session 12 correction: og:url does NOT derive from the
+  // per-route canonical (a false s8-era belief — Next emits og:url only from
+  // openGraph.url); the per-route social URL set (canonical + og:url +
+  // twitter:url) now ships via src/lib/route-head.ts on the route layouts.
   openGraph: {
     type: "website",
     siteName: "ServiceDesk",

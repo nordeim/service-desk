@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-11 remediation (2026-10-10).
+  functionality. Distilled through the session-12 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.9.0
+version: 2.10.0
 last_updated: 2026-10-10
-project_state: 55 unit tests + 156 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–11)
+project_state: 55 unit tests + 167 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–12)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -391,6 +391,11 @@ Manual/visual checks:
 46. **The platform's special cases are contract too.** (Session 11.) `/dashboard` carrying no JSON-LD (and no proper title) is their builder's home-route special case — mirroring the ABSENCE is as much parity as mirroring the presence.
 47. **Next's `app/manifest.ts` convention overrides `metadata.manifest`.** (Session 11.) The convention file serves `/manifest.webmanifest` AND auto-emits its own head link — silently defeating the metadata field. When the manifest URL matters (parity), use a plain route handler.
 48. **Static engine-trap scans need structural confirmation.** (Session 11.) The space-y detector flagged 2 "hits" — both grandchildren (the known false-positive class). Verify JSX depth before filing engine-trap findings.
+49. **A measured reference claim is not a shipped clone claim.** (Session 12.) The session-8 sweep measured the reference's og set, wrote "og:url derives from the per-route canonical" as a code comment, and four sessions believed it — while our side shipped NO og:url or twitter:url anywhere. Every reference-measured value needs a pin against OUR build the same session it's measured; an unpinned "parity" is a hypothesis.
+50. **The engine trap list is a code-review checklist, not a migration memory.** (Session 12.) Trap #4 (margin utilities on direct children of space-y containers) was documented as "verified absent" in the very session that introduced a live instance two views away — it then shipped an 8px overlap for two sessions. "Verified absent" goes stale: run the trap scan on every diff that adds any margin utility, and remember `=>` in JSX attributes breaks naive tag-regex scanners (the depth walk needs care).
+51. **Computed margins can diverge with zero class difference.** (Session 12.) Both sites shipped identical `-mb-2` DOM on the login-view back buttons — only the computed gap (the reference's 16px vs our −8px overlap) revealed the v3→v4 engine difference. The computed-value-is-ground-truth rule that governs shadows and radii governs margins too: measure the gap, never trust the shared class.
+52. **Attribute the console per-site before filing.** (Session 12.) A shared browser session's console buffer mixes tabs: the reference's DialogTitle error and its Tailwind-CDN-in-production warning would have misattributed to our clone. Clear and re-check per origin before writing a finding.
+53. **The reference's platform head layer is route-blind.** (Session 12.) It emits canonical + og:url + twitter:url + segment titles on every route — 404 catch-alls included. Mirror the per-route coverage where we have real routes; keep the production-sane refusal where we don't (canonicalizing 404s is an SEO anti-pattern). Platform exhaust rules: replicate the infrastructure, never the dead content.
 
 ---
 

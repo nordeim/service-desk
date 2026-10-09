@@ -355,13 +355,21 @@ export default function LoginPage() {
               ) : view === "reset" ? (
                 /* Reset view (live-measured session 10): back button + h2 +
                    subtext + the single-field form; the logo/h1/Google block
-                   is replaced entirely. */
+                   is replaced entirely.
+                   Session 12: the back button's margin is a computed-parity
+                   fix — the reference ships -mb-2 (their v3 class), which on
+                   our v4 build computed an 8px OVERLAP (space-y trap-log #4:
+                   v4 puts margin-bottom on earlier children, so the next
+                   block gets no margin-top). mb-2 sm:mb-4 computes their
+                   measured gaps: 8px below sm, 16px at >=sm. Parity is the
+                   COMPUTED value, never the class name (the shadow-xs
+                   doctrine, session 5). */
                 <div className="w-full">
                   <div className="space-y-4 sm:space-y-6">
                     <button
                       type="button"
                       onClick={() => switchView("signin")}
-                      className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors -mb-2"
+                      className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors mb-2 sm:mb-4"
                     >
                       <ArrowLeft className="h-4 w-4" aria-hidden />
                       Back to sign in
@@ -456,13 +464,17 @@ export default function LoginPage() {
               ) : (
                 /* Signup view (live-measured session 10): back button + h2 +
                    the three-field form (no name field — base44 auth has no
-                   name concept; the client derives it from the local-part). */
+                   name concept; the client derives it from the local-part).
+                   Session 12: the back button's margin is a computed-parity
+                   fix — the reference's -mb-2 (v3) computed an 8px overlap on
+                   our v4 build; mb-2 computes their measured 8px gap at all
+                   widths (their container is space-y-4, no sm variant). */
                 <div className="w-full">
                   <div className="space-y-4">
                     <button
                       type="button"
                       onClick={() => switchView("signin")}
-                      className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors -mb-2"
+                      className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors mb-2"
                     >
                       <ArrowLeft className="h-4 w-4" aria-hidden />
                       Back to sign in

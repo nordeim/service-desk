@@ -124,3 +124,40 @@ Dry-run OK (`aa0e069..725d4af → main`). Real push:
 Also verified: mobile nav fully green on both sites, zero reference drift, space-y v4 trap absent, screenshots refreshed, all docs + SKILL v2.9.0 updated.
 
 **Suggested next:** watch the CI run on GitHub, then review `docs/remediation-plan-session11.md` §5 — especially "the head is bigger than the metas you grep for" and "drive the route matrix's degenerate cells."
+
+---
+
+# Session 12 Retrospective
+
+**Date:** 2026-10-10 · **Scope:** session-12 parity audit + remediation · **Repo state at start:** `31e7848` (session-11 code + this briefing) · **At end:** both findings fixed, 167/167 E2E, pushed to `main`.
+
+## What this session delivered
+
+- **F1 — the per-route social URL set (canonical + og:url + twitter:url) [MED].** The session-8 sweep measured the reference's og set, wrote "og:url derives from the per-route canonical" as a code comment, and never pinned our side — a false belief that shipped NO og:url and NO twitter:url on ANY route for four sessions (and no canonical on the three auth routes). Next-16 facts, verified in the resolver sources: og:url is emitted ONLY from `openGraph.url`; the twitter metadata type has no url field at all (it rides `metadata.other`, which is not metadataBase-resolved — hence the absolute URL); a child's `openGraph` wholesale-REPLACES the parent's. Fix: `src/lib/route-head.ts` — a single-source helper (`SITE_URL` export + `routeHead(segment)` carrying the full og set + url, twitter card, `other.twitter:url`, `alternates.canonical`) spread by all 7 route layouts; the root layout's `metadataBase` now imports the same `SITE_URL`. Live-verified: all three equal per route on every route, og:site_name + og:image preserved.
+- **F2 — the space-y trap-log #4 fired live [HIGH-visual].** The session-10 login view state machine shipped the reference's measured `-mb-2` class on the reset/signup back buttons — each a DIRECT child of the view's `space-y-*` container. On the reference's v3 build it computes a 16px gap (≥sm) / 8px (<sm, signup); on our v4 build it computed an **8px overlap** for two sessions — v4's space-y puts margin-bottom on earlier children, so the next block gets no margin-top and the negative margin is the only spacing left. Fix (the shadow-xs doctrine — parity is the COMPUTED value, never the class name): `mb-2 sm:mb-4` (reset) / `mb-2` (signup) — computing the reference's measured gaps at both breakpoints. The s10 class pin superseded to the new classes; the authoritative computed pins added.
+- **Lineage fix:** the committed s10 AND s11 screenshot scripts both carry the invalid `aref*=` selector (the s11 plan claimed the fix but never landed it — the s11 agent debugged it interactively and saved the script with the typo). `scripts/capture-screenshots-s12.sh` uses the working `a[href*="ticketdetails"]` + a FATAL guard verifying the capture page before shooting.
+
+## Audit & verification
+
+- Baseline at `31e7848` (fresh workspace): lint ✓ typecheck ✓ 55 unit ✓ build ✓ **156/156 E2E** ✓ smoke 11/11 ✓ (after `npx playwright install chromium` — the cache held 1200/1243, the suite needed 1248); the session-11 commit `725d4af` audited clean (G1–G4 all verified in code).
+- **Standing priority — mobile navigation**: full live matrix on both sites at 375×812. Reference stable (288px sheet, #fafafa, 80% overlay, scroll lock, Escape → body; the sheet STAYS OPEN after a nav-tap — re-confirmed with a real click; our auto-close is the E2E-pinned superset). Ours fully green: geometry, overlay `oklab(0 0 0 / 0.8)`, lock, nav-tap auto-close + scroll restore, zero overflow.
+- New probe surfaces: the social URL family on our side (the finding), the login-view computed margins (the trap), the comment POST flow (a real post on both sites — append-at-bottom, cleared textarea, re-disabled button, byte-parity item markup), the status-filter options (both list `All Status/Open/In Progress/Resolved/Closed`, listbox width identical 311.33px), 320px narrow viewport (reference overflows 451/365; ours fits everywhere — the min-w-0 superset extends), the dashboard performance formats ("N/A" logic identical), the search no-match state (the s7-documented superset pair), `/login`-while-authed (both render the card), the reference's auth-route bodies (their 404 catch-all + empty scaffold — platform exhaust; our real pages are the URL supersets), console hygiene per-site (ours zero; theirs DialogTitle + Tailwind-CDN warnings — platform artifacts).
+- TDD: 10 red → **167/167 E2E green** (+11 session-12 tests) + 55 unit + smoke 11/11. Live paired re-verification on the production standalone: the 7 routes' three URLs equal per route; the reset view 16px gap at ≥sm, 8px at 375px; the signup view 8px — the reference's measured values, no overlap anywhere.
+- Screenshots refreshed (7 shots); 01/02/03/06/07 byte-identical to the s11 set (deterministic renders); 04/05 changed only by the seed-time-derived timestamp strings.
+
+## Process lessons (in `docs/remediation-plan-session12.md` §5)
+
+1. A measured reference claim is not a shipped clone claim — pin our side the same session it's measured.
+2. The engine trap list is a code-review checklist, not a migration memory — trap #4 was "verified absent" in the very session that introduced a live instance.
+3. Computed margins can diverge with zero class difference — the computed-value ground-truth rule governs margins too.
+4. Attribute the console per-site before filing.
+5. The reference's platform head layer is route-blind — mirror per-route coverage where we have real routes; keep the production-sane refusal on 404s.
+
+## Artifacts
+
+- `docs/remediation-plan-session12.md` — the full inventory, non-gap ledger, execution log, and lessons.
+- `tests/e2e/visual-parity.spec.ts` — +11 session-12 tests (138 parity total; suite 167).
+- `src/lib/route-head.ts` + the 7 route layouts + the root layout metadataBase import — the social URL surface.
+- `src/app/login/page.tsx` — the computed-parity back-button margins.
+- `scripts/capture-screenshots-s12.sh` + `docs/screenshots/` — the refreshed capture set (lineage selector fixed).
+- README / AGENTS (session-12 contracts; the s10 line amended) / CLAUDE (counts + rules) / PAD (known-issues row + parity count) / `service-desk_SKILL.md` v2.10.0 (lessons 49–53) — all updated.
