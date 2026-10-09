@@ -240,3 +240,36 @@ Work Log:
 
 Stage Summary:
 - All 9 session-6 findings fixed and E2E-pinned (107 E2E total: +17 parity tests, 61→78); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 14
+Agent: main (Super Z)
+Task: Session 7 — refresh repo, review session_6/session_7 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- Fresh workspace: git clone (prior workspace reset) at 1a1f040 (session-6 code + session-7 briefing doc/session_7.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.4.0 + session_6.md + remediation-plan-session6.md + worklog + session_7.md — all aligned with the codebase; env contract re-verified (.env created from .env.example with generated AUTH_SECRET, DATABASE_URL=file:../db/custom.db, db/ at root, skills/ excluded by construction in vitest + playwright configs)
+- Baseline gates at 1a1f040 (after installing Playwright Chromium in the fresh workspace): lint ✓ typecheck ✓ 54 unit ✓ build ✓ 107/107 E2E ✓ smoke 11/11 ✓; session-6 commit fca7030 audited clean (32 files match the documented plan)
+- Fresh gap analysis vs live reference (agent-browser + Playwright hover-capable probes, both sites): NEW probe surfaces — the token layer (:root getPropertyValue: --accent/--accent-foreground), hover states under hover:hover, document titles + favicon, fetch-failure paths, empty-state markup; re-verified standing surfaces (typography scale, truncation, 768px breakpoint, mobile nav both sites)
+- 10 findings: the accent-token pair (cyan-50/cyan-700 vs the reference's stock #f5f5f5/#171717 — select-option highlights, ghost/outline hover text, Skeleton); the reference's rounded-sm drift (2px→4px — session-6 pin superseded); dashboard fetch-failure = infinite skeleton (transient 401 proved it); mytickets fetch-failure = misleading empty state; mytickets empty-state markup (w-20 gradient circle, FileText w-10, text-xl heading); dashboard recent-empty colors + p-12; no favicon; static titles (reference sets per-route); v4 hover media-guard (documented divergence); reference-drift ledger (data-active mechanism, titles, rounded-sm)
+- Key debugging: the agent-browser browser reports hover:none — every Tailwind v4 hover: rule is inert under it (the @media (hover:hover) guard); hover probes moved to Playwright Desktop Chrome. The "stuck loading" mystery was twofold: asChild anchors render as <a> not <button> (probe locator bug) + one real transient 401 exposing the resilience gap
+- Wrote + validated docs/remediation-plan-session7.md (10 findings + non-gaps ledger + risks + process lessons)
+
+Stage Summary:
+- Repo at 1a1f040 + plan; 10 findings (3 HIGH: accent tokens, radius drift, dashboard resilience) queued for TDD execution
+
+---
+Task ID: 15
+Agent: main (Super Z)
+Task: Session 7 — TDD remediation, verification, docs, SKILL.md v2.5.0, commit + push
+
+Work Log:
+- TDD: 10 E2E tests written first (9 session-7 + the session-6 option-radius pin superseded in place to 4px), all verified RED against the pre-fix build; one test hardened mid-cycle (CTA hover waits for the recent list to settle + the rise-in animation — async content shifts the CTA under an early hover)
+- Implemented: G1+G2 globals.css (--accent #f5f5f5, --accent-foreground #171717, --radius-sm 0.25rem with rationale comments); G3 dashboard error+retry (loadFailed + reloadKey; the panel replaces stat cards + performance + recent, keeping header/CTA); G4 mytickets error+retry (error state distinguished from genuine empty); G5 mytickets empty state to the measured reference markup (kept the filtered-message superset); G6 dashboard recent-empty flips (slate-400 icon, slate-500 label, p-12 wrapper); G7 src/app/icon.png; G8 per-route layout.tsx metadata ×4 (root template appends the suffix — first iteration double-suffixed, caught by the red test)
+- Gates: lint ✓ typecheck ✓ 54 unit ✓ build ✓ 116/116 E2E ✓ smoke 11/11 ✓
+- Live paired re-verification (production standalone + reference): option highlight rgb(245,245,245)/rgb(23,23,23) + 4px radius = reference exactly; CTA hover = cyan-50 bg + cyan-500 border + near-black text = reference (was cyan-700); back-button hover = reference; titles + favicon verified
+- VLM composite sweep (7 composites, compare-s7/): every significant claim refuted by computed/pixel verification (login card 448px both; reference form grid IS 2-col md:grid-cols-2 gap-6; reference priority trigger IS pre-filled Medium-Normal blue; gradient endpoints + badge colors identical in lab(); clock icon present; both mobile headers white; active-nav = documented "/"-root quirk; the Base44 FAB = the reference's own badge, VLM confused left/right); the long-title probe ticket deleted from the dev DB, screenshots 04/05 recaptured
+- Refreshed docs/screenshots/ (7 shots); updated README/AGENTS (session-7 contracts + radius supersede + drift ledger)/CLAUDE (accent + hover-guard + radius rules)/PAD (known-issues row)/service-desk_SKILL.md v2.5.0 (lessons 23-26); session_7.md retrospective appended; remediation-plan-session7.md execution status; this worklog
+
+Stage Summary:
+- All 10 session-7 findings fixed and E2E-pinned (116 E2E total: visual-parity 78→87); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py

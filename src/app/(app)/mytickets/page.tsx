@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FileSearch, Search } from "lucide-react";
+import { FileText, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,11 @@ export default function MyTicketsPage() {
   const [priority, setPriority] = React.useState<PriorityFilter>("all");
   const [sort, setSort] = React.useState<SortMode>("newest");
   const [scope, setScope] = React.useState<"mine" | "all">("mine");
+  // Session 7 (resilience superset): a failed fetch used to silently render
+  // the EMPTY state ("No tickets found") — misleading when the user HAS
+  // tickets. Distinguish failure from genuine emptiness; offer a retry.
+  const [error, setError] = React.useState(false);
+  const [reloadKey, setReloadKey] = React.useState(0);
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -37,13 +42,16 @@ export default function MyTicketsPage() {
     if (priority !== "all") params.set("priority", priority);
 
     fetch(`/api/tickets?${params.toString()}`, { signal: controller.signal })
-      .then((r) => (r.ok ? r.json() : { tickets: [] }))
-      .then((d) => setTickets(d.tickets ?? []))
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("tickets failed"))))
+      .then((d) => {
+        setError(false);
+        setTickets((d as { tickets?: TicketCardData[] }).tickets ?? []);
+      })
       .catch((err) => {
-        if (err.name !== "AbortError") setTickets([]);
+        if (err.name !== "AbortError") setError(true);
       });
     return () => controller.abort();
-  }, [search, status, priority, sort, scope]);
+  }, [search, status, priority, sort, scope, reloadKey]);
 
   const isFiltered = search.trim() !== "" || status !== "all" || priority !== "all";
 
@@ -131,21 +139,52 @@ export default function MyTicketsPage() {
 
         {/* Reference: rows are grid gap-4 cards (TicketCard already implements
             the measured classes: w-14 tile, arrow, text-lg font-bold title). */}
-        {tickets === null ? (
+        {error ? (
+          // Fetch-failure panel (session 7 superset): the reference has no
+          // error UI at all; the empty-state visual language carries it.
+          <div
+            className="rounded-xl border bg-card text-card-foreground p-12 text-center border-none shadow-xl"
+            role="alert"
+          >
+            <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-10 h-10 text-slate-400" aria-hidden />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">Could not load tickets</h3>
+            <p className="text-slate-500">Something went wrong. Please try again.</p>
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className="border-slate-300 hover:border-cyan-500 hover:bg-cyan-50 transition-all duration-300"
+              >
+                Try again
+              </Button>
+            </div>
+          </div>
+        ) : tickets === null ? (
           <div className="grid gap-4" aria-label="Loading tickets">
             <Skeleton className="h-32 w-full rounded-xl" />
             <Skeleton className="h-32 w-full rounded-xl" />
             <Skeleton className="h-32 w-full rounded-xl" />
           </div>
         ) : tickets.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-lg p-12 text-center">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileSearch className="w-8 h-8 text-slate-300" aria-hidden />
+          // Reference empty state (measured session 7, search-no-match):
+          // card `rounded-xl border bg-card text-card-foreground p-12
+          // text-center border-none shadow-xl`, icon circle w-20 h-20 with
+          // the slate-100→slate-200 gradient + FileText w-10 h-10
+          // text-slate-400, h3 text-xl font-semibold text-slate-900 mb-2,
+          // p text-slate-500 (16px — no text-sm). Our distinct
+          // filtered/empty message pair stays (superset: the reference shows
+          // "You haven't submitted any tickets yet." even for a no-match
+          // search).
+          <div className="rounded-xl border bg-card text-card-foreground p-12 text-center border-none shadow-xl">
+            <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-10 h-10 text-slate-400" aria-hidden />
             </div>
-            <h3 className="font-semibold text-slate-700 mb-1">
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">
               {isFiltered ? "No tickets match your filters" : "No tickets found"}
             </h3>
-            <p className="text-sm text-slate-400">
+            <p className="text-slate-500">
               {isFiltered
                 ? "Try adjusting the search or filters."
                 : "You haven't submitted any tickets yet."}

@@ -840,11 +840,15 @@ test.describe("session 6: radius scale (reference v3 defaults)", () => {
     await expect(trigger).toHaveCSS("border-radius", "8px");
   });
 
-  test("select options render rounded-sm at the reference 2px", async ({ page }) => {
+  // Session-7 supersede: the reference's rounded-sm now computes 4px (their
+  // build drifted; re-measured live — only rounded-sm differs between the
+  // v3 and v4 scales: v3 rounded (4px) became v4 rounded-sm). See the
+  // session-7 radius note in AGENTS.md and remediation-plan-session7.md §1.B.
+  test("select options render rounded-sm at the reference 4px (session-7 re-measure)", async ({ page }) => {
     await page.goto("/submitticket");
     await page.locator("button#category").click();
     const option = page.getByRole("option").first();
-    await expect(option).toHaveCSS("border-radius", "2px");
+    await expect(option).toHaveCSS("border-radius", "4px");
   });
 });
 
@@ -1085,5 +1089,194 @@ test.describe("session 6: focus states (reference computed)", () => {
     expect(layers.some((c) => colorIs(c, "white"))).toBe(true);
     expect(layers.some((c) => colorIs(c, "slate400"))).toBe(true);
     await expect(email).toHaveCSS("border-color", colorRegex("slate400")); // custom active
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session 7 — accent tokens, empty states, resilience, favicon, titles.
+// Inventory + evidence: docs/remediation-plan-session7.md.
+// ---------------------------------------------------------------------------
+
+// Literal-hex tokens render as rgb() (the lab() pipeline applies to palette
+// utilities, not to :root literal hex) — the reference's accent pair measures
+// rgb(245,245,245) bg + rgb(23,23,23) text on the highlighted option.
+const ACCEPT7: Record<string, string[]> = {
+  accentGray: ["#f5f5f5", "rgb(245, 245, 245)"],
+  accentFg: ["#171717", "rgb(23, 23, 23)"],
+};
+const colorRegex7 = (key: keyof typeof ACCEPT7) =>
+  new RegExp(`^(${ACCEPT7[key].map((c) => c.replace(/[()]/g, "\\$&")).join("|")})$`);
+
+test.describe("session 7: accent tokens (reference computed)", () => {
+  // Reference: --accent hsl(0 0% 96.1%) = #f5f5f5, --accent-foreground
+  // hsl(0 0% 9%) = #171717 (the stock shadcn light pair — live-measured on
+  // their :root). Ours carried cyan-50/cyan-700 (a session-1 theme choice
+  // never measured): every dropdown highlight, ghost/outline hover text, and
+  // the Skeleton rendered cyan-tinted.
+  test("select options highlight to the reference gray + near-black", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.locator("button#category").click();
+    // The first option is keyboard-highlighted when the dropdown opens
+    // (Radix highlights it automatically — verified live on both sites).
+    const option = page.getByRole("option").first();
+    await expect(option).toHaveCSS("background-color", colorRegex7("accentGray"));
+    await expect(option).toHaveCSS("color", colorRegex7("accentFg"));
+  });
+
+  // Hover pins run under Playwright's Desktop Chrome (hover:hover — a real
+  // mouse context). Under hover:none (agent-browser's browser, touch devices)
+  // every Tailwind v4 hover: rule is inert — see AGENTS.md session-7 note.
+  test("CTA hover renders the reference near-black text (accent-foreground)", async ({ page }) => {
+    await page.goto("/dashboard");
+    await page.waitForSelector("main a:has-text('View All Tickets')");
+    // Wait for the recent list to settle before hovering: the async fetch
+    // replaces skeletons with taller rows, shifting the CTA down — a hover
+    // issued mid-load can leave the mouse off-element (found in the batch
+    // run; isolated runs passed). Also wait out the 300ms rise-in animation.
+    await page.waitForSelector("main .divide-y > a, main p:text-is('No tickets yet')");
+    await page.waitForTimeout(400);
+    const cta = page.locator("main a", { hasText: "View All Tickets" });
+    await cta.hover();
+    // transition-all duration-300 — toHaveCSS auto-retries past the fade.
+    await expect(cta).toHaveCSS("color", colorRegex7("accentFg"));
+  });
+
+  test("back-button hover renders the reference near-black text", async ({ page }) => {
+    await page.goto("/submitticket");
+    const back = page.getByRole("link", { name: /Back to Dashboard/ });
+    await back.hover();
+    await expect(back).toHaveCSS("color", colorRegex7("accentFg"));
+  });
+});
+
+test.describe("session 7: empty states (reference markup)", () => {
+  // Reference search-no-match state (live-measured): card
+  // `rounded-xl border bg-card text-card-foreground p-12 text-center
+  //  border-none shadow-xl`, icon circle `w-20 h-20 bg-gradient-to-br
+  // from-slate-100 to-slate-200`, FileText `w-10 h-10 text-slate-400`,
+  // h3 `text-xl font-semibold text-slate-900 mb-2`, p `text-slate-500` (16px).
+  // Our distinct filtered/empty message pair is a kept superset (the reference
+  // confusingly shows "You haven't submitted any tickets yet." for a no-match
+  // search too).
+  test("mytickets search-empty renders the reference empty-state markup", async ({ page }) => {
+    await page.goto("/mytickets");
+    await page.getByPlaceholder("Search tickets...").fill("zzzz-no-such-ticket-qqqq");
+    const heading = page.getByRole("heading", { name: "No tickets match your filters" });
+    await expect(heading).toBeVisible();
+    const card = heading.locator("xpath=ancestor::div[contains(@class,'p-12')]");
+    await expect(card).toHaveClass(/rounded-xl/);
+    await expect(card).toHaveClass(/border-none/);
+    await expect(card).toHaveClass(/shadow-xl/);
+    const circle = card.locator("div.w-20");
+    await expect(circle).toHaveClass(/h-20/);
+    await expect(circle).toHaveClass(/from-slate-100/);
+    await expect(circle).toHaveClass(/to-slate-200/);
+    const icon = circle.locator("svg");
+    await expect(icon).toHaveClass(/w-10/);
+    await expect(icon).toHaveClass(/h-10/);
+    await expect(icon).toHaveClass(/text-slate-400/);
+    await expect(heading).toHaveClass(/text-xl/);
+    await expect(heading).toHaveClass(/text-slate-900/);
+    await expect(heading).toHaveClass(/mb-2/);
+    const sub = card.locator("p.text-slate-500");
+    await expect(sub).toHaveCount(1);
+    await expect(sub).not.toHaveClass(/text-sm/);
+  });
+
+  // Reference dashboard recent-empty (live-measured with their data API
+  // blocked): wrapper `p-12 text-center`, circle `w-16 h-16 bg-slate-100
+  // rounded-full ... mb-4`, FileText `w-8 h-8 text-slate-400`,
+  // p `text-slate-500 font-medium` + `text-sm text-slate-400 mt-1`.
+  // Route-mocked empty list (deterministic — no fresh signup needed).
+  test("dashboard recent-empty renders the reference colors + padding", async ({ page }) => {
+    await page.route("**/api/tickets", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ tickets: [] }) }),
+    );
+    await page.goto("/dashboard");
+    const empty = page.getByText("No tickets yet", { exact: true });
+    await expect(empty).toBeVisible();
+    const wrap = empty.locator("xpath=ancestor::div[contains(@class,'text-center')][1]");
+    await expect(wrap).toHaveClass(/p-12/);
+    const circle = wrap.locator("div.w-16");
+    await expect(circle).toHaveClass(/bg-slate-100/);
+    const icon = circle.locator("svg");
+    await expect(icon).toHaveClass(/w-8/);
+    await expect(icon).toHaveClass(/text-slate-400/);
+    await expect(empty).toHaveClass(/text-slate-500/);
+    await expect(empty).toHaveClass(/font-medium/);
+  });
+});
+
+test.describe("session 7: fetch-failure resilience (superset)", () => {
+  // The reference renders zeros forever on a failing fetch (their own silent
+  // failure — verified live by blocking their entities API). A production-
+  // ready superset surfaces the failure and offers a retry: one transient 401
+  // during session-7 live probing left our dashboard skeletoned FOREVER
+  // (non-ok mapped to null, state never settled) — the exact bug this fixes.
+  test("dashboard shows an error panel + Retry when the APIs fail, then recovers", async ({ page }) => {
+    await page.route("**/api/stats", (route) =>
+      route.fulfill({ status: 500, contentType: "application/json", body: "{}" }),
+    );
+    await page.route("**/api/tickets", (route) =>
+      route.fulfill({ status: 500, contentType: "application/json", body: "{}" }),
+    );
+    await page.goto("/dashboard");
+    const retry = page.getByRole("button", { name: /Try again/i });
+    await expect(retry).toBeVisible();
+    await expect(page.getByText(/could not load/i)).toBeVisible();
+    // No skeleton limbo: the error panel replaced the stat values.
+    await expect(page.locator("main span.animate-pulse")).toHaveCount(0);
+    await page.unroute("**/api/stats");
+    await page.unroute("**/api/tickets");
+    await retry.click();
+    // Recovery: the stat cards render real numbers (not the "…" placeholder).
+    await expect(page.getByText("Total Tickets")).toBeVisible();
+    const value = page.locator("main p.text-4xl").first();
+    await expect(value).not.toHaveText(/…/);
+  });
+
+  // Pre-fix behavior: a failed fetch silently rendered "No tickets found" —
+  // misleading (the user HAS tickets; the fetch failed).
+  test("mytickets shows an error panel + Retry (not the empty state) when the API fails", async ({ page }) => {
+    await page.route("**/api/tickets**", (route) =>
+      route.fulfill({ status: 500, contentType: "application/json", body: "{}" }),
+    );
+    await page.goto("/mytickets");
+    const retry = page.getByRole("button", { name: /Try again/i });
+    await expect(retry).toBeVisible();
+    await expect(page.getByText(/could not load/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /No tickets/ })).toHaveCount(0);
+    await page.unroute("**/api/tickets**");
+    await retry.click();
+    await expect(page.getByRole("heading", { name: /No tickets/ })).toHaveCount(0);
+    // Recovery: ticket cards render (seeded corpus).
+    await expect(page.locator("main a[href*='ticketdetails']").first()).toBeVisible();
+  });
+});
+
+test.describe("session 7: favicon + per-page titles", () => {
+  // The reference serves a favicon (their logo on supabase CDN); we served
+  // none (404). src/app/icon.png is the Next.js App Router convention.
+  test("the app serves a favicon", async ({ page }) => {
+    await page.goto("/dashboard");
+    const iconLink = page.locator('link[rel="icon"]');
+    await expect(iconLink).toHaveCount(1);
+    const res = await page.request.get("/icon.png");
+    expect(res.status()).toBe(200);
+  });
+
+  // Reference (live-measured): per-route titles — "/mytickets" →
+  // "Mytickets | ServiceDesk", "/submitticket" → "Submitticket | ServiceDesk",
+  // "/ticketdetails" → "Ticketdetails | ServiceDesk", "/dashboard" →
+  // "ServiceDesk". Superset: proper-cased page names.
+  test("document titles are per-route (reference pattern, superset casing)", async ({ page }) => {
+    await page.goto("/dashboard");
+    expect(await page.title()).toBe("Dashboard | ServiceDesk");
+    await page.goto("/submitticket");
+    expect(await page.title()).toBe("Submit Ticket | ServiceDesk");
+    await page.goto("/mytickets");
+    expect(await page.title()).toBe("My Tickets | ServiceDesk");
+    await page.goto("/ticketdetails");
+    expect(await page.title()).toBe("Ticket Details | ServiceDesk");
   });
 });

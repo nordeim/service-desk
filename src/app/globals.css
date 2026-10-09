@@ -52,13 +52,20 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   /* Radius scale (session 6): pinned to the reference's Tailwind v3
-     DEFAULTS — rounded-sm=2px, rounded-md=6px, rounded-lg=8px,
-     rounded-xl=12px. The shadcn v4 calc chain off --radius: 0.625rem
-     rendered 6/8/10/14px — exactly +2px on every rounded control while the
-     class NAMES were identical on both sites (computed-value parity, like
-     the session-5 font pin). rounded-2xl/full keep the Tailwind defaults
-     (16px/9999px — identical on v3 and v4). */
-  --radius-sm: 0.125rem;
+     DEFAULTS — rounded-md=6px, rounded-lg=8px, rounded-xl=12px. The shadcn
+     v4 calc chain off --radius: 0.625rem rendered 6/8/10/14px — exactly
+     +2px on every rounded control while the class NAMES were identical on
+     both sites (computed-value parity, like the session-5 font pin).
+     rounded-2xl/full keep the Tailwind defaults (16px/9999px — identical on
+     v3 and v4).
+
+     Session-7 supersede: --radius-sm is now 0.25rem (4px), NOT the v3
+     literal 2px — the reference's own rounded-sm (their SelectItem — the
+     only rounded-sm usage on either site) re-measured at 4px (their build
+     drifted; v3's `rounded` (4px) became v4's `rounded-sm`, and the other
+     scale steps md/lg/xl are identical on both scales). Evidence:
+     docs/remediation-plan-session7.md §1.B. */
+  --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
@@ -82,8 +89,15 @@
   --secondary-foreground: #0f172a;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #ecfeff;
-  --accent-foreground: #0e7490;
+  /* Accent pair (session 7): the reference's :root carries the stock
+     shadcn light pair — --accent hsl(0 0% 96.1%) = #f5f5f5 (light gray) and
+     --accent-foreground hsl(0 0% 9%) = #171717 (near-black) — live-measured.
+     Ours were cyan-50/cyan-700 (a session-1 theme choice never verified):
+     every select-option highlight, ghost/outline hover text, and the
+     Skeleton rendered cyan-tinted. The cyan motif lives in the explicit
+     color utilities (from-cyan-500, text-cyan-700, …), not these tokens. */
+  --accent: #f5f5f5;
+  --accent-foreground: #171717;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;

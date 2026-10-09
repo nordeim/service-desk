@@ -145,3 +145,42 @@ Dry-run OK (`67ebad4..fca7030 → main`). Real push:
 - Docs updated (plan + 5 root docs + SKILL v2.4.0 + retrospective + worklogs) and 7 screenshots refreshed
 
 **Suggested next:** watch the CI run on the new 107-test suite, and review `docs/remediation-plan-session6.md` §5 — the eight process lessons (esp. "probe the scales" and "exercise the interaction in the pin").
+
+---
+
+# Session 7 Retrospective
+
+**Date:** 2026-10-09 · **Scope:** session-7 parity audit + remediation · **Repo state at start:** `1a1f040` (session-6 code + this briefing) · **At end:** all 10 findings fixed, 116/116 E2E, pushed to `main`.
+
+## What this session delivered
+
+- **The accent-token pair (HIGH).** `--accent`/`--accent-foreground` were cyan-tinted (#ecfeff/#0e7490 — a session-1 theme choice, never measured) while the reference's `:root` carries the stock shadcn pair #f5f5f5/#171717. Visible on every select-option highlight (dropdown open → first option), every ghost/outline hover text (CTA + back buttons rendered cyan-700 where the reference renders near-black), and the Skeleton. One token-layer probe (`getPropertyValue` on `:root`) settled a three-surface family that six sessions of utility-level probes never touched.
+- **The reference drifted (HIGH).** Three changes re-measured live: their active-nav no longer sets `data-active` (gradient hardcoded — visually identical), they now set per-route titles, and their `rounded-sm` moved 2px→4px (only rounded-sm differs between the v3/v4 scales — session-6's 2px pin superseded in place; our single rounded-sm call site is the SelectItem, matching theirs).
+- **Fetch-failure resilience (HIGH, superset).** One transient 401 during live probing left the dashboard skeletoned FOREVER (non-ok → null, state never settles); mytickets silently rendered "No tickets found" on failure (misleading when the user HAS tickets). Both pages now render an error panel + Try again (the empty-state visual language), with verified recovery. The reference renders silent zeros on failure (verified live by blocking their API) — our error UI is a deliberate superset.
+- **Empty states + chrome (MED).** The mytickets empty state now matches the measured reference markup (w-20 gradient circle, FileText w-10 slate-400, text-xl slate-900 heading, 16px slate-500 sub-line; our distinct filtered-message superset stays); the dashboard recent-empty flips (icon slate-400, label slate-500, p-12 wrapper); favicon added (`src/app/icon.png` — /favicon.ico was a 404); per-route document titles via passthrough layouts ("Dashboard | ServiceDesk" etc. — the reference's own pattern, proper-cased).
+- **The v4 hover media-guard (documented divergence).** Tailwind v4 wraps `hover:` variants in `@media (hover:hover)` — the reference's v3-style hovers apply on touch devices (sticky hover); ours don't. Intentional modern behavior, documented like the lab() pipeline. Tooling consequence: agent-browser's browser reports hover:none — hover probes MUST run under Playwright's Desktop Chrome (found the hard way: the CTA hover "gap" was an artifact of reading at-rest values).
+- **10 E2E pins added** (visual-parity 78→87, suite 107→116; one session-6 pin superseded in place).
+
+## Audit & verification
+
+- Baseline at `1a1f040`: lint ✓ typecheck ✓ 54 unit ✓ build ✓ 107/107 E2E ✓ smoke 11/11 ✓ (Playwright browsers re-installed in the fresh workspace); session-6 commit `fca7030` audited clean (all 32 files match the documented plan).
+- New probe surfaces: the **token layer** (accent pair), **hover states under a hover-capable device**, **document titles + favicon**, **fetch-failure paths**, **empty-state markup** — plus re-verification of the standing surfaces (typography scale, truncation contracts, sidebar breakpoint at 768px, mobile navigation on both sites: trigger hit-test, sheet geometry 288px/20px/600, overlay + Escape + nav-tap auto-close).
+- Full gate after all fixes: lint ✓ typecheck ✓ **54 unit** ✓ build ✓ **116/116 E2E** ✓ smoke 11/11 ✓.
+- Live paired re-verification: option highlight rgb(245,245,245)/rgb(23,23,23) + 4px radius = reference exactly; hover text near-black = reference; titles + favicon verified.
+- **VLM composite sweep (7 composites): every significant claim refuted** by computed/pixel verification — login card 448px both; the reference's form grid IS 2-col; their priority trigger IS pre-filled; gradient endpoints + badge colors identical (lab() representation); the clock icon present; both mobile headers white (pixel-sampled); the active-nav claim = the documented "/"-root quirk; the "Edit with Base44" FAB = the reference's own badge (VLM confused left/right). The one real artifact: screenshot 05 had captured my long-title probe ticket — deleted from the dev DB, 04/05 recaptured.
+
+## Process lessons (in `docs/remediation-plan-session7.md` §5)
+
+1. Probe the TOKEN layer (`:root` getPropertyValue), not just the utilities that consume it.
+2. Hover probes need a hover-capable context — agent-browser reports hover:none (every v4 hover: rule inert under it).
+3. The reference DRIFTS — re-measure before trusting old pins (three changes in one session).
+4. A class-level pin is a snapshot, not a contract.
+5. Exercise the FAILURE path, not just the happy path (the transient-401 hang).
+6. `querySelectorAll('main button')` misses asChild anchors — probe `main a, main button` on the clone.
+
+## Artifacts
+
+- `docs/remediation-plan-session7.md` — the full inventory, drift ledger, ledgers, execution log, and lessons.
+- `tests/e2e/visual-parity.spec.ts` — +9 session-7 tests (87 total; one session-6 pin superseded in place).
+- `docs/screenshots/` — 7 refreshed dev-server captures; `compare-s7/` composites.
+- README / AGENTS (session-7 contracts + radius supersede + drift ledger) / CLAUDE (accent + hover-guard + radius rules) / PAD (known-issues row) / `service-desk_SKILL.md` v2.5.0 (lessons 23–26) — all updated.

@@ -7,9 +7,9 @@ description: >
   functionality. Distilled through the session-5 remediation (2026-10-09).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.4.0
+version: 2.5.0
 last_updated: 2026-10-09
-project_state: 54 unit tests + 107 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–6)
+project_state: 54 unit tests + 116 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–7)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -365,6 +365,10 @@ Manual/visual checks:
 20. **Focus states are parity surface.** (Session 6.) "Invisible at rest" base-generation divergences become visible the moment a keyboard user Tabs. The new-gen `focus-visible:ring-[3px] ring-ring/50 + border-ring` tail renders a 3px translucent ring + border change; the reference's old-gen renders solid 1px near-black, no border change. Pin the focused COMPUTED state per control type.
 21. **A reference's custom classes can be inert per-surface — verify each.** (Session 6.) The reference's `focus:border-cyan-500 focus:ring-cyan-500` customs: INERT on text inputs (near-black ring + unchanged border wins), border-only active on textareas, fully active on select triggers. Only paired computed measurements per surface reveal the matrix; class diffs cannot.
 22. **Exercise the interaction in a pin, not just the rest state.** (Session 6.) The double-emoji category-trigger bug (`🖥️🖥️ Hardware Issue`) survived five sessions because every pin read the at-rest placeholder — none SELECTED an option and read the trigger. Selected states, open states, and focus states all need pins that drive them.
+23. **Probe the TOKEN layer, not just the utilities that consume it.** (Session 7.) The accent tokens (`--accent`/`--accent-foreground`) drove three visible surface families (select-option highlights, ghost/outline hover text, the Skeleton) and had never been measured in six sessions — because no probe ever asked "what is the reference's `--accent`?". One `getPropertyValue` on `:root` settles a whole token family. Tokens to probe: accent, ring, border, input, secondary, muted.
+24. **Hover probes need a hover-capable context.** (Session 7.) agent-browser's browser reports `hover: none` — every Tailwind v4 `hover:` rule is silently inert under it (the `@media (hover:hover)` guard), so hover probes read at-rest values and look like bugs that don't exist. Run hover assertions under Playwright's Desktop Chrome (hover:hover) or a real device.
+25. **The reference DRIFTS — re-measure before trusting old pins.** (Session 7.) Three reference changes observed in one session: the active-nav mechanism (data-active removed, gradient hardcoded — visually identical), per-route document titles added, and `rounded-sm` moved 2px→4px. A class-level pin is a snapshot, not a contract; re-verify against the live site before "fixing" anything that suddenly looks different.
+26. **Exercise the FAILURE path, not just the happy path.** (Session 7.) Six sessions of E2E never tested a failing fetch — until a transient 401 during live probing left the dashboard skeletoned forever (non-ok mapped to null; state never settled). Production-ready supersets need error states + retry, and pins that force failures (`page.route` 500s) to keep them honest.
 
 ---
 

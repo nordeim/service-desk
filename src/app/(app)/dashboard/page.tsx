@@ -64,25 +64,32 @@ const STAT_CARDS = [
 function DashboardContent({ userName }: { userName: string }) {
   const [stats, setStats] = React.useState<StatsResponse | null>(null);
   const [recent, setRecent] = React.useState<TicketCardData[] | null>(null);
+  // Session 7 (resilience superset): a non-ok response used to leave the
+  // page skeletoned forever (non-ok mapped to null, state never settled —
+  // one transient 401 during live probing left the dashboard stuck). Surface
+  // the failure with a retry instead; the reference renders silent zeros.
+  const [loadFailed, setLoadFailed] = React.useState(false);
+  const [reloadKey, setReloadKey] = React.useState(0);
 
   React.useEffect(() => {
     let cancelled = false;
     Promise.all([
-      fetch("/api/stats").then((r) => (r.ok ? r.json() : null)),
-      fetch("/api/tickets").then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/stats").then((r) => (r.ok ? r.json() : Promise.reject(new Error("stats failed")))),
+      fetch("/api/tickets").then((r) => (r.ok ? r.json() : Promise.reject(new Error("tickets failed")))),
     ])
       .then(([s, t]) => {
         if (cancelled) return;
-        if (s) setStats(s);
-        if (t?.tickets) {
-          setRecent((t.tickets as (TicketCardData & { createdAt: string })[]).slice(0, 5));
-        }
+        setLoadFailed(false);
+        setStats(s as StatsResponse);
+        setRecent(((t as { tickets?: (TicketCardData & { createdAt: string })[] }).tickets ?? []).slice(0, 5));
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (!cancelled) setLoadFailed(true);
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
@@ -106,6 +113,33 @@ function DashboardContent({ userName }: { userName: string }) {
           </Button>
         </div>
 
+        {/* Fetch-failure panel (session 7 superset): replaces the stat cards,
+            performance metrics, and recent list — no skeleton limbo. Same
+            visual language as the empty states (measured session 7). */}
+        {loadFailed ? (
+          <div
+            className="rounded-xl border text-card-foreground border-none shadow-xl bg-white p-12 text-center"
+            role="alert"
+          >
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CircleAlert className="w-8 h-8 text-slate-400" aria-hidden />
+            </div>
+            <p className="text-slate-500 font-medium">Could not load dashboard data</p>
+            <p className="text-sm text-slate-400 mt-1">
+              Something went wrong. Check your connection and try again.
+            </p>
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className="border-slate-300 hover:border-cyan-500 hover:bg-cyan-50 transition-all duration-300"
+              >
+                Try again
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
         {/* Stat cards (reference: grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
             cards shadow-lg → hover:shadow-xl; values plain text-4xl, no
             tabular-nums — measured session 2) */}
@@ -185,11 +219,14 @@ function DashboardContent({ userName }: { userName: string }) {
                 <Skeleton className="h-16 w-full rounded-xl" />
               </div>
             ) : recent.length === 0 ? (
-              <div className="text-center py-12">
+              // Reference empty state (measured session 7): wrapper p-12
+              // text-center (48px horizontal too, not py-12), icon
+              // text-slate-400, label text-slate-500.
+              <div className="p-12 text-center">
                 <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-8 h-8 text-slate-300" aria-hidden />
+                  <FileText className="w-8 h-8 text-slate-400" aria-hidden />
                 </div>
-                <p className="text-slate-600 font-medium">No tickets yet</p>
+                <p className="text-slate-500 font-medium">No tickets yet</p>
                 <p className="text-sm text-slate-400 mt-1">
                   Submit your first ticket to get started
                 </p>
@@ -217,6 +254,8 @@ function DashboardContent({ userName }: { userName: string }) {
             </Link>
           </Button>
         </div>
+          </>
+        )}
       </div>
     </div>
   );
