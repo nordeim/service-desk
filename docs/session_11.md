@@ -115,3 +115,42 @@ Dry-run OK (`0fc0fee..43ac03d → main`). Real push now.
 Also verified: mobile nav fully green, space-y v4 trap absent (computed-margin walk), zero reference drift.
 
 **Suggested next:** watch the CI run on GitHub, then review `docs/remediation-plan-session10.md` §5 — especially "click every control before claiming parity."
+
+---
+
+# Session 11 Retrospective
+
+**Date:** 2026-10-10 · **Scope:** session-11 parity audit + remediation · **Repo state at start:** `aa0e069` (session-10 code + this briefing) · **At end:** all 4 findings fixed, 156/156 E2E, pushed to `main`.
+
+## What this session delivered
+
+- **The id-less detail route (HIGH).** The headline discovery — the degenerate cell of the route matrix. Every prior session drove `/ticketdetails` WITH an id; the bare route was never opened. The reference renders the "Ticket not found" destructive Alert (identical to the unknown-id contract); ours hung in the loading skeleton forever (the load callback early-returns on a missing id, so the ticket state never resolves — a UX dead-end for stale bookmarks and chat-stripped links). Fixed with a render-time `missingId` derivation ahead of the skeleton branch (NOT setState-in-effect — that rule is an ERROR in this config); the empty `?id=` case is covered too.
+- **The PWA manifest (MED).** The head's `rel="manifest"` link — never enumerated in ten sessions of meta-tag sweeps — led to the reference's `/manifest.json` (302 → their platform API). Measured the full contract (name/short_name "ServiceDesk", their description, standalone display, #000000 theme + #ffffff background, 192×192 + 512×512 icons, start_url/scope) and shipped a production-sane mirror: a plain route handler at the reference's URL with REAL size-correct PNG icons (their manifest declares two sizes against one 480×480 JPEG). Mid-cycle correction: Next's `app/manifest.ts` convention serves `/manifest.webmanifest` AND auto-emits its own head link, silently overriding `metadata.manifest` — the E2E link pin caught it; the convention file was dropped for the route handler.
+- **theme-color + apple-touch-icon (MED).** The two head neighbors the session-8 social/PWA sweep missed: `<meta name="theme-color" content="#000000">` (Next 16 emits it from the Viewport export) and the apple-touch-icon link (a real 180×180 PNG via Next's `apple-icon.png` file convention).
+- **The BreadcrumbList JSON-LD (MED-LOW).** The reference's SEO builder emits `Home → <lowercase path segment>` structured data per route — with `/dashboard` deliberately exempt (their home special case, the same map that plain-titles it). Implemented as a shared server component rendered by the per-route layouts (the session-7 passthrough pattern); the signup/forgotpassword supersets get the same treatment; mirroring the dashboard ABSENCE is part of the contract.
+
+## Audit & verification
+
+- Baseline at `aa0e069` (fresh workspace): lint ✓ typecheck ✓ 55 unit ✓ build ✓ 145/145 E2E ✓ smoke 11/11 ✓; the session-10 commit `43ac03d` audited clean against its documented plan (G1–G4 all verified in code).
+- **Standing priority — mobile navigation**: full live matrix on both sites at 375×812 (reference contract stable: 288px sheet, #fafafa, 80% overlay, scroll lock, Escape → body; ours fully green incl. nav-tap auto-close + zero overflow; the 10-test E2E spec passed at baseline).
+- New probe surfaces: the head's LINK + SCRIPT enumeration (manifest + JSON-LD), the id-less route matrix cell, HTTP response headers, 1920px wide viewport (the reference overflows 48px — their blob defect; ours fits), stat-card affordances (inert on both), empty-form validation (native bubbles on the reference — our field-error superset), the Google button click (their base44 OAuth redirect — our production-sane alert), comment ordering + disabled-state contract (parity).
+- **Tailwind v4 sweep**: the space-y trap-log #4 static scan flagged 2 candidates — both grandchildren (the known false-positive class, structurally confirmed); the standing pins (cursor preflight, token block, hover guard) all stable.
+- TDD: 10 red → **156/156 E2E green** (+11 session-11 tests) + 55 unit + smoke 11/11. Mid-cycle hardenings: `String()` coercion for the manifest's `Record<string, unknown>` fields (TS18046); the manifest-link pin caught the Next convention override.
+- Live paired re-verification on the production standalone: the bare-route Alert computes the reference's exact contract (`rgb(239, 68, 68)` + 50%-alpha border + 8px radius + 12px/16px padding); `/manifest.json` serves the full measured field set; the head carries the manifest link + theme-color + apple-touch-icon; the JSON-LD breadcrumbs render `[Home, <segment>]` per route with `/dashboard` carrying none.
+
+## Process lessons (in `docs/remediation-plan-session11.md` §5)
+
+1. The head is bigger than the metas you grep for — enumerate every `<link>` and `<script>`.
+2. Follow the redirect — the manifest was one `curl -L` away.
+3. Drive the route matrix, including the degenerate cells — the id-less route hid an infinite skeleton.
+4. The platform's special cases are contract too — mirror the ABSENCE of the dashboard JSON-LD.
+5. Static scans need structural confirmation — both space-y "hits" were grandchildren.
+
+## Artifacts
+
+- `docs/remediation-plan-session11.md` — the full inventory, non-gap ledger, execution log, and lessons.
+- `tests/e2e/visual-parity.spec.ts` — +11 session-11 tests (127 parity total; suite 156).
+- `src/app/manifest.json/route.ts` + `public/icon-192.png`/`icon-512.png` + `src/app/apple-icon.png` (via `scripts/gen-icons-s11.py`) — the PWA surface.
+- `src/components/breadcrumb-jsonld.tsx` + 6 route layouts — the structured-data surface.
+- `docs/screenshots/` — 7 refreshed production-server captures (`scripts/capture-screenshots-s11.sh` — also fixes the s9/s10 `aref*=` selector lineage bug).
+- README / AGENTS (session-11 contracts) / CLAUDE (counts + two new anti-patterns) / PAD (known-issues row + parity count) / `service-desk_SKILL.md` v2.9.0 (lessons 43–48) — all updated.

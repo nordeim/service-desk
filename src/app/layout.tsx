@@ -39,11 +39,18 @@ export const metadata: Metadata = {
     title: "ServiceDesk",
     statusBarStyle: "black",
   },
+  // Session 11: the reference's head links rel="manifest" -> /manifest.json
+  // (their platform API behind a 302). Ours is the app/manifest.ts route.
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Session 11 (live-measured): the reference ships
+  // <meta name="theme-color" content="#000000"> — missed by the session-8
+  // social/PWA sweep. Next 16 emits it from the Viewport export.
+  themeColor: "#000000",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

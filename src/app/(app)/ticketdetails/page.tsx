@@ -123,7 +123,17 @@ export default function TicketDetailsPage() {
     }
   }
 
-  if (notFound) {
+  // Session 11: the reference renders the not-found Alert on the id-less
+  // route too (live-measured on the bare /ticketdetails) — the same
+  // destructive Alert as the unknown-id case. Derived at render time (not
+  // setState in the effect body — that's an ESLint error in this config):
+  // a missing/empty id means there is no ticket to load, so we short-circuit
+  // straight to the terminal state instead of the loading skeleton (which
+  // previously rendered forever — the load callback early-returns and the
+  // ticket state never resolves).
+  const missingId = !ticketId;
+
+  if (notFound || missingId) {
     return (
       // Session 10: the reference renders a shadcn destructive Alert inline
       // in the standard max-w-5xl page container (live-measured on

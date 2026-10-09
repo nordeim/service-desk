@@ -371,3 +371,37 @@ Work Log:
 
 Stage Summary:
 - All 4 session-10 findings fixed and E2E-pinned (145 E2E total: visual-parity 105→116); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 22
+Agent: main (Super Z)
+Task: Session 11 — refresh repo, review session_10/session_11 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git clone (fresh workspace) at aa0e069 (session-10 code + the session-11 briefing docs/session_11.md); current session established as Session 11
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.8.0 + session_10.md + remediation-plan-session10.md + worklog + session_11.md — all aligned with the codebase; env contract set up (.env from .env.example with generated AUTH_SECRET, DATABASE_URL=file:../db/custom.db, db/ at root with schema pushed + seeded 4/11/3, skills/ excluded by construction in eslint/vitest/playwright/tsconfig configs; .env.example matches the codebase)
+- Baseline gates (fresh workspace): lint ✓ typecheck ✓ 55 unit ✓ build ✓ 145/145 E2E ✓ smoke 11/11 ✓; session-10 commit 43ac03d audited clean (G1 LoginView state machine, G2 destructive Alert, G3 attachment constants, G4 sitemap/robots — all verified in code)
+- Fresh gap analysis vs live reference (agent-browser, both sites). NEW probe surfaces: the head's LINK + SCRIPT enumeration (found rel=manifest → /manifest.json behind a 302 — the full PWA manifest contract measured: name/short_name, their description, standalone, #000000 theme, #ffffff background, 192+512 icons, start_url/scope; ours had neither route nor head link), theme-color meta + apple-touch-icon link (both missing on ours — missed by the s8 social/PWA meta sweep), the per-route BreadcrumbList JSON-LD (the reference's SEO builder emits Home → lowercase-segment per route; /dashboard carries NONE — their home special case; ours had no JSON-LD), the id-less /ticketdetails route (reference renders the not-found destructive Alert; ours hung in an infinite loading skeleton — the load callback early-returns on a missing id; every prior session drove the route WITH an id), HTTP response headers (platform infra vs our security headers — superset, non-gap), 1920px viewport (reference overflows 48px — their blob defect; ours fits — superset), stat-card affordances (inert on both), empty-form validation (reference = native required bubbles; our noValidate + field errors = documented superset), Google button (reference = real base44 OAuth redirect — platform artifact; ours = production-sane alert), comment contract (placeholder, disabled-at-empty Add button, No-comments-yet, oldest-first ordering — parity on all)
+- Standing priority verified: mobile navigation full matrix on both sites at 375px (reference contract stable — 288px sheet, #fafafa, 80% overlay, scroll lock, Escape→body; ours fully green: trigger hit-test BUTTON, sheet geometry, nav-tap auto-close + scroll restore, zero horizontal overflow; the 10-test E2E spec green at baseline)
+- Tailwind v4 sweep: space-y trap-log #4 static scan found 2 candidates — both grandchildren (false positives, structurally confirmed); standing pins stable (cursor preflight, :root token block, titles, canonical/og, head set — no reference drift this session)
+- 4 findings: G1 the id-less detail route infinite skeleton (HIGH); G2 no PWA manifest + no head link (MED); G3 no theme-color meta + no apple-touch-icon link (MED); G4 no BreadcrumbList JSON-LD (MED-LOW)
+- Deep-verified NON-gaps: /site.webmanifest on the reference = their SPA catch-all HTML (platform exhaust, not a webmanifest); og:image divergence (their 1200x630 rendered canvas vs our /icon.png — the s8 documented decision); password eye toggle + print rules absent on both
+- Wrote + validated docs/remediation-plan-session11.md (4 findings + non-gap ledger + risks + 5 process lessons)
+
+Stage Summary:
+- Repo at aa0e069 + plan; 4 findings (1 HIGH: the id-less route; 3 MED head/PWA/SEO surfaces) queued for TDD execution
+
+---
+Task ID: 23
+Agent: main (Super Z)
+Task: Session 11 — TDD remediation, verification, docs, SKILL.md v2.9.0, commit + push
+
+Work Log:
+- TDD: 11 E2E tests written first (2 id-less-route + 2 manifest + 2 theme-color/apple-icon + 5 JSON-LD), all verified RED against the pre-fix build (10 failed; the passes = the setup project + the trivially-green dashboard-absence guard); one hardened mid-cycle (String() coercion for the manifest's Record<string, unknown> fields — TS18046)
+- Implemented: G1 ticketdetails/page.tsx render-time missingId = !ticketId derivation ahead of the skeleton branch (covers bare + empty ?id=); G2 public/icon-192.png + icon-512.png (real PNGs via scripts/gen-icons-s11.py, LANCZOS from the 480x480 logo) + src/app/manifest.json/route.ts (the reference's URL; MID-CYCLE CORRECTION: Next's app/manifest.ts convention serves /manifest.webmanifest AND auto-emits its own head link overriding metadata.manifest — the E2E link pin caught it; the convention file was dropped for the plain route handler) + manifest: "/manifest.json" in the root metadata; G3 themeColor #000000 in the root viewport export (Next 16's location for it) + src/app/apple-icon.png (180x180 — the file convention emits the apple-touch-icon link); G4 src/components/breadcrumb-jsonld.tsx (Home → lowercase segment, absolute URLs from NEXT_PUBLIC_SITE_URL) rendered in mytickets/submitticket/ticketdetails layouts + new login/signup/forgotpassword layouts (dashboard deliberately excluded, mirroring the reference's home special case)
+- Gates: lint ✓ typecheck ✓ 55 unit ✓ build ✓ 156/156 E2E ✓ (145 + 11 new, zero regressions) smoke 11/11 ✓
+- Live paired re-verification (production standalone :3000): the bare /ticketdetails renders the Alert computing rgb(239,68,68) + oklab /0.5 border + 8px radius + 12px 16px padding (the reference's measured contract) with no skeleton + the superset Back control; /manifest.json serves the full measured field set; link[rel=manifest] → /manifest.json, meta[name=theme-color] → #000000, link[rel=apple-touch-icon] → the 180x180 PNG; JSON-LD [Home, login]/[Home, mytickets]/[Home, submitticket]/[Home, ticketdetails] (+ superset signup/forgotpassword), /dashboard carries none
+- Refreshed docs/screenshots/ (7 shots via scripts/capture-screenshots-s11.sh — fixes the s9/s10 aref*= selector lineage bug; 02/03/06/07 rendered byte-identical to the s10 set, 01/04/05 refreshed); updated README (counts 156/127 parity + features + session-11 pin list)/AGENTS (session-11 contracts + command counts + reference list)/CLAUDE (counts + E2E paragraph + two new anti-patterns: the manifest.ts convention override, setState-in-effect for not-found)/PAD (known-issues row + parity count 127)/service-desk_SKILL.md v2.9.0 (lessons 43-48); session_11.md retrospective appended; remediation-plan-session11.md execution status; this worklog
+
+Stage Summary:
+- All 4 session-11 findings fixed and E2E-pinned (156 E2E total: visual-parity 116→127); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py

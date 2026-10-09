@@ -1848,3 +1848,145 @@ test.describe("session 9: the desktop sidebar edge", () => {
     expect(translucent, `edge border color was: ${edge.borderColor}`).toBe(true);
   });
 });
+
+test.describe("session 11: the id-less ticket detail route", () => {
+  // The reference renders the "Ticket not found" destructive Alert on the
+  // BARE /ticketdetails route (no ?id) — the same measured contract as the
+  // unknown-id case. Ours hung in the loading skeleton forever (the load
+  // callback early-returns on a missing id, so the ticket state never
+  // resolves). First probed in session 11: every prior session drove the
+  // detail page WITH an id.
+  test("the bare route renders the destructive Alert, not a skeleton", async ({ page }) => {
+    await page.goto("/ticketdetails");
+    // Scoped to main — Next's route announcer also carries role=alert.
+    const alert = page.locator('main div[role="alert"]');
+    await expect(alert).toBeVisible();
+    await expect(alert).toContainText("Ticket not found");
+    await expect(alert).toHaveClass(/border-destructive\/50/);
+    await expect(alert).toHaveClass(/text-destructive/);
+    // The skeleton must NOT linger — the page resolves to a terminal state.
+    await expect(page.locator('[aria-label="Loading ticket"]')).toHaveCount(0);
+    // The superset Back to Tickets control stays (asChild → role=link).
+    await expect(page.getByRole("link", { name: /Back to Tickets/ })).toBeVisible();
+  });
+
+  test("an empty id query (?id=) also resolves to the Alert", async ({ page }) => {
+    await page.goto("/ticketdetails?id=");
+    const alert = page.locator('main div[role="alert"]');
+    await expect(alert).toBeVisible();
+    await expect(alert).toContainText("Ticket not found");
+  });
+});
+
+test.describe("session 11: the PWA manifest surface", () => {
+  // The reference ships /manifest.json (302 → their platform API) linked
+  // from the head. Live-measured fields: name/short_name "ServiceDesk",
+  // their description, icons at 192x192 + 512x512, start_url, display
+  // "standalone", theme_color #000000, background_color #ffffff, scope.
+  // Production-sane mirror: real size-correct PNG icons (their manifest
+  // declares two sizes against one 480x480 JPEG) + NEXT_PUBLIC_SITE_URL
+  // for the absolute URLs (the sitemap.ts precedent).
+  test("/manifest.json serves the reference's measured contract", async ({ page }) => {
+    const res = await page.request.get("/manifest.json");
+    expect(res.status()).toBe(200);
+    const manifest = (await res.json()) as Record<string, unknown>;
+    expect(manifest.name).toBe("ServiceDesk");
+    expect(manifest.short_name).toBe("ServiceDesk");
+    expect(manifest.description).toBe(
+      "An IT ticketing system to log, track, prioritize, and resolve technical issues efficiently."
+    );
+    expect(manifest.display).toBe("standalone");
+    expect(String(manifest.theme_color).toLowerCase()).toBe("#000000");
+    expect(String(manifest.background_color).toLowerCase()).toBe("#ffffff");
+    // start_url/scope derive from the build origin — assert shape, not host.
+    expect(String(manifest.start_url)).toMatch(/^https?:\/\//);
+    expect(new URL(String(manifest.start_url)).pathname).toBe("/");
+    expect(String(manifest.scope)).toMatch(/\/$/);
+    const icons = manifest.icons as { src: string; sizes: string; type: string }[];
+    expect(icons.map((i) => i.sizes).sort()).toEqual(["192x192", "512x512"]);
+    for (const icon of icons) {
+      expect(icon.type).toBe("image/png");
+      const iconRes = await page.request.get(icon.src);
+      expect(iconRes.status(), `icon ${icon.src} fetched`).toBe(200);
+      expect(iconRes.headers()["content-type"]).toContain("image/png");
+    }
+  });
+
+  test("the head links the manifest", async ({ page }) => {
+    await page.goto("/login");
+    const link = page.locator('link[rel="manifest"]');
+    await expect(link).toHaveCount(1);
+    // Next may append a version query — assert the path.
+    const href = await link.getAttribute("href");
+    expect(href, `manifest href was: ${href}`).toMatch(/\/manifest\.json/);
+  });
+});
+
+test.describe("session 11: theme-color + apple-touch-icon", () => {
+  // The reference's head ships <meta name="theme-color" content="#000000">
+  // and <link rel="apple-touch-icon" href="<their logo>"> — both missed by
+  // the session-8 social/PWA sweep (it captured the apple-mobile-web-app-*
+  // metas but not these two). Our apple icon is a real 180x180 PNG from the
+  // same logo source; Next's apple-icon.png file convention emits the link.
+  test("the head carries theme-color #000000", async ({ page }) => {
+    await page.goto("/login");
+    const meta = page.locator('meta[name="theme-color"]');
+    await expect(meta).toHaveCount(1);
+    await expect(meta).toHaveAttribute("content", "#000000");
+  });
+
+  test("the head carries the apple-touch-icon link", async ({ page }) => {
+    await page.goto("/login");
+    const link = page.locator('link[rel="apple-touch-icon"]');
+    await expect(link).toHaveCount(1);
+    const href = await link.getAttribute("href");
+    expect(href, `apple-touch-icon href was: ${href}`).toMatch(/apple-icon\.png/);
+    const res = await page.request.get(href!);
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("image/png");
+  });
+});
+
+test.describe("session 11: BreadcrumbList JSON-LD structured data", () => {
+  // The reference ships a BreadcrumbList JSON-LD in the head on every route
+  // EXCEPT /dashboard (their builder special-cases its home route — the same
+  // map that plain-titles it). Names are the lowercase path segment verbatim
+  // ("login", "mytickets", …); position 1 is Home → the origin.
+  const routes: [string, string][] = [
+    ["/login", "login"],
+    ["/mytickets", "mytickets"],
+    ["/submitticket", "submitticket"],
+    ["/ticketdetails", "ticketdetails"],
+  ];
+
+  for (const [path, segment] of routes) {
+    test(`/${segment === "" ? "" : segment} carries the breadcrumb with name "${segment}"`, async ({ page }) => {
+      await page.goto(path);
+      const ld = await page.evaluate(() => {
+        const el = document.querySelector('script[type="application/ld+json"]');
+        return el ? el.textContent : null;
+      });
+      expect(ld, `no JSON-LD script on ${path}`).toBeTruthy();
+      const parsed = JSON.parse(ld!) as {
+        "@type": string;
+        itemListElement: { position: number; name: string; item: string }[];
+      };
+      expect(parsed["@type"]).toBe("BreadcrumbList");
+      const items = parsed.itemListElement;
+      expect(items).toHaveLength(2);
+      expect(items[0].name).toBe("Home");
+      expect(new URL(items[0].item).pathname).toBe("/");
+      expect(items[1].name).toBe(segment);
+      expect(new URL(items[1].item).pathname).toBe(`/${segment}`);
+    });
+  }
+
+  test("/dashboard carries NO JSON-LD (the reference's home special case)", async ({ page }) => {
+    await page.goto("/dashboard");
+    await page.waitForSelector("main .text-4xl");
+    const ld = await page.evaluate(
+      () => document.querySelector('script[type="application/ld+json"]')?.textContent ?? null,
+    );
+    expect(ld).toBeNull();
+  });
+});

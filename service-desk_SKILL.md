@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-10 remediation (2026-10-10).
+  functionality. Distilled through the session-11 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.8.0
+version: 2.9.0
 last_updated: 2026-10-10
-project_state: 55 unit tests + 145 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–10)
+project_state: 55 unit tests + 156 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–11)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -385,6 +385,12 @@ Manual/visual checks:
 40. **Platform artifacts are not features.** (Session 10.) The base44 verify-email view and the auto-generated sitemap of dead routes are platform exhaust — replicate the DESIGN (card views, sitemap infrastructure) with production-sane substance (no fake verification, no dead URLs).
 41. **The engine trap log pays dividends — verify, don't assume.** (Session 10.) The space-y v3→v4 selector rewrite (margin-side swap + `:where()` specificity) had zero instances in this app, but only because a computed-margin walk ran on both sites. Keep walking the scales each session.
 42. **Enumerate the invisible surfaces too.** (Session 10.) robots.txt/sitemap.xml lived outside every DOM probe for nine sessions — one curl each. The session-8 `<head>` lesson extends to the server's root files.
+43. **The head is bigger than the metas you grep for.** (Session 11.) Ten sessions swept og:/twitter:/apple- metas; the `rel="manifest"` LINK and the JSON-LD SCRIPT lived beside them the whole time. Enumerate every `<link>` and every `<script type>` in the head, not just meta tags.
+44. **Follow the redirect.** (Session 11.) `/manifest.json` answered 302 — the lazy probe stops at "not 200". The manifest contract was one `curl -L` away.
+45. **Drive the route matrix, including the degenerate cells.** (Session 11.) Every session opened `/ticketdetails?id=X`; the id-less cell of the matrix hid an infinite skeleton. Parameterized routes deserve their empty-parameter probes.
+46. **The platform's special cases are contract too.** (Session 11.) `/dashboard` carrying no JSON-LD (and no proper title) is their builder's home-route special case — mirroring the ABSENCE is as much parity as mirroring the presence.
+47. **Next's `app/manifest.ts` convention overrides `metadata.manifest`.** (Session 11.) The convention file serves `/manifest.webmanifest` AND auto-emits its own head link — silently defeating the metadata field. When the manifest URL matters (parity), use a plain route handler.
+48. **Static engine-trap scans need structural confirmation.** (Session 11.) The space-y detector flagged 2 "hits" — both grandchildren (the known false-positive class). Verify JSX depth before filing engine-trap findings.
 
 ---
 
