@@ -127,3 +127,40 @@ Dry-run OK (`e8eca32..2d003a6 → main`). Real push:
 Also verified: the reference never toasts, mobile nav passes the full close-path matrix, and no reference drift this session.
 
 **Suggested next:** watch the CI run on GitHub (it should go green now), then review `docs/remediation-plan-session8.md` §5 — six process lessons (esp. "the gate's unit is the commit" and "probe the head, not just the body").
+
+---
+
+# Session 9 Retrospective
+
+**Date:** 2026-10-10 · **Scope:** session-9 parity audit + remediation · **Repo state at start:** `796a37a` (session-8 code + this briefing) · **At end:** all 7 findings fixed, 134/134 E2E, pushed to `main`.
+
+## What this session delivered
+
+- **The Tailwind v4 cursor-preflight regression (HIGH).** v4 removed v3's `button, [role="button"] { cursor: pointer }` preflight (a documented breaking change) — every true button on our site rendered the OS arrow cursor while the reference (v3 build) renders the hand (live-verified on their sign-out, triggers, CTAs). Restored the v3 rule verbatim in `@layer base` — one rule fixes ~15 button surfaces (sign-out, both sidebar triggers, all select triggers, every form submit, Try again, 404 Go Home, Google, Remove).
+- **The stock shadcn token block (HIGH).** The session's headline method — a FULL `:root` token diff between the two sites (every custom property, resolved to RGB) — revealed the reference's entire block is verbatim stock shadcn, while ours carried session-1 custom slate/cyan guesses never measured until now: `--primary` cyan-600 (all 11 `hover:bg-primary/80` badge hovers rendered cyan instead of the reference's live-measured dark `rgba(23,23,23,0.8)`), `--border`/`--input` slate-200 vs neutral-200 (every Card edge), `--foreground` family slate-900 vs near-black (the CategoryBadge text), `--sidebar-ring` cyan-500 vs blue-500 (nav keyboard focus rings), `--background` slate-50 vs white. Flipped the whole family to stock (the inert remainder drift-proofed).
+- **The old-gen Badge base (MED).** Our Badge atom shipped the NEW shadcn generation (`transition-[color,box-shadow]`, `focus-visible:ring-[3px]`) — hover backgrounds SNAPPED (no background-color in the transition list) where the reference fades through the 150 ms `transition-colors`. Swapped to the DOM-measured old-gen base + old-gen variant hovers; added the same tail to the 3 raw quick-stat pills.
+- **The translucent sidebar edge (MED).** The reference's desktop wrapper carries an explicit `border-slate-200/60` (resolves rgba(226,232,240,0.6)); ours was solid default-border. One class.
+
+## Audit & verification
+
+- Baseline at `796a37a` (after installing Playwright Chromium — fresh workspace): lint ✓ typecheck ✓ 54 unit ✓ build ✓ **125/125 E2E** ✓ smoke 11/11 ✓; session-8 commit `2d003a6` audited clean against its documented plan.
+- New probe surfaces: **the full `:root` token diff** (both sites' CSSOM enumerated, diffed, resolved), **the preflight diff** (button-cursor rules), **badge hover colors + transitions under hover:hover** (Playwright: their pill hovers to rgba(23,23,23,0.8), ours was cyan oklab), **landscape viewports** (812×375 desktop-flip both; 667×375 phone-landscape sheet scroll structure byte-identical 452/185), **the mobile-sheet a11y trio** (focus trap ✓ both; scroll lock ✓ both; open-focus lands on the SIGN-OUT button on BOTH — a shared Radix removeLinks quirk, not a divergence), **comment-thread markup** (identical classes + gradient + timestamp format), **select-option text colors** (identical rgb(23,23,23)), **::selection/scrollbar/autofill rules** (none on either), **autocomplete attributes** (our documented superset), **the sidebar wrapper border**, and the standing drift pins (accent tokens, rounded-sm 4px, per-route titles, nav mechanism, head meta — ALL stable).
+- Shared-defect ledger: the mangled `transition-argin,opacity]` upstream shadcn class ships in BOTH DOMs (inert on both — do not fix one side); the reference's DB carries our session-8 probe ticket/comments (their data hygiene).
+- TDD: 9 red → 134/134 E2E green (2 mid-cycle hardenings: the hover read raced the new 150 ms fade; the edge probe matched the wrong wrapper div). Full gate green incl. smoke 11/11. A first-run lint warning in the new probe script was caught and fixed before commit (the session-8 "gate's unit is the commit" lesson holding).
+- Live paired re-verification on the production build: every token/cursor/border/hover/ring value = the reference (the sidebar edge and badge hovers differ only in oklab-vs-rgba serialization — the documented pipeline divergence).
+
+## Process lessons (in `docs/remediation-plan-session9.md` §5)
+
+1. Diff the whole `:root` — not just the tokens you know about.
+2. Preflight is part of parity — diff the base layer too.
+3. Component generation matters even when classes look right — pin computed `transition-property`.
+4. The reference's DOM is twMerge output — compare merged strings.
+5. Shared defects are parity too — verify the reference shares a quirk before fixing it.
+6. Detached-element probes beat locator gymnastics for at-rest values.
+
+## Artifacts
+
+- `docs/remediation-plan-session9.md` — the full inventory, non-gap ledger, execution log, and lessons.
+- `tests/e2e/visual-parity.spec.ts` — +9 session-9 tests (105 parity total; suite 134).
+- `docs/screenshots/` — 7 refreshed production-server captures; `scripts/capture-screenshots-s9.sh`.
+- README / AGENTS (session-9 contracts) / CLAUDE (cursor + token + badge rules) / PAD (token table + known-issues row) / `service-desk_SKILL.md` v2.7.0 (lessons 33–37) — all updated.

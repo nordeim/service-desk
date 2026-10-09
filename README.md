@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?logo=prisma&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-54%20unit%20%2B%20125%20E2E-brightgreen)
+![Tests](https://img.shields.io/badge/tests-54%20unit%20%2B%20134%20E2E-brightgreen)
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 
 A production-ready IT support ticketing portal — a feature-parity **superset** clone of the [base44 ServiceDesk reference app](https://service-desk-332a5ae4.base44.app/), rebuilt on Next.js 16 + React 19 + Prisma/SQLite. Users sign in, submit tickets across six issue categories, track status/priority, converse in comment threads, and manage their own ticket lifecycle.
@@ -14,7 +14,7 @@ A production-ready IT support ticketing portal — a feature-parity **superset**
 
 The portal solves a everyday enterprise problem: employees need a single place to report IT issues (hardware, software, network, access, email) and follow them to resolution, while the sidebar keeps live global stats visible. The clone reproduces the reference app's visual design (measured from its live DOM and computed styles — not guessed) and extends it with a working signup flow, password-reset request, file attachments, owner-side status control, search/filter/sort, and a full test pyramid.
 
-**Verification status:** `lint` ✓ · `typecheck` ✓ · 54 Vitest unit tests ✓ · production build ✓ · 125 Playwright E2E tests ✓ · API smoke script ✓ · CI (GitHub Actions, on push/PR to main) ✓
+**Verification status:** `lint` ✓ · `typecheck` ✓ · 54 Vitest unit tests ✓ · production build ✓ · 134 Playwright E2E tests ✓ · API smoke script ✓ · CI (GitHub Actions, on push/PR to main) ✓
 
 ## Key Features
 
@@ -31,9 +31,9 @@ The portal solves a everyday enterprise problem: employees need a single place t
 | 🧾 **Social/PWA metadata** | Per-route canonical URLs, OpenGraph + Twitter cards, apple-web-app meta (the reference's measured head set) |
 | 📊 **Live stats** | Sidebar quick stats (global) + dashboard cards (yours) + average resolution time |
 | 📱 **Responsive chrome** | shadcn/ui off-canvas mobile sidebar with overlay, Escape, and auto-close on navigate |
-| 🎨 **Parity-pinned design** | 96 E2E parity tests pin the reference's measured contracts (adjacent nav icon/label layout, gradient quick stats, flat recent rows with FileText tiles, detail grid, login card, lowercase badges, entrance animations, badge shadow + per-surface padding, the measured focus-state matrix, reference-computed icon-button padding/shadows/spacings, the system font stack, the v3 radius scale, select dropdown structure + priority colors, the accent-token pair, the auth-error alert contract, the 80% sheet overlay) |
+| 🎨 **Parity-pinned design** | 105 E2E parity tests pin the reference's measured contracts (adjacent nav icon/label layout, gradient quick stats, flat recent rows with FileText tiles, detail grid, login card, lowercase badges, entrance animations, badge shadow + per-surface padding, the measured focus-state matrix, reference-computed icon-button padding/shadows/spacings, the system font stack, the v3 radius scale, select dropdown structure + priority colors, the accent-token pair, the auth-error alert contract, the 80% sheet overlay, the button-cursor preflight, the stock shadcn token block, the old-gen Badge base, the translucent sidebar edge) |
 | 🏃 **Entrance animations** | Reference-measured rise-in (opacity + 20px slide, spring easing) on cards/rows — disabled under `prefers-reduced-motion` |
-| 🧪 **Test pyramid** | 54 unit + 125 E2E tests + API smoke + GitHub Actions CI, pinned to the UI contract |
+| 🧪 **Test pyramid** | 54 unit + 134 E2E tests + API smoke + GitHub Actions CI, pinned to the UI contract |
 
 ## Architecture
 
@@ -134,12 +134,12 @@ bun run lint && bun run typecheck && bun run test
 
 ```bash
 bun run test               # Vitest unit: 54 tests (auth HMAC/scrypt/rate-limit, validation, db-path, utils, priority-select colors)
-bun run test:e2e           # Playwright E2E (125 tests): builds nothing — boots the PRODUCTION standalone server
+bun run test:e2e           # Playwright E2E (134 tests): builds nothing — boots the PRODUCTION standalone server
                            # on :3100 with an isolated db/e2e.db (schema pushed + seeded by global setup)
 bash scripts/smoke-test.sh # API surface against a throwaway standalone server on :3999
 ```
 
-E2E notes: the suite signs the demo user in **once** (setup project → saved `storageState`) because the auth endpoints are rate-limited (10 attempts/IP/15 min). `tests/e2e/auth.spec.ts` opts out of the shared session to test the logged-out surface. The mobile-navigation spec pins the off-canvas sheet contract (open, overlay close, Escape close, auto-close on navigate, desktop gradient parity, the 80% overlay dim). `tests/e2e/visual-parity.spec.ts` (96 tests) pins the session-2 through session-8 remediation contracts measured from the live reference: gradient quick-stats rows, flat divide-y recent tickets with FileText icon tiles + arrows + date-only dates, lowercase badges, the detail page's `lg:grid-cols-3` layout with gradient card header, `text-4xl` page headings, the non-sticky mobile header, the login card shell, the reference entrance animation (`animate-rise-in`, disabled under `prefers-reduced-motion`), and the submit form details (circle-alert header icon, blue priority value, upload dropzone, inline footer). Session-5 additions pin the reference-computed values that class names alone cannot express: icon-button 16px horizontal padding, the light v3-name shadow step (`shadow-xs` on the v4 scale), `mr-2` icon spacings, the CTA arrow's `translate-x-1` slide, and the system font stack (the reference loads no webfont). Session-6 additions pin the radius scale (6/8/12px steps — the shadcn v4 calc chain rendered +2px on every rounded control), the focus-state matrix (1px near-black rings on buttons/inputs, 2px slate-400 + white offset on auth inputs, per-surface cyan customs), the select dropdown contracts (emoji-span category options, per-priority option colors, trigger color follows selection), the whole-line signup link, and the shadow-less Google button. Session-7 additions pin the accent-token pair (gray #f5f5f5 + near-black #171717 on option highlights and hover text — ours were cyan), the option-radius drift (reference rounded-sm now 4px), the empty-state markup (w-20 gradient circle, FileText tile, text-xl heading), fetch-failure resilience (error panel + Try again, with recovery), the favicon, and per-route document titles. Session-8 additions pin the auth-error alert contract (translucent red-50/70 + red-700 + rounded-xl + p-4 — the reference's shadcn Alert), the mobile sheet overlay at 80% black, zero horizontal overflow at 375px (a deliberate superset over a defect the reference shares) with ellipsis-active row titles, the social/PWA head set (description, og:*, twitter:card, canonicals, apple-web-app), and the focus-visible ring tails on the raw sign-out/Remove buttons. Color pins accept both rgb() and lab() representations (Tailwind v4 emits palette colors as lab()). `tests/e2e/dashboard.spec.ts` also pins a clean hydration (no console hydration-mismatch errors).
+E2E notes: the suite signs the demo user in **once** (setup project → saved `storageState`) because the auth endpoints are rate-limited (10 attempts/IP/15 min). `tests/e2e/auth.spec.ts` opts out of the shared session to test the logged-out surface. The mobile-navigation spec pins the off-canvas sheet contract (open, overlay close, Escape close, auto-close on navigate, desktop gradient parity, the 80% overlay dim). `tests/e2e/visual-parity.spec.ts` (105 tests) pins the session-2 through session-9 remediation contracts measured from the live reference: gradient quick-stats rows, flat divide-y recent tickets with FileText icon tiles + arrows + date-only dates, lowercase badges, the detail page's `lg:grid-cols-3` layout with gradient card header, `text-4xl` page headings, the non-sticky mobile header, the login card shell, the reference entrance animation (`animate-rise-in`, disabled under `prefers-reduced-motion`), and the submit form details (circle-alert header icon, blue priority value, upload dropzone, inline footer). Session-5 additions pin the reference-computed values that class names alone cannot express: icon-button 16px horizontal padding, the light v3-name shadow step (`shadow-xs` on the v4 scale), `mr-2` icon spacings, the CTA arrow's `translate-x-1` slide, and the system font stack (the reference loads no webfont). Session-6 additions pin the radius scale (6/8/12px steps — the shadcn v4 calc chain rendered +2px on every rounded control), the focus-state matrix (1px near-black rings on buttons/inputs, 2px slate-400 + white offset on auth inputs, per-surface cyan customs), the select dropdown contracts (emoji-span category options, per-priority option colors, trigger color follows selection), the whole-line signup link, and the shadow-less Google button. Session-7 additions pin the accent-token pair (gray #f5f5f5 + near-black #171717 on option highlights and hover text — ours were cyan), the option-radius drift (reference rounded-sm now 4px), the empty-state markup (w-20 gradient circle, FileText tile, text-xl heading), fetch-failure resilience (error panel + Try again, with recovery), the favicon, and per-route document titles. Session-8 additions pin the auth-error alert contract (translucent red-50/70 + red-700 + rounded-xl + p-4 — the reference's shadcn Alert), the mobile sheet overlay at 80% black, zero horizontal overflow at 375px (a deliberate superset over a defect the reference shares) with ellipsis-active row titles, the social/PWA head set (description, og:*, twitter:card, canonicals, apple-web-app), and the focus-visible ring tails on the raw sign-out/Remove buttons. Session-9 additions pin the Tailwind v4 cursor-preflight restoration (every true button renders the hand cursor, like the reference's v3 build), the stock shadcn token block (near-black --primary driving the dark badge hovers, neutral-200 --border on every Card, near-black --foreground on the CategoryBadge, blue-500 --sidebar-ring on nav keyboard focus — live-measured via real Tab presses), the old-gen Badge base (transition-colors including background-color — the 150 ms hover fade — plus the focus:ring-2 tail, replacing the new-gen ring-[3px] base), and the translucent desktop sidebar edge (border-slate-200/60). Color pins accept both rgb() and lab() representations (Tailwind v4 emits palette colors as lab()). `tests/e2e/dashboard.spec.ts` also pins a clean hydration (no console hydration-mismatch errors).
 
 ### CI
 
@@ -165,13 +165,16 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR to `main`: the
 
 ## Design System
 
-Measured from the reference app (computed styles + extracted `:root` variables):
+Measured from the reference app (computed styles + extracted `:root` variables). Session-9's full token diff established that the reference's `:root` is verbatim **stock shadcn** (zinc neutrals, near-black primary, blue-500 sidebar ring) — the cyan→blue motif lives entirely in explicit utilities, never in the semantic tokens:
 
 | Token | Hex | Usage |
 |---|---|---|
-| `--background` | `#f8fafc` | Page base (slate-50) |
+| `--background` | `#ffffff` | Body base (white — stock; the visible slate-50 page base comes from the gradient wrappers) |
 | `--sidebar` | `#fafafa` | Sidebar panel — **not** white (measured) |
-| `--primary` / `--ring` | `#0891b2` / `#06b6d4` | Cyan accents, focus rings |
+| `--primary` / `--ring` | `#171717` / `#0a0a0a` | Near-black (stock): badge hovers (`hover:bg-primary/80` → dark) and focus rings; cyan accents come from explicit `*-cyan-500` utilities |
+| `--border` / `--input` | `#e5e5e5` | Neutral-200 (stock) — every default-bordered Card/control edge |
+| `--foreground` | `#0a0a0a` | Near-black (stock) — the outline CategoryBadge text + inherited card text |
+| `--sidebar-ring` | `#3b82f6` | Blue-500 (stock) — nav keyboard focus rings |
 | `--navy-950 … 800` | `#0a1628` / `#0f2744` / `#1a3a5c` | Dark surfaces (login badge, dark theme) |
 | `--amber-500` | `#f59e0b` | "Open" stat badge |
 | `--emerald-500` | `#10b981` | "Resolved" accent |

@@ -163,19 +163,19 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
                 <span className="text-sm font-medium text-slate-700">Open</span>
                 {/* Reference (measured session 5): the quick-stat value
                     badges carry the old-shadcn hover wash. */}
-                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent hover:bg-primary/80 bg-amber-500 text-white font-bold shadow-md">
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-amber-500 text-white font-bold shadow-md">
                   {stats ? stats.open : "…"}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200/50">
                 <span className="text-sm font-medium text-slate-700">In Progress</span>
-                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent hover:bg-primary/80 bg-blue-500 text-white font-bold shadow-md">
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-blue-500 text-white font-bold shadow-md">
                   {stats ? stats.in_progress : "…"}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200/50">
                 <span className="text-sm font-medium text-slate-700">Total</span>
-                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent hover:bg-primary/80 bg-slate-600 text-white font-bold shadow-md">
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-slate-600 text-white font-bold shadow-md">
                   {stats ? stats.total : "…"}
                 </span>
               </div>

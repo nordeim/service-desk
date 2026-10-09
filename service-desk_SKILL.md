@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-8 remediation (2026-10-09).
+  functionality. Distilled through the session-9 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.6.0
-last_updated: 2026-10-09
-project_state: 54 unit tests + 125 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–8)
+version: 2.7.0
+last_updated: 2026-10-10
+project_state: 54 unit tests + 134 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–9)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -124,7 +124,7 @@ All tokens live in `src/app/globals.css` (Tailwind v4 CSS-first — there is NO 
   --background: #f8fafc;  --foreground: #0f172a;
   --card: #ffffff;        --card-foreground: #0f172a;
   --sidebar: #fafafa;     /* measured — NOT white */
-  --primary: #0891b2;     --ring: #0a0a0a;  # near-black (session 6; was cyan #06b6d4)
+  --primary: #171717;     --ring: #0a0a0a;  # both near-black (stock shadcn, sessions 6+9; --primary was cyan #0891b2 for 8 sessions — the full token diff proved the reference ships stock)
   --navy-950: #0a1628;    --navy-900: #0f2744;  --navy-800: #1a3a5c;
   --amber-500: #f59e0b;   --emerald-500: #10b981;
   /* …full palette in the file */
@@ -375,6 +375,11 @@ Manual/visual checks:
 30. **Horizontal-overflow probes need data control.** (Session 8.) Our mobile scrollWidth (516) vs theirs (451) was the SEED CORPUS, not structure — the same ticket title produced byte-identical scrollWidths on both sites. Bisect by hiding sections, then re-measure with equal data before calling a structural gap.
 31. **A `data-slot` prop can be overridden by call sites.** (Session 8.) Our mobile sidebar content renders `data-slot="sidebar"` (not `sheet-content`) because the sidebar passes its own prop — probe selectors built from component-file defaults false-negatived three close-path tests. Enumerate the live DOM before trusting the component source.
 32. **Read FULL computed values — string truncation manufactures bugs.** (Sessions 7–8, twice.) A 90-char `boxShadow.slice()` hid the visible shadow layers behind the animate-in zeros and nearly shipped a phantom "stat-card shadow missing" finding; the same truncation struck again on the focus ring. Never slice computed strings in probes.
+33. **Diff the whole `:root`, not just the tokens you know.** (Session 9.) Six sessions of surface probes never noticed half the token block was a session-1 theme guess — one CSSOM enumeration (`:root` rule dump → resolve to RGB → diff) catches the entire class in one probe.
+34. **Preflight is part of parity.** (Session 9.) The v3→v4 migration changed more than utilities: v4 removed `button, [role="button"] { cursor: pointer }` — invisible to every class-based probe. Diff the BASE layer rules too.
+35. **Component generation matters even when classes look right.** (Session 9.) Our Badge carried the new-gen base under old-gen variant classes; class-level pins passed while `transition-property` silently diverged (hover backgrounds snapped, never faded). Pin computed `transition-property` on interactive surfaces.
+36. **The reference's DOM is twMerge output — compare merged strings.** (Session 9.) Their "two different badge bases" resolved into one base + variant dedupe once read as cn() output; compare the final class attribute, not the source arrays.
+37. **Shared defects are parity too.** (Session 9.) The `transition-argin,opacity]` upstream mangling and the sheet-open focus landing on the sign-out button live in BOTH sites — verify the reference shares a quirk before "fixing" it, and never fix only one side.
 
 ---
 
@@ -516,7 +521,7 @@ Rules: never introduce a z above 50 for page chrome; portals own 50+; the dev ov
 | `--card-foreground` | `#0f172a` | card text |
 | `--sidebar` | `#fafafa` | sidebar panel — **measured, not white** |
 | `--sidebar-foreground` | `#0f172a` | sidebar text |
-| `--primary` | `#0891b2` | cyan accent (buttons, links) |
+| `--primary` | `#171717` | near-black (stock shadcn, session 9) — drives the dark `hover:bg-primary/80` badge washes; cyan accents come from explicit utilities |
 | `--primary-foreground` | `#ffffff` | text on primary |
 | `--secondary` | `#f1f5f9` | secondary bg |
 | `--muted` | `#f1f5f9` / `--muted-foreground: #64748b` | quiet text |

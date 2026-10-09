@@ -216,7 +216,12 @@ function Sidebar({
         variant === "floating" || variant === "inset"
           ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
           : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
+        // Session 9: the reference's desktop wrapper carries an explicit
+        // border-slate-200/60 (resolved rgba(226,232,240,0.6), DOM-measured) —
+        // a translucent slate edge, NOT the default --border (solid). The
+        // class colors whichever side the border renders on.
         side === "right" ? "border-l" : "border-r",
+        "border-slate-200/60",
         className,
       )}
       {...props}

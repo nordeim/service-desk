@@ -304,3 +304,35 @@ Work Log:
 
 Stage Summary:
 - All 7 session-8 findings fixed and E2E-pinned (125 E2E total: visual-parity 87→96); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 18
+Agent: main (Super Z)
+Task: Session 9 — refresh repo, review session_8/session_9 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git clone (fresh workspace) at 796a37a (session-8 code + session-9 briefing docs/session_9.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.6.0 + session_8.md + remediation-plan-session8.md + worklog + session_9.md — all aligned with the codebase; env contract set up (.env from .env.example with generated AUTH_SECRET, DATABASE_URL=file:../db/custom.db, db/ at root, skills/ excluded by construction in eslint/vitest/playwright configs; .env.example already matches the codebase)
+- Baseline gates (after installing Playwright Chromium): lint ✓ typecheck ✓ 54 unit ✓ build ✓ 125/125 E2E ✓ smoke 11/11 ✓; session-8 commit 2d003a6 audited clean against its documented plan (G1–G7 all verified in code)
+- Fresh gap analysis vs live reference (agent-browser + Playwright hover-capable probes, both sites). NEW probe surfaces: the FULL :root token diff (both CSSOMs enumerated + resolved to RGB — the session's headline method), the Tailwind preflight diff (button cursor), badge hover colors/transitions under hover:hover, landscape viewports (812×375 + 667×375), the mobile-sheet a11y trio (focus trap/scroll lock/focus return), comment-thread markup, select-option text colors, ::selection/scrollbar/autofill rules, autocomplete attributes, the sidebar wrapper border; standing surfaces re-verified: mobile nav full matrix (10/10 E2E + live), reference drift pins (accent tokens, rounded-sm 4px, per-route titles, nav mechanism, head meta — all stable)
+- 7 findings: G1 the v4 cursor-preflight regression (v3's button{cursor:pointer} removed in v4 — every true button rendered the arrow vs the reference's hand); G2 --primary cyan-600 vs the reference's stock near-black #171717 (all 11 hover:bg-primary/80 badges hovered cyan vs their live-measured dark rgba(23,23,23,0.8)); G3 --border/--input slate-200 vs stock neutral-200 #e5e5e5 (every Card edge); G4 --foreground family slate-900 vs stock near-black #0a0a0a (CategoryBadge text); G5 --sidebar-ring cyan-500 vs stock blue-500 #3b82f6 (nav keyboard focus rings); G6 the Badge atom shipped the NEW shadcn generation (hover backgrounds snapped — no background-color in transition-property — + ring-[3px] tail) where the reference carries the old base, same tail missing on the 3 raw quick-stat pills; G7 the desktop sidebar edge solid vs the reference's explicit translucent border-slate-200/60
+- Deep-verified NON-gaps: landscape parity both viewports (desktop flip at md; phone-landscape sheet scroll 452/185 byte-identical); the sheet-open focus lands on the SIGN-OUT button on BOTH sites (a shared Radix removeLinks quirk — anchors skipped, the display-none Close fails, the footer sign-out is next — NOT a divergence); the mangled transition-argin,opacity] upstream shadcn class ships VERBATIM in both DOMs (inert both); comment blocks/select options/subtitle/stat labels/nav anchor/group label — all computed-identical; --radius base + chart tokens + secondary/muted/sidebar-* family — inert on both
+- Wrote + validated docs/remediation-plan-session9.md (7 findings + non-gaps ledger + risks + 6 process lessons)
+
+Stage Summary:
+- Repo at 796a37a + plan; 7 findings (2 HIGH: cursor preflight, --primary; 1 HIGH: --border; 3 MED: foreground family, sidebar-ring, badge generation, sidebar edge) queued for TDD execution
+
+---
+Task ID: 19
+Agent: main (Super Z)
+Task: Session 9 — TDD remediation, verification, docs, SKILL.md v2.7.0, commit + push
+
+Work Log:
+- TDD: 9 E2E tests written first (cursor ×2, token layer ×4, badge generation/hover ×2, sidebar edge ×1), all verified RED against the pre-fix build; two hardened mid-cycle (the pill-hover read raced the NEW 150ms fade — the mid-interpolation oklab(0.54/α0.91) read was itself proof the transition works; the edge probe matched the outer group/sidebar-wrapper — exact-token regex fix)
+- Implemented: G1 the v3 cursor preflight restored verbatim in @layer base; G2–G5 + inert family the full :root flip to the reference's stock shadcn values (primary #171717/#fafafa, border/input #e5e5e5, foreground/card/popover-foreground #0a0a0a, sidebar-ring #3b82f6, background #ffffff, secondary/muted/destructive-foreground/sidebar-* to stock zinc — inert-but-drift-proofed, documented in globals.css); G6 badge.tsx → the DOM-measured old-gen base (transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 + /80 hovers + bare outline=text-foreground) + the same tail on the 3 quick-stat pills; G7 border-slate-200/60 on the desktop sidebar wrapper
+- Gates: lint ✓ (after the gate itself caught a warning in the new s9 probe script — fixed pre-commit, the session-8 lesson holding) typecheck ✓ 54 unit ✓ build ✓ 134/134 E2E ✓ smoke 11/11 ✓
+- Live paired re-verification (production standalone): sign-out cursor pointer = reference; card border rgb(229,229,229) = reference; --primary rgb(23,23,23)/--foreground rgb(10,10,10)/--sidebar-ring rgb(59,130,246)/body white = reference; sidebar edge oklab(0.93…/0.6) = their rgba(226,232,240,0.6); the nav focus ring renders rgb(59,130,246) 0px 0px 0px 2px under REAL Tab presses (initial transparent read = the ring mid-fade; re-read after settle); badge transition-property now includes background-color
+- Refreshed docs/screenshots/ (7 shots via scripts/capture-screenshots-s9.sh against the production standalone); updated README (stock-token design table + counts + session-9 pin list)/AGENTS (session-9 contracts + shared-artifact + landscape pins)/CLAUDE (cursor + token + badge + edge rules)/PAD (token table + known-issues row + 105 parity count)/service-desk_SKILL.md v2.7.0 (lessons 33–37); session_9.md retrospective appended; remediation-plan-session9.md execution status; this worklog
+
+Stage Summary:
+- All 7 session-9 findings fixed and E2E-pinned (134 E2E total: visual-parity 96→105); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py

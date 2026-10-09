@@ -1423,3 +1423,178 @@ test.describe("session 8: raw buttons carry the reference focus tail", () => {
     await expect(remove).toHaveClass(/focus-visible:ring-1/);
   });
 });
+
+test.describe("session 9: the cursor preflight (Tailwind v4 regression)", () => {
+  // Tailwind v3's preflight ships `button, [role="button"] { cursor: pointer }`;
+  // v4 REMOVED it (buttons use the browser-default arrow). The reference (v3
+  // build) renders the hand cursor on every true button — verified live on
+  // their sign-out, triggers, and CTAs — while our v4 build rendered `default`.
+  // G1 restores the v3 rule verbatim in @layer base (globals.css).
+  test("a bare (classless) button computes cursor: pointer", async ({ page }) => {
+    await page.goto("/dashboard");
+    await page.waitForSelector("main .text-4xl");
+    // detached-element probe (session-9 lesson #6): append, read, remove —
+    // immune to locator/traversal races.
+    const cursor = await page.evaluate(() => {
+      const probe = document.createElement("button");
+      probe.id = "s9-cursor-probe";
+      probe.textContent = "probe";
+      document.body.appendChild(probe);
+      const c = getComputedStyle(probe).cursor;
+      probe.remove();
+      return c;
+    });
+    expect(cursor).toBe("pointer");
+  });
+
+  test("the sidebar sign-out button renders the hand cursor", async ({ page }) => {
+    await page.goto("/dashboard");
+    await page.waitForSelector('button[aria-label="Sign out"]');
+    const signOut = page.locator('button[aria-label="Sign out"]');
+    await expect(signOut).toHaveCSS("cursor", "pointer");
+  });
+});
+
+test.describe("session 9: the stock shadcn token block (:root parity)", () => {
+  // Session-9 headline: the reference's :root is verbatim STOCK shadcn
+  // (zinc neutrals, near-black primary, blue-500 sidebar ring); ours carried
+  // session-1 custom slate/cyan values, never measured until the full token
+  // diff. Tokens are resolved through a probe element (color: var(--x)) so
+  // the assertion is representation-independent.
+  const resolveToken = (page: import("@playwright/test").Page, token: string) =>
+    page.evaluate((t) => {
+      const probe = document.createElement("div");
+      probe.id = "s9-token-probe";
+      probe.style.color = `var(${t})`;
+      document.body.appendChild(probe);
+      const c = getComputedStyle(probe).color;
+      probe.remove();
+      return c;
+    }, token);
+
+  test("--primary resolves the reference's near-black (badge hovers go dark)", async ({ page }) => {
+    await page.goto("/dashboard");
+    // stock hsl(0 0% 9%) = rgb(23,23,23) — the reference's hover:bg-primary/80
+    // computes rgba(23,23,23,0.8) live on their quick-stat pill.
+    expect(await resolveToken(page, "--primary")).toBe("rgb(23, 23, 23)");
+  });
+
+  test("--border resolves neutral-200 and the dashboard cards render it", async ({ page }) => {
+    await page.goto("/dashboard");
+    await page.waitForSelector("main .text-4xl");
+    // stock hsl(0 0% 89.8%) = rgb(229,229,229); the reference's Card borders
+    // compute exactly this (live-measured on their stat cards).
+    expect(await resolveToken(page, "--border")).toBe("rgb(229, 229, 229)");
+    const card = page.locator("main div.rounded-xl.border").first();
+    await expect(card).toBeVisible();
+    await expect(card).toHaveCSS("border-top-color", "rgb(229, 229, 229)");
+  });
+
+  test("--foreground resolves near-black and the CategoryBadge renders it", async ({ page }) => {
+    await page.goto("/mytickets");
+    await page.waitForSelector("main a[href*=ticketdetails]");
+    // stock hsl(0 0% 3.9%) = rgb(10,10,10); the reference's outline
+    // CategoryBadge text computes exactly this (their badge base =
+    // text-foreground), ours was slate-900 rgb(15,23,42).
+    expect(await resolveToken(page, "--foreground")).toBe("rgb(10, 10, 10)");
+    const badge = page
+      .locator("main a[href*=ticketdetails] span")
+      .filter({ hasText: /^(hardware|software|network|access|email|other)$/ })
+      .first();
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveCSS("color", "rgb(10, 10, 10)");
+  });
+
+  test("--sidebar-ring resolves the reference's blue-500 (nav keyboard focus)", async ({ page }) => {
+    await page.goto("/dashboard");
+    await page.waitForSelector("main .text-4xl");
+    // stock hsl(217.2 91.2% 59.8%) = rgb(59,130,246) — resolved live on the
+    // reference; drives focus-visible:ring-2 on nav items + the group label.
+    expect(await resolveToken(page, "--sidebar-ring")).toBe("rgb(59, 130, 246)");
+  });
+});
+
+test.describe("session 9: badge generation + hover behavior", () => {
+  // Our Badge atom shipped the NEW shadcn base (transition-[color,box-shadow],
+  // focus-visible:ring-[3px]) while the reference carries the OLD base
+  // (transition-colors focus:outline-none focus:ring-2 focus:ring-ring
+  // focus:ring-offset-2). Visible deltas: our badge background SNAPPED on
+  // hover (no background-color in the transition list) and the quick-stat
+  // pills (raw spans) had no transition at all.
+  test("badges carry the old-gen transition + focus tail, not ring-[3px]", async ({ page }) => {
+    await page.goto("/mytickets");
+    const badge = page
+      .locator("main a[href*=ticketdetails] span")
+      .filter({ hasText: /^(open|in progress|resolved|closed|low|medium|high|urgent)$/ })
+      .first();
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveClass(/transition-colors/);
+    await expect(badge).toHaveClass(/focus:outline-none/);
+    await expect(badge).toHaveClass(/focus:ring-2/);
+    await expect(badge).toHaveClass(/focus:ring-ring/);
+    await expect(badge).toHaveClass(/focus:ring-offset-2/);
+    await expect(badge).not.toHaveClass(/ring-\[3px\]/);
+    // the transition list must include background-color (the 150ms fade the
+    // reference renders on badge hover — ours transitioned only color+shadow)
+    const transition = await badge.evaluate((el) => getComputedStyle(el).transitionProperty);
+    expect(transition).toContain("background-color");
+  });
+
+  test("the quick-stat pill hovers to near-black at 80% and fades its background", async ({ page }) => {
+    await page.goto("/dashboard");
+    // wait for the client-side stats fetch + settle (the sidebar shifts once
+    // the numbers land — the session-7 hover-race lesson)
+    const pill = page.locator("span.inline-flex.shadow-md").first();
+    await expect(pill).toBeVisible();
+    await page.waitForTimeout(700); // rise-in + stats settle
+    await pill.hover();
+    // the reference's pill hover computes rgba(23,23,23,0.8) (their --primary
+    // is near-black); our v4 pipeline may emit oklab(0.2x … / 0.8) or
+    // color-mix(...) — accept the known near-black/0.8 representations.
+    // NOTE: read AFTER the 150ms transition-colors fade settles — an
+    // immediate read catches the color mid-interpolation (oklab L≈0.54,
+    // alpha≈0.91 on the first run) which is itself proof the fade works.
+    await page.waitForTimeout(300);
+    const hoverBg = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const near = /rgba\(23, ?23, ?23, ?0\.8\)/.test(hoverBg)
+      || /oklab\(0\.[12]\d* [^)]*\/ 0\.8\)/.test(hoverBg)
+      || /color-mix\([^)]*0\.8[^)]*\)/.test(hoverBg);
+    expect(near, `pill hover bg was: ${hoverBg}`).toBe(true);
+    // the pill carries the reference's transition-colors tail (raw-span fix)
+    await expect(pill).toHaveClass(/transition-colors/);
+    const transition = await pill.evaluate((el) => getComputedStyle(el).transitionProperty);
+    expect(transition).toContain("background-color");
+  });
+});
+
+test.describe("session 9: the desktop sidebar edge", () => {
+  // The reference's sidebar wrapper carries an explicit border-slate-200/60
+  // (resolved rgba(226,232,240,0.6) live); ours rendered border-r with the
+  // default --border (solid). DOM-verified on their wrapper class list.
+  test("the sidebar edge renders slate-200 at 60% alpha", async ({ page }) => {
+    await page.goto("/dashboard");
+    await page.waitForSelector("main .text-4xl");
+    const edge = await page.evaluate(() => {
+      // the bordered desktop wrapper is `group/sidebar` — NOT the outer
+      // `group/sidebar-wrapper` (a substring match grabbed the wrong div on
+      // the first run). Match the token exactly.
+      const sb = [...document.querySelectorAll("div")].find((d) =>
+        /(^|\s)group\/sidebar(?![-\w])/.test((d.className || "").toString()),
+      );
+      if (!sb) return { found: false as const };
+      return {
+        found: true as const,
+        cls: sb.className.toString(),
+        borderColor: getComputedStyle(sb).borderRightColor,
+      };
+    });
+    expect(edge.found).toBe(true);
+    if (!edge.found) return;
+    expect(edge.cls).toContain("border-slate-200/60");
+    // v4 may serialize the 60% alpha as rgba(...,0.6) or oklab(… / 0.6)
+    const translucent = /rgba\(226, ?232, ?240, ?0\.6\)/.test(edge.borderColor)
+      || /\/ 0\.6\)/.test(edge.borderColor)
+      || /color-mix\([^)]*0\.6[^)]*\)/.test(edge.borderColor);
+    expect(translucent, `edge border color was: ${edge.borderColor}`).toBe(true);
+  });
+});
