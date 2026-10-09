@@ -1,6 +1,6 @@
 # Deployment Guide
 
-ORBITAL ships as a single Next.js **standalone** build with a SQLite file
+ServiceDesk ships as a single Next.js **standalone** build with a SQLite file
 database — one process, zero external services. This guide covers the
 supported production paths and the environment contract.
 

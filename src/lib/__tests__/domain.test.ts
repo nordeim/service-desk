@@ -1,0 +1,153 @@
+import { describe, expect, it } from "vitest";
+import {
+  CATEGORY_EMOJI,
+  CATEGORY_LABELS,
+  PRIORITY_LABELS,
+  STATUS_LABELS,
+  TICKET_CATEGORIES,
+  TICKET_PRIORITIES,
+  TICKET_STATUSES,
+  isTicketCategory,
+  isTicketPriority,
+  isTicketStatus,
+} from "@/lib/constants";
+import {
+  validateAttachments,
+  validateCommentInput,
+  validateLoginInput,
+  validateSignupInput,
+  validateTicketInput,
+} from "@/lib/validation";
+
+// The domain vocabulary + input guards. Every rule mirrors the reference
+// app's form contract (categories, priorities, statuses) and the API's
+// attachment limits.
+
+describe("constants", () => {
+  it("pins the six reference categories with emoji + labels", () => {
+    expect([...TICKET_CATEGORIES]).toEqual([
+      "hardware",
+      "software",
+      "network",
+      "access",
+      "email",
+      "other",
+    ]);
+    expect(CATEGORY_LABELS.hardware).toBe("🖥️ Hardware Issue");
+    expect(CATEGORY_EMOJI.other).toBe("📋");
+  });
+
+  it("pins the four priorities and statuses", () => {
+    expect([...TICKET_PRIORITIES]).toEqual(["low", "medium", "high", "urgent"]);
+    expect([...TICKET_STATUSES]).toEqual(["open", "in_progress", "resolved", "closed"]);
+    expect(PRIORITY_LABELS.urgent).toBe("Urgent - Critical");
+    expect(STATUS_LABELS.in_progress).toBe("In Progress");
+  });
+
+  it("type-guards reject unknown values", () => {
+    expect(isTicketStatus("open")).toBe(true);
+    expect(isTicketStatus("deleted")).toBe(false);
+    expect(isTicketPriority("")).toBe(false);
+    expect(isTicketCategory("Hardware")).toBe(false); // case-sensitive
+  });
+});
+
+describe("validateTicketInput", () => {
+  const valid = {
+    title: "Laptop battery not charging",
+    description: "The battery drains even when plugged in.",
+    category: "hardware",
+    priority: "medium",
+  };
+
+  it("accepts a valid ticket", () => {
+    expect(validateTicketInput(valid).ok).toBe(true);
+  });
+
+  it("requires a title of at least 5 characters", () => {
+    const r = validateTicketInput({ ...valid, title: "no" });
+    expect(r.ok).toBe(false);
+    expect(r.errors.title).toBeDefined();
+  });
+
+  it("requires a description of at least 10 characters", () => {
+    const r = validateTicketInput({ ...valid, description: "short" });
+    expect(r.ok).toBe(false);
+    expect(r.errors.description).toBeDefined();
+  });
+
+  it("rejects unknown category/priority values", () => {
+    expect(validateTicketInput({ ...valid, category: "kitchen" }).ok).toBe(false);
+    expect(validateTicketInput({ ...valid, priority: "meh" }).ok).toBe(false);
+  });
+
+  it("trims before validating", () => {
+    const r = validateTicketInput({ ...valid, title: "   " });
+    expect(r.ok).toBe(false);
+  });
+});
+
+describe("validateCommentInput", () => {
+  it("accepts a normal comment", () => {
+    expect(validateCommentInput({ content: "Update: tried another charger." }).ok).toBe(true);
+  });
+  it("rejects empty and over-long comments", () => {
+    expect(validateCommentInput({ content: "  " }).ok).toBe(false);
+    expect(validateCommentInput({ content: "x".repeat(2001) }).ok).toBe(false);
+  });
+});
+
+describe("validateSignupInput", () => {
+  const valid = { email: "a@b.co", name: "Alice", password: "Passw0rd" };
+
+  it("accepts a valid signup", () => {
+    expect(validateSignupInput(valid).ok).toBe(true);
+  });
+  it("rejects bad emails", () => {
+    expect(validateSignupInput({ ...valid, email: "not-an-email" }).ok).toBe(false);
+  });
+  it("requires 8+ chars with letters and numbers", () => {
+    expect(validateSignupInput({ ...valid, password: "short1" }).ok).toBe(false);
+    expect(validateSignupInput({ ...valid, password: "onlyletters" }).ok).toBe(false);
+    expect(validateSignupInput({ ...valid, password: "12345678" }).ok).toBe(false);
+  });
+});
+
+describe("validateLoginInput", () => {
+  it("requires both fields with a valid email", () => {
+    expect(validateLoginInput({ email: "a@b.co", password: "x" }).ok).toBe(true);
+    expect(validateLoginInput({ email: "bad", password: "x" }).ok).toBe(false);
+    expect(validateLoginInput({ email: "a@b.co", password: "" }).ok).toBe(false);
+  });
+});
+
+describe("validateAttachments", () => {
+  it("accepts within count/size limits", () => {
+    expect(
+      validateAttachments([
+        { fileName: "a.png", mimeType: "image/png", sizeBytes: 1024 },
+        { fileName: "b.pdf", mimeType: "application/pdf", sizeBytes: 2 * 1024 * 1024 },
+      ]).ok,
+    ).toBe(true);
+  });
+  it("rejects more than 3 files", () => {
+    const files = Array.from({ length: 4 }, (_, i) => ({
+      fileName: `f${i}.txt`,
+      mimeType: "text/plain",
+      sizeBytes: 10,
+    }));
+    expect(validateAttachments(files).ok).toBe(false);
+  });
+  it("rejects a file over 2 MiB", () => {
+    expect(
+      validateAttachments([
+        { fileName: "big.png", mimeType: "image/png", sizeBytes: 2 * 1024 * 1024 + 1 },
+      ]).ok,
+    ).toBe(false);
+  });
+  it("rejects path-traversal file names", () => {
+    expect(
+      validateAttachments([{ fileName: "../evil.txt", mimeType: "text/plain", sizeBytes: 5 }]).ok,
+    ).toBe(false);
+  });
+});

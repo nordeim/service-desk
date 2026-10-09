@@ -1,0 +1,73 @@
+// ServiceDesk — Prisma schema (SQLite).
+//
+// The DATABASE_URL contract (src/lib/db-path.ts, pinned by tests/db-path.test.ts):
+// a RELATIVE `file:` URL resolves against the repo that owns this schema file,
+// so `file:../db/custom.db` points at <repo>/db/custom.db for the Prisma CLI,
+// `next dev`, `next build` and the standalone server alike.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  tickets      Ticket[]
+  comments     Comment[]
+}
+
+// SQLite has no native enums, so Ticket.category / .priority / .status are
+// validated strings whose allowed values live in src/lib/constants.ts
+// (single source of truth, unit-tested).
+
+model Ticket {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  category    String // hardware | software | network | access | email | other
+  priority    String // low | medium | high | urgent
+  status      String // open | in_progress | resolved | closed
+  createdById String
+  createdBy   User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  comments    Comment[]
+  attachments Attachment[]
+
+  @@index([createdById, createdAt(sort: Desc)])
+  @@index([status])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([ticketId, createdAt])
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  fileName  String
+  mimeType  String
+  sizeBytes Int
+  data      String // base64 payload; capped by the API (2 MiB/file, 3 files)
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+}

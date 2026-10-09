@@ -1,0 +1,112 @@
+// Ticket input validation — plain guards, no schema library needed at this
+// surface area. Every rule mirrors the reference app's form contract and is
+// unit-tested (tests/ticket-validation.test.ts).
+
+import {
+  ATTACHMENT_MAX_BYTES,
+  ATTACHMENT_MAX_COUNT,
+  isTicketCategory,
+  isTicketPriority,
+} from "./constants";
+
+export interface TicketInput {
+  title: string;
+  description: string;
+  category: string;
+  priority: string;
+}
+
+export interface ValidationResult {
+  ok: boolean;
+  errors: Record<string, string>;
+}
+
+export function validateTicketInput(input: Partial<TicketInput>): ValidationResult {
+  const errors: Record<string, string> = {};
+
+  const title = (input.title ?? "").trim();
+  if (!title) errors.title = "Issue title is required";
+  else if (title.length < 5) errors.title = "Issue title must be at least 5 characters";
+  else if (title.length > 120) errors.title = "Issue title must be at most 120 characters";
+
+  const description = (input.description ?? "").trim();
+  if (!description) errors.description = "Description is required";
+  else if (description.length < 10)
+    errors.description = "Description must be at least 10 characters";
+  else if (description.length > 5000)
+    errors.description = "Description must be at most 5000 characters";
+
+  if (!isTicketCategory(input.category)) errors.category = "Select a valid category";
+  if (!isTicketPriority(input.priority)) errors.priority = "Select a valid priority";
+
+  return { ok: Object.keys(errors).length === 0, errors };
+}
+
+export interface CommentInput {
+  content: string;
+}
+
+export function validateCommentInput(input: Partial<CommentInput>): ValidationResult {
+  const errors: Record<string, string> = {};
+  const content = (input.content ?? "").trim();
+  if (!content) errors.content = "Comment cannot be empty";
+  else if (content.length > 2000) errors.content = "Comment must be at most 2000 characters";
+  return { ok: Object.keys(errors).length === 0, errors };
+}
+
+export interface SignupInput {
+  email: string;
+  name: string;
+  password: string;
+}
+
+export function validateSignupInput(input: Partial<SignupInput>): ValidationResult {
+  const errors: Record<string, string> = {};
+  const email = (input.email ?? "").trim().toLowerCase();
+  if (!email) errors.email = "Email is required";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) errors.email = "Enter a valid email";
+
+  const name = (input.name ?? "").trim();
+  if (!name) errors.name = "Name is required";
+  else if (name.length > 80) errors.name = "Name must be at most 80 characters";
+
+  const password = input.password ?? "";
+  if (!password) errors.password = "Password is required";
+  else if (password.length < 8) errors.password = "Password must be at least 8 characters";
+  else if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password))
+    errors.password = "Password must contain letters and numbers";
+
+  return { ok: Object.keys(errors).length === 0, errors };
+}
+
+export function validateLoginInput(input: Partial<{ email: string; password: string }>): ValidationResult {
+  const errors: Record<string, string> = {};
+  const email = (input.email ?? "").trim().toLowerCase();
+  if (!email) errors.email = "Email is required";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) errors.email = "Enter a valid email";
+  if (!input.password) errors.password = "Password is required";
+  return { ok: Object.keys(errors).length === 0, errors };
+}
+
+export interface RawAttachment {
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+}
+
+export function validateAttachments(
+  files: RawAttachment[],
+): { ok: true } | { ok: false; error: string } {
+  if (files.length > ATTACHMENT_MAX_COUNT) {
+    return { ok: false, error: `At most ${ATTACHMENT_MAX_COUNT} files can be attached` };
+  }
+  for (const f of files) {
+    if (f.sizeBytes > ATTACHMENT_MAX_BYTES) {
+      return { ok: false, error: `"${f.fileName}" exceeds the 2 MB per-file limit` };
+    }
+    if (!f.fileName || f.fileName.length > 200 || /[\\/]/.test(f.fileName)) {
+      return { ok: false, error: `"${f.fileName}" has an invalid file name` };
+    }
+  }
+  return { ok: true };
+}
