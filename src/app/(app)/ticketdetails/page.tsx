@@ -3,10 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, FileText, MessageSquare, Send, Download } from "lucide-react";
+import { ArrowLeft, Download, FileText, MessageSquare, Send, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -126,7 +125,7 @@ export default function TicketDetailsPage() {
 
   if (notFound) {
     return (
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-900 mb-2">Ticket not found</h1>
           <p className="text-slate-500 mb-6">This ticket may have been deleted.</p>
@@ -140,7 +139,7 @@ export default function TicketDetailsPage() {
 
   if (!ticket) {
     return (
-      <div className="flex-1 bg-slate-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
         <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6" aria-label="Loading ticket">
           <Skeleton className="h-5 w-36" />
           <Skeleton className="h-10 w-3/4" />
@@ -152,42 +151,58 @@ export default function TicketDetailsPage() {
   }
 
   return (
-    <div className="flex-1 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
+    // Reference structure (measured session 2): max-w-5xl container, a
+    // mb-6 back button, then grid lg:grid-cols-3 — left col-span-2 holds the
+    // ticket card (gradient header + description) and the comments card;
+    // the right column holds the Ticket Information panel.
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
       <div className="max-w-5xl mx-auto">
-        <Link
-          href="/mytickets"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-cyan-600 transition-colors mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" aria-hidden />
-          Back to Tickets
-        </Link>
+        <div className="mb-6">
+          <Button asChild variant="outline" className="mb-4 hover:bg-slate-100">
+            <Link href="/mytickets">
+              <ArrowLeft className="w-4 h-4" aria-hidden />
+              Back to Tickets
+            </Link>
+          </Button>
+        </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Main column */}
-          <div className="flex-1 space-y-6 min-w-0">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight break-words">
-                {ticket.title}
-              </h1>
-              <StatusBadge status={ticket.status as TicketStatus} />
-            </div>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main column (reference: lg:col-span-2 space-y-6) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Ticket card: gradient header with inline title + badges */}
+            <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100 bg-gradient-to-r from-cyan-50/50 to-blue-50/50">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="font-semibold tracking-tight text-2xl text-slate-900">
+                      {ticket.title}
+                    </div>
+                    <StatusBadge status={ticket.status as TicketStatus} detail />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <PriorityBadge priority={ticket.priority as never} showWord />
+                    <CategoryBadge category={ticket.category as never} />
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 space-y-6">
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-cyan-500" aria-hidden />
+                    Description
+                  </h3>
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                    {ticket.description}
+                  </p>
+                </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <PriorityBadge priority={ticket.priority as never} />
-              <span className="text-xs text-slate-400">priority</span>
-              <CategoryBadge category={ticket.category as never} />
-            </div>
-
-            <Card className="border-none shadow-lg">
-              <CardHeader className="flex-row items-center gap-2 border-b border-slate-100">
-                <FileText className="w-5 h-5 text-cyan-500" aria-hidden />
-                <CardTitle className="text-lg">Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-700 whitespace-pre-wrap">{ticket.description}</p>
+                {/* Superset: attachments (kept inside the reference card body) */}
                 {ticket.attachments.length > 0 ? (
-                  <>
-                    <Separator className="my-4" />
+                  <div>
+                    <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                      <Download className="w-5 h-5 text-cyan-500" aria-hidden />
+                      Attachments
+                    </h3>
                     <ul className="space-y-2">
                       {ticket.attachments.map((a) => (
                         <li key={a.id}>
@@ -204,90 +219,108 @@ export default function TicketDetailsPage() {
                         </li>
                       ))}
                     </ul>
-                  </>
+                  </div>
                 ) : null}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="border-none shadow-lg">
-              <CardHeader className="flex-row items-center gap-2 border-b border-slate-100">
-                <MessageSquare className="w-5 h-5 text-cyan-500" aria-hidden />
-                <CardTitle className="text-lg">Comments &amp; Updates</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {ticket.comments.length === 0 ? (
-                  <p className="text-center text-slate-400 py-6">No comments yet</p>
-                ) : (
-                  <ul className="space-y-4">
-                    {ticket.comments.map((c) => (
-                      <li key={c.id} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="font-semibold text-sm text-slate-800">{c.author.name}</span>
-                          <span className="text-xs text-slate-400">{formatDateTime(c.createdAt)}</span>
+            {/* Comments card (reference: avatar circles + ml-10 indent) */}
+            <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100">
+                <div className="font-semibold leading-none tracking-tight flex items-center gap-2 text-slate-900">
+                  <MessageSquare className="w-5 h-5 text-cyan-500" aria-hidden />
+                  Comments &amp; Updates
+                </div>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="space-y-4">
+                  {ticket.comments.length === 0 ? (
+                    <p className="text-center text-slate-400 py-6">No comments yet</p>
+                  ) : (
+                    ticket.comments.map((c) => (
+                      <div
+                        key={c.id}
+                        className="p-4 rounded-xl border bg-slate-50 border-slate-200"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
+                              <UserIcon className="w-4 h-4 text-white" aria-hidden />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-900 text-sm">{c.author.name}</p>
+                              <p className="text-xs text-slate-500">{formatDateTime(c.createdAt)}</p>
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-sm text-slate-600 whitespace-pre-wrap">{c.content}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                        <p className="text-slate-700 whitespace-pre-wrap ml-10">{c.content}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
 
-                <form onSubmit={handleAddComment} className="space-y-3 pt-2">
+                <form onSubmit={handleAddComment} className="space-y-3 pt-4 border-t border-slate-200">
                   <Textarea
                     placeholder="Add a comment or update..."
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     aria-label="Add a comment or update"
+                    className="min-h-24 border-slate-300 focus:border-cyan-500 focus:ring-cyan-500"
                   />
-                  <div className="flex justify-end">
+                  <div className="flex items-center justify-between">
                     <Button
                       type="submit"
                       disabled={posting || !comment.trim()}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/30"
+                      className="ml-auto bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
                     >
                       <Send className="w-4 h-4" aria-hidden />
                       {posting ? "Adding…" : "Add Comment"}
                     </Button>
                   </div>
                 </form>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
-          {/* Info sidebar */}
-          <aside className="w-full lg:w-80 shrink-0 space-y-6">
-            <Card className="border-none shadow-lg">
-              <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-base">Ticket Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-0 p-0">
-                {[
-                  ["Created By", ticket.createdBy.email],
-                  ["Created On", formatDateTime(ticket.createdAt)],
-                  ["Last Updated", formatDateTime(ticket.updatedAt)],
-                  ["Comments", String(ticket.comments.length)],
-                ].map(([label, value], i, arr) => (
-                  <div key={label}>
-                    <div className="px-6 py-4">
-                      <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
-                        {label}
-                      </p>
-                      <p className="text-sm text-slate-800 break-words">{value}</p>
-                    </div>
-                    {i < arr.length - 1 ? <Separator /> : null}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+          {/* Right column (reference: space-y-6) */}
+          <div className="space-y-6">
+            <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100">
+                <div className="tracking-tight text-sm font-semibold text-slate-900">
+                  Ticket Information
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                    Created By
+                  </p>
+                  <p className="text-sm text-slate-900 font-medium">{ticket.createdBy.email}</p>
+                </div>
+                <Separator className="h-[1px] w-full" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                    Created On
+                  </p>
+                  <p className="text-sm text-slate-900 font-medium">{formatDateTime(ticket.createdAt)}</p>
+                </div>
+                <Separator className="h-[1px] w-full" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                    Last Updated
+                  </p>
+                  <p className="text-sm text-slate-900 font-medium">{formatDateTime(ticket.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
 
             {/* Superset: owner status control */}
-            <Card className="border-none shadow-lg">
-              <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-base">Update Status</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-xs text-slate-400">
-                  Owners can close or reopen their own tickets.
-                </p>
+            <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100">
+                <div className="tracking-tight text-sm font-semibold text-slate-900">Update Status</div>
+              </div>
+              <div className="p-6 space-y-2">
+                <p className="text-xs text-slate-400">Owners can close or reopen their own tickets.</p>
                 <Select
                   value={ticket.status}
                   onValueChange={(v) => void handleStatusChange(v)}
@@ -304,9 +337,9 @@ export default function TicketDetailsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-              </CardContent>
-            </Card>
-          </aside>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -31,8 +31,9 @@ test.describe("dashboard", () => {
     await expect(stats.getByText("Open", { exact: true })).toBeVisible();
     await expect(stats.getByText("In Progress", { exact: true })).toBeVisible();
     await expect(stats.getByText("Total", { exact: true })).toBeVisible();
-    // The badges (last span of each tinted card) resolve from "…" to digits.
-    for (const card of [".bg-amber-50", ".bg-blue-50", ".bg-slate-100"]) {
+    // The badges (last span of each gradient row) resolve from "…" to digits.
+    // Rows carry from-*-50 gradient stops (reference parity, session 2).
+    for (const card of [".from-amber-50", ".from-blue-50", ".from-slate-50"]) {
       const badge = stats.locator(card).locator("span").last();
       await expect(badge).toHaveText(/^\d+$/);
     }

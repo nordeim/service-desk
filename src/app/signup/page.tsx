@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, Ticket, User } from "lucide-react";
+import { Lock, Mail, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,118 +51,126 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-cyan-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-[420px]">
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/60 px-8 py-10 pt-14 relative">
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg flex flex-col items-center justify-center">
-            <Ticket className="w-6 h-6 text-cyan-400" aria-hidden />
-            <span className="text-[10px] font-semibold text-white tracking-wide mt-0.5">
-              SERVICE DESK
-            </span>
+    // Superset page (no reference counterpart — the reference /signup is a
+    // 404): follows the reference login card design language.
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="w-full max-w-md">
+        <div className="text-card-foreground relative overflow-hidden border-0 shadow-2xl bg-white/95 backdrop-blur-sm rounded-2xl">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-200 via-slate-300 to-slate-200" aria-hidden />
+
+          <div className="p-8 sm:p-10 md:pt-12 md:pb-10 md:px-10">
+            <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8">
+              <div className="relative group">
+                <div
+                  className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full blur-xl opacity-30 group-hover:opacity-40 transition-opacity duration-300"
+                  aria-hidden
+                />
+                <span className="flex shrink-0 overflow-hidden rounded-full relative h-20 w-20 sm:h-24 sm:w-24 shadow-lg ring-4 ring-white/50 group-hover:shadow-xl transition-all duration-300">
+                  <img className="aspect-square h-full w-full object-cover" alt="ServiceDesk logo" src="/logo.png" />
+                </span>
+              </div>
+
+              <div className="space-y-2 sm:space-y-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                  Create your account
+                </h1>
+                <p className="text-slate-500 text-sm sm:text-base font-medium">
+                  Start tracking your IT support requests
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="w-full space-y-4 sm:space-y-5" noValidate>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-sm font-medium text-slate-700">Full name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden />
+                      <Input
+                        id="name"
+                        autoComplete="name"
+                        placeholder="Jane Doe"
+                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
+                        value={form.name}
+                        onChange={update("name")}
+                        required
+                        aria-invalid={!!fieldErrors.name}
+                      />
+                    </div>
+                    {fieldErrors.name ? <p className="text-xs text-red-600">{fieldErrors.name}</p> : null}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden />
+                      <Input
+                        id="email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder="you@example.com"
+                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
+                        value={form.email}
+                        onChange={update("email")}
+                        required
+                        aria-invalid={!!fieldErrors.email}
+                      />
+                    </div>
+                    {fieldErrors.email ? (
+                      <p className="text-xs text-red-600">{fieldErrors.email}</p>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password" className="text-sm font-medium text-slate-700">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden />
+                      <Input
+                        id="password"
+                        type="password"
+                        autoComplete="new-password"
+                        placeholder="At least 8 characters, letters + numbers"
+                        className="pl-10 h-11 sm:h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400 rounded-xl placeholder:text-slate-600"
+                        value={form.password}
+                        onChange={update("password")}
+                        required
+                        aria-invalid={!!fieldErrors.password}
+                      />
+                    </div>
+                    {fieldErrors.password ? (
+                      <p className="text-xs text-red-600">{fieldErrors.password}</p>
+                    ) : null}
+                  </div>
+                </div>
+
+                {error ? (
+                  <p
+                    className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"
+                    role="alert"
+                  >
+                    {error}
+                  </p>
+                ) : null}
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-11 sm:h-12 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm rounded-xl transition-all duration-200"
+                >
+                  {loading ? "Creating account…" : "Sign up"}
+                </Button>
+
+                <p className="text-center text-sm text-slate-500">
+                  Already have an account?{" "}
+                  <Link href="/login" className="font-medium text-slate-700 hover:text-slate-900 transition-colors">
+                    Sign in
+                  </Link>
+                </p>
+              </form>
+            </div>
           </div>
-
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Create your account
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">Start tracking your IT support requests</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-            <div className="space-y-2">
-              <Label htmlFor="name">Full name</Label>
-              <div className="relative">
-                <User
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                  aria-hidden
-                />
-                <Input
-                  id="name"
-                  autoComplete="name"
-                  placeholder="Jane Doe"
-                  className="h-11 pl-10"
-                  value={form.name}
-                  onChange={update("name")}
-                  required
-                  aria-invalid={!!fieldErrors.name}
-                />
-              </div>
-              {fieldErrors.name ? <p className="text-xs text-red-600">{fieldErrors.name}</p> : null}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                  aria-hidden
-                />
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@company.com"
-                  className="h-11 pl-10"
-                  value={form.email}
-                  onChange={update("email")}
-                  required
-                  aria-invalid={!!fieldErrors.email}
-                />
-              </div>
-              {fieldErrors.email ? (
-                <p className="text-xs text-red-600">{fieldErrors.email}</p>
-              ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                  aria-hidden
-                />
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="At least 8 characters, letters + numbers"
-                  className="h-11 pl-10"
-                  value={form.password}
-                  onChange={update("password")}
-                  required
-                  aria-invalid={!!fieldErrors.password}
-                />
-              </div>
-              {fieldErrors.password ? (
-                <p className="text-xs text-red-600">{fieldErrors.password}</p>
-              ) : null}
-            </div>
-
-            {error ? (
-              <p
-                className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"
-                role="alert"
-              >
-                {error}
-              </p>
-            ) : null}
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-11 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/30"
-            >
-              {loading ? "Creating account…" : "Sign up"}
-            </Button>
-          </form>
-
-          <p className="text-center text-sm text-slate-500 mt-6">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium text-cyan-600 hover:text-cyan-700">
-              Sign in
-            </Link>
-          </p>
         </div>
+
+        <p className="text-center text-xs text-slate-400 mt-8">ServiceDesk — IT Support Portal</p>
       </div>
     </main>
   );

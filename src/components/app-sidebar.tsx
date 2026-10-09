@@ -142,34 +142,40 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="p-2">
+        {/* Quick Stats — reference parity: gradient rows with shadowed value
+            badges (measured from the live reference DOM, session 2):
+            Open = amber-50→orange-50, In Progress = blue-50→cyan-50,
+            Total = slate-50→gray-50; borders *-200/50; labels text-slate-700. */}
+        <SidebarGroup className="p-2 mt-4">
           <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
             Quick Stats
           </SidebarGroupLabel>
-          <SidebarGroupContent className="flex flex-col gap-2 px-1">
-            <div className="bg-amber-50 rounded-xl p-3 flex items-center justify-between border border-amber-100">
-              <span className="text-sm font-medium text-amber-900">Open</span>
-              <span className="bg-amber-500 text-white text-xs font-bold rounded-md px-2.5 py-0.5 min-w-8 text-center tabular-nums">
-                {stats ? stats.open : "…"}
-              </span>
-            </div>
-            <div className="bg-blue-50 rounded-xl p-3 flex items-center justify-between border border-blue-100">
-              <span className="text-sm font-medium text-blue-900">In Progress</span>
-              <span className="bg-blue-500 text-white text-xs font-bold rounded-md px-2.5 py-0.5 min-w-8 text-center tabular-nums">
-                {stats ? stats.in_progress : "…"}
-              </span>
-            </div>
-            <div className="bg-slate-100 rounded-xl p-3 flex items-center justify-between border border-slate-200">
-              <span className="text-sm font-medium text-slate-600">Total</span>
-              <span className="bg-slate-600 text-white text-xs font-bold rounded-md px-2.5 py-0.5 min-w-8 text-center tabular-nums">
-                {stats ? stats.total : "…"}
-              </span>
+          <SidebarGroupContent>
+            <div className="px-4 py-3 space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200/50">
+                <span className="text-sm font-medium text-slate-700">Open</span>
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent bg-amber-500 text-white font-bold shadow-md">
+                  {stats ? stats.open : "…"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200/50">
+                <span className="text-sm font-medium text-slate-700">In Progress</span>
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent bg-blue-500 text-white font-bold shadow-md">
+                  {stats ? stats.in_progress : "…"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200/50">
+                <span className="text-sm font-medium text-slate-700">Total</span>
+                <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs border-transparent bg-slate-600 text-white font-bold shadow-md">
+                  {stats ? stats.total : "…"}
+                </span>
+              </div>
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="flex flex-col gap-2 border-t border-slate-200/60 p-4">
         <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-slate-50 to-gray-50">
           <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center shadow-md shrink-0">
             <UserIcon className="w-5 h-5 text-white" aria-hidden />
@@ -183,9 +189,9 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
             onClick={handleLogout}
             aria-label="Sign out"
             title="Sign out"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-md text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors"
           >
-            <LogOut className="w-5 h-5" aria-hidden />
+            <LogOut className="w-4 h-4" aria-hidden />
           </button>
         </div>
       </SidebarFooter>

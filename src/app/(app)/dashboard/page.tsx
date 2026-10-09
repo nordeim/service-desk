@@ -13,9 +13,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TicketCard } from "@/components/ticket-bits";
+import { RecentTicketRow } from "@/components/ticket-bits";
 import { formatDateTime, formatDuration } from "@/lib/utils";
 import type { TicketCardData } from "@/components/ticket-bits";
 
@@ -86,15 +85,15 @@ function DashboardContent({ userName }: { userName: string }) {
   }, []);
 
   return (
-    <div className="flex-1 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Page header */}
+        {/* Page header (reference: text-4xl + text-lg subtitle) */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
               Welcome back, {userName}
             </h1>
-            <p className="text-slate-500 mt-1">Track your support requests</p>
+            <p className="text-slate-600 mt-2 text-lg">Track your support requests</p>
           </div>
           <Button
             asChild
@@ -107,12 +106,14 @@ function DashboardContent({ userName }: { userName: string }) {
           </Button>
         </div>
 
-        {/* Stat cards (reference: grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6) */}
+        {/* Stat cards (reference: grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+            cards shadow-lg → hover:shadow-xl; values plain text-4xl, no
+            tabular-nums — measured session 2) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {STAT_CARDS.map((card) => (
             <div
               key={card.key}
-              className="rounded-xl border text-card-foreground border-none shadow-xl bg-white overflow-hidden group relative transition-all duration-300 hover:shadow-2xl"
+              className="rounded-xl border bg-card text-card-foreground border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group relative"
             >
               <div
                 className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${card.deco} opacity-10 rounded-full transform translate-x-12 -translate-y-12 group-hover:scale-150 transition-transform duration-500`}
@@ -122,7 +123,7 @@ function DashboardContent({ userName }: { userName: string }) {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="text-sm font-medium text-slate-600 mb-1">{card.label}</p>
-                    <p className="text-4xl font-bold text-slate-900 tabular-nums">
+                    <p className="text-4xl font-bold text-slate-900">
                       {stats ? stats.mine[card.key] : "…"}
                     </p>
                   </div>
@@ -136,7 +137,8 @@ function DashboardContent({ userName }: { userName: string }) {
           ))}
         </div>
 
-        {/* Performance Metrics (reference: full width, slate-50→white gradient card) */}
+        {/* Performance Metrics (reference: full width, slate-50→white gradient card;
+            value is a <p> — measured session 2) */}
         <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-gradient-to-br from-slate-50 to-white">
           <div className="flex flex-col space-y-1.5 p-6 pb-3">
             <div className="font-semibold leading-none tracking-tight flex items-center gap-2 text-slate-900">
@@ -148,13 +150,13 @@ function DashboardContent({ userName }: { userName: string }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-600 mb-1">Average Resolution Time</p>
-                <div className="text-3xl font-bold text-slate-900">
+                <p className="text-3xl font-bold text-slate-900">
                   {stats ? (
                     formatDuration(stats.avgResolutionMs)
                   ) : (
                     <Skeleton className="h-9 w-20" />
                   )}
-                </div>
+                </p>
               </div>
               <div className="w-16 h-16 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-2xl flex items-center justify-center">
                 <Clock className="w-8 h-8 text-cyan-600" aria-hidden />
@@ -163,19 +165,20 @@ function DashboardContent({ userName }: { userName: string }) {
           </div>
         </div>
 
-        {/* Recent Tickets (reference: full width, white card) */}
+        {/* Recent Tickets (reference: white card, header with bottom border,
+            flat divide-y rows — NOT cards. Measured session 2.) */}
         <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
-          <div className="flex flex-col space-y-1.5 p-6 pb-3">
+          <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100">
             <div className="font-semibold leading-none tracking-tight flex items-center gap-2 text-slate-900">
               <FileText className="w-5 h-5 text-cyan-500" aria-hidden />
               Recent Tickets
             </div>
           </div>
-          <div className="p-6 pt-0">
+          <div className="p-0">
             {recent === null ? (
-              <div className="space-y-3" aria-label="Loading tickets">
-                <Skeleton className="h-32 w-full rounded-xl" />
-                <Skeleton className="h-32 w-full rounded-xl" />
+              <div className="space-y-3 p-6" aria-label="Loading tickets">
+                <Skeleton className="h-16 w-full rounded-xl" />
+                <Skeleton className="h-16 w-full rounded-xl" />
               </div>
             ) : recent.length === 0 ? (
               <div className="text-center py-12">
@@ -188,23 +191,25 @@ function DashboardContent({ userName }: { userName: string }) {
                 </p>
               </div>
             ) : (
-              <ul className="space-y-4">
+              <div className="divide-y divide-slate-100">
                 {recent.map((t) => (
-                  <li key={t.id}>
-                    <TicketCard ticket={t} formattedDate={formatDateTime(t.createdAt)} />
-                  </li>
+                  <RecentTicketRow key={t.id} ticket={t} formattedDate={formatDateTime(t.createdAt)} />
                 ))}
-              </ul>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Bottom CTA (reference: centered below Recent Tickets) */}
+        {/* Bottom CTA (reference: centered outline button) */}
         <div className="flex justify-center">
-          <Button asChild variant="outline" size="lg" className="rounded-xl px-8">
+          <Button
+            asChild
+            variant="outline"
+            className="group border-slate-300 hover:border-cyan-500 hover:bg-cyan-50 transition-all duration-300"
+          >
             <Link href="/mytickets">
               View All Tickets
-              <ArrowRight className="w-4 h-4 ml-2" aria-hidden />
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" aria-hidden />
             </Link>
           </Button>
         </div>

@@ -32,14 +32,37 @@ const PRIORITY_BADGE_CLASSES: Record<TicketPriority, string> = {
   urgent: "bg-red-100 text-red-700 font-medium px-3 py-1",
 };
 
-export function StatusBadge({ status }: { status: TicketStatus }) {
+export function StatusBadge({
+  status,
+  detail = false,
+}: {
+  status: TicketStatus;
+  /** detail=true renders the reference's larger detail-page treatment
+   *  (text-sm font-bold) instead of the row treatment (text-xs font-medium). */
+  detail?: boolean;
+}) {
+  const extra = detail ? "text-sm! font-bold" : "";
   return (
-    <Badge className={cn("capitalize", STATUS_BADGE_CLASSES[status])}>{status.replace("_", " ")}</Badge>
+    <Badge className={cn("capitalize", STATUS_BADGE_CLASSES[status], extra)}>
+      {status.replace("_", " ")}
+    </Badge>
   );
 }
 
-export function PriorityBadge({ priority }: { priority: TicketPriority }) {
-  return <Badge className={cn("capitalize", PRIORITY_BADGE_CLASSES[priority])}>{priority}</Badge>;
+export function PriorityBadge({
+  priority,
+  showWord = false,
+}: {
+  priority: TicketPriority;
+  /** showWord=true appends " priority" — the reference detail page puts the
+   *  word inside the badge ("medium priority"), rows keep it bare. */
+  showWord?: boolean;
+}) {
+  return (
+    <Badge className={cn("capitalize", PRIORITY_BADGE_CLASSES[priority])}>
+      {showWord ? `${priority.replace("_", " ")} priority` : priority}
+    </Badge>
+  );
 }
 
 export function CategoryBadge({ category }: { category: TicketCategory }) {
@@ -95,6 +118,43 @@ export function TicketCard({
                 </span>
               ) : null}
             </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// Reference "Recent Tickets" row (dashboard): flat divide-y list entry —
+// measured from the reference DOM (session 2). NOT a card: no border/shadow,
+// w-12 h-12 tile, truncated semibold title, one-line description, no arrow.
+export function RecentTicketRow({
+  ticket,
+  formattedDate,
+}: {
+  ticket: TicketCardData;
+  formattedDate: string;
+}) {
+  const emoji = CATEGORY_EMOJI[(ticket.category as TicketCategory) ?? "other"] ?? "📋";
+  return (
+    <Link
+      href={`/ticketdetails?id=${ticket.id}`}
+      className="block p-6 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-blue-50/50 transition-all duration-300 group"
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 text-2xl">
+          {emoji}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-slate-900 truncate group-hover:text-cyan-600 transition-colors">
+            {ticket.title}
+          </h3>
+          <p className="text-sm text-slate-600 line-clamp-1 mb-3">{ticket.description}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={ticket.status as TicketStatus} />
+            <PriorityBadge priority={ticket.priority as TicketPriority} />
+            <CategoryBadge category={ticket.category as TicketCategory} />
+            <span className="text-xs text-slate-500 font-medium">{formattedDate}</span>
           </div>
         </div>
       </div>

@@ -43,8 +43,9 @@ test.describe("ticket lifecycle", () => {
     // Search narrows to a seeded title.
     await page.getByLabel("Search tickets").fill("VPN disconnects");
     await expect(page.getByRole("heading", { name: "VPN disconnects every 15 minutes" })).toBeVisible();
-    const cardCount = await page.locator('a[href*="/ticketdetails"]').count();
-    expect(cardCount).toBe(1);
+    // toHaveCount retries — a bare locator.count() races the async search
+    // fetch (observed: counted the unfiltered 11 before results rendered).
+    await expect(page.locator('a[href*="/ticketdetails"]')).toHaveCount(1);
 
     // A nonsense search shows the filtered empty state.
     await page.getByLabel("Search tickets").fill("zzz-no-such-ticket-zzz");
@@ -69,7 +70,9 @@ test.describe("ticket lifecycle", () => {
     // Owner status control: open → resolved.
     await page.getByRole("combobox", { name: "Ticket status" }).click();
     await page.getByRole("option", { name: "Resolved" }).click();
-    await expect(page.getByText("Status updated")).toBeVisible();
+    // exact:true — the Radix toast announcer (role="status") concatenates
+    // title+description, so a substring match resolves to 2 elements.
+    await expect(page.getByText("Status updated", { exact: true })).toBeVisible();
     await expect(page.getByText("resolved", { exact: true }).first()).toBeVisible();
   });
 

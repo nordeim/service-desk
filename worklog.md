@@ -62,3 +62,39 @@ Work Log:
 Stage Summary:
 - COMPLETE: production-ready ServiceDesk clone pushed to git@github.com:nordeim/service-desk.git (main @ cf8e4f0)
 - Deliverables: full codebase (48 TS files), 7 screenshots in docs/screenshots/, 4 regenerated root docs, all gates green
+
+---
+Task ID: 4
+Agent: main (Super Z)
+Task: Session 2 — refresh repo, review docs/session_1 + worklog, gap analysis vs live reference, remediation plan
+
+Work Log:
+- git pull: 6b40dca adds docs/session_1.md + repo-root worklog.md
+- Reviewed AGENTS/CLAUDE/README/PAD + session_1.md — aligned with codebase
+- Verified skills/ exclusion in all 4 configs (tsconfig, eslint, vitest, playwright)
+- Gates at baseline: lint/typecheck/50-unit/build green; E2E 26/28 (2 tickets.spec locator defects)
+- Logged into live reference; extracted DOM ground truth for all pages; class-level structural diffs; VLM leads verified against computed styles (3 false claims refuted)
+- Findings: 25 gaps across 9 groups; wrote + validated docs/remediation-plan-session2.md
+
+Stage Summary:
+- Repo at 6b40dca, clean. Remediation plan written + validated. Ready to execute in TDD order.
+
+---
+Task ID: 5
+Agent: main (Super Z)
+Task: Session 2 — remediation execution, verification, docs, SKILL.md, commit + push
+
+Work Log:
+- Fixed tickets.spec defects: non-retrying count() → toHaveCount (A1); getByText toast-announcer ambiguity → { exact: true } (A2)
+- Wrote 18-test visual-parity.spec.ts (red) pinning all reference-measured contracts; went green after implementation
+- Implemented all 9 remediation groups: C1/C2 sidebar (gradient quick stats + border-t footer + w-4 icon), B1/B2/B3 chrome (app-wide gradient wrapper, flex-1 overflow-auto scroll container, non-sticky mobile header with plain h1, text-4xl page headings), D1-D5 dashboard (bg-card shadow-lg cards, flat divide-y RecentTicketRow, p-6 border-b header, <p> perf value, outline CTA), E1 mytickets (max-w-7xl, mb-8 header, 3-col filter grid, pl-10 search), F1-F5 detail (grid lg:grid-cols-3, gradient card header with inline badges incl. "priority" word, avatar comments + ml-10, text-xs uppercase labels, button-style back), G1/G2 submit (shadow-2xl card, gradient header, p-8 body, back button), H1-H4 login + signup + forgotpassword (max-w-md shell, backdrop-blur, slate top bar, ring-4 in-card logo from public/logo.png — fetched from reference app, bg-slate-50/50 inputs, bg-slate-900 sign-in, OR divider)
+- Housekeeping: removed empty untracked src/app route dirs, deleted lint-violating scratch script
+- Gates: lint ✓ typecheck ✓ 50 unit ✓ build ✓ 46/46 E2E ✓ smoke 10/10 ✓
+- Live re-verification vs reference: quick stats geometry IDENTICAL (48px rows, 16px offset, 14px labels); mobile header IDENTICAL (static, 20px h1, 0 brand tiles); detail gradient header computed style confirmed; refuted 3 false VLM claims (active-nav color, quick-stats style, missing gradient header)
+- Refreshed docs/screenshots/ (7 shots); updated README/AGENTS/CLAUDE/PAD for the remediated codebase; .env.example verified matching (already tracked)
+- Created service-desk_SKILL.md (599 lines, 20 sections + 2 appendices) via skills/distill-codebase-skill + skills/to-distill-project-into-skill patterns; versions verified from node_modules
+
+Stage Summary:
+- All 25 session-2 findings fixed and E2E-pinned; 46 E2E + 50 unit + smoke green; parity verified against live reference via computed styles
+- Deliverables: remediated codebase (19 files changed + 3 new: visual-parity.spec.ts, public/logo.png, docs/remediation-plan-session2.md, service-desk_SKILL.md), refreshed screenshots, 4 updated root docs
+- Ready for commit + push via ssh_git_wrapper_v3.py

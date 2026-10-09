@@ -131,36 +131,37 @@ export default function SubmitTicketPage() {
   }
 
   return (
-    <div className="flex-1 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
+    // Reference (measured session 2): max-w-3xl container; mb-8 header block
+    // with text-4xl h1; a shadow-2xl form card whose header carries the
+    // cyan→blue gradient; body p-8; button-style back control.
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
       <div className="max-w-3xl mx-auto">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-cyan-600 transition-colors mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" aria-hidden />
-          Back to Dashboard
-        </Link>
-
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Submit a Ticket</h1>
-          <p className="text-slate-500 mt-1">
+          <Button asChild variant="outline" className="mb-4 hover:bg-slate-100">
+            <Link href="/dashboard">
+              <ArrowLeft className="w-4 h-4" aria-hidden />
+              Back to Dashboard
+            </Link>
+          </Button>
+          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Submit a Ticket</h1>
+          <p className="text-slate-600 mt-2 text-lg">
             Report an issue and our IT team will get back to you shortly
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/60 overflow-hidden"
+          className="rounded-xl border text-card-foreground border-none shadow-2xl bg-white overflow-hidden"
           noValidate
         >
-          <div className="bg-sky-50 border-b border-sky-100 px-6 py-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white border border-sky-200 flex items-center justify-center">
-              <Info className="w-4 h-4 text-sky-600" aria-hidden />
+          <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100 bg-gradient-to-r from-cyan-50/50 to-blue-50/50">
+            <div className="font-semibold leading-none tracking-tight flex items-center gap-2 text-slate-900">
+              <Info className="w-5 h-5 text-cyan-500" aria-hidden />
+              Ticket Details
             </div>
-            <h2 className="font-semibold text-slate-800">Ticket Details</h2>
           </div>
 
-          <div className="p-6 space-y-6">
+          <div className="p-8 space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">
                 Issue Title <span className="text-red-500">*</span>
@@ -283,7 +284,7 @@ export default function SubmitTicketPage() {
             </div>
           </div>
 
-          <div className="border-t border-slate-100 px-6 py-4 flex items-center justify-end gap-3 bg-slate-50/50">
+          <div className="px-8 py-6 flex items-center justify-end gap-3 border-t border-slate-100">
             <Button type="button" variant="outline" asChild>
               <Link href="/dashboard">Cancel</Link>
             </Button>

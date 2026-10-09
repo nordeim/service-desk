@@ -436,8 +436,11 @@ Single role today: **authenticated user**. Ownership is the authorization unit �
 | E2E — dashboard | 1 | 7 | `tests/e2e/dashboard.spec.ts` | Playwright |
 | E2E — ticket lifecycle | 1 | 5 | `tests/e2e/tickets.spec.ts` | Playwright |
 | E2E — mobile + desktop navigation | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| E2E — visual parity (session-2 contracts) | 1 | 18 | `tests/e2e/visual-parity.spec.ts` | Playwright |
 | E2E — shared session setup project | 1 | 1 | `tests/e2e/auth.setup.ts` | Playwright |
 | API smoke | 1 | 10 steps | `scripts/smoke-test.sh` | bash + curl |
+
+> Session-2 additions: the 18 visual-parity tests pin the reference-measured design contracts (gradient quick stats, flat recent rows, detail grid + gradient header, `text-4xl` headings, non-sticky mobile header, login shell). The two tickets.spec locator defects (non-retrying `count()`; toast-announcer strict-mode ambiguity) were fixed with `toHaveCount` and `{ exact: true }` respectively — the patterns are documented in AGENTS.md.
 
 ### 7.2 Test Patterns
 
@@ -536,6 +539,8 @@ Main-only trunk with atomic Conventional Commits. Feature branches are short-liv
 | LOW | No numeric coverage threshold | Coverage discipline is convention, not gate | Open (`vitest --coverage` + thresholds when the suite grows) |
 | INFO | Attachment storage is base64-in-SQLite | 2 MiB × 3 cap keeps it safe; volume growth → object storage | Documented (§4.2) |
 | INFO | Dev-mode Next overlay (bottom-left dark circle) overlaps the sidebar footer in dev screenshots | Visual-check false positive only; production never renders it | Mitigated (`devIndicators: false` + AGENTS.md note) |
+| RESOLVED | Visual parity gaps vs the live reference (25 findings, session 2: flat quick stats, card-style recent list, flex detail layout, old login shell, `text-3xl` headings, sticky mobile header) | Parity risk on every page | Fixed — every contract E2E-pinned by `visual-parity.spec.ts`; inventory in `docs/remediation-plan-session2.md` |
+| RESOLVED | tickets.spec flakiness (2 locator defects: non-retrying `count()` racing async search; `getByText` strict-mode ambiguity vs the Radix toast announcer) | 2 tests failing intermittently in full runs | Fixed with `toHaveCount` + `{ exact: true }` (session 2) |
 
 ---
 
@@ -548,9 +553,9 @@ Main-only trunk with atomic Conventional Commits. Feature branches are short-liv
 | `src/lib/constants.ts` | ~95 | Ticket vocabulary, emoji/label maps, attachment limits |
 | `src/lib/validation.ts` | ~120 | Every input guard (ticket/comment/signup/login/attachments) |
 | `src/components/ui/sidebar.tsx` | ~700 | shadcn Sidebar (desktop inline + mobile Sheet) — the reference-parity keystone |
-| `src/components/app-sidebar.tsx` | ~190 | Nav + quick stats + user footer (the `text-white!` cascade fix lives here) |
-| `src/components/app-sidebar-chrome.tsx` | ~55 | Provider tree + mobile header |
-| `src/components/ticket-bits.tsx` | ~110 | Reference-class badges + ticket card |
+| `src/components/app-sidebar.tsx` | ~200 | Nav + gradient quick stats + user footer (the `text-white!` cascade fix lives here) |
+| `src/components/app-sidebar-chrome.tsx` | ~50 | Provider tree + gradient wrapper + non-sticky mobile header + `flex-1 overflow-auto` scroll container |
+| `src/components/ticket-bits.tsx` | ~140 | Reference-class badges + ticket card (mytickets) + flat recent-ticket row (dashboard) |
 | `src/app/(app)/layout.tsx` | ~22 | The auth guard + chrome composition |
 | `src/app/(app)/dashboard/page.tsx` | ~230 | Stat cards, performance metrics, recent tickets (reference layout) |
 | `src/app/api/tickets/route.ts` | ~120 | List (filters/sort/scope) + create (attachments) |
