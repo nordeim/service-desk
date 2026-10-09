@@ -9,7 +9,7 @@ last_updated: 2026-10-09
 
 Full-stack IT ticketing portal (Next.js 16 App Router standalone · React 19 · TypeScript strict · Tailwind CSS v4 CSS-first · shadcn/ui · Prisma 6 + SQLite · Vitest + Playwright). A visual-parity, feature-superset clone of the base44 ServiceDesk reference app, maintained as a single deployable process with zero external services.
 
-**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (134 specs against the production standalone build) when UI/auth behavior changes. **Re-run the gate after EVERY file that lands — including one-off scripts** (a post-gate `.cjs` script broke CI on main in session 7). CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
+**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (145 specs against the production standalone build) when UI/auth behavior changes. **Re-run the gate after EVERY file that lands — including one-off scripts** (a post-gate `.cjs` script broke CI on main in session 7). CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
 
 ## Foundational Principles
 
@@ -86,14 +86,14 @@ bun run dev                     # http://localhost:3000  (demo@servicedesk.app /
 | `bun run build` | Production standalone build |
 | `bun run start` | Boot standalone server |
 | `bun run lint` / `bun run typecheck` | ESLint / tsc |
-| `bun run test` / `bun run test:e2e` | 54 unit / 125 E2E (needs prior build) |
+| `bun run test` / `bun run test:e2e` | 55 unit / 145 E2E (needs prior build) |
 | `bash scripts/smoke-test.sh` | API smoke on a throwaway server |
 | `bun run db:push` / `db:seed` / `db:reset` | Schema push / idempotent seed / reset |
 
 ## Testing Strategy
 
 - **Unit (Vitest, `*.test.ts`)**: pure seams only — auth sign/verify + scrypt + rate limiting, input validation, constants vocabulary, db-path resolution, date/duration formatting (`formatDate` date-only, `formatDateTime`, `formatDuration`). No DOM, no DB.
-- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (105 tests) pins the reference-measured design contracts (sessions 2–8; session 6 added the computed-value pins — the radius scale, the focus-state matrix, select dropdown structure + priority colors; session 7 added the accent-token pair, the option-radius drift supersede, empty-state markup, fetch-failure resilience, favicon + per-route titles; session 8 added the auth-error alert contract, the 80% sheet overlay, zero-overflow-at-375px + ellipsis truncation, the social/PWA head set, and the raw-button focus tails; session 9 added the button-cursor preflight, the stock shadcn token block — near-black --primary (dark badge hovers), neutral-200 --border, near-black --foreground, blue-500 --sidebar-ring — the old-gen Badge base (transition-colors incl. background-color), and the translucent sidebar edge). Color pins accept both rgb() and lab() representations (v4 emits palette colors as lab()). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
+- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (116 tests) pins the reference-measured design contracts (sessions 2–10; session 6 added the computed-value pins — the radius scale, the focus-state matrix, select dropdown structure + priority colors; session 7 added the accent-token pair, the option-radius drift supersede, empty-state markup, fetch-failure resilience, favicon + per-route titles; session 8 added the auth-error alert contract, the 80% sheet overlay, zero-overflow-at-375px + ellipsis truncation, the social/PWA head set, and the raw-button focus tails; session 9 added the button-cursor preflight, the stock shadcn token block, the old-gen Badge base, and the translucent sidebar edge; session 10 added the in-card login view state machine — reset + Check-your-email + signup views with the shorter h-10/sm:h-11 input generation — the ticket-not-found destructive Alert, the doc/docx picker families, and the sitemap/robots SEO surface). Color pins accept both rgb() and lab() representations (v4 emits palette colors as lab()). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
 - **Smoke (`scripts/smoke-test.sh`)**: API contract on a throwaway server — health, login, CRUD, comments, guards (401/400).
 - Bug fixes require a failing test first (unit for domain seams, E2E for UI contract). The mobile-navigation spec is the highest-regression-risk chrome — run it after any sidebar/sheet/Tailwind change; run visual-parity after any page-layout change.
 
@@ -135,3 +135,5 @@ bun run dev                     # http://localhost:3000  (demo@servicedesk.app /
 - Trusting an ambient `DATABASE_URL` env var over the repo `.env` (scripts pin it for this reason).
 - "Fixing" the dark circle over the sidebar footer in dev screenshots (Next dev overlay, shadow DOM, dev-only).
 - Real logins per E2E test (rate limiter) — use the shared `storageState`.
+- Adding a margin utility to a DIRECT child of a `space-y-*` container (the v3→v4 selector rewrite makes it render differently than the reference — session-10 verified no instance; keep it that way).
+- Faking the reference's base44 "Verify your email" flow (platform artifact; no mail transport — the direct sign-in on create is the documented superset).

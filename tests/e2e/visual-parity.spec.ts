@@ -857,9 +857,13 @@ test.describe("session 6: login footer + Google button", () => {
   // `text-sm text-slate-500 hover:text-slate-700 transition-colors` with an
   // inner `font-medium text-slate-700` span. Ours split it across a <p> and
   // an inner link (hover darkened only "Sign up", to slate-900).
-  test("the signup line is one link with the reference whole-line hover", async ({ page }) => {
+  // Session 10 supersede: the reference's control is a BUTTON that swaps
+  // the card to the in-card signup view (measured live) — ours became a
+  // button too (same classes); the standalone /signup page remains as the
+  // URL superset.
+  test("the signup line is one control with the reference whole-line hover", async ({ page }) => {
     await page.goto("/login");
-    const line = page.locator('a[href="/signup"]');
+    const line = page.getByRole("button", { name: /Need an account\?\s*Sign up/ });
     await expect(line).toHaveCount(1);
     await expect(line).toHaveText(/Need an account\?\s*Sign up/);
     await expect(line).toHaveClass(/text-sm/);
@@ -1564,6 +1568,252 @@ test.describe("session 9: badge generation + hover behavior", () => {
     await expect(pill).toHaveClass(/transition-colors/);
     const transition = await pill.evaluate((el) => getComputedStyle(el).transitionProperty);
     expect(transition).toContain("background-color");
+  });
+});
+
+test.describe("session 10: the login card's in-card view swaps", () => {
+  // The reference's login card is a view state machine on /login — "Forgot
+  // password?" and "Need an account? Sign up" are BUTTONS that swap the card
+  // content in place (URL unchanged). First exercised live in session 10
+  // (nine sessions read only the at-rest sign-in DOM). Contracts measured
+  // from the live reference: docs/remediation-plan-session10.md §G1.
+
+  test("Forgot password? swaps the card to the reset view without navigating", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Forgot password?" }).click();
+    await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
+    // The card swaps in place — the URL never changes and the sign-in
+    // heading is replaced (logo + Google + OR divider all absent).
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { name: "Welcome to ServiceDesk" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Continue with Google/ })).toHaveCount(0);
+    await expect(page.locator("main img")).toHaveCount(0);
+  });
+
+  test("the reset view matches the reference structure", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Forgot password?" }).click();
+
+    // Back button: whole-line classes + the -mb-2 nudge + h-4 arrow.
+    const back = page.getByRole("button", { name: /Back to sign in/ });
+    await expect(back).toHaveClass(/text-sm/);
+    await expect(back).toHaveClass(/text-slate-500/);
+    await expect(back).toHaveClass(/hover:text-slate-700/);
+    await expect(back).toHaveClass(/font-medium/);
+    await expect(back).toHaveClass(/transition-colors/);
+    await expect(back).toHaveClass(/-mb-2/);
+    await expect(back.locator("svg")).toHaveClass(/h-4/);
+
+    // The h2 + subtext block.
+    const h2 = page.getByRole("heading", { name: "Reset your password" });
+    await expect(h2).toHaveClass(/text-xl/);
+    await expect(h2).toHaveClass(/sm:text-2xl/);
+    await expect(h2).toHaveClass(/font-bold/);
+    await expect(h2).toHaveClass(/text-slate-900/);
+    const sub = page.getByText("Enter your email and we'll send you a link to reset your password");
+    await expect(sub).toHaveClass(/text-slate-600/);
+    await expect(sub).toHaveClass(/text-sm/);
+
+    // The form: the reference's space-y-4 sm:space-y-5 + the shorter
+    // input generation (h-10 sm:h-11, placeholder slate-400).
+    const form = page.locator("main form");
+    await expect(form).toHaveClass(/space-y-4/);
+    await expect(form).toHaveClass(/sm:space-y-5/);
+    const email = page.getByLabel("Email");
+    await expect(email).toHaveClass(/h-10/);
+    await expect(email).toHaveClass(/sm:h-11/);
+    await expect(email).toHaveClass(/placeholder:text-slate-400/);
+    await expect(email).toHaveClass(/bg-slate-50\/50/);
+    await expect(email).toHaveAttribute("placeholder", "you@example.com");
+
+    // Submit: the shorter h-10 sm:h-11 generation; their v3 shadow-sm
+    // computes to our shadow-xs (the session-5 naming trap).
+    const submit = page.getByRole("button", { name: /Send reset link/ });
+    await expect(submit).toHaveClass(/h-10/);
+    await expect(submit).toHaveClass(/sm:h-11/);
+    await expect(submit).toHaveClass(/bg-slate-900/);
+    await expect(submit).toHaveClass(/shadow-xs/);
+    await expect(submit).toHaveClass(/rounded-xl/);
+  });
+
+  test("submitting the reset form renders the Check-your-email success view", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Forgot password?" }).click();
+    await page.getByLabel("Email").fill("parity@s10.dev");
+    await page.getByRole("button", { name: /Send reset link/ }).click();
+
+    // The icon circle + h2 + email paragraph + the green alert.
+    const circle = page.locator("div.mx-auto.bg-slate-100.rounded-full");
+    await expect(circle).toHaveClass(/w-14/);
+    await expect(circle).toHaveClass(/h-14/);
+    await expect(circle).toHaveClass(/sm:w-16/);
+    await expect(circle).toHaveClass(/sm:h-16/);
+    await expect(circle.locator("svg")).toHaveClass(/h-7/);
+    await expect(circle.locator("svg")).toHaveClass(/sm:h-8/);
+    await expect(circle.locator("svg")).toHaveClass(/text-slate-700/);
+
+    const h2 = page.getByRole("heading", { name: "Check your email" });
+    await expect(h2).toHaveClass(/text-xl/);
+    await expect(h2).toHaveClass(/sm:text-2xl/);
+    await expect(page.getByText("parity@s10.dev")).toHaveClass(/font-medium/);
+    await expect(page.getByText("parity@s10.dev")).toHaveClass(/text-slate-900/);
+
+    // The green alert: the reference's bg-green-50/70 + border-green-200 +
+    // rounded-xl + p-4 with the [&_p]:leading-relaxed text-green-700 inner.
+    // (Scoped to main — Next's route announcer also carries role=alert.)
+    const alert = page.locator('main div[role="alert"]');
+    await expect(alert).toHaveClass(/bg-green-50\/70/);
+    await expect(alert).toHaveClass(/border-green-200/);
+    await expect(alert).toHaveClass(/rounded-xl/);
+    await expect(alert).toHaveClass(/p-4/);
+    await expect(alert.locator("div")).toHaveClass(/text-green-700/);
+    await expect(alert.locator("div")).toHaveClass(/text-sm/);
+    // v4 emits palette colors as lab() — accept both representations
+    // (green-700 = rgb(21, 128, 61)).
+    const green = await alert.locator("div").evaluate((el) => getComputedStyle(el).color);
+    const greenOk = green === "rgb(21, 128, 61)" || /^lab\(/.test(green);
+    expect(greenOk, `green-700 computed as: ${green}`).toBe(true);
+
+    // The success back button is the full-width centered variant.
+    const back = page.getByRole("button", { name: /Back to sign in/ });
+    await expect(back).toHaveClass(/w-full/);
+    await expect(back).toHaveClass(/justify-center/);
+  });
+
+  test("Need an account? Sign up swaps the card to the signup view", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Need an account\?\s*Sign up/ }).click();
+
+    await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { name: "Welcome to ServiceDesk" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Continue with Google/ })).toHaveCount(0);
+
+    // Three fields with the reference placeholders; no name field
+    // (base44 auth has no name concept — the client derives the account
+    // name from the email local-part). Exact match — the Confirm Password
+    // label also contains "Password".
+    await expect(page.getByLabel("Email")).toHaveAttribute("placeholder", "you@example.com");
+    await expect(page.getByLabel("Password", { exact: true })).toHaveAttribute("placeholder", "Min. 8 characters");
+    await expect(page.getByLabel("Confirm Password")).toHaveAttribute("placeholder", "Re-enter password");
+
+    // The shorter input generation (h-10 sm:h-11 + slate-400 placeholders).
+    const email = page.getByLabel("Email");
+    await expect(email).toHaveClass(/h-10/);
+    await expect(email).toHaveClass(/sm:h-11/);
+    await expect(email).toHaveClass(/placeholder:text-slate-400/);
+
+    // The form is the tighter space-y-3 sm:space-y-4 generation.
+    const form = page.locator("main form");
+    await expect(form).toHaveClass(/space-y-3/);
+    await expect(form).toHaveClass(/sm:space-y-4/);
+
+    // Submit: "Create account" with the shorter button generation.
+    const submit = page.getByRole("button", { name: /Create account/ });
+    await expect(submit).toHaveClass(/h-10/);
+    await expect(submit).toHaveClass(/sm:h-11/);
+    await expect(submit).toHaveClass(/bg-slate-900/);
+    await expect(submit).toHaveClass(/shadow-xs/);
+  });
+
+  test("Back to sign in returns to the sign-in view from both swapped views", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Forgot password?" }).click();
+    await page.getByRole("button", { name: /Back to sign in/ }).click();
+    await expect(page.getByRole("heading", { name: "Welcome to ServiceDesk" })).toBeVisible();
+
+    await page.getByRole("button", { name: /Need an account\?\s*Sign up/ }).click();
+    await page.getByRole("button", { name: /Back to sign in/ }).click();
+    await expect(page.getByRole("heading", { name: "Welcome to ServiceDesk" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
+  });
+});
+
+test.describe("session 10: the ticket-not-found state", () => {
+  // The reference renders a shadcn destructive Alert inline in the
+  // max-w-5xl page container (measured live on /ticketdetails?id=unknown):
+  // rounded-lg (8px) + px-4 py-3 (12px 16px) + border-destructive/50 +
+  // text-destructive. Ours was a centered text-2xl card.
+  test("an unknown ticket id renders the reference destructive Alert", async ({ page }) => {
+    await page.goto("/ticketdetails?id=nonexistent-s10");
+    // Scoped to main — Next's route announcer also carries role=alert.
+    const alert = page.locator('main div[role="alert"]');
+    await expect(alert).toBeVisible();
+    await expect(alert).toContainText("Ticket not found");
+    await expect(alert).toHaveClass(/border-destructive\/50/);
+    await expect(alert).toHaveClass(/text-destructive/);
+    await expect(alert).toHaveClass(/rounded-lg/);
+    await expect(alert).toHaveClass(/px-4/);
+    await expect(alert).toHaveClass(/py-3/);
+    await expect(alert).toHaveClass(/text-sm/);
+    await expect(alert.locator("div")).toHaveClass(/leading-relaxed/);
+
+    // Computed contract: red-500 text + the 50%-alpha border + 8px radius
+    // + 12px/16px padding (live-measured on the reference). The
+    // destructive token is literal-hex (rgb); the border's 50% alpha may
+    // serialize as rgba or color-mix on the v4 pipeline.
+    const red = await alert.evaluate((el) => getComputedStyle(el).color);
+    const redOk = red === "rgb(239, 68, 68)" || /^lab\(/.test(red);
+    expect(redOk, `destructive text computed as: ${red}`).toBe(true);
+    const border = await alert.evaluate((el) => getComputedStyle(el).borderTopColor);
+    const borderOk = border === "rgba(239, 68, 68, 0.5)" || /color-mix|lab\(/.test(border);
+    expect(borderOk, `destructive border computed as: ${border}`).toBe(true);
+    await expect(alert).toHaveCSS("border-top-left-radius", "8px");
+    await expect(alert).toHaveCSS("padding", "12px 16px");
+
+    // The alert sits inside the standard max-w-5xl page wrapper.
+    const wrapper = alert.locator("xpath=ancestor::div[contains(@class,'max-w-5xl')]");
+    await expect(wrapper).toHaveCount(1);
+  });
+
+  test("the not-found state keeps the superset Back to Tickets control", async ({ page }) => {
+    await page.goto("/ticketdetails?id=nonexistent-s10");
+    // asChild Button → renders an anchor (role=link).
+    const back = page.getByRole("link", { name: /Back to Tickets/ });
+    await expect(back).toBeVisible();
+  });
+});
+
+test.describe("session 10: attachment accept + the SEO surface", () => {
+  // The reference's upload input accepts image/*,.pdf,.doc,.docx — ours
+  // missed the Word families (a .docx they accept was hidden by our picker).
+  test("the upload input accepts the reference's doc/docx families", async ({ page }) => {
+    await page.goto("/submitticket");
+    const input = page.locator('input[type="file"]');
+    const accept = await input.getAttribute("accept");
+    expect(accept, `accept was: ${accept}`).toContain(".doc");
+    expect(accept, `accept was: ${accept}`).toContain(".docx");
+    expect(accept).toContain(".pdf");
+    expect(accept).toContain(".png");
+  });
+
+  // The reference ships robots.txt (with a Sitemap directive) + sitemap.xml.
+  // Ours had robots.txt but no sitemap and no directive. We serve the four
+  // PUBLIC routes only (their auto-generated sitemap lists dead scaffold
+  // routes — deliberately not copied).
+  test("/sitemap.xml serves the public-route set", async ({ page }) => {
+    const res = await page.request.get("/sitemap.xml");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toContain("<urlset");
+    // Parse the <loc> URLs and compare the PATHNAME set (the origin is the
+    // build-time NEXT_PUBLIC_SITE_URL — don't hardcode it).
+    const locs = [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+    expect(locs).toEqual(["/", "/login", "/signup", "/forgotpassword"]);
+    // The authenticated routes stay OUT of the sitemap (login-walled).
+    expect(locs).not.toContain("/dashboard");
+    expect(locs).not.toContain("/mytickets");
+  });
+
+  test("/robots.txt carries the Sitemap directive + the disallow policy", async ({ page }) => {
+    const res = await page.request.get("/robots.txt");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    // The robots protocol is case-insensitive; Next serializes "User-Agent".
+    expect(body.toLowerCase()).toContain("user-agent: *");
+    expect(body).toContain("Disallow: /dashboard");
+    expect(body).toContain("Disallow: /api/");
+    expect(body.toLowerCase()).toContain("sitemap:");
   });
 });
 

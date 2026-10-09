@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-9 remediation (2026-10-10).
+  functionality. Distilled through the session-10 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.7.0
+version: 2.8.0
 last_updated: 2026-10-10
-project_state: 54 unit tests + 134 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–9)
+project_state: 55 unit tests + 145 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–10)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -380,6 +380,11 @@ Manual/visual checks:
 35. **Component generation matters even when classes look right.** (Session 9.) Our Badge carried the new-gen base under old-gen variant classes; class-level pins passed while `transition-property` silently diverged (hover backgrounds snapped, never faded). Pin computed `transition-property` on interactive surfaces.
 36. **The reference's DOM is twMerge output — compare merged strings.** (Session 9.) Their "two different badge bases" resolved into one base + variant dedupe once read as cn() output; compare the final class attribute, not the source arrays.
 37. **Shared defects are parity too.** (Session 9.) The `transition-argin,opacity]` upstream mangling and the sheet-open focus landing on the sign-out button live in BOTH sites — verify the reference shares a quirk before "fixing" it, and never fix only one side.
+38. **Click every control before claiming parity.** (Session 10.) Nine sessions read the login card's at-rest DOM; the card's three other views (in-card reset, Check-your-email, signup) were one click away the whole time. The at-rest DOM is the floor of parity, not the ceiling.
+39. **A "dead" route can hide a live flow.** (Session 10.) The reference's `/signup` route 404s — but the login card's Sign-up button works (an in-card view swap). Route-level probing misses view-state machines; interaction-level probing finds them.
+40. **Platform artifacts are not features.** (Session 10.) The base44 verify-email view and the auto-generated sitemap of dead routes are platform exhaust — replicate the DESIGN (card views, sitemap infrastructure) with production-sane substance (no fake verification, no dead URLs).
+41. **The engine trap log pays dividends — verify, don't assume.** (Session 10.) The space-y v3→v4 selector rewrite (margin-side swap + `:where()` specificity) had zero instances in this app, but only because a computed-margin walk ran on both sites. Keep walking the scales each session.
+42. **Enumerate the invisible surfaces too.** (Session 10.) robots.txt/sitemap.xml lived outside every DOM probe for nine sessions — one curl each. The session-8 `<head>` lesson extends to the server's root files.
 
 ---
 

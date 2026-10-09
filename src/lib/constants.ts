@@ -99,9 +99,19 @@ export const ATTACHMENT_ACCEPTED_TYPES = [
   "image/gif",
   "image/webp",
   "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "text/plain",
   "text/markdown",
   "text/csv",
   "application/json",
   "application/zip",
 ];
+// Session 10: the reference's picker accepts image/*,.pdf,.doc,.docx — the
+// Word families were missing from ours (a .docx they accept was hidden by
+// our file picker). Kept as a precise extension list rather than their
+// image/* wildcard: svg stays excluded (an XSS vector the wildcard permits).
+// Derived here so the picker attribute and the accepted-type list cannot
+// drift apart again.
+export const ATTACHMENT_ACCEPT_ATTR =
+  ".png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx,.txt,.md,.csv,.json,.zip";

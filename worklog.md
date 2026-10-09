@@ -336,3 +336,38 @@ Work Log:
 
 Stage Summary:
 - All 7 session-9 findings fixed and E2E-pinned (134 E2E total: visual-parity 96→105); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 20
+Agent: main (Super Z)
+Task: Session 10 — refresh repo, review session_9/session_10 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git clone (fresh workspace) at 0fc0fee (session-9 code + the session-10 briefing docs/session_10.md); current session established as Session 10
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.7.0 + session_9.md + remediation-plan-session9.md + worklog + session_10.md — all aligned with the codebase; env contract set up (.env from .env.example with generated AUTH_SECRET, DATABASE_URL=file:../db/custom.db, db/ at root, skills/ excluded by construction in eslint/vitest/playwright/tsconfig configs; .env.example matches the codebase)
+- Baseline gates (after installing Playwright Chromium): lint ✓ typecheck ✓ 54 unit ✓ build ✓ 134/134 E2E ✓ smoke 11/11 ✓; session-9 commit 1f12f42 audited clean (G1 cursor preflight, G2–G5 token flips, G6 badge old-gen base + pill tails, G7 sidebar edge — all verified in code)
+- Fresh gap analysis vs live reference (agent-browser, both sites). NEW probe surfaces: the login card's INTERACTIVE state machine (every button clicked for the first time — "Forgot password?" and "Need an account? Sign up" swap the card IN PLACE: reset view, Check-your-email success view with icon circle + green alert, signup view with 3 fields and a shorter h-10/sm:h-11 input/button generation; our clone navigated to standalone pages), the invalid-ticket detail state (reference = destructive shadcn Alert inline in max-w-5xl; ours = centered text-2xl card), robots.txt/sitemap.xml (reference ships both — sitemap lists dead base44 scaffold routes; ours had robots but no sitemap/directive), <html>/<body> attributes (computed-identical), input HTML attributes (accept lists diverge: reference image/*,.pdf,.doc,.docx vs ours missing doc/docx), touch-action (auto both), comment edit/delete (absent on reference), console errors (zero on both)
+- Standing priority verified: mobile navigation full matrix on both sites at 375px (reference contract stable — 288px sheet, 80% overlay, their trigger still blocked by their own toast viewport; ours fully green: trigger hit-test BUTTON, sheet geometry, overlay oklab 0.8, active-nav gradient + white text, nav-tap auto-close + scroll restore, Escape→body, zero horizontal overflow)
+- Tailwind v4 sweep: the space-y v3→v4 selector rewrite (trap-log #4 — margin-side swap + :where() specificity) verified ABSENT via computed-margin walks on every space-y container on dashboard + ticketdetails on BOTH sites (identical gaps; no direct-child margin utilities); standing pins stable (cursor preflight, :root token block, bare-button cursor, titles, head set, overlay)
+- 4 findings: G1 the login card's in-card view state machine (HIGH — ours navigated to standalone pages; full measured contracts captured incl. the swapped views' shorter input generation and the base44 verify-email platform artifact we do NOT fake); G2 the ticket-not-found destructive Alert (HIGH); G3 the attachment picker missing .doc/.docx (MED); G4 no sitemap.xml + no robots.txt Sitemap directive (MED-LOW)
+- Deep-verified NON-gaps: reference scaffold routes (/AllTickets /Analytics /Developer /Home /Settings) render 200-empty (base44 boilerplate — their sitemap lists them; deliberately not copied); the base44 "Verify your email" 6-digit view (platform auth; our direct sign-in is the superset); viewport meta "1" vs "1.0" cosmetic; body classes invisible
+- Wrote + validated docs/remediation-plan-session10.md (4 findings + non-gaps ledger + risks + 5 process lessons)
+
+Stage Summary:
+- Repo at 0fc0fee + plan; 4 findings (2 HIGH: in-card login views, not-found Alert) queued for TDD execution
+
+---
+Task ID: 21
+Agent: main (Super Z)
+Task: Session 10 — TDD remediation, verification, docs, SKILL.md v2.8.0, commit + push
+
+Work Log:
+- TDD: 10 E2E tests written first (5 in-card login views + 2 not-found + 3 accept/SEO) + 1 unit pin (attachment accept list) + 3 superseded pins updated (session-6 whole-line link → button; auth.spec link pins → buttons) + 1 new auth.spec in-card-signup flow test — all session-10 tests verified RED against the pre-fix build (10 failed; the pass = setup project)
+- Implemented: G1 login/page.tsx → the four-view LoginView state machine (signin | reset | reset-success | signup) rendering the measured contracts inside the unchanged card shell (back buttons with -mb-2 + ArrowLeft h-4, h2 text-xl sm:text-2xl font-bold, reset form space-y-4 sm:space-y-5, signup form space-y-3 sm:space-y-4, the swapped views' SWAPPED_INPUT_CLASSES (h-10 sm:h-11 + placeholder:text-slate-400) + SWAPPED_SUBMIT_CLASSES (h-10 sm:h-11 + shadow-xs), the success view's icon circle + green alert (bg-green-50/70 border-green-200 rounded-xl p-4) + full-width back, in-card signup derives name from email local-part + direct sign-in — no fake verification); G2 ticketdetails not-found → the destructive Alert (rounded-lg px-4 py-3 text-sm border-destructive/50 text-destructive) + superset ghost Back-to-Tickets; G3 constants +msword +docx +ATTACHMENT_ACCEPT_ATTR (submitticket consumes it); G4 src/app/sitemap.ts (4 public routes) + src/app/robots.ts (disallow policy + Sitemap directive; static public/robots.txt deleted)
+- Test-authoring hardenings mid-cycle: div[role=alert] scoped to main (route announcer), getByLabel("Password") exact:true (Confirm Password contains it), green/destructive color pins accept lab(), sitemap pin parses <loc> pathnames, Back-to-Tickets pin role=link (asChild anchor)
+- Gates: lint ✓ typecheck ✓ 55 unit ✓ build ✓ 145/145 E2E ✓ smoke 11/11 ✓
+- Live paired re-verification (production standalone :3000): reset view (h2, -mb-2 back, 44px input, slate-400 placeholder lab rep, logo absent, URL /login); success view (icon circle, green alert, full-width back 368px); signup view (3 fields, exact placeholders, space-y-3 sm:space-y-4); not-found Alert computes rgb(239,68,68) + oklab /0.5 border + 8px radius + 12px 16px padding inside max-w-5xl; /sitemap.xml serves the 4 public locs; /robots.txt carries the policy + directive; picker accepts .doc,.docx — all = the reference's measured values
+- Refreshed docs/screenshots/ (7 shots via scripts/capture-screenshots-s10.sh — fixes the s9 script's aref*= typo in the new copy); updated README (counts 55/145 + features + session-10 pin list)/AGENTS (session-10 contracts + reference list + command counts)/CLAUDE (gate counts + E2E paragraph + two new anti-patterns: space-y direct-child margins, fake verification flows)/PAD (known-issues row + 116 parity count)/service-desk_SKILL.md v2.8.0 (lessons 38–42); session_10.md retrospective appended; remediation-plan-session10.md execution status; this worklog
+
+Stage Summary:
+- All 4 session-10 findings fixed and E2E-pinned (145 E2E total: visual-parity 105→116); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py

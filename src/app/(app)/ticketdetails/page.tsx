@@ -125,13 +125,28 @@ export default function TicketDetailsPage() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Ticket not found</h1>
-          <p className="text-slate-500 mb-6">This ticket may have been deleted.</p>
-          <Button asChild variant="outline">
-            <Link href="/mytickets">Back to Tickets</Link>
-          </Button>
+      // Session 10: the reference renders a shadcn destructive Alert inline
+      // in the standard max-w-5xl page container (live-measured on
+      // /ticketdetails?id=unknown) — rounded-lg + px-4 py-3 + text-sm +
+      // border-destructive/50 + text-destructive, resolving red-500 text
+      // with a 50%-alpha border. Was a centered text-2xl card. The Back to
+      // Tickets control stays as the documented superset below the alert.
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
+        <div className="max-w-5xl mx-auto space-y-4">
+          <div
+            role="alert"
+            className="relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive"
+          >
+            <div className="text-sm [&_p]:leading-relaxed">Ticket not found</div>
+          </div>
+          <div>
+            <Button asChild variant="ghost" className="text-slate-500 hover:text-slate-700">
+              <Link href="/mytickets">
+                <ArrowLeft className="w-4 h-4 mr-2" aria-hidden />
+                Back to Tickets
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     );

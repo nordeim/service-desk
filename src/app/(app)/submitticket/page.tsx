@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/toast";
 import {
+  ATTACHMENT_ACCEPT_ATTR,
   ATTACHMENT_MAX_BYTES,
   ATTACHMENT_MAX_COUNT,
   CATEGORY_EMOJI,
@@ -300,7 +301,7 @@ export default function SubmitTicketPage() {
                   className="hidden"
                   id="file-upload"
                   aria-label="Upload attachments"
-                  accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.md,.csv,.json,.zip"
+                  accept={ATTACHMENT_ACCEPT_ATTR}
                   onChange={(e) => void handleFiles(e.target.files)}
                 />
                 <label htmlFor="file-upload" className="flex flex-col items-center cursor-pointer">

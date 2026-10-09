@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  ATTACHMENT_ACCEPTED_TYPES,
+  ATTACHMENT_ACCEPT_ATTR,
   CATEGORY_EMOJI,
   CATEGORY_LABELS,
   PRIORITY_LABELS,
@@ -68,6 +70,22 @@ describe("constants", () => {
     expect(isTicketStatus("deleted")).toBe(false);
     expect(isTicketPriority("")).toBe(false);
     expect(isTicketCategory("Hardware")).toBe(false); // case-sensitive
+  });
+
+  it("pins the attachment accept list incl. the reference's Word families (session 10)", () => {
+    // The reference's picker accepts image/*,.pdf,.doc,.docx — ours missed
+    // the Word families until session 10. The MIME list feeds the accept
+    // attribute; svg stays excluded (XSS vector their wildcard permits).
+    expect(ATTACHMENT_ACCEPTED_TYPES).toContain("application/msword");
+    expect(ATTACHMENT_ACCEPTED_TYPES).toContain(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    expect(ATTACHMENT_ACCEPTED_TYPES).toContain("image/png");
+    expect(ATTACHMENT_ACCEPTED_TYPES).toContain("application/pdf");
+    expect(ATTACHMENT_ACCEPTED_TYPES).not.toContain("image/svg+xml");
+    // The picker attribute is derived from the same list — no drift.
+    expect(ATTACHMENT_ACCEPT_ATTR).toContain(".docx");
+    expect(ATTACHMENT_ACCEPT_ATTR).toContain(".pdf");
   });
 });
 

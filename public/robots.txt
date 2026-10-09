@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /$
-Disallow: /dashboard
-Disallow: /submitticket
-Disallow: /mytickets
-Disallow: /ticketdetails
-Disallow: /api/

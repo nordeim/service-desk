@@ -19,10 +19,12 @@ test.describe("login page", () => {
     await expect(page.getByLabel("Email")).toBeVisible();
     await expect(page.getByLabel("Password")).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Forgot password?" })).toBeVisible();
+    // Session 10: the reference's footer controls are BUTTONS that swap the
+    // card in place (in-card reset/signup views) — no navigation.
+    await expect(page.getByRole("button", { name: "Forgot password?" })).toBeVisible();
     // Session 6: the reference renders the WHOLE "Need an account? Sign up"
-    // line as one control — our anchor's accessible name is the full line.
-    await expect(page.getByRole("link", { name: /Need an account\?\s*Sign up/ })).toBeVisible();
+    // line as one control — the button's accessible name is the full line.
+    await expect(page.getByRole("button", { name: /Need an account\?\s*Sign up/ })).toBeVisible();
   });
 
   test("rejects a wrong password with a visible error", async ({ page }) => {
@@ -46,6 +48,23 @@ test.describe("login page", () => {
   test("unauthenticated /dashboard bounces to /login", async ({ page }) => {
     await page.goto("/dashboard");
     await page.waitForURL("**/login");
+  });
+
+  // Session 10: the in-card signup view (the reference's login card swaps
+  // in place on "Need an account? Sign up"). No name field — the account
+  // name derives from the email local-part (base44 auth has no name
+  // concept); our direct sign-in after create is the documented superset
+  // over their base44 email-verification wall.
+  test("the in-card signup creates an account and lands on the dashboard", async ({ page }) => {
+    const email = `incare-${Date.now()}@servicedesk.app`;
+    await page.getByRole("button", { name: /Need an account\?\s*Sign up/ }).click();
+    await page.getByLabel("Email").fill(email);
+    // Exact match — the Confirm Password label also contains "Password".
+    await page.getByLabel("Password", { exact: true }).fill("Passw0rd123");
+    await page.getByLabel("Confirm Password").fill("Passw0rd123");
+    await page.getByRole("button", { name: /Create account/ }).click();
+    await page.waitForURL("**/dashboard");
+    await expect(page.getByRole("heading", { name: /Welcome back/ })).toBeVisible();
   });
 });
 

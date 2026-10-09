@@ -132,3 +132,39 @@ Dry-run OK (`796a37a..1f12f42 → main`). Real push:
 Also deep-verified: mobile nav 10/10, landscape parity, and several shared Radix/shadcn quirks (intentionally not "fixed" on one side only).
 
 **Suggested next:** watch the CI run on GitHub, then review `docs/remediation-plan-session9.md` §5 — six process lessons (esp. "diff the whole `:root`, not just the tokens you know").
+
+---
+
+# Session 10 Retrospective
+
+**Date:** 2026-10-10 · **Scope:** session-10 parity audit + remediation · **Repo state at start:** `0fc0fee` (session-9 code + this briefing) · **At end:** all 4 findings fixed, 145/145 E2E, pushed to `main`.
+
+## What this session delivered
+
+- **The login card's in-card view state machine (HIGH).** The headline discovery — for the first time in ten sessions, every button on the reference's login card was CLICKED, and the card turned out to be a four-view state machine on `/login`: "Forgot password?" and "Need an account? Sign up" are buttons that swap the card content in place (the URL never changes). The swapped views (reset, Check-your-email, signup) drop the logo/h1/Google/OR and render a shorter input/button generation (`h-10 sm:h-11`, slate-400 placeholders, `shadow-sm`-v3 → `shadow-xs`-v4 submits). Ours navigated to standalone pages. Implemented as a `LoginView` state machine with the measured contracts; the standalone `/signup` + `/forgotpassword` pages remain as URL supersets. The reference's base44 "Verify your email" 6-digit wall is a platform artifact we deliberately do NOT fake — our direct sign-in on create is the documented superset.
+- **The ticket-not-found state (HIGH).** The reference renders a destructive shadcn Alert inline in the `max-w-5xl` page container (red-500 text, 50%-alpha border, 8px radius, 12px/16px padding — live-measured); ours was a centered text-2xl card. Swapped to the Alert contract; the Back-to-Tickets control stays below as the superset.
+- **The attachment picker's Word families (MED).** The reference accepts `image/*,.pdf,.doc,.docx`; ours missed `.doc`/`.docx`. Added to `ATTACHMENT_ACCEPTED_TYPES` + the new `ATTACHMENT_ACCEPT_ATTR` constant (picker and list can no longer drift; svg stays excluded — an XSS vector their wildcard permits).
+- **The SEO surface (MED-LOW).** The reference ships robots.txt (with a Sitemap directive) + sitemap.xml; ours had robots.txt but no sitemap and no directive. Added `src/app/sitemap.ts` (the four public routes only — their auto-generated sitemap lists dead scaffold routes, deliberately not copied) + `src/app/robots.ts` (replaces the static file so the directive carries the deployed origin).
+
+## Audit & verification
+
+- Baseline at `0fc0fee` (fresh workspace, Playwright Chromium installed): lint ✓ typecheck ✓ 54 unit ✓ build ✓ 134/134 E2E ✓ smoke 11/11 ✓; the session-9 commit `1f12f42` audited clean against its documented plan (G1–G7 verified in code).
+- **Standing priority — mobile navigation**: full live matrix on both sites at 375px (reference sheet contract stable: 288px, #fafafa, 80% overlay, 20px/12px/600; their trigger still blocked by their own toast viewport — their standing defect). Our clone: trigger hit-tests to BUTTON, sheet + overlay + active-nav gradient, nav-tap auto-close with scroll restore, Escape → body, zero horizontal overflow. **Tailwind v4 sweep**: the space-y v3→v4 selector rewrite (trap log #4) verified ABSENT via computed-margin walks on both sites (identical gaps everywhere; no direct-child margin utilities exist); the standing pins (cursor preflight, token block, hover guard) all stable.
+- New probe surfaces: the login card's interactive state machine (the headline), the invalid-ticket detail state, robots.txt/sitemap.xml, `<html>`/`<body>` attributes, input HTML attributes (maxlength/accept/inputmode), touch-action, comment edit/delete (absent on the reference), console errors (zero).
+- TDD: 10 red → 145/145 E2E green (+1 unit pin → 55) + smoke 11/11. Mid-cycle hardenings: role=alert main-scoping, `getByLabel` exact matching, lab() color acceptance, `<loc>` pathname parsing.
+- Live paired re-verification on the production standalone: every swapped-view class/computed value, the not-found Alert's computed contract, the picker accept list, and both SEO endpoints = the reference's measured values.
+
+## Process lessons (in `docs/remediation-plan-session10.md` §5)
+
+1. Click every control before claiming parity — the at-rest DOM is the floor, not the ceiling.
+2. A "dead" route can hide a live flow — the reference's /signup 404s but the card's Sign-up button works.
+3. Platform artifacts are not features — replicate the design with production-sane substance.
+4. The engine trap log pays dividends — verify, don't assume.
+5. Enumerate the invisible surfaces too — one curl found robots/sitemap after nine sessions of DOM probes.
+
+## Artifacts
+
+- `docs/remediation-plan-session10.md` — the full inventory, non-gap ledger, execution log, and lessons.
+- `tests/e2e/visual-parity.spec.ts` — +10 session-10 tests (116 parity total; suite 145); `tests/e2e/auth.spec.ts` — the in-card signup flow + button pins; `src/lib/__tests__/domain.test.ts` — the attachment-accept pin.
+- `docs/screenshots/` — 7 refreshed production-server captures; `scripts/capture-screenshots-s10.sh`.
+- README / AGENTS (session-10 contracts) / CLAUDE (counts + two new anti-patterns) / PAD (known-issues row + parity count) / `service-desk_SKILL.md` v2.8.0 (lessons 38–42) — all updated.
