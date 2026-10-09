@@ -198,7 +198,11 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
             onClick={handleLogout}
             aria-label="Sign out"
             title="Sign out"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors"
+            // Session 8: the reference's sign-out renders the shadcn base
+            // incl. the focus-visible ring tail; this raw button had none
+            // (the session-6 focus matrix covered the Button/Input/Textarea/
+            // SelectTrigger bases, not raw buttons).
+            className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <LogOut className="w-4 h-4" aria-hidden />
           </button>

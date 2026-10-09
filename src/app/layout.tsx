@@ -9,12 +9,36 @@ import "./globals.css";
 // reference also leaves font smoothing at `auto` (no `antialiased`).
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
     default: "ServiceDesk | IT Support Portal",
     template: "%s | ServiceDesk",
   },
+  // Session 8 (live-measured from the reference's <head>): their description
+  // text — parity over our older wording.
   description:
-    "Submit, track, and resolve IT support tickets — hardware, software, network, access, and email issues.",
+    "An IT ticketing system to log, track, prioritize, and resolve technical issues efficiently.",
+  // Session 8: the reference ships a full social/PWA meta set per route —
+  // og:title/description/url/type/site_name/image, twitter:card
+  // summary_large_image, apple-mobile-web-app-*. og:title follows the title
+  // template above; og:url derives from each route's canonical.
+  openGraph: {
+    type: "website",
+    siteName: "ServiceDesk",
+    description:
+      "An IT ticketing system to log, track, prioritize, and resolve technical issues efficiently.",
+    images: [{ url: "/icon.png", width: 512, height: 512, alt: "ServiceDesk" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    description:
+      "An IT ticketing system to log, track, prioritize, and resolve technical issues efficiently.",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "ServiceDesk",
+    statusBarStyle: "black",
+  },
 };
 
 export const viewport: Viewport = {

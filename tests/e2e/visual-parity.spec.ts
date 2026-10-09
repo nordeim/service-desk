@@ -1280,3 +1280,146 @@ test.describe("session 7: favicon + per-page titles", () => {
     expect(await page.title()).toBe("Ticket Details | ServiceDesk");
   });
 });
+
+test.describe("session 8: auth error alerts (reference computed)", () => {
+  // Reference (live-measured, wrong-password flow): a shadcn Alert between
+  // the password field and the submit button — p-4 (16px), rounded-xl (12px),
+  // bg-red-50/70 (translucent rgba(254,242,242,0.7)), border-red-200, inner
+  // text-red-700 (rgb(185,28,28)). Ours rendered px-3 py-2 / rounded-lg /
+  // opaque red-50 / red-600. The p[role=alert] stays (a11y superset; the
+  // auth.spec pin keys on it).
+  test("the login error alert renders the reference Alert contract", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByLabel("Email").fill("demo@servicedesk.app");
+    await page.getByLabel("Password").fill("DefinitelyWrong1");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    const alert = page.locator('p[role="alert"]');
+    await expect(alert).toContainText(/invalid email or password/i);
+    await expect(alert).toHaveClass(/bg-red-50\/70/);
+    await expect(alert).toHaveClass(/text-red-700/);
+    await expect(alert).toHaveClass(/rounded-xl/);
+    await expect(alert).toHaveClass(/p-4/);
+    // Representation-stable computed values (v4 may emit lab()/color-mix()).
+    await expect(alert).toHaveCSS("border-radius", "12px");
+    await expect(alert).toHaveCSS("padding", "16px");
+  });
+
+  test("the signup error alert carries the same contract", async ({ page }) => {
+    // Duplicate email → the API returns an error rendered in the same alert P.
+    await page.goto("/signup");
+    await page.getByLabel("Name").fill("Dup User");
+    await page.getByLabel("Email").fill("demo@servicedesk.app");
+    await page.getByLabel("Password").fill("SomePassword1!");
+    await page.getByRole("button", { name: /create account|sign up/i }).click();
+    const alert = page.locator('p[role="alert"]');
+    await expect(alert).toBeVisible();
+    await expect(alert).toHaveClass(/bg-red-50\/70/);
+    await expect(alert).toHaveClass(/rounded-xl/);
+    await expect(alert).toHaveClass(/p-4/);
+    await expect(alert).toHaveCSS("border-radius", "12px");
+  });
+});
+
+test.describe("session 8: mobile sheet overlay + overflow (reference computed)", () => {
+  // Reference (live-measured on their open sheet): the backdrop dims at 80%
+  // black. Ours was bg-black/50 — visibly lighter on every mobile menu open.
+  test("the mobile sheet overlay dims to the reference 80% black", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/dashboard");
+    await page.locator("header button").click();
+    const overlay = page.locator("[data-slot=sheet-overlay][data-state=open]");
+    await expect(overlay).toBeVisible();
+    const bg = await overlay.evaluate((el) => getComputedStyle(el).backgroundColor);
+    // v3 emits rgba(0,0,0,0.8); v4 may emit oklab(0 0 0 / 0.8) or a
+    // color-mix equivalent — accept any 0.8-alpha black representation.
+    expect(bg).toMatch(/0\.8\)|\/ 0\.8|80%/);
+  });
+
+  // The reference shares the mobile horizontal-overflow defect (their
+  // scrollWidth 451 at 375 = our single-row measurement with the same ticket
+  // title — structurally identical, data-dependent). min-w-0 on <main> is a
+  // deliberate superset fix: the document stops overflowing AND the
+  // recent-row titles actually truncate.
+  test("no horizontal overflow at 375px on any app page", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    for (const path of ["/dashboard", "/submitticket", "/mytickets", "/ticketdetails?id="]) {
+      await page.goto(path === "/ticketdetails?id=" ? "/mytickets" : path);
+      await page.waitForLoadState("networkidle");
+      await page.waitForTimeout(600);
+      const widths = await page.evaluate(() => ({
+        scrollW: document.documentElement.scrollWidth,
+        clientW: document.documentElement.clientWidth,
+      }));
+      expect(widths.scrollW, `${path} overflowed`).toBeLessThanOrEqual(widths.clientW);
+    }
+  });
+
+  test("the dashboard recent-row title truncates at 375px (ellipsis active)", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/dashboard");
+    await page.waitForLoadState("networkidle");
+    const firstRow = page.locator("main .divide-y > a").first();
+    await expect(firstRow).toBeVisible();
+    const h3 = firstRow.locator("h3");
+    const truncated = await h3.evaluate((el) => el.scrollWidth > el.clientWidth);
+    expect(truncated).toBe(true);
+  });
+});
+
+test.describe("session 8: head metadata (reference set)", () => {
+  // Reference (live-measured per route): description "An IT ticketing system
+  // to log, track, prioritize, and resolve technical issues efficiently.",
+  // og:title/description/url/type/site_name/image, twitter:card
+  // summary_large_image, canonical, apple-mobile-web-app-*.
+  test("the root metadata matches the reference social/PWA set", async ({ page }) => {
+    await page.goto("/dashboard");
+    const desc = page.locator('meta[name="description"]');
+    await expect(desc).toHaveAttribute(
+      "content",
+      "An IT ticketing system to log, track, prioritize, and resolve technical issues efficiently."
+    );
+    await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "ServiceDesk");
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute("content", "website");
+    await expect(page.locator('meta[property="og:image"]')).toHaveCount(1);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute("content", "summary_large_image");
+    await expect(page.locator('meta[name="apple-mobile-web-app-title"]')).toHaveAttribute("content", "ServiceDesk");
+  });
+
+  test("app routes carry canonical URLs", async ({ page }) => {
+    for (const [path, slug] of [
+      ["/dashboard", "/dashboard"],
+      ["/submitticket", "/submitticket"],
+      ["/mytickets", "/mytickets"],
+    ] as const) {
+      await page.goto(path);
+      const canonical = page.locator('link[rel="canonical"]');
+      await expect(canonical).toHaveCount(1);
+      await expect(canonical).toHaveAttribute("href", new RegExp(`${slug}/?$`));
+    }
+  });
+});
+
+test.describe("session 8: raw buttons carry the reference focus tail", () => {
+  // The reference's sign-out button renders the shadcn base incl.
+  // focus-visible:ring-1 ring-ring; ours is a raw <button> that had no
+  // focus-visible styling (the session-6 matrix covered the Button/Input/
+  // Textarea/SelectTrigger bases, not raw buttons).
+  test("the sidebar sign-out button carries the focus-visible ring", async ({ page }) => {
+    await page.goto("/dashboard");
+    const signOut = page.locator('button[aria-label="Sign out"]');
+    await expect(signOut).toHaveClass(/focus-visible:ring-1/);
+    await expect(signOut).toHaveClass(/focus-visible:ring-ring/);
+  });
+
+  test("the attachment Remove button carries the focus-visible ring", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.setInputFiles("#file-upload", {
+      name: "probe.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("session-8 focus-tail probe"),
+    });
+    const remove = page.getByRole("button", { name: "Remove", exact: true });
+    await expect(remove).toBeVisible();
+    await expect(remove).toHaveClass(/focus-visible:ring-1/);
+  });
+});

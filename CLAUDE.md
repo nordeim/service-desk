@@ -9,7 +9,7 @@ last_updated: 2026-10-09
 
 Full-stack IT ticketing portal (Next.js 16 App Router standalone · React 19 · TypeScript strict · Tailwind CSS v4 CSS-first · shadcn/ui · Prisma 6 + SQLite · Vitest + Playwright). A visual-parity, feature-superset clone of the base44 ServiceDesk reference app, maintained as a single deployable process with zero external services.
 
-**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (116 specs against the production standalone build) when UI/auth behavior changes. CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
+**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (125 specs against the production standalone build) when UI/auth behavior changes. **Re-run the gate after EVERY file that lands — including one-off scripts** (a post-gate `.cjs` script broke CI on main in session 7). CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
 
 ## Foundational Principles
 
@@ -54,7 +54,9 @@ Full-stack IT ticketing portal (Next.js 16 App Router standalone · React 19 · 
 - **Radius scale: Tailwind v3 defaults** (session 6, superseded in 7): `--radius-md/lg/xl` are pinned to 0.375/0.5/0.75rem; `--radius-sm` is 0.25rem (4px — the reference's own rounded-sm re-measured at 4px in session 7; only rounded-sm differs between the v3 and v4 scales). Do NOT reintroduce the calc chain.
 - **The accent pair is gray + near-black, not cyan** (session 7): `--accent: #f5f5f5`, `--accent-foreground: #171717` (the reference's stock shadcn pair). It drives select-option highlights, ghost/outline hover text, and the Skeleton. Do NOT tint it cyan — the cyan motif lives in explicit utilities.
 - **Hover variants are media-guarded in v4** (`@media (hover:hover)`): on touch devices our hovers are inert while the reference's v3 hovers still apply — an intentional documented divergence. Hover E2E assertions must run under Playwright's Desktop Chrome (hover:hover); agent-browser reports hover:none and reads at-rest values.
-- **Focus states are part of parity** (session 6): the Button/Input/Textarea bases use `focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring` (near-black `--ring: #0a0a0a`); the SelectTrigger base uses plain `focus:ring-1`. Do NOT restore the new-gen `ring-[3px] ring-ring/50` tail. The reference's cyan focus customs are inert on text inputs, active on selects + the textarea border — see AGENTS.md session-6 contracts.
+- **Focus states are part of parity** (session 6): the Button/Input/Textarea bases use `focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring` (near-black `--ring: #0a0a0a`); the SelectTrigger base uses plain `focus:ring-1`. Do NOT restore the new-gen `ring-[3px] ring-ring/50` tail. The reference's cyan focus customs are inert on text inputs, active on selects + the textarea border — see AGENTS.md session-6 contracts. **Raw `<button>`s need the tail spelled out per call site** (session 8: sign-out + attachment Remove).
+- **The mobile sheet overlay is 80% black** (session 8, live-measured) and **`min-w-0` on the SidebarInset main is load-bearing** — it kills a mobile horizontal-overflow defect the reference itself has; without it the recent-card rows' intrinsic nowrap width widens the whole document at 375px.
+- **Auth error alerts** (session 8): `text-sm text-red-700 bg-red-50/70 border border-red-200 rounded-xl p-4` on `p[role=alert]` — the reference's measured shadcn-Alert contract (was red-600/rounded-lg/px-3 py-2/opaque).
 
 ### Data Layer (Prisma + SQLite)
 
@@ -81,14 +83,14 @@ bun run dev                     # http://localhost:3000  (demo@servicedesk.app /
 | `bun run build` | Production standalone build |
 | `bun run start` | Boot standalone server |
 | `bun run lint` / `bun run typecheck` | ESLint / tsc |
-| `bun run test` / `bun run test:e2e` | 54 unit / 116 E2E (needs prior build) |
+| `bun run test` / `bun run test:e2e` | 54 unit / 125 E2E (needs prior build) |
 | `bash scripts/smoke-test.sh` | API smoke on a throwaway server |
 | `bun run db:push` / `db:seed` / `db:reset` | Schema push / idempotent seed / reset |
 
 ## Testing Strategy
 
 - **Unit (Vitest, `*.test.ts`)**: pure seams only — auth sign/verify + scrypt + rate limiting, input validation, constants vocabulary, db-path resolution, date/duration formatting (`formatDate` date-only, `formatDateTime`, `formatDuration`). No DOM, no DB.
-- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (87 tests) pins the reference-measured design contracts (sessions 2–7; session 6 added the computed-value pins — the radius scale, the focus-state matrix, select dropdown structure + priority colors; session 7 added the accent-token pair, the option-radius drift supersede, empty-state markup, fetch-failure resilience, favicon + per-route titles). Color pins accept both rgb() and lab() representations (v4 emits palette colors as lab()). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
+- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (96 tests) pins the reference-measured design contracts (sessions 2–8; session 6 added the computed-value pins — the radius scale, the focus-state matrix, select dropdown structure + priority colors; session 7 added the accent-token pair, the option-radius drift supersede, empty-state markup, fetch-failure resilience, favicon + per-route titles; session 8 added the auth-error alert contract, the 80% sheet overlay, zero-overflow-at-375px + ellipsis truncation, the social/PWA head set, and the raw-button focus tails). Color pins accept both rgb() and lab() representations (v4 emits palette colors as lab()). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
 - **Smoke (`scripts/smoke-test.sh`)**: API contract on a throwaway server — health, login, CRUD, comments, guards (401/400).
 - Bug fixes require a failing test first (unit for domain seams, E2E for UI contract). The mobile-navigation spec is the highest-regression-risk chrome — run it after any sidebar/sheet/Tailwind change; run visual-parity after any page-layout change.
 

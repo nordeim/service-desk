@@ -323,7 +323,11 @@ export default function SubmitTicketPage() {
                         </span>
                         <button
                           type="button"
-                          className="text-xs text-red-500 hover:text-red-600 font-medium"
+                          // Session 8: focus-visible tail for internal
+                          // consistency with the sign-out button + the
+                          // reference's button base (superset surface — the
+                          // reference has no attachments).
+                          className="text-xs text-red-500 hover:text-red-600 font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                           onClick={() => setAttachments((prev) => prev.filter((_, j) => j !== i))}
                         >
                           Remove

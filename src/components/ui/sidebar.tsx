@@ -289,7 +289,13 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
       // `bg-background relative w-full` (opaque — it masks the wrapper
       // gradient) plus inset-variant classes for a variant we never use;
       // both were dropped deliberately.
-      className={cn("flex-1 flex flex-col", className)}
+      // Session 8 superset: `min-w-0` — without it the flex item's automatic
+      // minimum (min-content) lets the recent-card rows' intrinsic nowrap
+      // width (the truncate chain's intrinsic contribution) widen the whole
+      // document at mobile (scrollWidth 516 at 375px). The reference has the
+      // identical defect (their scrollWidth 451 with their data); we fix it
+      // deliberately — the row titles then truncate with ellipsis as designed.
+      className={cn("flex-1 flex flex-col min-w-0", className)}
       {...props}
     />
   );

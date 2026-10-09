@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-5 remediation (2026-10-09).
+  functionality. Distilled through the session-8 remediation (2026-10-09).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.5.0
+version: 2.6.0
 last_updated: 2026-10-09
-project_state: 54 unit tests + 116 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–7)
+project_state: 54 unit tests + 125 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–8)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -369,6 +369,12 @@ Manual/visual checks:
 24. **Hover probes need a hover-capable context.** (Session 7.) agent-browser's browser reports `hover: none` — every Tailwind v4 `hover:` rule is silently inert under it (the `@media (hover:hover)` guard), so hover probes read at-rest values and look like bugs that don't exist. Run hover assertions under Playwright's Desktop Chrome (hover:hover) or a real device.
 25. **The reference DRIFTS — re-measure before trusting old pins.** (Session 7.) Three reference changes observed in one session: the active-nav mechanism (data-active removed, gradient hardcoded — visually identical), per-route document titles added, and `rounded-sm` moved 2px→4px. A class-level pin is a snapshot, not a contract; re-verify against the live site before "fixing" anything that suddenly looks different.
 26. **Exercise the FAILURE path, not just the happy path.** (Session 7.) Six sessions of E2E never tested a failing fetch — until a transient 401 during live probing left the dashboard skeletoned forever (non-ok mapped to null; state never settled). Production-ready supersets need error states + retry, and pins that force failures (`page.route` 500s) to keep them honest.
+27. **Run the gate AFTER the last file lands — including one-off scripts.** (Session 8.) A post-gate `.cjs` DB-cleanup script (CommonJS `require()`) was committed without re-running lint, turning CI on main red for an otherwise fully-green codebase. The gate's unit is the COMMIT, not the feature.
+28. **Probe the `<head>`, not just the body.** (Session 8.) Six sessions of pixel-perfect body work never noticed the reference ships a full OG/Twitter/canonical/PWA meta set. A one-line `querySelectorAll('head meta')` enumeration is the whole probe.
+29. **Observing the ABSENCE of a behavior is also parity data.** (Session 8.) The reference never toasts — comment-add, ticket-submit, and login-error all verified idle under live triggers + MutationObservers. That explained why their broken `pointer-events: auto` viewport never fires for their users, and why our toast feedback is a superset, not a gap.
+30. **Horizontal-overflow probes need data control.** (Session 8.) Our mobile scrollWidth (516) vs theirs (451) was the SEED CORPUS, not structure — the same ticket title produced byte-identical scrollWidths on both sites. Bisect by hiding sections, then re-measure with equal data before calling a structural gap.
+31. **A `data-slot` prop can be overridden by call sites.** (Session 8.) Our mobile sidebar content renders `data-slot="sidebar"` (not `sheet-content`) because the sidebar passes its own prop — probe selectors built from component-file defaults false-negatived three close-path tests. Enumerate the live DOM before trusting the component source.
+32. **Read FULL computed values — string truncation manufactures bugs.** (Sessions 7–8, twice.) A 90-char `boxShadow.slice()` hid the visible shadow layers behind the animate-in zeros and nearly shipped a phantom "stat-card shadow missing" finding; the same truncation struck again on the focus ring. Never slice computed strings in probes.
 
 ---
 

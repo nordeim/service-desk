@@ -8,6 +8,9 @@ import type { Metadata } from "next";
 // lives on a passthrough server layout per route folder.
 export const metadata: Metadata = {
   title: "Dashboard",
+  // Session 8: per-route canonical (the reference sets one on every route;
+  // og:url derives from it).
+  alternates: { canonical: "/dashboard" },
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

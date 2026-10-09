@@ -273,3 +273,34 @@ Work Log:
 
 Stage Summary:
 - All 10 session-7 findings fixed and E2E-pinned (116 E2E total: visual-parity 78→87); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 16
+Agent: main (Super Z)
+Task: Session 8 — refresh repo, review session_7/session_8 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git pull: e8eca32 adds docs/session_8.md (the session-7 execution narrative — confirms session 7 shipped at c9f4470)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.5.0 + session_7.md + remediation-plan-session7.md + worklog + session_8.md — all aligned with the codebase; env contract re-verified (.env DATABASE_URL=file:../db/custom.db, db/ at root, .env.example matches, skills/ excluded in eslint/vitest/playwright configs)
+- Baseline gates at e8eca32: lint ✗ (scripts/cleanup-s7-tickets.cjs — a post-gate session-7 artifact with require()) typecheck ✓ 54 unit ✓ build ✓ 116/116 E2E ✓ smoke 11/11 ✓ — CI on main is RED (the lint step) → session-8 finding G1; session-7 commit c9f4470 audited clean against its documented plan otherwise
+- Fresh gap analysis vs live reference (agent-browser + Playwright hover probes, both sites, paired computed measurements): NEW probe surfaces — toast behavior (reference NEVER toasts on comment/submit/login-error — verified with live triggers + MutationObservers; our toasts = superset, viewport classes identical, pointer-events:none fix intact), auth error-state styling (reference = shadcn Alert p-4/rounded-xl/bg-red-50/70/red-700), mobile sheet overlay color (reference 80% black vs ours 50% — never probed), viewport extremes incl. min-content bisection (mobile horizontal overflow on BOTH sites — ours 516/theirs 451 at 375, data-dependent, structurally identical via the same-title single-row test), head metadata (reference ships og/twitter/canonical/apple set; ours bare), keyboard tab order (identical; their CTAs double-stop via nested a>button), sidebar footer + sign-out button (geometry/hover identical; ours missed the focus-visible tail), stat/recent/card hovers (identical contracts), select flip (identical); standing surfaces re-verified: mobile nav full close-path matrix (sheet 288px/20px icons/12px gap/600 labels; trigger hit-tests BUTTON — the reference's own toast viewport still blocks THEIR trigger; Escape ✓ overlay-via-real-pointer ✓ nav-tap auto-close ✓), accent tokens + option radius + titles + nav mechanism — all stable (no reference drift this session)
+- Probe gotchas recorded: our mobile sidebar content carries data-slot="sidebar" (not sheet-content — the sidebar passes its own prop) which false-negatived three probes; computed-string truncation manufactured two phantom findings (stat-card shadow, focus ring) — read FULL values
+- Wrote + validated docs/remediation-plan-session8.md (7 findings + non-gaps ledger + risks + process lessons)
+
+Stage Summary:
+- Repo at e8eca32 + plan; 7 findings (1 HIGH process: lint gate red on main; 1 HIGH parity: auth-error alert; overlay 80%; mobile-overflow superset fix; social/PWA meta; 2 raw-button focus tails) queued for TDD execution
+
+---
+Task ID: 17
+Agent: main (Super Z)
+Task: Session 8 — TDD remediation, verification, docs, SKILL.md v2.6.0, commit + push
+
+Work Log:
+- TDD: 9 E2E tests written first (2 auth-alert + 3 overlay/overflow + 2 meta + 2 focus tails), all verified RED against the pre-fix build; one JSX-comment placement bug in login/page.tsx caught and fixed mid-edit
+- Implemented: G1 cleanup-s7-tickets.cjs→.mjs (ESM, gate restored); G2 auth alerts ×3 restyled to the reference contract (text-sm text-red-700 bg-red-50/70 border border-red-200 rounded-xl p-4 on p[role=alert]; field-error superset kept); G3 sheet overlay bg-black/50→/80; G4 min-w-0 on the SidebarInset main (mobile horizontal overflow killed — deliberate superset over a defect the reference shares, documented in-code + AGENTS); G5 root metadata (metadataBase, the reference's description text, openGraph siteName/type/image, twitter summary_large_image, appleWebApp) + alternates.canonical in the 4 app-route layouts; G6/G7 focus-visible:ring-1 ring-ring tails on the sign-out + attachment-Remove raw buttons
+- Gates: lint ✓ typecheck ✓ 54 unit ✓ build ✓ 125/125 E2E ✓ smoke 11/11 ✓ (the stale :3100 E2E server killed first so the suite booted the fresh build)
+- Live paired re-verification (production standalone + reference): login alert computes 12px radius/16px padding/0.7-alpha red-50/red-700 = reference exactly (oklab pipeline); overlay oklab(0 0 0 / 0.8) = reference 80%; scrollWidth 375 = clientWidth with the sheet open + recent-row h3 ellipsis-active; head ships the full og/twitter/canonical/apple set; the keyboard-focused sign-out renders rgb(10,10,10) 0 0 0 1px via REAL Tab presses (programmatic .focus() doesn't trigger :focus-visible)
+- Refreshed docs/screenshots/ (7 shots via scripts/capture-screenshots-s8.sh against the production standalone); updated README/AGENTS (session-8 contracts)/CLAUDE (gate rule + alert/overlay/min-w-0 rules + counts)/PAD (known-issues row)/service-desk_SKILL.md v2.6.0 (lessons 27-32); session_8.md retrospective appended; remediation-plan-session8.md execution status; this worklog
+
+Stage Summary:
+- All 7 session-8 findings fixed and E2E-pinned (125 E2E total: visual-parity 87→96); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py

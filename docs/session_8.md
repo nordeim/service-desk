@@ -171,3 +171,42 @@ Dry-run OK (`1a1f040..c9f4470 → main`). Real push:
 - Mobile nav re-verified on both sites; VLM sweep: all claims refuted by computed evidence
 
 **Suggested next:** watch the CI run on GitHub, then review `docs/remediation-plan-session7.md` §5 — six process lessons (esp. "probe the token layer" and "hover probes need hover:hover").
+
+---
+
+# Session 8 Retrospective
+
+**Date:** 2026-10-09 · **Scope:** session-8 parity audit + remediation · **Repo state at start:** `e8eca32` (session-7 code + this briefing) · **At end:** all 7 findings fixed, 125/125 E2E, pushed to `main`.
+
+## What this session delivered
+
+- **The post-gate lint break (HIGH, process).** `scripts/cleanup-s7-tickets.cjs` — a one-off DB cleanup created after the session-7 gate ran — failed `no-require-imports` and had turned CI on main red. Converted to ESM (`.mjs`); the artifact stays, the gate restores. New standing rule: the gate's unit is the COMMIT — re-run after every file that lands, one-off scripts included.
+- **The auth-error alert contract (HIGH).** Live-measured the reference's wrong-password alert (a shadcn Alert: p-4 / rounded-xl / **translucent** bg-red-50/70 / border-red-200 / text-red-700, positioned between password and submit); ours was px-3 py-2 / rounded-lg / opaque red-50 / red-600. Restyled all three auth pages (login + signup + forgotpassword); `p[role=alert]` and the field-error superset kept.
+- **The 80% overlay (MED).** The reference's open sheet dims at `rgba(0,0,0,0.8)`; ours was bg-black/50 for seven sessions — a never-probed surface (geometry was pinned, the backdrop color never). One class flip.
+- **The mobile-overflow superset (MED).** At 375px our document scrolled sideways (scrollWidth 516) — the recent-card rows' intrinsic nowrap width defeats the truncate chain through the flex `min-width:auto` at `<main>`. The reference has the IDENTICAL defect (their 451 = our single-row measurement with their ticket title — structurally confirmed before calling it a gap). Fixed deliberately via `min-w-0` (a documented superset like the `/` redirect): the document now fits and the row titles truncate with ellipsis as designed.
+- **The social/PWA head set (MED).** The reference ships per-route og:*/twitter:*/canonical/apple-mobile-web-app-*; ours had only a description. Root-layout metadata (the reference's description text, openGraph, twitter card, appleWebApp, metadataBase) + per-route canonicals in the 4 app-route layouts. og:title follows the existing title template.
+- **Raw-button focus tails (LOW).** The sidebar sign-out + the attachment Remove buttons lacked the `focus-visible:ring-1 ring-ring` tail the reference's buttons carry (the session-6 matrix covered component bases, not raw buttons). Verified live via REAL Tab presses: the keyboard-focused sign-out now renders the 1px near-black ring.
+
+## Audit & verification
+
+- Baseline at `e8eca32`: typecheck ✓ 54 unit ✓ build ✓ 116/116 E2E ✓ smoke 11/11 ✓ — **lint ✗** (the G1 script); session-7 commit `c9f4470` audited clean against its documented plan otherwise.
+- New probe surfaces: **toast behavior** (the reference never toasts — comment/submit/login-error verified idle under live triggers + MutationObservers; our toasts = documented superset, our viewport identical + the pointer-events:none fix intact), **auth error states**, **overlay color**, **viewport extremes** (320–1920, min-content bissection), **head metadata**, **tab order** (login sequences identical; the reference's CTAs are double Tab stops — nested a>button — ours asChild single), **sidebar footer/sign-out** (geometry + hover identical), **stat/recent/card hovers** (identical class contracts; two truncation-manufactured false alarms caught by reading FULL computed values), **select flip** (identical Radix behavior), and the standing **mobile nav full close-path matrix** (a `data-slot="sidebar"` override on the sheet content false-negatived three probes — corrected against the live DOM).
+- Reference drift re-check: accent tokens, option radius 4px, per-route titles, active-nav mechanism — ALL stable this session. New observations for the ledger: their sidebar renders plain divs (ours too — parity); their post-login lands on `/` (the known root quirk); they ALSO overflow at 1920 (their decorative blobs — their defect, not copied).
+- Full gate after all fixes: lint ✓ typecheck ✓ **54 unit** ✓ build ✓ **125/125 E2E** ✓ smoke 11/11 ✓.
+- Live paired re-verification: the alert computes 12px/16px/0.7-alpha/red-700 = the reference (oklab pipeline); overlay `oklab(0 0 0 / 0.8)`; scrollWidth 375 = clientWidth with the sheet open; the head set matches the reference's inventory; the focus ring renders under real keyboard focus.
+
+## Process lessons (in `docs/remediation-plan-session8.md` §5)
+
+1. Run the gate after the LAST file lands — the gate's unit is the commit, not the feature.
+2. Probe the `<head>`, not just the body (a one-line meta enumeration is the whole probe).
+3. Observing the ABSENCE of a behavior is also parity data (the reference never toasts).
+4. Horizontal-overflow probes need data control (the 516-vs-451 delta was the seed corpus, not structure).
+5. A `data-slot` prop can be overridden by call sites — enumerate the live DOM before trusting component defaults.
+6. Never slice computed strings in probes — truncation manufactured two phantom findings this session.
+
+## Artifacts
+
+- `docs/remediation-plan-session8.md` — the full inventory, non-gap ledger, execution log, and lessons.
+- `tests/e2e/visual-parity.spec.ts` — +9 session-8 tests (96 parity total; suite 125).
+- `docs/screenshots/` — 7 refreshed production-server captures; `scripts/capture-screenshots-s8.sh`.
+- README / AGENTS (session-8 contracts) / CLAUDE (gate rule + new CSS rules) / PAD (known-issues row) / `service-desk_SKILL.md` v2.6.0 (lessons 27–32) — all updated.

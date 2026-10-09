@@ -182,9 +182,15 @@ export default function LoginPage() {
                       </div>
                     </div>
 
+                    {/* Reference (live-measured session 8, wrong-password
+                        flow): a shadcn-Alert-style banner — p-4 (16px),
+                        rounded-xl (12px), translucent bg-red-50/70,
+                        border-red-200, text-red-700. Was px-3 py-2 /
+                        rounded-lg / opaque red-50 / red-600. The p[role=alert]
+                        stays (a11y superset + the auth.spec pin). */}
                     {error ? (
                       <p
-                        className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"
+                        className="text-sm text-red-700 bg-red-50/70 border border-red-200 rounded-xl p-4"
                         role="alert"
                       >
                         {error}
