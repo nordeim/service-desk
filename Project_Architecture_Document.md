@@ -375,9 +375,10 @@ shadcn/ui (New York flavor) vendored in `src/components/ui/` — **sidebar** (wi
 ### 5.4 Motion / Animation
 
 - Cards/links: `transition-all duration-300` + hover lift (`hover:shadow-xl`), icon-tile scale on group hover (`group-hover:scale-110`), ticket-card arrow slide (`group-hover:translate-x-1`).
+- Entrance animation (session 3, measured from the reference's framer-motion): `animate-rise-in` — `opacity 0→1` + `translateY(20px)→0`, 0.3 s `cubic-bezier(0.34, 1.56, 0.64, 1)` (≈ a ~310 ms spring with ~12% overshoot, no stagger) on dashboard stat cards + recent rows, mytickets cards, the submit form card, and the detail back+grid wrapper.
 - Mobile sheet: `slide-in-from-left` 500 ms open / 300 ms close (E2E waits 700 ms before geometry assertions).
 - Decorative stat-card circles: `opacity-10` corner gradient scaling to 150% over 500 ms on hover.
-- No `prefers-reduced-motion` exceptions exist yet — tracked in §10.
+- `prefers-reduced-motion` is honored globally (globals.css) and on the rise-in entrance utility — see §10 (resolved session 3).
 
 ---
 
@@ -430,17 +431,19 @@ Single role today: **authenticated user**. Ownership is the authorization unit �
 |---|---|---|---|---|
 | Unit — auth (session/crypto/rate-limit) | 1 | 11 | `src/lib/__tests__/auth.test.ts` | Vitest |
 | Unit — domain (constants + validation) | 1 | 18 | `src/lib/__tests__/domain.test.ts` | Vitest |
-| Unit — utils (date/duration formatting) | 1 | 6 | `src/lib/__tests__/utils.test.ts` | Vitest |
+| Unit — utils (date/duration formatting incl. `formatDate`) | 1 | 9 | `src/lib/__tests__/utils.test.ts` | Vitest |
 | Unit — db-path URL contract | 1 | 15 | `tests/db-path.test.ts` | Vitest |
 | E2E — auth surface (logged-out) | 1 | 6 | `tests/e2e/auth.spec.ts` | Playwright |
-| E2E — dashboard | 1 | 7 | `tests/e2e/dashboard.spec.ts` | Playwright |
+| E2E — dashboard (incl. clean-hydration pin) | 1 | 8 | `tests/e2e/dashboard.spec.ts` | Playwright |
 | E2E — ticket lifecycle | 1 | 5 | `tests/e2e/tickets.spec.ts` | Playwright |
 | E2E — mobile + desktop navigation | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
-| E2E — visual parity (session-2 contracts) | 1 | 18 | `tests/e2e/visual-parity.spec.ts` | Playwright |
+| E2E — visual parity (session-2 + session-3 contracts) | 1 | 29 | `tests/e2e/visual-parity.spec.ts` | Playwright |
 | E2E — shared session setup project | 1 | 1 | `tests/e2e/auth.setup.ts` | Playwright |
-| API smoke | 1 | 10 steps | `scripts/smoke-test.sh` | bash + curl |
+| API smoke | 1 | 11 steps | `scripts/smoke-test.sh` | bash + curl |
 
-> Session-2 additions: the 18 visual-parity tests pin the reference-measured design contracts (gradient quick stats, flat recent rows, detail grid + gradient header, `text-4xl` headings, non-sticky mobile header, login shell). The two tickets.spec locator defects (non-retrying `count()`; toast-announcer strict-mode ambiguity) were fixed with `toHaveCount` and `{ exact: true }` respectively — the patterns are documented in AGENTS.md.
+> Session-2 additions: the first 18 visual-parity tests pin the reference-measured design contracts (gradient quick stats, flat recent rows, detail grid + gradient header, `text-4xl` headings, non-sticky mobile header, login shell). The two tickets.spec locator defects (non-retrying `count()`; toast-announcer strict-mode ambiguity) were fixed with `toHaveCount` and `{ exact: true }` respectively — the patterns are documented in AGENTS.md.
+>
+> Session-3 additions: 11 more parity tests (recent-row FileText tile + arrow + date-only dates, lowercase badges, entrance animations incl. `prefers-reduced-motion`, submit-form details, login caption removal, search icon size, info-panel tracking, main-element classes), the clean-hydration pin in dashboard.spec (a `<div>`-in-`<p>` Skeleton broke hydration — fixed with an inline span skeleton), and `formatDate` unit tests. Raw `evaluate(getComputedStyle)` assertions were hardened to auto-retrying `toHaveCSS` after a one-off full-suite flake.
 
 ### 7.2 Test Patterns
 
@@ -492,7 +495,7 @@ None by design (single Node process; `docs/DEPLOYMENT.md` documents the bare-met
 
 ### 8.4 CI/CD Pipeline
 
-No hosted CI yet (documented limitation — the local gate in §7.4 is the only gate, mirroring the repo's git contract). Pushes go to `git@github.com:nordeim/service-desk.git` main-only via `docs/ssh_git_wrapper_v3.py` (key materialized to a 0600 temp file, shredded after; remote ref re-verified against local HEAD).
+CI runs on GitHub Actions (`.github/workflows/ci.yml`, added session 3): a `verify` job (lint → typecheck → unit → build, the same gate as §7.4) plus an `e2e` job restoring the standalone build and running the Playwright suite. Pushes go to `git@github.com:nordeim/service-desk.git` main-only via `docs/ssh_git_wrapper_v3.py` (key materialized to a 0600 temp file, shredded after; remote ref re-verified against local HEAD).
 
 ---
 
@@ -532,15 +535,16 @@ Main-only trunk with atomic Conventional Commits. Feature branches are short-liv
 
 | Priority | Issue | Impact | Status |
 |---|---|---|---|
-| MEDIUM | No hosted CI — the local gate (§7.4) is the only gate | A regression can land if a contributor skips the gate | Open (add a GitHub Actions workflow mirroring §7.4) |
+| ~~MEDIUM~~ | ~~No hosted CI~~ | A regression can land if a contributor skips the gate | **Resolved (session 3)** — `.github/workflows/ci.yml`: verify job (lint → typecheck → unit → build) + e2e job (Playwright against the restored standalone build) on push/PR to main |
 | MEDIUM | Rate limiter is per-process (in-memory) | Horizontal scaling would share no state | Open by design (ADR-003); document before scaling out |
 | LOW | Forgot-password logs the request but sends no mail | UX gap vs. a full reset flow (enumeration-safe response implemented) | Open (wire Resend/SendGrid when a domain exists) |
-| LOW | No `prefers-reduced-motion` handling on hover/sheet animations | Motion-sensitive users see full animations | Open (a `motion-reduce:` pass over §5.4) |
+| ~~LOW~~ | ~~No `prefers-reduced-motion` handling~~ | Motion-sensitive users see full animations | **Resolved (session 3)** — global reduced-motion block in `globals.css` + `motion-reduce:animate-none` on the `animate-rise-in` utility (E2E-pinned) |
 | LOW | No numeric coverage threshold | Coverage discipline is convention, not gate | Open (`vitest --coverage` + thresholds when the suite grows) |
 | INFO | Attachment storage is base64-in-SQLite | 2 MiB × 3 cap keeps it safe; volume growth → object storage | Documented (§4.2) |
 | INFO | Dev-mode Next overlay (bottom-left dark circle) overlaps the sidebar footer in dev screenshots | Visual-check false positive only; production never renders it | Mitigated (`devIndicators: false` + AGENTS.md note) |
 | RESOLVED | Visual parity gaps vs the live reference (25 findings, session 2: flat quick stats, card-style recent list, flex detail layout, old login shell, `text-3xl` headings, sticky mobile header) | Parity risk on every page | Fixed — every contract E2E-pinned by `visual-parity.spec.ts`; inventory in `docs/remediation-plan-session2.md` |
 | RESOLVED | tickets.spec flakiness (2 locator defects: non-retrying `count()` racing async search; `getByText` strict-mode ambiguity vs the Radix toast announcer) | 2 tests failing intermittently in full runs | Fixed with `toHaveCount` + `{ exact: true }` (session 2) |
+| RESOLVED | Session-3 parity gaps (12 findings: emoji tile + no arrow + category badge + datetime on dashboard recent rows; capitalized badges; missing entrance animations; submit-form details; login caption; search icon size; info-panel tracking; opaque `<main>`) + a hydration error (`<div>`-in-`<p>` Skeleton) | Parity risk on every page + a console error on every dashboard load | Fixed — all E2E-pinned; inventory in `docs/remediation-plan-session3.md` |
 
 ---
 

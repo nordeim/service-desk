@@ -283,11 +283,13 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
   return (
     <main
       data-slot="sidebar-inset"
-      className={cn(
-        "bg-background relative flex w-full flex-1 flex-col",
-        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm",
-        className,
-      )}
+      // Reference parity (measured session 3): the reference's <main> is
+      // exactly `flex-1 flex flex-col` — transparent, so the app-wide
+      // gradient wrapper paints through. shadcn's stock inset adds
+      // `bg-background relative w-full` (opaque — it masks the wrapper
+      // gradient) plus inset-variant classes for a variant we never use;
+      // both were dropped deliberately.
+      className={cn("flex-1 flex flex-col", className)}
       {...props}
     />
   );

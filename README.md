@@ -5,7 +5,8 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?logo=prisma&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-50%20unit%20%2B%2046%20E2E-brightgreen)
+![Tests](https://img.shields.io/badge/tests-53%20unit%20%2B%2057%20E2E-brightgreen)
+![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 
 A production-ready IT support ticketing portal — a feature-parity **superset** clone of the [base44 ServiceDesk reference app](https://service-desk-332a5ae4.base44.app/), rebuilt on Next.js 16 + React 19 + Prisma/SQLite. Users sign in, submit tickets across six issue categories, track status/priority, converse in comment threads, and manage their own ticket lifecycle.
 
@@ -13,7 +14,7 @@ A production-ready IT support ticketing portal — a feature-parity **superset**
 
 The portal solves a everyday enterprise problem: employees need a single place to report IT issues (hardware, software, network, access, email) and follow them to resolution, while the sidebar keeps live global stats visible. The clone reproduces the reference app's visual design (measured from its live DOM and computed styles — not guessed) and extends it with a working signup flow, password-reset request, file attachments, owner-side status control, search/filter/sort, and a full test pyramid.
 
-**Verification status:** `lint` ✓ · `typecheck` ✓ · 50 Vitest unit tests ✓ · production build ✓ · 46 Playwright E2E tests ✓ · API smoke script ✓
+**Verification status:** `lint` ✓ · `typecheck` ✓ · 53 Vitest unit tests ✓ · production build ✓ · 57 Playwright E2E tests ✓ · API smoke script ✓ · CI (GitHub Actions, on push/PR to main) ✓
 
 ## Key Features
 
@@ -28,8 +29,9 @@ The portal solves a everyday enterprise problem: employees need a single place t
 | 🔍 **Search & filters** | Full-text search, status/priority filters, newest/oldest/priority sort, My/All scope |
 | 📊 **Live stats** | Sidebar quick stats (global) + dashboard cards (yours) + average resolution time |
 | 📱 **Responsive chrome** | shadcn/ui off-canvas mobile sidebar with overlay, Escape, and auto-close on navigate |
-| 🎨 **Parity-pinned design** | 18 E2E parity tests pin the reference's measured classes (gradient quick stats, flat recent rows, detail grid, login card) |
-| 🧪 **Test pyramid** | 50 unit + 46 E2E tests + API smoke, pinned to the UI contract |
+| 🎨 **Parity-pinned design** | 29 E2E parity tests pin the reference's measured classes (gradient quick stats, flat recent rows with FileText tiles, detail grid, login card, lowercase badges, entrance animations) |
+| 🏃 **Entrance animations** | Reference-measured rise-in (opacity + 20px slide, spring easing) on cards/rows — disabled under `prefers-reduced-motion` |
+| 🧪 **Test pyramid** | 53 unit + 57 E2E tests + API smoke + GitHub Actions CI, pinned to the UI contract |
 
 ## Architecture
 
@@ -129,13 +131,17 @@ bun run lint && bun run typecheck && bun run test
 ## Testing
 
 ```bash
-bun run test               # Vitest unit: 50 tests (auth HMAC/scrypt/rate-limit, validation, db-path, utils)
-bun run test:e2e           # Playwright E2E (46 tests): builds nothing — boots the PRODUCTION standalone server
+bun run test               # Vitest unit: 53 tests (auth HMAC/scrypt/rate-limit, validation, db-path, utils incl. formatDate)
+bun run test:e2e           # Playwright E2E (57 tests): builds nothing — boots the PRODUCTION standalone server
                            # on :3100 with an isolated db/e2e.db (schema pushed + seeded by global setup)
 bash scripts/smoke-test.sh # API surface against a throwaway standalone server on :3999
 ```
 
-E2E notes: the suite signs the demo user in **once** (setup project → saved `storageState`) because the auth endpoints are rate-limited (10 attempts/IP/15 min). `tests/e2e/auth.spec.ts` opts out of the shared session to test the logged-out surface. The mobile-navigation spec pins the off-canvas sheet contract (open, overlay close, Escape close, auto-close on navigate, desktop gradient parity). `tests/e2e/visual-parity.spec.ts` (18 tests) pins the session-2 remediation contracts measured from the live reference: gradient quick-stats rows, flat divide-y recent tickets, the detail page's `lg:grid-cols-3` layout with gradient card header, `text-4xl` page headings, the non-sticky mobile header, and the login card shell (`max-w-md`, `backdrop-blur-sm`, `ring-4` logo).
+E2E notes: the suite signs the demo user in **once** (setup project → saved `storageState`) because the auth endpoints are rate-limited (10 attempts/IP/15 min). `tests/e2e/auth.spec.ts` opts out of the shared session to test the logged-out surface. The mobile-navigation spec pins the off-canvas sheet contract (open, overlay close, Escape close, auto-close on navigate, desktop gradient parity). `tests/e2e/visual-parity.spec.ts` (29 tests) pins the session-2 + session-3 remediation contracts measured from the live reference: gradient quick-stats rows, flat divide-y recent tickets with FileText icon tiles + arrows + date-only dates, lowercase badges, the detail page's `lg:grid-cols-3` layout with gradient card header, `text-4xl` page headings, the non-sticky mobile header, the login card shell, the reference entrance animation (`animate-rise-in`, disabled under `prefers-reduced-motion`), and the submit form details (circle-alert header icon, blue priority value, upload dropzone, inline footer). `tests/e2e/dashboard.spec.ts` also pins a clean hydration (no console hydration-mismatch errors).
+
+### CI
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push/PR to `main`: the `verify` job (lint → typecheck → unit → production build) and an `e2e` job that restores the standalone build, installs Playwright Chromium, and runs the full E2E suite against the production server.
 
 ## API Reference
 
@@ -168,11 +174,12 @@ Measured from the reference app (computed styles + extracted `:root` variables):
 | `--amber-500` | `#f59e0b` | "Open" stat badge |
 | `--emerald-500` | `#10b981` | "Resolved" accent |
 
-- **Typography:** Inter (next/font), tight tracking on headings (`tracking-tight`); page h1s are `text-4xl` with `text-lg text-slate-600` subtitles (reference scale, session 2).
+- **Typography:** Inter (next/font), tight tracking on headings (`tracking-tight`); page h1s are `text-4xl` with `text-lg text-slate-600` subtitles (reference scale, session 2). Badge text is lowercase ("open", "medium priority", "hardware" — reference convention, session 3); dashboard recent rows show date-only dates while mytickets cards keep the full "Oct 9, 2026 at 12:47 AM" format.
 - **Signature motif:** `bg-gradient-to-r from-cyan-500 to-blue-600` — active nav, primary buttons; icon tiles and card headers use per-context gradients (violet→purple, amber→orange, blue→cyan, emerald→green; card headers cyan-50/50→blue-50/50).
 - **Quick stats:** gradient rows `from-amber-50 to-orange-50` / `from-blue-50 to-cyan-50` / `from-slate-50 to-gray-50` with `shadow-md` value badges — geometry verified identical to the reference (48 px rows, 16 px group offset, 14 px labels).
-- **Login card:** `max-w-md`, `bg-white/95 backdrop-blur-sm shadow-2xl` with a slate gradient top bar and an in-card `ring-4` logo circle; inputs `bg-slate-50/50` (focus `border-slate-400`), sign-in button `bg-slate-900`.
-- **Motion:** 300–500 ms `transition-all` on cards/links; sheet slide-in 500 ms; hover lift + arrow slide on ticket cards (mytickets rows only — dashboard recent rows are flat).
+- **Entrance animation (session 3):** `animate-rise-in` — `opacity 0→1` + `translateY(20px)→0`, 0.3 s `cubic-bezier(0.34, 1.56, 0.64, 1)` (measured from the reference's framer-motion spring, ~310 ms with ~12% overshoot, no stagger) on dashboard stat cards + recent rows, mytickets cards, the submit form card, and the detail back+grid wrapper. Always paired with `motion-reduce:animate-none`; a global `prefers-reduced-motion` block collapses all other animations/transitions.
+- **Login card:** `max-w-md`, `bg-white/95 backdrop-blur-sm shadow-2xl` with a slate gradient top bar and an in-card `ring-4` logo circle; inputs `bg-slate-50/50` (focus `border-slate-400`), sign-in button `bg-slate-900`; no caption below the card.
+- **Motion:** 300–500 ms `transition-all` on cards/links; sheet slide-in 500 ms; hover lift + arrow slide on ticket cards (mytickets rows only — dashboard recent rows use the FileText tile + arrow, flat).
 
 ## Deployment
 

@@ -50,15 +50,15 @@ test.describe("dashboard", () => {
     for (const label of ["Total Tickets", "Open", "In Progress", "Resolved"]) {
       await expect(page.locator("p", { hasText: new RegExp(`^${label}$`) })).toBeVisible();
     }
-    // Icon tiles exist and carry a gradient background-image.
+    // Icon tiles exist and carry a gradient background-image (toHaveCSS
+    // auto-retries — a raw evaluate can race stylesheet load).
     const tile = page
       .locator("main .grid > div")
       .first()
       .locator(".rounded-2xl")
       .first();
     await expect(tile).toBeVisible();
-    const bg = await tile.evaluate((el) => getComputedStyle(el).backgroundImage);
-    expect(bg).toContain("linear-gradient");
+    await expect(tile).toHaveCSS("background-image", /linear-gradient/);
   });
 
   test("renders Performance Metrics and Recent Tickets stacked full-width", async ({ page }) => {
@@ -87,5 +87,22 @@ test.describe("dashboard", () => {
   test("signs out via the footer button", async ({ page }) => {
     await page.locator('[data-sidebar="footer"]').getByRole("button", { name: "Sign out" }).click();
     await page.waitForURL("**/login");
+  });
+
+  // Session 3: the performance-value <p> used to hold the Skeleton <div>
+  // (invalid p>div nesting) — the browser parser hoisted the div, the client
+  // tree mismatched, and React logged a hydration error. This pins a clean
+  // hydration for the dashboard.
+  test("hydrates cleanly (no hydration-mismatch console errors)", async ({ page }) => {
+    const problems: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") problems.push(msg.text());
+    });
+    page.on("pageerror", (err) => problems.push(String(err)));
+    await page.goto("/dashboard");
+    await page.waitForLoadState("networkidle");
+    const text = problems.join("\n");
+    expect(text).not.toContain("Hydration failed");
+    expect(text).not.toContain("cannot be a descendant");
   });
 });

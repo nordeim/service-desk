@@ -59,7 +59,7 @@ export default function MyTicketsPage() {
         <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
               aria-hidden
             />
             <Input

@@ -21,6 +21,18 @@ export function formatDateTime(date: Date | string): string {
   return `${datePart} at ${timePart}`;
 }
 
+/** "Oct 9, 2026" — date-only form used by the reference's dashboard
+ *  recent-ticket rows (mytickets cards and the detail panel keep the
+ *  full formatDateTime — measured from the live reference, session 3). */
+export function formatDate(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(d);
+}
+
 /** Humanized duration: "3d 4h", "2h 15m", "45m", "N/A". */
 export function formatDuration(ms: number | null): string {
   if (ms === null || ms < 0 || !Number.isFinite(ms)) return "N/A";

@@ -1,0 +1,108 @@
+# ServiceDesk CI — mirrors the local verification gate (AGENTS.md "Commands").
+#
+# verify job: lint → typecheck → unit tests → production build (the fast,
+# deterministic gate every contributor runs locally).
+# e2e job: boots the Playwright suite against the production standalone
+# server (self-contained per playwright.config.ts: global-setup pushes +
+# seeds db/e2e.db, webServer boots .next/standalone/server.js on :3100).
+#
+# Notes:
+# - `bun install` may skip dependency postinstall scripts, so prisma generate
+#   runs explicitly (the build imports @prisma/client).
+# - The build script copies .next/static + public INSIDE .next/standalone,
+#   so the uploaded artifact is a complete, self-contained server bundle —
+#   the e2e job restores it and never rebuilds.
+# - The npm scripts pin DATABASE_URL inline, so an ambient env var can never
+#   redirect the database; AUTH_SECRET gets a throwaway CI value (sessions
+#   are exercised, production secrets are not).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: lint + typecheck + unit + build
+    runs-on: ubuntu-latest
+    env:
+      AUTH_SECRET: ci-only-session-secret-not-for-production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: bun run db:generate
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Unit tests
+        run: bun run test
+
+      - name: Production build
+        run: bun run build
+
+      - name: Upload standalone build for e2e
+        uses: actions/upload-artifact@v4
+        with:
+          name: standalone-build
+          path: .next/standalone
+          retention-days: 1
+
+  e2e:
+    name: playwright e2e (standalone server)
+    runs-on: ubuntu-latest
+    needs: verify
+    env:
+      AUTH_SECRET: ci-only-session-secret-not-for-production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: bun run db:generate
+
+      - name: Restore standalone build
+        uses: actions/download-artifact@v4
+        with:
+          name: standalone-build
+          path: .next/standalone
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run E2E suite
+        run: bun run test:e2e
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7

@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RecentTicketRow } from "@/components/ticket-bits";
-import { formatDateTime, formatDuration } from "@/lib/utils";
+import { formatDuration } from "@/lib/utils";
 import type { TicketCardData } from "@/components/ticket-bits";
 
 interface StatsResponse {
@@ -113,7 +113,7 @@ function DashboardContent({ userName }: { userName: string }) {
           {STAT_CARDS.map((card) => (
             <div
               key={card.key}
-              className="rounded-xl border bg-card text-card-foreground border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group relative"
+              className="animate-rise-in motion-reduce:animate-none rounded-xl border bg-card text-card-foreground border-none shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group relative"
             >
               <div
                 className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${card.deco} opacity-10 rounded-full transform translate-x-12 -translate-y-12 group-hover:scale-150 transition-transform duration-500`}
@@ -154,7 +154,11 @@ function DashboardContent({ userName }: { userName: string }) {
                   {stats ? (
                     formatDuration(stats.avgResolutionMs)
                   ) : (
-                    <Skeleton className="h-9 w-20" />
+                    // Inline skeleton — the Skeleton component renders a
+                    // <div>, which is invalid inside <p> and broke hydration
+                    // (the browser parser hoists it; React then mismatched).
+                    // Session 3: pin with dashboard.spec "hydrates cleanly".
+                    <span className="inline-block h-9 w-20 animate-pulse rounded-md bg-slate-200/80" aria-hidden />
                   )}
                 </p>
               </div>
@@ -193,7 +197,7 @@ function DashboardContent({ userName }: { userName: string }) {
             ) : (
               <div className="divide-y divide-slate-100">
                 {recent.map((t) => (
-                  <RecentTicketRow key={t.id} ticket={t} formattedDate={formatDateTime(t.createdAt)} />
+                  <RecentTicketRow key={t.id} ticket={t} />
                 ))}
               </div>
             )}

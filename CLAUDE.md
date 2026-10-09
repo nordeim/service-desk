@@ -9,7 +9,7 @@ last_updated: 2026-10-09
 
 Full-stack IT ticketing portal (Next.js 16 App Router standalone · React 19 · TypeScript strict · Tailwind CSS v4 CSS-first · shadcn/ui · Prisma 6 + SQLite · Vitest + Playwright). A visual-parity, feature-superset clone of the base44 ServiceDesk reference app, maintained as a single deployable process with zero external services.
 
-**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (46 specs against the production standalone build) when UI/auth behavior changes.
+**Verification gate (must be green before any commit):** `bun run lint && bun run typecheck && bun run test && bun run build` — plus `bun run test:e2e` (57 specs against the production standalone build) when UI/auth behavior changes. CI (`.github/workflows/ci.yml`) runs the same gate on every push/PR to main.
 
 ## Foundational Principles
 
@@ -24,8 +24,8 @@ Full-stack IT ticketing portal (Next.js 16 App Router standalone · React 19 · 
 
 ### Project-Specific Principles
 
-- **Visual parity is a contract.** The reference app's design was measured (computed styles + DOM classes), not guessed — sidebar `#fafafa`, the cyan→blue gradient motif, badge colors, the stacked dashboard layout, `text-4xl` page headings, gradient quick-stats rows, the flat divide-y recent list, the detail grid, and the login card shell are pinned by E2E specs (`visual-parity.spec.ts`, session 2). Style changes need a parity reason.
-- **Superset, not divergence.** Additions (signup, forgot-password, attachments, owner status control, sort/scope) must not alter reference-visible structure. The reference's own quirks (header inside `<main>`, focus-to-body on sheet close) are preserved deliberately.
+- **Visual parity is a contract.** The reference app's design was measured (computed styles + DOM classes), not guessed — sidebar `#fafafa`, the cyan→blue gradient motif, badge colors + lowercase badge text, the stacked dashboard layout, `text-4xl` page headings, gradient quick-stats rows, the flat divide-y recent list (FileText tiles, arrows, date-only dates), the detail grid, the login card shell, and the rise-in entrance animations are pinned by E2E specs (`visual-parity.spec.ts`, sessions 2–3). Style changes need a parity reason.
+- **Superset, not divergence.** Additions (signup, forgot-password, attachments, owner status control, sort/scope) must not alter reference-visible structure. The reference's own quirks (header inside `<main>`, focus-to-body on sheet close, no nav highlight at `/`) are preserved or deliberately improved (the `/`→`/dashboard` redirect) — document any intentional divergence.
 - **Zero third-party auth dependency.** HMAC cookie sessions + scrypt hashing in `src/lib/auth.ts` — auditable, unit-tested, no supply-chain surface. Do not swap in an auth library casually.
 - **The database path is load-bearing.** `file:../db/custom.db` anchors against `prisma/schema.prisma`; `src/lib/db-path.ts` replicates the CLI rule at runtime so dev, build, and the standalone server open ONE file. Pinned by 15 tests.
 
@@ -82,8 +82,8 @@ bun run dev                     # http://localhost:3000  (demo@servicedesk.app /
 
 ## Testing Strategy
 
-- **Unit (Vitest, `*.test.ts`)**: pure seams only — auth sign/verify + scrypt + rate limiting, input validation, constants vocabulary, db-path resolution, date/duration formatting. No DOM, no DB.
-- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (18 tests) pins the reference-measured design contracts (session 2).
+- **Unit (Vitest, `*.test.ts`)**: pure seams only — auth sign/verify + scrypt + rate limiting, input validation, constants vocabulary, db-path resolution, date/duration formatting (`formatDate` date-only, `formatDateTime`, `formatDuration`). No DOM, no DB.
+- **E2E (Playwright, `tests/e2e/*.spec.ts`)**: boots the PRODUCTION standalone server on :3100 with an isolated seeded `db/e2e.db`. One authenticated session via the setup project's `storageState` (auth is rate-limited — keep real logins under 10/run). `auth.spec.ts` opts out to test the logged-out surface. `visual-parity.spec.ts` (29 tests) pins the reference-measured design contracts (sessions 2–3). `dashboard.spec.ts` pins clean hydration (no console hydration-mismatch errors — a `<div>`-in-`<p>` skeleton once broke it).
 - **Smoke (`scripts/smoke-test.sh`)**: API contract on a throwaway server — health, login, CRUD, comments, guards (401/400).
 - Bug fixes require a failing test first (unit for domain seams, E2E for UI contract). The mobile-navigation spec is the highest-regression-risk chrome — run it after any sidebar/sheet/Tailwind change; run visual-parity after any page-layout change.
 

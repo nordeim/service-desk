@@ -124,9 +124,9 @@ test.describe("desktop navigation", () => {
   }) => {
     await page.goto("/dashboard");
     const active = page.locator('[data-sidebar="menu-button"]').first();
-    const bg = await active.evaluate((el) => getComputedStyle(el).backgroundImage);
-    expect(bg).toContain("linear-gradient");
-    const color = await active.evaluate((el) => getComputedStyle(el).color);
-    expect(color).toBe("rgb(255, 255, 255)");
+    // toHaveCSS auto-retries — a raw evaluate() here raced stylesheet load
+    // once in a full-suite run (session 3) and flaked.
+    await expect(active).toHaveCSS("background-image", /linear-gradient/);
+    await expect(active).toHaveCSS("color", "rgb(255, 255, 255)");
   });
 });

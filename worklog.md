@@ -98,3 +98,41 @@ Stage Summary:
 - All 25 session-2 findings fixed and E2E-pinned; 46 E2E + 50 unit + smoke green; parity verified against live reference via computed styles
 - Deliverables: remediated codebase (19 files changed + 3 new: visual-parity.spec.ts, public/logo.png, docs/remediation-plan-session2.md, service-desk_SKILL.md), refreshed screenshots, 4 updated root docs
 - Ready for commit + push via ssh_git_wrapper_v3.py
+
+---
+Task ID: 6
+Agent: main (Super Z)
+Task: Session 3 — refresh repo, review session_2 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git pull: 70ecc59 adds docs/session_2.md (session-2 retrospective) + prompt-to-review-2 delta
+- Reviewed AGENTS/CLAUDE/README/PAD/service-desk_SKILL + docs/session_2.md + docs/remediation-plan-session2.md + worklog — all aligned with the codebase (env, db path, skills/ exclusion in all 4 configs re-verified)
+- Baseline gates: lint ✓ typecheck ✓ 50 unit ✓ build ✓ 46 E2E ✓ smoke 10/10 ✓ (working tree clean at 70ecc59)
+- Audit of session-2 commit f89730f (code-review-checklist + verification-and-review-protocol skills): source clean; confirmed open known issues (no CI, no prefers-reduced-motion) + vitest.config.ts orbital comment drift
+- Fresh gap analysis vs live reference (agent-browser, two sessions): DOM dumps for all 5 pages both sites; entrance-animation parameters measured via a Playwright MutationObserver probe (opacity 0→1 + translateY(20px)→0, spring ~310 ms with ~12% overshoot, NO stagger; motion wrappers per page counted)
+- 12 parity gaps found (recent-row structure incl. FileText tile + arrow + no category badge + date-only dates, lowercase badges, entrance animations, submit-form details, login caption, search icon w-5, info-panel tracking-wide, transparent <main>); 8 VLM screenshot claims checked against computed styles — 5 refuted (icon-only sidebar, no nav gradient, tinted tiles, wrong category value, external-link icon)
+- Mobile navigation verified on BOTH sites: reference opens/stays-open-on-tap (our auto-close is the superset); clone opens, overlay-close, Escape-close, auto-close, icons + labels present, zero console errors
+- Wrote + validated docs/remediation-plan-session3.md (12 gaps + known-issue closure + intentional divergences)
+
+Stage Summary:
+- Repo at 70ecc59 + plan. 12 gaps + 2 known issues (CI, reduced-motion) + 1 latent hydration bug identified and planned.
+
+---
+Task ID: 7
+Agent: main (Super Z)
+Task: Session 3 — remediation execution (TDD), verification, docs, SKILL.md v2.1.0, commit + push
+
+Work Log:
+- TDD: 3 formatDate unit tests + 11 red session-3 parity tests + 1 clean-hydration E2E pin written first
+- Fixed the latent hydration bug found during live verification: the performance-value <p> held the Skeleton <div> (invalid p>div) → inline span skeleton; pinned by dashboard.spec "hydrates cleanly"; all pages now load with ZERO console errors
+- Implemented all 12 gaps: RecentTicketRow rework (FileText icon tile, title/arrow wrapper, no category badge, formatDate date-only); badges lowercase (capitalize removed); entrance animations via globals.css @keyframes + @utility animate-rise-in (cubic-bezier(0.34,1.56,0.64,1) 0.3s backwards) + motion-reduce:animate-none + global prefers-reduced-motion block; submit form (CircleAlert header icon, blue priority SelectValue, emoji-span category value, reference dropzone w/ Upload icon + label-for, inline pt-4 footer no border-t, Send icon); login/signup/forgotpassword caption removed; mytickets search icon w-5; detail labels tracking-wide; SidebarInset → flex-1 flex flex-col (transparent)
+- Known issues closed: .github/workflows/ci.yml (verify + e2e jobs); vitest.config.ts comment de-orbitalized
+- Hardened 2 latent-flaky raw evaluate(getComputedStyle) assertions → auto-retrying toHaveCSS (mobile-navigation + dashboard specs)
+- Gates: lint ✓ typecheck ✓ 53 unit ✓ build ✓ 57/57 E2E ✓ smoke 11/11 ✓
+- Live re-verification: every fixed contract confirmed via computed styles/DOM on the dev server (animation-name rise-in 0.3s, FileText w-6 cyan-600, lowercase badges, date-only dates, blue priority, transparent main); mobile menu re-verified; final VLM composite check on dashboard + submit: IDENTICAL
+- Refreshed docs/screenshots/ (7 shots); updated README/AGENTS/CLAUDE/PAD/service-desk_SKILL.md (v2.1.0); .env.example verified unchanged-matching
+
+Stage Summary:
+- All 12 session-3 findings + hydration bug fixed and E2E-pinned; 57 E2E + 53 unit + smoke green; CI added; parity verified against the live reference
+- Deliverables: remediated codebase (14 source files + 2 test files + ci.yml + globals.css), docs/remediation-plan-session3.md, refreshed screenshots, 5 updated docs
+- Ready for commit + push via ssh_git_wrapper_v3.py

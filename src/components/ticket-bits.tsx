@@ -6,7 +6,7 @@
 // chip, gradient emoji tile, group-hover arrow slide.
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, FileText } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,7 +16,7 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 const STATUS_BADGE_CLASSES: Record<TicketStatus, string> = {
   open: "bg-amber-100 text-amber-800 border-amber-300 border font-medium px-3 py-1",
@@ -42,8 +42,10 @@ export function StatusBadge({
   detail?: boolean;
 }) {
   const extra = detail ? "text-sm! font-bold" : "";
+  // Reference renders badge text lowercase ("open", "in progress") —
+  // no capitalize (measured session 3).
   return (
-    <Badge className={cn("capitalize", STATUS_BADGE_CLASSES[status], extra)}>
+    <Badge className={cn(STATUS_BADGE_CLASSES[status], extra)}>
       {status.replace("_", " ")}
     </Badge>
   );
@@ -59,7 +61,7 @@ export function PriorityBadge({
   showWord?: boolean;
 }) {
   return (
-    <Badge className={cn("capitalize", PRIORITY_BADGE_CLASSES[priority])}>
+    <Badge className={cn(PRIORITY_BADGE_CLASSES[priority])}>
       {showWord ? `${priority.replace("_", " ")} priority` : priority}
     </Badge>
   );
@@ -67,7 +69,7 @@ export function PriorityBadge({
 
 export function CategoryBadge({ category }: { category: TicketCategory }) {
   return (
-    <Badge variant="outline" className="px-2.5 py-0.5 text-xs font-medium capitalize">
+    <Badge variant="outline" className="px-2.5 py-0.5 text-xs font-medium">
       {category}
     </Badge>
   );
@@ -94,7 +96,7 @@ export function TicketCard({
   const emoji = CATEGORY_EMOJI[(ticket.category as TicketCategory) ?? "other"] ?? "📋";
   return (
     <Link href={`/ticketdetails?id=${ticket.id}`} className="block group">
-      <div className="rounded-xl border text-card-foreground p-6 border-none shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer bg-white">
+      <div className="animate-rise-in motion-reduce:animate-none rounded-xl border text-card-foreground p-6 border-none shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer bg-white">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 text-2xl">
             {emoji}
@@ -126,35 +128,34 @@ export function TicketCard({
 }
 
 // Reference "Recent Tickets" row (dashboard): flat divide-y list entry —
-// measured from the reference DOM (session 2). NOT a card: no border/shadow,
-// w-12 h-12 tile, truncated semibold title, one-line description, no arrow.
-export function RecentTicketRow({
-  ticket,
-  formattedDate,
-}: {
-  ticket: TicketCardData;
-  formattedDate: string;
-}) {
-  const emoji = CATEGORY_EMOJI[(ticket.category as TicketCategory) ?? "other"] ?? "📋";
+// measured from the reference DOM (session 3 refresh). NOT a card: no
+// border/shadow; the tile renders a FileText SVG icon (w-6 h-6 cyan-600,
+// NOT the category emoji); the title sits in a flex justify-between wrapper
+// with the hover-sliding arrow; badges are status + priority only (no
+// category); the date is DATE-ONLY ("Oct 9, 2026") — mytickets cards keep
+// the full datetime.
+export function RecentTicketRow({ ticket }: { ticket: TicketCardData }) {
   return (
     <Link
       href={`/ticketdetails?id=${ticket.id}`}
-      className="block p-6 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-blue-50/50 transition-all duration-300 group"
+      className="animate-rise-in motion-reduce:animate-none block p-6 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-blue-50/50 transition-all duration-300 group"
     >
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 text-2xl">
-          {emoji}
+        <div className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+          <FileText className="w-6 h-6 text-cyan-600" aria-hidden />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-slate-900 truncate group-hover:text-cyan-600 transition-colors">
-            {ticket.title}
-          </h3>
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <h3 className="font-semibold text-slate-900 truncate group-hover:text-cyan-600 transition-colors">
+              {ticket.title}
+            </h3>
+            <ArrowRight className="w-5 h-5 text-slate-400 flex-shrink-0 group-hover:text-cyan-500 group-hover:translate-x-1 transition-all" aria-hidden />
+          </div>
           <p className="text-sm text-slate-600 line-clamp-1 mb-3">{ticket.description}</p>
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={ticket.status as TicketStatus} />
             <PriorityBadge priority={ticket.priority as TicketPriority} />
-            <CategoryBadge category={ticket.category as TicketCategory} />
-            <span className="text-xs text-slate-500 font-medium">{formattedDate}</span>
+            <span className="text-xs text-slate-500 font-medium">{formatDate(ticket.createdAt)}</span>
           </div>
         </div>
       </div>

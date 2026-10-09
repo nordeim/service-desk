@@ -7,9 +7,9 @@ description: >
   functionality. Distilled after the session-2 remediation (2026-10-09).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.0.0
+version: 2.1.0
 last_updated: 2026-10-09
-project_state: 50 unit tests + 46 E2E green; all parity contracts E2E-pinned
+project_state: 53 unit tests + 57 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–3)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -185,7 +185,7 @@ The scroll-container architecture is reference-measured: the mobile header never
 | Renderer | Used on | Anatomy |
 |---|---|---|
 | `TicketCard` | /mytickets | bordered card (`rounded-xl … shadow-lg hover:shadow-xl bg-white`), `w-14 h-14` emoji tile, arrow icon (`group-hover:translate-x-1`), `font-bold text-lg` title, `line-clamp-2 mb-4` description |
-| `RecentTicketRow` | /dashboard | flat `divide-y` row (`a.block.p-6 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-blue-50/50`), `w-12 h-12` tile, `font-semibold truncate` title, `text-sm line-clamp-1 mb-3` description, NO arrow, NO border/shadow |
+| `RecentTicketRow` | /dashboard | flat `divide-y` row (`a.block.p-6 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-blue-50/50` + `animate-rise-in`), `w-12 h-12` tile with a **FileText SVG icon** (`w-6 h-6 text-cyan-600`, NOT the category emoji), title inside `flex items-start justify-between gap-4 mb-2` **with the ArrowRight**, status + priority badges only (no category), **date-only** date (`formatDate`), NO border/shadow |
 
 Both are measured from the reference. Reusing `TicketCard` on the dashboard (or vice versa) is a parity regression — pinned by visual-parity.spec.ts.
 
@@ -315,22 +315,26 @@ Bash gates (in order — every commit):
 ```bash
 bun run lint          # ESLint 9 flat — zero warnings tolerated
 bun run typecheck     # tsc --noEmit
-bun run test          # Vitest — 50 unit tests
+bun run test          # Vitest — 53 unit tests
 bun run build         # production standalone build
-bun run test:e2e      # 46 E2E (needs the prior build)
-bash scripts/smoke-test.sh   # 10-step API contract on :3999
+bun run test:e2e      # 57 E2E (needs the prior build)
+bash scripts/smoke-test.sh   # 11-step API contract on :3999
 ```
+
+CI (`.github/workflows/ci.yml`) runs the verify job (lint → typecheck → unit → build) + an e2e job on every push/PR to main.
 
 Manual/visual checks:
 
 - [ ] Mobile navigation: opens via trigger, overlay tap closes, Escape closes (focus → body), nav tap navigates AND auto-closes (superset behavior)
 - [ ] Active nav item renders the cyan→blue gradient with white text (computed style, not screenshot)
 - [ ] Quick stats rows show gradient backgrounds with `shadow-md` badges
-- [ ] Dashboard recent tickets are FLAT rows (no card borders), mytickets rows ARE cards (border + arrow)
+- [ ] Dashboard recent tickets are FLAT rows (no card borders) with FileText icon tiles + arrows + date-only dates; mytickets rows ARE cards (border + arrow + emoji tile + full datetime)
+- [ ] Badge text is lowercase ("open", "medium priority", "hardware")
+- [ ] Entrance animations play once on mount (`animate-rise-in`) and vanish under `prefers-reduced-motion`
 - [ ] No `tabular-nums` on any counter
+- [ ] Zero console errors on every page (no hydration mismatches — never put a block component inside `<p>`)
 - [ ] Login card: slate top bar + ring-4 logo + bg-slate-900 sign-in button
 - [ ] `curl localhost:3000/api/health` → `{"status":"ok","db":"up"}`
-- [ ] No console errors on any page (agent-browser `errors`)
 - [ ] `git ls-files | grep -E '^\.env$|\.key$'` → empty (no secrets staged)
 
 ---
@@ -419,8 +423,8 @@ className={`... ${isActive
 ### 15.5 Two-renderer ticket rows
 
 ```tsx
-// mytickets: <TicketCard ticket={t} formattedDate={...} />
-// dashboard: <RecentTicketRow ticket={t} formattedDate={...} />
+// mytickets: <TicketCard ticket={t} formattedDate={formatDateTime(t.createdAt)} />
+// dashboard: <RecentTicketRow ticket={t} />  // formats its own date-only date
 // Same TicketCardData shape; different measured presentations.
 ```
 
@@ -572,6 +576,8 @@ The six-phase workflow every change follows (from CLAUDE.md):
 6. **DELIVER** — report what was verified, what was not, and any deferred debt. Never claim "works" without executed evidence.
 
 Session-2 application of this loop: 25 findings → remediation plan (docs/remediation-plan-session2.md) → plan validated against source → 18 red parity tests → implementation (9 groups: tests, chrome, sidebar, dashboard, mytickets, detail, submit, login, housekeeping) → 46/46 E2E green → computed-style re-verification on both sites → docs + this skill.
+
+Session-3 application of this loop: fresh DOM/computed-style diff + a MutationObserver motion probe → 12 findings + 1 latent hydration bug (`<div>`-in-`<p>` Skeleton) → remediation plan (docs/remediation-plan-session3.md) → 11 red parity tests + clean-hydration pin + `formatDate` unit tests → implementation (recent-row rework, lowercase badges, CSS entrance animations + `prefers-reduced-motion`, submit-form details, login caption, search icon, info-panel tracking, transparent `<main>`, CI workflow) → 57/57 E2E green → live re-verification (all contracts + zero console errors) → docs + this skill (v2.1.0).
 
 ## Appendix B: Quick Reference Card
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Info, UploadCloud } from "lucide-react";
+import { ArrowLeft, CircleAlert, Send, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,10 +20,13 @@ import { useToast } from "@/components/toast";
 import {
   ATTACHMENT_MAX_BYTES,
   ATTACHMENT_MAX_COUNT,
+  CATEGORY_EMOJI,
   CATEGORY_LABELS,
   PRIORITY_LABELS,
   TICKET_CATEGORIES,
   TICKET_PRIORITIES,
+  type TicketCategory,
+  type TicketPriority,
 } from "@/lib/constants";
 
 interface PendingAttachment {
@@ -151,12 +154,12 @@ export default function SubmitTicketPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-xl border text-card-foreground border-none shadow-2xl bg-white overflow-hidden"
+          className="animate-rise-in motion-reduce:animate-none rounded-xl border text-card-foreground border-none shadow-2xl bg-white overflow-hidden"
           noValidate
         >
           <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100 bg-gradient-to-r from-cyan-50/50 to-blue-50/50">
             <div className="font-semibold leading-none tracking-tight flex items-center gap-2 text-slate-900">
-              <Info className="w-5 h-5 text-cyan-500" aria-hidden />
+              <CircleAlert className="w-5 h-5 text-cyan-500" aria-hidden />
               Ticket Details
             </div>
           </div>
@@ -183,7 +186,17 @@ export default function SubmitTicketPage() {
                 </Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger id="category" className="w-full" aria-invalid={!!errors.category}>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder="Select category">
+                      {/* Reference (measured session 3): the selected category
+                          renders as emoji-span + label inside a flex row; the
+                          priority value renders blue. */}
+                      {category ? (
+                        <span className="flex items-center gap-2">
+                          <span>{CATEGORY_EMOJI[category as TicketCategory]}</span>
+                          {CATEGORY_LABELS[category as TicketCategory]}
+                        </span>
+                      ) : null}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {TICKET_CATEGORIES.map((c) => (
@@ -202,7 +215,9 @@ export default function SubmitTicketPage() {
                 </Label>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger id="priority" className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      <span className="text-blue-600">{PRIORITY_LABELS[priority as TicketPriority]}</span>
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {TICKET_PRIORITIES.map((p) => (
@@ -234,29 +249,33 @@ export default function SubmitTicketPage() {
 
             <div className="space-y-2">
               <Label>Attachments (optional)</Label>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
+              {/* Reference dropzone (measured session 3): dashed div + hidden
+                  input + label-for (icon mb-2, sub-text mt-1, no hover bg).
+                  Superset: drag-and-drop handlers live on the wrapper div. */}
+              <div
+                className="border-2 border-dashed border-slate-300 rounded-xl p-6 hover:border-cyan-400 transition-colors"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                   e.preventDefault();
                   void handleFiles(e.dataTransfer.files);
                 }}
-                className="w-full border-2 border-dashed border-slate-300 rounded-xl py-8 flex flex-col items-center gap-2 text-slate-500 hover:border-cyan-400 hover:bg-cyan-50/50 transition-colors"
               >
-                <UploadCloud className="w-8 h-8 text-slate-400" aria-hidden />
-                <span className="text-sm font-medium text-slate-600">Click to upload files</span>
-                <span className="text-xs">Images, PDFs, or documents (max 2 MB each, 3 files)</span>
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                className="sr-only"
-                aria-label="Upload attachments"
-                accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.md,.csv,.json,.zip"
-                onChange={(e) => void handleFiles(e.target.files)}
-              />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  id="file-upload"
+                  aria-label="Upload attachments"
+                  accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.md,.csv,.json,.zip"
+                  onChange={(e) => void handleFiles(e.target.files)}
+                />
+                <label htmlFor="file-upload" className="flex flex-col items-center cursor-pointer">
+                  <Upload className="w-8 h-8 text-slate-400 mb-2" aria-hidden />
+                  <span className="text-sm text-slate-600 font-medium">Click to upload files</span>
+                  <span className="text-xs text-slate-500 mt-1">Images, PDFs, or documents</span>
+                </label>
+              </div>
               {attachments.length > 0 ? (
                 <ul className="space-y-2">
                   {attachments.map((a, i) => (
@@ -282,19 +301,23 @@ export default function SubmitTicketPage() {
                 </ul>
               ) : null}
             </div>
-          </div>
 
-          <div className="px-8 py-6 flex items-center justify-end gap-3 border-t border-slate-100">
-            <Button type="button" variant="outline" asChild>
-              <Link href="/dashboard">Cancel</Link>
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/30"
-            >
-              {loading ? "Submitting…" : "Submit Ticket"}
-            </Button>
+            {/* Reference (measured session 3): the footer is an inline
+                justify-end row inside the form body — no border-t card
+                footer. Cancel first, then the gradient submit with Send. */}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" asChild>
+                <Link href="/dashboard">Cancel</Link>
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/30"
+              >
+                <Send className="w-4 h-4 mr-2" aria-hidden />
+                {loading ? "Submitting…" : "Submit Ticket"}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

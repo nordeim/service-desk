@@ -98,13 +98,12 @@ test.describe("dashboard parity", () => {
     await expect(list).toHaveCount(1);
     await expect(list).toHaveClass(/divide-slate-100/);
 
-    // Rows: block anchors with the hover gradient, w-12 h-12 tiles, no arrow.
+    // Rows: block anchors with the hover gradient, w-12 h-12 tiles.
     const row = list.locator("a").first();
     await expect(row).toHaveClass(/block/);
     await expect(row).toHaveClass(/hover:bg-gradient-to-r/);
     await expect(row).toHaveClass(/p-6/);
     await expect(row.locator("div.w-12")).toHaveCount(1);
-    await expect(row.locator("svg.lucide-arrow-right")).toHaveCount(0);
     // Titles: font-semibold + truncate (not text-lg font-bold).
     await expect(row.getByRole("heading").first()).toHaveClass(/truncate/);
     await expect(row.getByRole("heading").first()).not.toHaveClass(/text-lg/);
@@ -259,5 +258,155 @@ test.describe("login parity", () => {
     // Logo is an in-card circle (ring-4 span), not the overlapping dark badge.
     await expect(page.locator("span.ring-4")).toHaveCount(1);
     await expect(page.locator(".-top-10")).toHaveCount(0);
+  });
+
+  test("login card has no caption below it (reference shows none)", async ({ page }) => {
+    await page.goto("/login");
+    // The reference renders an empty sm:hidden nbsp div below the card —
+    // no visible caption text (session 3).
+    await expect(page.getByText("ServiceDesk — IT Support Portal")).toHaveCount(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session-3 contracts (docs/remediation-plan-session3.md) — measured from the
+// live reference on 2026-10-09: the dashboard recent-row structure (FileText
+// tile + title/arrow wrapper + no category badge + date-only dates), lowercase
+// badges, entrance animations (rise-in, honoring prefers-reduced-motion),
+// submit-form details (circle-alert icon, blue priority value, upload dropzone,
+// inline footer with Send icon), the mytickets search icon size, info-panel
+// tracking, and the main-element classes.
+// ---------------------------------------------------------------------------
+
+test.describe("session 3: recent-row structure", () => {
+  test("recent rows use the FileText tile, arrow, no category badge, date-only dates", async ({ page }) => {
+    await page.goto("/dashboard");
+    const row = page.locator("div.divide-y a").first();
+    // FileText icon tile (w-6 h-6 cyan-600) — not the category emoji tile.
+    const tile = row.locator("div.w-12");
+    const fileIcon = tile.locator("svg.lucide-file-text");
+    await expect(fileIcon).toHaveCount(1);
+    await expect(fileIcon).toHaveClass(/w-6/);
+    await expect(fileIcon).toHaveClass(/text-cyan-600/);
+    await expect(tile).not.toHaveClass(/text-2xl/);
+    // Title row wrapper with the arrow (reference: flex justify-between mb-2).
+    const titleWrap = row.locator("div.flex.items-start.justify-between");
+    await expect(titleWrap).toHaveClass(/mb-2/);
+    await expect(row.locator("svg.lucide-arrow-right")).toHaveCount(1);
+    // No category badge in recent rows (status + priority only).
+    await expect(
+      row.locator("span").filter({ hasText: /^(hardware|software|network|access|email|other)$/ })
+    ).toHaveCount(0);
+    // Date is date-only ("Oct 8, 2026") — no time component.
+    const date = row.locator("span.text-xs").last();
+    await expect(date).toHaveText(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
+  });
+});
+
+test.describe("session 3: badge case", () => {
+  test("ticket badges render lowercase (reference convention)", async ({ page }) => {
+    await page.goto("/mytickets");
+    const card = page.locator('a[href*="/ticketdetails"]').first();
+    await expect(
+      card.locator("span").filter({ hasText: /^(open|in progress|resolved|closed)$/ }).first()
+    ).toBeVisible();
+    await expect(
+      card.locator("span").filter({ hasText: /^(low|medium|high|urgent)$/ }).first()
+    ).toBeVisible();
+    await expect(
+      card.locator("span").filter({ hasText: /^(hardware|software|network|access|email|other)$/ }).first()
+    ).toBeVisible();
+    // No capitalized variants anywhere in the card.
+    await expect(
+      card.locator("span").filter({ hasText: /^(Open|In Progress|Medium|High|Hardware|Software)$/ })
+    ).toHaveCount(0);
+  });
+});
+
+test.describe("session 3: entrance animations", () => {
+  test("dashboard stat cards and recent rows carry the rise-in animation", async ({ page }) => {
+    await page.goto("/dashboard");
+    const firstCard = page.locator("main .grid > div", { hasText: "Total Tickets" }).first();
+    await expect(firstCard).toHaveClass(/animate-rise-in/);
+    await expect(firstCard).toHaveClass(/motion-reduce:animate-none/);
+    await expect(firstCard).toHaveCSS("animation-name", "rise-in");
+    // Recent rows animate too (they mount when the tickets arrive).
+    const row = page.locator("div.divide-y a").first();
+    await expect(row).toHaveClass(/animate-rise-in/);
+  });
+
+  test("mytickets cards, submit card, and detail wrapper animate in", async ({ page }) => {
+    await page.goto("/mytickets");
+    const card = page.locator('a[href*="/ticketdetails"] > div').first();
+    await expect(card).toHaveClass(/animate-rise-in/);
+    await expect(card).toHaveCSS("animation-name", "rise-in");
+
+    await page.goto("/submitticket");
+    await expect(page.locator("form").first()).toHaveClass(/animate-rise-in/);
+
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    await expect(page.locator("main div.animate-rise-in").first()).toBeVisible();
+  });
+
+  test("entrance animations honor prefers-reduced-motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/dashboard");
+    const firstCard = page.locator("main .grid > div", { hasText: "Total Tickets" }).first();
+    await expect(firstCard).toHaveCSS("animation-name", "none");
+    const row = page.locator("div.divide-y a").first();
+    await expect(row).toHaveCSS("animation-name", "none");
+  });
+});
+
+test.describe("session 3: submit form details", () => {
+  test("submit form matches the reference details (icon, blue priority, footer row)", async ({ page }) => {
+    await page.goto("/submitticket");
+    // Header icon is circle-alert (not info) — reference measured.
+    const header = page.locator("div.bg-gradient-to-r").filter({ hasText: "Ticket Details" });
+    await expect(header.locator("svg.lucide-circle-alert")).toHaveCount(1);
+    await expect(header.locator("svg.lucide-circle-alert")).toHaveClass(/text-cyan-500/);
+    // Priority trigger value renders in blue (reference).
+    await expect(page.locator("button#priority span.text-blue-600")).toBeVisible();
+    // Upload icon is the plain upload arrow in the reference dropzone.
+    await expect(page.locator("svg.lucide-upload")).toHaveCount(1);
+    const dz = page.locator("div.border-dashed");
+    await expect(dz).toHaveClass(/p-6/);
+    await expect(dz).not.toHaveClass(/py-8/);
+    await expect(dz.locator("label")).toHaveCount(1);
+    await expect(page.getByText("Images, PDFs, or documents", { exact: true })).toBeVisible();
+    // Footer: inline row with pt-4 inside the body — no border-t card footer.
+    await expect(page.locator("div.flex.justify-end.gap-3.pt-4")).toHaveCount(1);
+    await expect(page.locator("main .border-t")).toHaveCount(0);
+    // Submit button carries the Send icon.
+    await expect(page.locator('button[type="submit"] svg.lucide-send')).toHaveCount(1);
+  });
+});
+
+test.describe("session 3: chrome details", () => {
+  test("mytickets search icon is w-5 h-5 (reference size)", async ({ page }) => {
+    await page.goto("/mytickets");
+    const icon = page.locator("div.relative > svg.lucide-search");
+    await expect(icon).toHaveClass(/w-5/);
+    await expect(icon).toHaveClass(/h-5/);
+  });
+
+  test("info panel labels use tracking-wide (reference)", async ({ page }) => {
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    const label = page.locator("main p.text-xs").filter({ hasText: /^Created By$/ });
+    await expect(label).toHaveClass(/tracking-wide/);
+    await expect(label).not.toHaveClass(/tracking-wider/);
+  });
+
+  test("main element uses the reference classes (transparent, no bg-background)", async ({ page }) => {
+    await page.goto("/dashboard");
+    const main = page.locator("main");
+    await expect(main).toHaveClass(/flex-1/);
+    await expect(main).toHaveClass(/flex-col/);
+    await expect(main).not.toHaveClass(/bg-background/);
+    await expect(main).not.toHaveClass(/relative/);
   });
 });

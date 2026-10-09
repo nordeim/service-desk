@@ -157,6 +157,9 @@ export default function TicketDetailsPage() {
     // the right column holds the Ticket Information panel.
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
       <div className="max-w-5xl mx-auto">
+        {/* Reference (measured session 3): the back button + grid animate in
+            together inside ONE motion wrapper. */}
+        <div className="animate-rise-in motion-reduce:animate-none">
         <div className="mb-6">
           <Button asChild variant="outline" className="mb-4 hover:bg-slate-100">
             <Link href="/mytickets">
@@ -292,21 +295,21 @@ export default function TicketDetailsPage() {
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
                     Created By
                   </p>
                   <p className="text-sm text-slate-900 font-medium">{ticket.createdBy.email}</p>
                 </div>
                 <Separator className="h-[1px] w-full" />
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
                     Created On
                   </p>
                   <p className="text-sm text-slate-900 font-medium">{formatDateTime(ticket.createdAt)}</p>
                 </div>
                 <Separator className="h-[1px] w-full" />
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
                     Last Updated
                   </p>
                   <p className="text-sm text-slate-900 font-medium">{formatDateTime(ticket.updatedAt)}</p>
@@ -340,6 +343,7 @@ export default function TicketDetailsPage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

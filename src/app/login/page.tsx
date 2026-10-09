@@ -220,7 +220,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-8">ServiceDesk — IT Support Portal</p>
       </div>
     </main>
   );

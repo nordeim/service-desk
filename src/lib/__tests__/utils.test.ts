@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, formatDuration } from "@/lib/utils";
+import { formatDate, formatDateTime, formatDuration } from "@/lib/utils";
 
 describe("formatDuration", () => {
   it("returns N/A for null/negative", () => {
@@ -25,5 +25,18 @@ describe("formatDateTime", () => {
   });
   it("accepts ISO strings", () => {
     expect(() => formatDateTime("2026-10-09T00:47:00.000Z")).not.toThrow();
+  });
+});
+
+describe("formatDate", () => {
+  it("formats the reference dashboard-row shape (date only, no time)", () => {
+    expect(formatDate(new Date("2026-10-09T14:30:00"))).toBe("Oct 9, 2026");
+  });
+  it("accepts ISO strings", () => {
+    expect(formatDate("2026-12-01T09:15:00.000Z")).toMatch(/^(Nov 30|Dec 1), 2026$/);
+  });
+  it("never includes a time component", () => {
+    expect(formatDate(new Date("2026-10-09T23:59:59"))).not.toContain("at");
+    expect(formatDate(new Date("2026-10-09T23:59:59"))).not.toMatch(/AM|PM/);
   });
 });
