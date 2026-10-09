@@ -34,7 +34,7 @@ Screenshots refreshed via `scripts/capture-screenshots-s12.sh` — which also fi
 
 Docs updated: README (counts + session-12 pins), AGENTS (session-12 contracts + the s10 line amended + the trap anti-pattern rewritten), CLAUDE (counts + two new anti-patterns), PAD (known-issues row + parity 138), SKILL.md v2.10.0 (lessons 49-53), the session_12.md retrospective, session_13.md (this log), the plan's execution status, the worklog.
 
-**Session 12 complete** — pushed to `main` (see the worklog for the commit hash).
+**Session 12 complete** — pushed to `main` @ `dcfc542` (remote ref verified, tracking synced, operator key shredded, tree clean).
 
 **What shipped** — 2 parity findings fixed via TDD (10 red → **167/167 E2E** + 55 unit + smoke 11/11):
 - **The per-route social URL set (MED)**: canonical + og:url + twitter:url, all three equal, on every route — via `src/lib/route-head.ts` (the single-source helper; the child-openGraph-replace hazard defeated). Ours had shipped NO og:url/twitter:url anywhere for four sessions on a false "derives from canonical" belief.
