@@ -27,6 +27,20 @@ const DESCRIPTION =
 // twitter:url has no field in the twitter metadata type (the renderer emits
 // only known keys), so it rides metadata.other — and `other` values are NOT
 // resolved against metadataBase, hence the absolute URL below.
+// The single source for the OG card image (session 17): a declaration is a
+// CLAIM about an asset — /icon.png (the Next file-convention route over the
+// reference's logo) serves a 480x480 JPEG, so a 512x512 declaration was false
+// on both the dimensions and the type. /icon-512.png is the real 512x512
+// PNG (the s11 PWA-manifest set, generated from the same logo). The
+// reference declares 1200x630 against the same 480x480 JPEG — their
+// platform default, their defect, never mirrored (the s11 size-correct
+// precedent). Exported so the root layout and routeHead can never drift
+// apart (the SITE_URL picker/list lesson — a child's openGraph REPLACES the
+// parent's wholesale, so both must carry the same images array).
+export const OG_IMAGES = [
+  { url: "/icon-512.png", width: 512, height: 512, alt: "ServiceDesk" },
+];
+
 export function routeHead(
   segment: string,
 ): Pick<Metadata, "alternates" | "openGraph" | "twitter" | "other"> {
@@ -36,7 +50,7 @@ export function routeHead(
       type: "website",
       siteName: "ServiceDesk",
       description: DESCRIPTION,
-      images: [{ url: "/icon.png", width: 512, height: 512, alt: "ServiceDesk" }],
+      images: OG_IMAGES,
       url: segment,
     },
     twitter: {

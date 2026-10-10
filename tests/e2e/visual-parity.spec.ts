@@ -2054,7 +2054,10 @@ test.describe("session 12: the per-route social URL set (canonical + og:url + tw
     const ogImage = page.locator('meta[property="og:image"]:not([property="og:image:width"])');
     await expect(ogImage).toHaveCount(1);
     const img = await ogImage.getAttribute("content");
-    expect(img).toMatch(/\/icon\.png/);
+    // s17: the og:image moved to /icon-512.png (the real 512x512 PNG) —
+    // the mechanism this pin guards (the og set surviving the wholesale
+    // openGraph replace) is unchanged; the URL follows the asset.
+    expect(img).toMatch(/icon-512\.png/);
   });
 });
 
@@ -2796,5 +2799,70 @@ test.describe("session 16: the per-surface entrance-animation contract + the sta
     await page.goto("/mytickets");
     await page.waitForTimeout(6500);
     expect(statsCalls, "mount fetch + the 5s interval").toBeGreaterThanOrEqual(2);
+  });
+});
+
+test.describe("session 17: the viewport meta + the og:image asset truth (head-layer value probes)", () => {
+  // The s8 "probe the head" lesson extends past meta PRESENCE to meta VALUES:
+  // sixteen sessions of head work pinned which metas EXIST; the viewport
+  // string and the og:image's pointed-at asset were never value-diffed. Two
+  // findings came out of the first value-level head sweep.
+
+  test("the viewport meta ships viewport-fit=cover (the reference's notched-device contract)", async ({ page }) => {
+    // Reference (live-measured s17): width=device-width, initial-scale=1.0,
+    // viewport-fit=cover. viewport-fit=cover renders edge-to-edge into the
+    // notch/home-indicator safe areas on iPhone X+-class devices — the
+    // companion to the standalone PWA display (our /manifest.json declares
+    // display:"standalone"). Without it the browser letterboxes the viewport
+    // to the safe area on every notched phone. Assert the contract part —
+    // Next composes the content string (initial-scale=1 vs the reference's
+    // 1.0 is a spelling difference with identical computed behavior).
+    await page.goto("/login");
+    const meta = page.locator('meta[name="viewport"]');
+    await expect(meta).toHaveCount(1);
+    await expect(meta).toHaveAttribute("content", /width=device-width/);
+    await expect(meta).toHaveAttribute("content", /viewport-fit=cover/);
+    // The root layout serves every route — spot-check an app route too.
+    await page.goto("/dashboard");
+    await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
+      "content",
+      /viewport-fit=cover/
+    );
+  });
+
+  test("the og:image points at the real 512x512 PNG (declared dimensions tell the truth)", async ({ page }) => {
+    // The s17 finding: og:image declared { url: "/icon.png", 512, 512 } but
+    // /icon.png (the Next file-convention route over the reference's logo)
+    // serves a 480x480 JPEG — a false declaration on both the dimensions and
+    // the type. The reference declares 1200x630 against the SAME 480x480
+    // JPEG (their platform default — their defect, never mirrored; the s11
+    // manifest precedent: our side ships size-correct truth). Fix: point at
+    // /icon-512.png — the real 512x512 PNG generated in s11 for the PWA
+    // manifest from the same logo.
+    await page.goto("/login");
+    const ogImage = page.locator(
+      'meta[property="og:image"]:not([property="og:image:width"])'
+    );
+    await expect(ogImage).toHaveCount(1);
+    const url = await ogImage.getAttribute("content");
+    expect(url).toMatch(/\/icon-512\.png$/);
+    await expect(
+      page.locator('meta[property="og:image:width"]')
+    ).toHaveAttribute("content", "512");
+    await expect(
+      page.locator('meta[property="og:image:height"]')
+    ).toHaveAttribute("content", "512");
+    // The response layer (the s14 doctrine applied to metadata): an og:image
+    // declaration is a CLAIM about an asset — GET it, read the content type,
+    // and verify the PNG magic bytes (89 50 4E 47 0D 0A 1A 0A).
+    expect(url, "og:image url").toBeTruthy();
+    const res = await page.request.get(url as string);
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("image/png");
+    const buf = await res.body();
+    const magic = Array.from(buf.slice(0, 8))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    expect(magic, "PNG magic bytes").toBe("89504e470d0a1a0a");
   });
 });

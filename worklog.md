@@ -569,3 +569,35 @@ Work Log:
 
 Stage Summary:
 - Both session-16 code findings fixed and E2E-pinned (191 E2E total: visual-parity 154→161); the admin-surface documentation finding recorded; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 34
+Agent: main (Super Z)
+Task: Session 17 — refresh repo, review session_21/remediation-plan-session16/worklog/session_22 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git pull refresh (workspace survived) 8f328c0..9611566 (the operator's session_22.md log commit); current session established as Session 17 (agent log → docs/session_23.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.14.0 + session_21.md + remediation-plan-session16.md + worklog + session_22.md — all aligned with the codebase; env contract verified standing (.env with DATABASE_URL=file:../db/custom.db, db/ at root with the canonical 11-ticket seed, skills/ excluded in all 4 configs, .env.example matches)
+- Baseline gates: lint ✓ typecheck ✓ 56 unit ✓ build ✓ 191/191 E2E ✓ smoke 11/11 ✓; session-16 commit 8f328c0 audited CLEAN (F1 the three animation utilities + component seams + split fade-in-spring; F2 the sidebar 5s interval)
+- Session-21 shortlist worked via the bundle: stat-card hover path NON-GAP (CSS transition-all duration-300 on the inner card; zero app-level whileHover in their bundle); last_active heartbeat verified present (updateMe on sidebar mount) driving an admin-table-only online-presence UI (green dot/Online/You/Assigned — no user-facing surface renders it; our data-privacy divergence documented); admin surface still unmeasurable
+- Fresh gap analysis: standing drift pins stable; fresh axes non-gap (print/forced-colors/::selection/scrollbar identical-none both sides; react-query refetchOnWindowFocus false on theirs; native HTML5 validation on theirs vs our noValidate+server-side superset; security headers our superset); mobile matrix green on ours (s14 script) + reference stable defects (their toast viewport now also observed covering THEIR Submit button at desktop); HEADLINE: the first value-level head sweep — F1 (LOW-MED) viewport meta missing viewport-fit=cover (the reference ships it); F2 (LOW) og:image declares 512x512 over the 480x480 JPEG at /icon.png (the reference declares 1200x630 against the same ~480x480 file — their platform defect, never mirrored)
+- Wrote + validated docs/remediation-plan-session17.md (Next's viewportFit renderer verified in the installed package source; the s12 pin the only og:image-URL reference; no existing viewport pin)
+
+Stage Summary:
+- Repo at 9611566 + plan; 2 head-layer code findings (F1 viewport-fit=cover, F2 the truth-telling og:image via OG_IMAGES single source) + 1 documentation finding queued for TDD execution
+
+---
+Task ID: 35
+Agent: main (Super Z)
+Task: Session 17 — TDD remediation, verification, docs, SKILL.md v2.15.0, commit + push
+
+Work Log:
+- TDD RED: a 2-test session-17 block (the viewport meta contract on two routes; the og:image URL + dimensions + the asset GET with PNG magic bytes) + the s12 mechanism pin's URL regex updated — RED verified 3/3 for the designed reasons
+- GREEN: viewportFit "cover" in the root layout's Viewport export; the og:image fixed via OG_IMAGES exported from route-head.ts as the SINGLE source (root layout imports it) — a mid-implementation discovery: the root-layout-only fix left every routeHead route serving the old URL (a child's openGraph REPLACES the parent's wholesale, the s12 merge rule) — the duplication drift class killed structurally
+- Gates: lint ✓ typecheck ✓ 56 unit ✓ build ✓ 193/193 E2E ✓ (191 + 2, zero regressions) smoke 11/11 ✓
+- Live paired re-verification (production standalone :3000): the viewport meta width=device-width, initial-scale=1, viewport-fit=cover on login + dashboard; og:image + twitter:image → /icon-512.png; the asset GET 200/image/png/79416 bytes/real 512x512 PNG; the reference re-read on a fresh navigation confirms both contracts (their SPA nav leaves their head stale — hard-navigate before reading it); mobile matrix re-run green (375=375); the canonical 11-ticket seed re-verified after the fixture cleanup
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s17.sh (the s16 lineage); VLM-verified shots 02 + 04 (LAYOUT-OK — the s17 fixes are head-layer, invisible in page captures)
+- Updated README (56/193/163 counts + the s17 sentences)/AGENTS (the session-17 contracts section)/CLAUDE (counts + the meta-value + duplicated-openGraph anti-patterns)/PAD (the s17 known-issues row)/service-desk_SKILL.md v2.15.0 (lessons 66-67: the meta-value probe surface, the response-layer-extends-to-metadata doctrine + the OG_IMAGES single source); session_23.md narrative log; plan execution status; this worklog; the s17 probe scripts committed (fresh-axes, toast-viewport-check, screenshot + VLM scripts)
+
+Stage Summary:
+- Both session-17 head-layer findings fixed and E2E-pinned (193 E2E total: visual-parity 161→163); the last_active divergence documented; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)

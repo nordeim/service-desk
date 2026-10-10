@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-16 remediation (2026-10-10).
+  functionality. Distilled through the session-17 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.14.0
+version: 2.15.0
 last_updated: 2026-10-10
-project_state: 56 unit tests + 191 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–16)
+project_state: 56 unit tests + 193 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–17)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -409,6 +409,8 @@ Manual/visual checks:
 63. **A timing contract measured once and applied everywhere is a single-spring trap.** (Session 16.) Session 3 fitted one curve (~310ms spring, 12% overshoot, no stagger) to what are actually FOUR different reference animations: the stat cards + submit/detail wrappers run a 500ms ease-out TWEEN (cubic-bezier(0.61, 1, 0.88, 1) — framer-motion's default tween ease), the mytickets cards run a staggered spring (50ms/index), the recent rows run an X-AXIS slide (translateX(-20px), 100ms/index), and the spring surfaces' opacity settles on a DIFFERENT curve than their transform (framer-motion springs work in absolute units — the 0→1 opacity distance settles slower than the 20px transform). When a surface animates, enumerate the per-surface parameters (axis, duration, easing, stagger, per-property curves) independently.
 64. **The reference's production bundle is a legitimate measurement instrument — often the BEST one.** (Session 16.) The bundle carries the exact framer-motion `transition` objects (`duration:.5`, `delay:o*.05`, `initial:{opacity:0,x:-20}`) — no timing-probe approximation can beat the source values, and the bundle explains WHY probes read as they do (the absolute-unit spring). The method: extract the parameters from the bundle, then confirm the rendered behavior with live rAF timelines. The bundle defines; the probe confirms.
 65. **Some surfaces are unmeasurable without credentials — document them, never invent them.** (Session 16.) The reference's nav extends with All Tickets / Analytics / Settings / Developer items when `user.role === "admin"` (full implementations live in their bundle; the operator login is `role: "user"`). The parity doctrine (computed styles = ground truth) means unmeasured UI is out of scope by design — do not guess an admin UI into existence. Document the surface, note what a future session needs (admin credentials) to measure it, and move on. Meanwhile the cheap E2E false-green trap: a /api/stats polling pin on /dashboard counts the DASHBOARD's own stats fetch — run behavioral pins on a page where only the surface under test fetches.
+66. **Meta VALUES are a probe surface, not just meta PRESENCE.** (Session 17.) Sixteen sessions of head work pinned which metas EXIST (the s8 enumeration lesson) — the viewport meta string and the og:image's pointed-at asset were never value-diffed. The first value-level head sweep found two real gaps: our viewport lacked `viewport-fit=cover` (the reference ships it — the notched-device full-bleed companion to the standalone PWA display), and our og:image declared 512×512 over a 480×480 JPEG (false on both the dimensions and the type; the reference declares 1200×630 against the same file — their platform default, never mirrored). For every pinned meta, ask what its content RESOLVES to and whether the asset behind it is what it claims.
+67. **The response layer extends to metadata assertions.** (Session 17.) The s14 doctrine (probe the HTTP response behind every user-visible click) also covers crawler-facing surfaces: an og:image declaration is a CLAIM about an asset — GET it, read the content type, parse the magic bytes. And when a metadata block is duplicated across the root layout AND a per-route helper, remember the s12 merge rule (a child's openGraph REPLACES the parent's wholesale) — both copies must stay identical, which is why `OG_IMAGES` lives in ONE exported constant beside `SITE_URL` (the picker/list lesson applied to the OG card: the root-layout-only fix left every routeHead route serving the old URL until the single source landed).
 
 
 

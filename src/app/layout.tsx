@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { SITE_URL } from "@/lib/route-head";
+import { OG_IMAGES, SITE_URL } from "@/lib/route-head";
 import "./globals.css";
 
 // Reference parity (measured session 5): the reference app loads NO webfont —
@@ -31,7 +31,11 @@ export const metadata: Metadata = {
     siteName: "ServiceDesk",
     description:
       "An IT ticketing system to log, track, prioritize, and resolve technical issues efficiently.",
-    images: [{ url: "/icon.png", width: 512, height: 512, alt: "ServiceDesk" }],
+    // Session 17: the OG image lives in ONE place — OG_IMAGES in
+    // src/lib/route-head.ts (shared with routeHead, because a child's
+    // openGraph replaces the parent's wholesale in the metadata merge —
+    // two inline arrays would drift, exactly the bug the s17 fix closed).
+    images: OG_IMAGES,
   },
   twitter: {
     card: "summary_large_image",
@@ -51,6 +55,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Session 17 (live-measured): the reference ships
+  // "width=device-width, initial-scale=1.0, viewport-fit=cover" — the
+  // viewport-fit key renders edge-to-edge into the notch/home-indicator
+  // safe areas on iPhone X+-class devices (the companion to the standalone
+  // PWA display; without it the browser letterboxes the viewport). Their
+  // safe-area padding rules are unused Tailwind-CDN exhaust — no element
+  // carries them — so the meta is the whole contract on both sides.
+  viewportFit: "cover",
   // Session 11 (live-measured): the reference ships
   // <meta name="theme-color" content="#000000"> — missed by the session-8
   // social/PWA sweep. Next 16 emits it from the Viewport export.
