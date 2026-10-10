@@ -694,3 +694,36 @@ Work Log:
 
 Stage Summary:
 - The session-19 code finding fixed and pinned (195 E2E total, clean-environment verified: 65 unit + smoke 11/11); the two drift/documented findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 42
+Agent: main (Super Z)
+Task: Session 20 — refresh repo, review session_27/remediation-plan-session19/worklog/session_28 docs, audit recent changes, fresh gap analysis vs live reference (the s20 shortlist probes), remediation plan
+
+Work Log:
+- git pull fast-forward 3bf8686 → c11eb76 (the operator's session_28.md transcript commit); current session established as Session 20 (agent log → docs/session_29.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.17.0 + session_27.md + remediation-plan-session19.md + worklog + session_28.md — all aligned with the codebase; environment contract verified standing (.env + db/ seeded 4/11/3/0 canonical, skills/ excluded in all 4 configs, .env.example matches, chromium 1248 present)
+- Baseline gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 65 unit ✓ build ✓ 195/195 E2E ✓ smoke 11/11 ✓; CI badge "CI - passing" (the s19 push held); session-19 commit 3bf8686 audited CLEAN against its plan (the three-layer from_url split verified in the tree; the 19-file set exact)
+- Fresh gap analysis (agent-browser + curl both sides + the reference bundle): the s20 shortlist probes executed — F1 (first measurement): the reference's Google button is a REAL Google OAuth flow (accounts.google.com, base44 callback, state={domain, from_url, app_id} — their OAuth threads the deep link); ours keeps the truthful not-configured alert (the zero-third-party-auth doctrine); F2 (first measurement): their logged-out gate is a CATCH-ALL (their /signup AND unknown routes bounce to /login?from_url=<url> — the SPA cannot know a route is invalid until after auth; the from_url round-trips even onto their 404s, verified end-to-end); ours gates exactly the four (app) routes + the real /signup + public 404s; F3 (non-gap verified live BOTH sites): the reset-detour deep-link interplay — the from_url survives the in-card forgot-password view machine (the URL never changes through the swaps) and the sign-in lands on the deep-linked page
+- Standing pins re-verified stable: the s19 drift ledger exact (PWA trio + og dims auth-pages-only; mwa + apple title/statusbar present on app routes; dashboard canonical-at-root); the mobile sheet contracts identical both sides with their standing defects persisting (468-overflow at 375 AND 390, sheet-stays-open, their toast viewport blocking their own mobile trigger — completed via JS dispatch); OUR mobile matrix fully green (s14 script + 390 spot-check); TW v4 guards standing; the bundle sweep clean; the dashboard/submit/mytickets/detail structures all match
+- One probe lesson (earned): a bare-substring waitForURL regex matched "ticketdetails" inside the URL-ENCODED from_url param — a green that measured nothing; the re-probe asserted the full decoded URL
+- Wrote + validated docs/remediation-plan-session20.md (the budget mapped: login 7→8/10; the forgot POST on its own 1/5 bucket; no existing forgot-password E2E references — grep-verified)
+
+Stage Summary:
+- Repo at c11eb76 + plan; 1 E2E pin (F3 the reset-detour chain) + 2 first-measurement documentation findings (F1 the Google OAuth entry, F2 the gate route-set) queued for execution
+
+---
+
+Task ID: 43
+Agent: main (Super Z)
+Task: Session 20 — the E2E pin execution, verification, docs, SKILL.md v2.18.0, commit + push
+
+Work Log:
+- The session-20 E2E pin added to tests/e2e/auth.spec.ts ("signing in after the forgot-password detour returns to the deep link") — GREEN on first run (the regression pin, as designed: the compound chain was live-verified on both sites before the pin; a failure would have meant a real bug)
+- Gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 65 unit ✓ build ✓ 196/196 E2E ✓ (195+1; zero regressions) smoke 11/11 ✓
+- Live paired re-verification (scripts/s20-live-verify.mjs on the production standalone :3000): the detour chain end-to-end (bounce → reset view URL-stable → reset-success URL-stable → sign-in lands on the deep-linked ticket + the s10 Alert); the plain-bounce regression; the cross-origin open-redirect guard; the mobile matrix green — ALL GREEN
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s20.sh (the s19 lineage verbatim; all four FATAL guards green); VLM-verified shots 02 + 05 (LAYOUT-OK); seed re-verified canonical (4/11/3/0) after the fixtures
+- Updated README (counts 65/196 + the auth-flow row + the E2E-notes sentence)/AGENTS (the session-20 contracts section + the reference list through s20)/CLAUDE (counts + the s20 pin sentence + the encoded-URL anti-pattern)/PAD (§7.1/§7.4 + the s20 known-issues row)/service-desk_SKILL.md v2.18.0 (lesson 74: the auth-flow branch enumeration + the two probe lessons); session_29.md narrative log; the plan's execution status; this worklog; the s20 probe/verify scripts committed (s20-dashboard-probe, s20-live-verify, s20-vlm-verify, capture-screenshots-s20)
+
+Stage Summary:
+- The session-20 compound-flow pin shipped (196 E2E total, clean-environment verified: 65 unit + smoke 11/11); the two first-measurement findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)

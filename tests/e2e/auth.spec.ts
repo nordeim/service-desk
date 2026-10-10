@@ -81,6 +81,39 @@ test.describe("login page", () => {
     await expect(page.getByText("Ticket not found")).toBeVisible();
   });
 
+  // Session 20 (F3): the compound deep-link path — a shared ticket URL opened
+  // logged out, the user detours through the forgot-password view machine,
+  // then signs in: the from_url must survive the detour and land ON the
+  // ticket. This is the most common real-world path to a shared link
+  // (open → forgot password → reset → sign in → expect THE ticket, not the
+  // dashboard). The s10 view machine never changes the URL through the swaps
+  // — that is WHY the from_url survives; this pin guards the interaction
+  // between the view machine (s10) and the deep-link contract (s19).
+  // A nonexistent id suffices (the s19 design): the proxy bounce precedes
+  // any data fetch and the landing assertion is the URL. The reset POST
+  // rides its own rate bucket (forgot:*, 1 of 5); the ONE real login puts
+  // the suite at 8 of the 10/15-min total.
+  test("signing in after the forgot-password detour returns to the deep link", async ({ page }) => {
+    await page.goto("/ticketdetails?id=e2e-reset-detour");
+    await page.waitForURL(/\/login\?from_url=/);
+
+    // The in-card reset detour (session-10 view machine — no URL change).
+    await page.getByRole("button", { name: "Forgot password?" }).click();
+    await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
+    await page.getByLabel("Email").fill("demo@servicedesk.app");
+    await page.getByRole("button", { name: "Send reset link" }).click();
+    await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
+    await page.getByRole("button", { name: "Back to sign in" }).click();
+    await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
+
+    // The sign-in must return to the DEEP LINK, not the dashboard default.
+    await page.getByLabel("Email").fill("demo@servicedesk.app");
+    await page.getByLabel("Password").fill("Demo1234!");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.waitForURL("**/ticketdetails?id=e2e-reset-detour");
+    await expect(page.getByText("Ticket not found")).toBeVisible();
+  });
+
   // Session 10: the in-card signup view (the reference's login card swaps
   // in place on "Need an account? Sign up"). No name field — the account
   // name derives from the email local-part (base44 auth has no name
