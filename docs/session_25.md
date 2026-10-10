@@ -55,3 +55,11 @@ The push executed cleanly (`8f41800`, remote verified) — but the CI run on it 
 **The fix:** `include-hidden-files: true` on the upload step (one input + a comment documenting the failure mode; the `@v4` tag resolves to ≥v4.6 where the input exists). Shipped in the follow-up commit with the F4 retraction corrections (the s18 script header, AGENTS.md, the plan's F4/F5 sections, this log, worklog, SKILL lesson 69's extension + lesson 70). The push of THAT commit should produce the repo's **first-ever green CI run** — with the s17-18 og:image/favicon pins finally executing against a real build.
 
 **The double lesson for the next agent:** (1) a never-green gate is a broken gate, not a flaky one — scrape the run history before assuming recency (the aria-labels carry the status anonymously); (2) any artifact that must carry dot-directories needs `include-hidden-files: true` — and a local `tar`-based simulation of an artifact round-trip does NOT reproduce the real upload's dot-directory exclusion (verify with the actual action, or read its README defaults).
+
+---
+
+## Confirmation (the final state): **CI - passing** — the repo's first green run
+
+The badge read **"CI - passing"** within minutes of the `5db0145` push landing: run 34's check page shows BOTH jobs green (verify ✓, playwright e2e ✓) — the first green run after 33 consecutive failures since session 3. The e2e job executed the full 194-test suite against the now-WHOLE standalone build — including the s17 og:image pin (the environment-independent fetch) and the s18 favicon pin under genuine CI conditions.
+
+The three-piece chain that closed five sessions of unnoticed red: (1) the s18 clean-environment baseline exposing the og:image pin's ambient-server false-green, (2) the truth-telling favicon, and (3) `include-hidden-files: true` restoring the artifact's hidden build files. Each was necessary: fixing only the tests would have kept CI red (the gutted artifact 500'd everything); fixing only the artifact would have kept it red (the og:image pin ECONNREFUSED in the clean env). Both shipped together with the root cause — and the badge went green.

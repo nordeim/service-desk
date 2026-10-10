@@ -648,3 +648,16 @@ Work Log:
 
 Stage Summary:
 - F5 root cause found and fixed; F4 retracted with the display-artifact lesson extended; follow-up commit pushes the workflow fix — targeting the repo's FIRST-EVER green CI run (33 red runs since session 3)
+
+---
+Task ID: 39
+Agent: main (Super Z)
+Task: Session 18 (final) — CI green-run confirmation recorded
+
+Work Log:
+- The badge flipped to "CI - passing" on the 5db0145 push: run 34's check page shows BOTH jobs green (verify + playwright e2e) — the repo's FIRST-EVER green CI run after 33 consecutive failures since session 3
+- The e2e job executed the full 194-test suite against the whole standalone build (the hidden-files fix) — including the s17 environment-independent og:image pin and the s18 favicon pin under genuine CI conditions
+- Recorded the confirmation in session_25.md; this final commit carries the record and doubles as a stability re-verification of the CI fix
+
+Stage Summary:
+- Session 18 fully complete: 2 parity findings + 2 CI-infrastructure findings (1 root cause + 2 retracted display artifacts) all closed; 194/194 E2E clean-env verified; CI green for the first time in the repo's history; production-ready superset maintained
