@@ -440,3 +440,36 @@ Work Log:
 
 Stage Summary:
 - Both session-12 findings fixed and E2E-pinned (167 E2E total: visual-parity 127→138); production-ready superset maintained; pushed to main @ dcfc542 (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 26
+Agent: main (Super Z)
+Task: Session 13 — refresh repo, review session_13/session_14 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git clone (fresh workspace) at 7c462f5 (session-12 remediation dcfc542 + log commits a73f88d/7c462f5 — the latter the operator adding docs/session_14.md, the s12 transcript); current session established as Session 13
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.10.0 + session_13.md + remediation-plan-session12.md + worklog + session_14.md — all aligned with the codebase; env contract set up (.env from .env.example with generated AUTH_SECRET, DATABASE_URL=file:../db/custom.db, db/ at root with schema pushed + seeded 4/11/3); the user's requested env/DB/vitest+playwright config items verified already satisfied (skills/ excluded in all 4 configs); scandihaven repo cloned as the tech-stack pattern reference
+- Baseline gates: lint ✓ typecheck ✓ 55 unit ✓ build ✓ 167/167 E2E ✓ smoke 11/11 ✓ (npx playwright install chromium first — 1248 vs cached 1200/1243); session-12 commit dcfc542 audited CLEAN (F1 route-head + 7 layouts; F2 computed-parity margins)
+- Fresh gap analysis vs live reference (agent-browser + Playwright paired probes, both sites): standing drift pins stable; mobile navigation full matrix on both sites green (reference stable incl. the stays-open quirk; ours fully green); HEADLINE — the s8 comment "the reference has no attachments" is FALSE: their multiple picker + appended rows + 36px X icon removes + CDN pipeline + detail display measured (a 2-file probe ticket verified the generic "Attachment 1"/"Attachment 2" labels; Paperclip w-4 + mb-3 Attachments heading; FileText w-4 Description heading)
+- 3 findings: F1 the submit-form attached rows (padding/filename/remove-control/container divergences — MED-HIGH); F2 the detail-page attachment display (cyan chip vs neutral Paperclip rows; generic labels; new-tab; heading icons — MED); F3 the no-comments paragraph (slate-400 py-6 vs slate-500 py-8 — LOW)
+- Non-gaps verified: submit→/mytickets + sign-out→/login parity (driven live on the reference for the first time); no status control/sort/scope on the reference (our supersets); the reference's SPA titles go STALE on client nav + native-HTML5-bubble validation (platform defects, never mirror); space-y trap scan clean (stack-based scanner committed); dropzone at-rest byte-identical
+- Wrote + validated docs/remediation-plan-session13.md
+
+Stage Summary:
+- Repo at 7c462f5 + plan; 3 findings queued for TDD execution
+
+---
+Task ID: 27
+Agent: main (Super Z)
+Task: Session 13 — TDD remediation, verification, docs, SKILL.md v2.11.0, commit + push
+
+Work Log:
+- TDD: 9 substantive E2E tests + the s8 pin retarget (name:"Remove" → /Remove {fileName}/) written first, verified RED (10 failed); mid-cycle the slate-50/slate-500 pins joined the session-6 ACCEPT lab()-map (the documented v4 color trap)
+- Implemented: F1 the row rewrite (space-y-2 mt-4, p-3 rows, bare text-sm slate-700 truncate flex-1 filename, ghost/icon X button h-9 w-9 hover:bg-red-50 hover:text-red-600 + aria-label, size display dropped); F2 the detail rewrite (neutral p-3 bg-slate-50 rounded-lg rows, Paperclip w-4 h-4 text-slate-500, "Attachment {i+1}" generic labels, target=_blank rel=noopener, title tooltip, Paperclip w-4 + mb-3 heading, Description icon w-4, unused Download dropped); F3 text-slate-500 py-8
+- Gates: lint ✓ typecheck ✓ 55 unit ✓ build ✓ 176/176 E2E ✓ (167 + 9, zero regressions) smoke 11/11 ✓
+- Live paired re-verification (production standalone :3000, scripts/s13-live-verify.mjs): every contract computed-identical; probe fixtures removed (canonical 11-ticket seed verified)
+- Screenshots: 9-shot set (the standing 7 + 08-submit-attachment-row + 09-ticket-detail-attachments) via capture-screenshots-s13.sh — which ALSO fixed two latent s12-lineage bugs (inverted guard condition + the wrong .text-4xl selector on the detail page) and documents the agent-browser DataTransfer/onChange + shell-mangling lessons (fixture via curl; row shot via Playwright setInputFiles scrolled into view); VLM-verified both new shots
+- Updated README (176/147 counts + attachment row + s13 paragraph)/AGENTS (s13 contracts + lineage corrections)/CLAUDE (counts + 2 anti-patterns)/PAD (known-issues row + counts)/service-desk_SKILL.md v2.11.0 (lessons 54-56); session_13 retrospective appended; session_15.md narrative log created (session_14.md = the operator's s12 transcript); plan execution status; this worklog
+
+Stage Summary:
+- All 3 session-13 findings fixed and E2E-pinned (176 E2E total: visual-parity 138→147); production-ready superset maintained; ready for commit + push via ssh_git_wrapper_v3.py

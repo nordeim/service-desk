@@ -954,8 +954,10 @@ test.describe("session 6: select dropdown structure + colors", () => {
 // (tokens authored as literal hex, like --ring #0a0a0a, stay rgb). The
 // session-6 pins accept either representation; both are deterministic.
 const ACCEPT: Record<string, string[]> = {
+  slate50: ["#f8fafc", "rgb(248, 250, 252)", "lab(98.1434 -0.369519 -1.05966)"],
   slate300: ["#cbd5e1", "rgb(203, 213, 225)", "lab(84.7652 -1.94535 -7.93337)"],
   slate400: ["#94a3b8", "rgb(148, 163, 184)", "lab(65.5349 -2.25151 -14.5072)"],
+  slate500: ["#64748b", "rgb(100, 116, 139)", "lab(48.0876 -2.03595 -16.5814)"],
   cyan500: ["#06b6d4", "rgb(6, 182, 212)", "lab(67.805 -35.3952 -30.2018)"],
   white: ["#ffffff", "rgb(255, 255, 255)"],
 };
@@ -1416,13 +1418,16 @@ test.describe("session 8: raw buttons carry the reference focus tail", () => {
   });
 
   test("the attachment Remove button carries the focus-visible ring", async ({ page }) => {
+    // Session-13 supersede: the remove control is now the reference's X
+    // icon button (aria-label="Remove {fileName}") — the s8 text-button
+    // locator retired with the parity fix.
     await page.goto("/submitticket");
     await page.setInputFiles("#file-upload", {
       name: "probe.txt",
       mimeType: "text/plain",
       buffer: Buffer.from("session-8 focus-tail probe"),
     });
-    const remove = page.getByRole("button", { name: "Remove", exact: true });
+    const remove = page.getByRole("button", { name: /Remove probe\.txt/ });
     await expect(remove).toBeVisible();
     await expect(remove).toHaveClass(/focus-visible:ring-1/);
   });
@@ -2108,5 +2113,228 @@ test.describe("session 12: the login view back buttons compute the reference's g
       return Math.round(next.getBoundingClientRect().top - back!.getBoundingClientRect().bottom);
     });
     expect(gap, "signup view back-bottom → next-top gap").toBe(8);
+  });
+});
+
+test.describe("session 13: the attachment UI parity (the reference ships a full attach pipeline)", () => {
+  // The session-8-era comment "the reference has no attachments" was FALSE —
+  // live-probed this session: their picker appends rows (multiple, no visible
+  // count limit at 4), renders an X icon button per row, uploads to a CDN,
+  // and the detail page renders neutral Paperclip rows with the GENERIC
+  // "Attachment N" label. The at-rest dropzone was always byte-identical
+  // (session 3) — the attached STATES were never compared until now.
+
+  // ---- F1: the submit-form attached-file rows ----
+
+  test("the attached-file row computes the reference's 12px padding, slate-50 bg and 8px radius", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.setInputFiles("#file-upload", {
+      name: "s13-probe.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("session-13 row contract probe"),
+    });
+    const row = page.locator("main ul > li").first();
+    await expect(row).toBeVisible();
+    const cs = await row.evaluate((el) => {
+      const c = getComputedStyle(el);
+      return { pad: c.padding, bg: c.backgroundColor, radius: c.borderRadius };
+    });
+    expect(cs.pad, "row padding (p-3)").toBe("12px");
+    expect(colorIs(cs.bg, "slate50"), `row background (slate-50) computed as: ${cs.bg}`).toBe(true);
+    expect(cs.radius, "row radius (rounded-lg)").toBe("8px");
+  });
+
+  test("the attached-file list carries the reference's mt-4 offset", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.setInputFiles("#file-upload", {
+      name: "s13-probe.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("session-13 container probe"),
+    });
+    const list = page.locator("main ul.space-y-2");
+    await expect(list).toBeVisible();
+    await expect(list).toHaveClass(/mt-4/);
+    const mt = await list.evaluate((el) => getComputedStyle(el).marginTop);
+    expect(mt, "container margin-top (mt-4)").toBe("16px");
+  });
+
+  test("the filename renders bare — text-sm slate-700 truncate flex-1, no emoji, no size", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.setInputFiles("#file-upload", {
+      name: "s13-probe.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("session-13 filename probe"),
+    });
+    const name = page.getByText("s13-probe.txt", { exact: true });
+    await expect(name).toBeVisible();
+    await expect(name).toHaveClass(/text-sm/);
+    await expect(name).toHaveClass(/text-slate-700/);
+    await expect(name).toHaveClass(/truncate/);
+    await expect(name).toHaveClass(/flex-1/);
+    // no emoji prefix, no KB size anywhere in the row
+    const rowText = await page.locator("main ul > li").first().textContent();
+    expect(rowText?.trim()).toBe("s13-probe.txt");
+  });
+
+  test("the remove control is the reference's 36px X icon button with the red hover", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.setInputFiles("#file-upload", {
+      name: "s13-probe.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("session-13 remove-button probe"),
+    });
+    const remove = page.getByRole("button", { name: /Remove s13-probe\.txt/ });
+    await expect(remove).toBeVisible();
+    await expect(remove).toHaveClass(/h-9/);
+    await expect(remove).toHaveClass(/w-9/);
+    await expect(remove).toHaveClass(/hover:bg-red-50/);
+    await expect(remove).toHaveClass(/hover:text-red-600/);
+    // the ghost variant's (non-dark) accent hover must NOT survive the merge
+    await expect(remove).not.toHaveClass(/(^| )hover:bg-accent( |$)/);
+    const icon = remove.locator("svg");
+    await expect(icon).toHaveClass(/lucide-x/);
+    await expect(icon).toHaveClass(/w-4/);
+    await expect(icon).toHaveClass(/h-4/);
+    const box = await remove.boundingBox();
+    expect(Math.round(box?.width ?? 0)).toBe(36);
+    expect(Math.round(box?.height ?? 0)).toBe(36);
+  });
+
+  test("the X button removes the row on click", async ({ page }) => {
+    await page.goto("/submitticket");
+    await page.setInputFiles("#file-upload", {
+      name: "s13-probe.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("session-13 removal probe"),
+    });
+    const remove = page.getByRole("button", { name: /Remove s13-probe\.txt/ });
+    await remove.click();
+    await expect(page.locator("main ul.space-y-2")).toHaveCount(0);
+  });
+
+  // ---- F2: the detail-page attachment display ----
+
+  test("the detail page renders the reference's neutral attachment rows with the generic labels", async ({ page }) => {
+    // Two attachments via the API (the base64 contract the UI rides).
+    const b64 = Buffer.from("session-13 detail fixture").toString("base64");
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S13 E2E two-attachment fixture",
+        category: "other",
+        priority: "medium",
+        description: "Fixture ticket carrying two attachments for the parity pins.",
+        attachments: [
+          { fileName: "first.txt", mimeType: "text/plain", sizeBytes: 8, data: b64 },
+          { fileName: "second.pdf", mimeType: "application/pdf", sizeBytes: 8, data: b64 },
+        ],
+      },
+    });
+    expect(res.ok(), "fixture ticket created").toBe(true);
+    const { ticket } = (await res.json()) as { ticket: { id: string } };
+
+    await page.goto(`/ticketdetails?id=${ticket.id}`);
+    const rows = page.locator("main a[href*='/attachments/']");
+    await expect(rows).toHaveCount(2);
+
+    // the generic indexed labels — never the filenames
+    await expect(rows.nth(0)).toHaveText(/Attachment 1/);
+    await expect(rows.nth(1)).toHaveText(/Attachment 2/);
+
+    // the neutral-slate class set (not the cyan chip)
+    for (const cls of [
+      "flex",
+      "items-center",
+      "gap-2",
+      "p-3",
+      "bg-slate-50",
+      "rounded-lg",
+      "hover:bg-slate-100",
+      "border-slate-200",
+    ]) {
+      await expect(rows.first()).toHaveClass(new RegExp(`(^| )${cls.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}( |$)`));
+    }
+
+    // opens in a new tab like the reference's CDN links
+    await expect(rows.first()).toHaveAttribute("target", "_blank");
+    await expect(rows.first()).toHaveAttribute("rel", "noopener noreferrer");
+
+    // the Paperclip row icon at 16px, slate-500
+    const icon = rows.first().locator("svg");
+    await expect(icon).toHaveClass(/lucide-paperclip/);
+    await expect(icon).toHaveClass(/w-4/);
+    await expect(icon).toHaveClass(/text-slate-500/);
+  });
+
+  test("the Attachments heading carries the Paperclip icon and mb-3", async ({ page }) => {
+    const b64 = Buffer.from("session-13 heading fixture").toString("base64");
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S13 E2E heading fixture",
+        category: "other",
+        priority: "low",
+        description: "Fixture for the heading pin.",
+        attachments: [
+          { fileName: "one.txt", mimeType: "text/plain", sizeBytes: 8, data: b64 },
+        ],
+      },
+    });
+    const { ticket } = (await res.json()) as { ticket: { id: string } };
+    await page.goto(`/ticketdetails?id=${ticket.id}`);
+
+    const heading = page.getByRole("heading", { name: /^Attachments/ });
+    await expect(heading).toBeVisible();
+    await expect(heading).toHaveClass(/mb-3/);
+    const icon = heading.locator("svg");
+    await expect(icon).toHaveClass(/lucide-paperclip/);
+    await expect(icon).toHaveClass(/w-4/);
+    await expect(icon).toHaveClass(/text-cyan-500/);
+  });
+
+  test("the Description heading icon computes the reference's 16px (w-4, not w-5)", async ({ page }) => {
+    const b64 = Buffer.from("session-13 description fixture").toString("base64");
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S13 E2E description-heading fixture",
+        category: "other",
+        priority: "low",
+        description: "Fixture for the Description heading icon pin.",
+        attachments: [
+          { fileName: "one.txt", mimeType: "text/plain", sizeBytes: 8, data: b64 },
+        ],
+      },
+    });
+    const { ticket } = (await res.json()) as { ticket: { id: string } };
+    await page.goto(`/ticketdetails?id=${ticket.id}`);
+
+    const heading = page.getByRole("heading", { name: /^Description/ });
+    await expect(heading).toBeVisible();
+    const icon = heading.locator("svg");
+    await expect(icon).toHaveClass(/lucide-file-text/);
+    const size = await icon.evaluate((el) => getComputedStyle(el).width);
+    expect(size, "Description heading icon width (w-4)").toBe("16px");
+  });
+
+  // ---- F3: the no-comments empty paragraph ----
+
+  test("the no-comments paragraph computes the reference's slate-500 + 32px padding", async ({ page }) => {
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S13 E2E no-comments fixture",
+        category: "other",
+        priority: "low",
+        description: "Fixture with no comments for the empty-state pin.",
+      },
+    });
+    const { ticket } = (await res.json()) as { ticket: { id: string } };
+    await page.goto(`/ticketdetails?id=${ticket.id}`);
+
+    const p = page.getByText("No comments yet", { exact: true });
+    await expect(p).toBeVisible();
+    const cs = await p.evaluate((el) => {
+      const c = getComputedStyle(el);
+      return { color: c.color, pad: c.padding };
+    });
+    expect(colorIs(cs.color, "slate500"), `no-comments text (slate-500) computed as: ${cs.color}`).toBe(true);
+    expect(cs.pad, "py-8 padding").toBe("32px 0px");
   });
 });

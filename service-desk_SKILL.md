@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-12 remediation (2026-10-10).
+  functionality. Distilled through the session-13 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.10.0
+version: 2.11.0
 last_updated: 2026-10-10
-project_state: 55 unit tests + 167 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–12)
+project_state: 55 unit tests + 176 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–13)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -396,6 +396,10 @@ Manual/visual checks:
 51. **Computed margins can diverge with zero class difference.** (Session 12.) Both sites shipped identical `-mb-2` DOM on the login-view back buttons — only the computed gap (the reference's 16px vs our −8px overlap) revealed the v3→v4 engine difference. The computed-value-is-ground-truth rule that governs shadows and radii governs margins too: measure the gap, never trust the shared class.
 52. **Attribute the console per-site before filing.** (Session 12.) A shared browser session's console buffer mixes tabs: the reference's DialogTitle error and its Tailwind-CDN-in-production warning would have misattributed to our clone. Clear and re-check per origin before writing a finding.
 53. **The reference's platform head layer is route-blind.** (Session 12.) It emits canonical + og:url + twitter:url + segment titles on every route — 404 catch-alls included. Mirror the per-route coverage where we have real routes; keep the production-sane refusal where we don't (canonicalizing 404s is an SEO anti-pattern). Platform exhaust rules: replicate the infrastructure, never the dead content.
+54. **A code comment's claim about the reference's feature set is a finding waiting to happen.** (Session 13.) "The reference has no attachments" shipped in session 8 and survived five sessions — while their full attach UI (multiple picker, appended rows, X icon removes, CDN uploads, the detail display) sat one probe away. Feature-level claims ("they don't have X") need the same live re-verification cadence as style claims; the s12 og:url belief was the same defect class.
+55. **Probe the STATES, not just the surfaces.** (Session 13.) The s3 dropzone measurement pinned the at-rest markup; the attached-file row — the state users spend time in — was never measured. Every interactive surface has at least two contracts: at-rest and active. Enumerate them when planning a gap analysis.
+56. **A guard nobody has fired is a guard that lies.** (Session 13.) The s12 screenshot script's FATAL checks were doubly broken — an inverted condition (`!=` fires on "ok", passes on "wrong:...") and a selector matching nothing on the target page (`.text-4xl` on the detail page, whose h1 is text-xl). Execute the failure path of every guard before trusting the success path.
+
 
 ---
 

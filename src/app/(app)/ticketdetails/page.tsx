@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, Download, FileText, MessageSquare, Send, User as UserIcon } from "lucide-react";
+import { ArrowLeft, FileText, MessageSquare, Paperclip, Send, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -221,7 +221,7 @@ export default function TicketDetailsPage() {
               <div className="p-6 space-y-6">
                 <div>
                   <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-cyan-500" aria-hidden />
+                    <FileText className="w-4 h-4 text-cyan-500" aria-hidden />
                     Description
                   </h3>
                   <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
@@ -229,29 +229,33 @@ export default function TicketDetailsPage() {
                   </p>
                 </div>
 
-                {/* Superset: attachments (kept inside the reference card body) */}
+                {/* Session 13: the reference's attachment display
+                    (live-measured on their probe tickets) — neutral slate
+                    rows, the Paperclip icon, and the GENERIC indexed label
+                    "Attachment N" (never the filename), opening in a new
+                    tab like their CDN links. The at-rest dropzone was always
+                    byte-identical; only this detail state had drifted. */}
                 {ticket.attachments.length > 0 ? (
                   <div>
-                    <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
-                      <Download className="w-5 h-5 text-cyan-500" aria-hidden />
+                    <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <Paperclip className="w-4 h-4 text-cyan-500" aria-hidden />
                       Attachments
                     </h3>
-                    <ul className="space-y-2">
-                      {ticket.attachments.map((a) => (
-                        <li key={a.id}>
-                          <a
-                            href={`/api/tickets/${ticket.id}/attachments/${a.id}`}
-                            className="inline-flex items-center gap-2 text-sm font-medium text-cyan-600 hover:text-cyan-700 bg-cyan-50 border border-cyan-100 rounded-lg px-3 py-2 transition-colors"
-                          >
-                            <Download className="w-4 h-4" aria-hidden />
-                            {a.fileName}
-                            <span className="text-xs text-slate-400 font-normal">
-                              {(a.sizeBytes / 1024).toFixed(1)} KB
-                            </span>
-                          </a>
-                        </li>
+                    <div className="space-y-2">
+                      {ticket.attachments.map((a, i) => (
+                        <a
+                          key={a.id}
+                          href={`/api/tickets/${ticket.id}/attachments/${a.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={a.fileName}
+                          className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200"
+                        >
+                          <Paperclip className="w-4 h-4 text-slate-500" aria-hidden />
+                          <span className="text-sm text-slate-700">Attachment {i + 1}</span>
+                        </a>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -268,7 +272,7 @@ export default function TicketDetailsPage() {
               <div className="p-6 space-y-6">
                 <div className="space-y-4">
                   {ticket.comments.length === 0 ? (
-                    <p className="text-center text-slate-400 py-6">No comments yet</p>
+                    <p className="text-center text-slate-500 py-8">No comments yet</p>
                   ) : (
                     ticket.comments.map((c) => (
                       <div

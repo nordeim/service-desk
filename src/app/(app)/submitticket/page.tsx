@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CircleAlert, Send, Upload } from "lucide-react";
+import { ArrowLeft, CircleAlert, Send, Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -311,29 +311,28 @@ export default function SubmitTicketPage() {
                 </label>
               </div>
               {attachments.length > 0 ? (
-                <ul className="space-y-2">
+                <ul className="space-y-2 mt-4">
                   {attachments.map((a, i) => (
                     <li
                       key={`${a.fileName}-${i}`}
-                      className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm"
+                      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200"
                     >
-                      <span className="truncate font-medium text-slate-700">📄 {a.fileName}</span>
-                      <span className="flex items-center gap-3">
-                        <span className="text-xs text-slate-400">
-                          {(a.sizeBytes / 1024).toFixed(1)} KB
-                        </span>
-                        <button
-                          type="button"
-                          // Session 8: focus-visible tail for internal
-                          // consistency with the sign-out button + the
-                          // reference's button base (superset surface — the
-                          // reference has no attachments).
-                          className="text-xs text-red-500 hover:text-red-600 font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                          onClick={() => setAttachments((prev) => prev.filter((_, j) => j !== i))}
-                        >
-                          Remove
-                        </button>
-                      </span>
+                      {/* Session 13: the reference's attached-file row
+                          (live-measured — the s8 "reference has no
+                          attachments" comment was false): plain
+                          text-sm slate-700 truncate flex-1 filename, no emoji,
+                          no font-medium, no size display. */}
+                      <span className="text-sm text-slate-700 truncate flex-1">{a.fileName}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 hover:bg-red-50 hover:text-red-600"
+                        aria-label={`Remove ${a.fileName}`}
+                        onClick={() => setAttachments((prev) => prev.filter((_, j) => j !== i))}
+                      >
+                        <X className="w-4 h-4" aria-hidden />
+                      </Button>
                     </li>
                   ))}
                 </ul>

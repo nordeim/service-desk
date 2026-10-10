@@ -42,3 +42,23 @@ Docs updated: README (counts + session-12 pins), AGENTS (session-12 contracts + 
 - Also: the screenshot-script lineage bug actually fixed this time; the mobile-nav matrix re-verified on both sites; zero reference drift; SKILL.md v2.10.0 (lessons 49-53).
 
 **Suggested next:** watch the CI run on GitHub, then review `docs/remediation-plan-session12.md` §5 — especially "a measured reference claim is not a shipped clone claim" and "the engine trap list is a code-review checklist, not a migration memory."
+
+---
+
+# Session 13 Retrospective
+
+**Date:** 2026-10-10 · **Agent:** session-13 (this remediation) · **Plan:** `docs/remediation-plan-session13.md`
+
+**Baseline:** `7c462f5` (session-12 remediation complete + the operator-committed transcript in `docs/session_14.md`). Full baseline gate green in the fresh workspace: lint ✓ typecheck ✓ 55 unit ✓ build ✓ **167/167 E2E** ✓ smoke 11/11 ✓. Session-12 commit `dcfc542` audited CLEAN against its plan (F1 route-head helper wired into all 7 layouts; F2 the computed-parity margins).
+
+**What shipped — 3 findings fixed via TDD (10 red → 176/176 E2E + 55 unit + smoke 11/11):**
+
+1. **F1 (MED-HIGH) · the submit-form attached-file rows** — the s8-era comment "the reference has no attachments" was FALSE (the same defect class as the s12 og:url belief: an unverified claim surviving on comment authority). Live-probing revealed the reference's full attach UI: `multiple` picker, appended rows across selections, a 36px X icon remove button. Our rows now render the measured contract (12px `p-3` rows, the bare `text-sm text-slate-700 truncate flex-1` filename with no emoji/size, the X button with `hover:bg-red-50 hover:text-red-600`, the `mt-4` container offset).
+2. **F2 (MED) · the detail-page attachment display** — the reference renders NEUTRAL slate rows (`p-3 bg-slate-50 rounded-lg hover:bg-slate-100`) with the Paperclip icon and the GENERIC indexed "Attachment N" label (verified with a 2-file probe ticket), opening in a new tab. The Attachments heading carries `Paperclip w-4 + mb-3`; the Description heading's icon is `w-4` (ours was w-5). Ours had shipped a cyan Download-icon chip with the filename + size.
+3. **F3 (LOW) · the no-comments empty paragraph** — `text-slate-500 py-8` (computing the reference's rgb(100,116,139) + 32px).
+
+**Also fixed (found by executing, not by planning):** the s12 screenshot script's FATAL guards were doubly broken — an inverted condition (`!=` fires on "ok") and a `.text-4xl` selector matching nothing on the detail page (the ticket h1 is `text-xl`); the s13 capture script fixes both, adds the attachment-shot pair (08/09 — VLM-verified), and documents two new toolchain lessons (the agent-browser DataTransfer dispatch never reaches React's onChange; long inline JS evals get mangled by the shell layer — use curl).
+
+**Verified NON-gaps:** the mobile navigation matrix on both sites (the standing priority — reference stable, ours fully green); all standing drift pins (token block, cursor, titles); the submit-signout navigation flows (both `/mytickets` / `/login` — parity, driven live for the first time); the reference has NO status control / sort / scope (our supersets confirmed); the reference's SPA titles go STALE on client-side navigation + their submit form uses native HTML5 bubbles (platform defects, never mirror); the space-y trap scan clean; the dropzone at-rest byte-identical; the comments header parity.
+
+**Suggested next:** watch the CI run on GitHub, then review `docs/remediation-plan-session13.md` §5 — especially "an unverified claim about the reference's feature set is a finding waiting to happen" and "probe the states, not just the surfaces." The next audit's fresh-probe shortlist: the reference's attachment DOWNLOAD UX from the new tab, the mytickets card hover states on touch, and a re-check of their CDN file URLs' lifetime.
