@@ -7,6 +7,7 @@ import { ArrowLeft, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { safeRedirectTarget } from "@/lib/redirect";
 
 // Login card — reference parity (measured session 2 from the live DOM):
 // max-w-md shell, white/95 + backdrop-blur card with a slate gradient top
@@ -90,7 +91,19 @@ export default function LoginPage() {
         setFieldErrors(data.errors ?? {});
         return;
       }
-      router.push("/dashboard");
+      // Session 19 (F1): the reference returns the user to their pre-auth
+      // destination (/login?from_url=<absolute url> — the deep-link contract
+      // our proxy now writes). The raw param is validated by safeRedirectTarget
+      // (same-origin, auth-pages rejected, /dashboard fallback — the
+      // open-redirect guard); a plain /login keeps the dashboard default.
+      // Read imperatively at submit time — no useSearchParams, so the page
+      // stays statically prerenderable.
+      router.push(
+        safeRedirectTarget(
+          new URLSearchParams(window.location.search).get("from_url"),
+          window.location.origin
+        )
+      );
       router.refresh();
     } catch {
       setError("Network error — please try again.");
@@ -158,7 +171,15 @@ export default function LoginPage() {
       // Direct sign-in on create — the documented superset over the
       // reference's base44 email-verification wall (we ship no mail
       // transport; a stubbed verification flow would be fake).
-      router.push("/dashboard");
+      // Session 19: the from_url deep-link contract applies to the in-card
+      // signup too (the account is signed in on create — return it to the
+      // pre-auth destination, same as the sign-in path).
+      router.push(
+        safeRedirectTarget(
+          new URLSearchParams(window.location.search).get("from_url"),
+          window.location.origin
+        )
+      );
       router.refresh();
     } catch {
       setSignupError("Network error — please try again.");

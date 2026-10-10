@@ -661,3 +661,36 @@ Work Log:
 
 Stage Summary:
 - Session 18 fully complete: 2 parity findings + 2 CI-infrastructure findings (1 root cause + 2 retracted display artifacts) all closed; 194/194 E2E clean-env verified; CI green for the first time in the repo's history; production-ready superset maintained
+---
+
+Task ID: 40
+Agent: main (Super Z)
+Task: Session 19 — refresh repo, review session_25/remediation-plan-session18/worklog/session_26 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git clone (fresh workspace — the prior workspace was reset) at dac393a (the s18 green-run record 44fa41b + the operator's session_26.md transcript commit); current session established as Session 19 (agent log → docs/session_27.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.16.0 + session_25.md + remediation-plan-session18.md + worklog + session_26.md — all aligned with the codebase; environment contract re-established on the fresh clone (.env with generated AUTH_SECRET + DATABASE_URL=file:../db/custom.db, db/ at root pushed + seeded 4/11/3, skills/ excluded in all 4 configs, .env.example matches); the Playwright 1248 chromium build installed (the s13 lesson)
+- Baseline gates in the CLEAN environment: lint ✓ typecheck ✓ 56 unit ✓ build ✓ 194/194 E2E ✓ (:3000 down) smoke 11/11 ✓; the CI badge reads "CI - passing" (the s18 fix held); session-18 commit 8f41800 audited CLEAN against its plan (the re-anchored og:image fetch, the true-PNG favicon, include-hidden-files: true)
+- Fresh gap analysis (agent-browser + curl both sites + the reference bundle): standing drift pins ALL stable (tokens, sidebar, font, segment canonicals + social set, ticketdetails ?id canonicalization + JSON-LD, login-view machine re-exercised, detail headings + Attachment N, recent rows, submit form, mytickets grid, SEO surface); mobile matrix green on ours (s14 script + a fresh 390px spot-check) + reference stable with their standing defects; bundle sweep zero new features; fresh axes: route response status/headers (ours 404-correct + superset), html lang/charset, noscript
+- HEADLINE F1 (MED): the reference's auth gate PRESERVES the destination via /login?from_url=<absolute url> and returns the user there after sign-in (verified live with a non-dashboard target); ours discarded it (plain bounce + hard-coded /dashboard landing — a shared /ticketdetails?id=X link lost the ticket); F2 (documentation): the reference's PWA trio (theme-color + manifest + apple-touch-icon) + og:image dims/alt now AUTH-PAGES-ONLY (the s18 viewport drift pattern extended — ours ships uniformly, the documented superset); F3 (documentation): the reference canonicalizes /dashboard to the ORIGIN ROOT (first value measurement — their home special case); ours stays segment-canonical (our / is a 307 redirect — canonicalizing the content URL at a redirect is an SEO anti-pattern, the s10 precedent)
+- Wrote + validated docs/remediation-plan-session19.md (the proxy convention verified in next/dist constants; the only logged-out app-route navigation isolated to auth.spec:49; the static prerender preserved via the imperative param read; the rate budget mapped 6+1=7/10)
+
+Stage Summary:
+- Repo at dac393a + plan; 1 code finding (F1 the from_url deep-link contract) + 2 documentation findings queued for TDD execution
+
+---
+
+Task ID: 41
+Agent: main (Super Z)
+Task: Session 19 — TDD remediation, verification, docs, SKILL.md v2.17.0, commit + push
+
+Work Log:
+- TDD RED: the safeRedirectTarget unit matrix (9 tests — the missing-module failure) + the session-19 E2E block (both tests timing out on the missing from_url — the designed reasons)
+- GREEN: src/lib/redirect.ts (the pure validator: same-origin, protocol-relative + auth-page targets rejected, query preserved, /dashboard fallback) + src/proxy.ts (cookie PRESENCE only on the four exact (app) routes — the layout guard stays the authoritative HMAC verifier; ADR-001's concern never duplicated) + the login page's sign-in AND in-card signup navigating to the validated target (imperative window.location.search read — /login stays statically prerendered); one E2E-run discovery: request.nextUrl reflects the standalone's 0.0.0.0 bind — the from_url builds from the request's HOST header (spoof-proof via the use-time validator)
+- Gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 65 unit ✓ (56+9) build ✓ 195/195 E2E ✓ (194+1 net new; the bounce pin updated in place; zero regressions) smoke 11/11 ✓
+- Live paired re-verification (scripts/s19-live-verify.mjs on the production standalone :3000): the deep-link chain end-to-end (unauth ticketdetails?id → login carrying from_url → sign-in → BACK on the same ticket URL + the s10 Alert); the open-redirect + auth-page-loop guards; the plain-login default; the mobile matrix green with the proxy in the path; the reference's from_url honored live; the canonical 11-ticket seed re-verified
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s19.sh (the s18 lineage; all FATAL guards green); VLM-verified shots 02 + 05 (LAYOUT-OK)
+- Updated README (65/195 counts + the auth-flow row + the s19 E2E sentence)/AGENTS (the session-19 contracts section + the reference list through s19)/CLAUDE (the proxy/guard split + two anti-patterns: the discarded-destination class; the nextUrl bind-address trap)/PAD (the ADR-001 s19 amendment + §7.1/§7.4 + the s19 known-issues row)/service-desk_SKILL.md v2.17.0 (lessons 71-73); session_27.md narrative log; plan execution status; this worklog; the s19 probe scripts committed (live-verify + VLM)
+
+Stage Summary:
+- The session-19 code finding fixed and pinned (195 E2E total, clean-environment verified: 65 unit + smoke 11/11); the two drift/documented findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)

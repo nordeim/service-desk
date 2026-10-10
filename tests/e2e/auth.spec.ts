@@ -45,9 +45,40 @@ test.describe("login page", () => {
     await expect(page.getByRole("heading", { name: /Welcome back/ })).toBeVisible();
   });
 
-  test("unauthenticated /dashboard bounces to /login", async ({ page }) => {
+  test("unauthenticated /dashboard bounces to /login carrying the from_url deep link", async ({ page }) => {
     await page.goto("/dashboard");
-    await page.waitForURL("**/login");
+    // Session 19 (F1): the reference's auth gate preserves the intended
+    // destination — their SPA redirects to /login?from_url=<absolute url>
+    // and signs the user back INTO that page after login. Our proxy now
+    // decorates the bounce the same way (the old plain /login redirect
+    // discarded the deep link).
+    await page.waitForURL(/\/login\?from_url=/);
+    const from = page.url().match(/from_url=([^&]*)/)?.[1];
+    expect(from, "from_url param present").toBeTruthy();
+    expect(decodeURIComponent(from ?? "")).toBe(
+      "http://localhost:3100/dashboard"
+    );
+  });
+
+  // Session 19 (F1): the strongest deep-link case — a shared ticket URL
+  // opened while logged out must survive the auth gate: sign in from the
+  // from_url-bearing login and land back ON the same URL. A NONEXISTENT
+  // ticket id suffices — the proxy bounce precedes any data fetch, and the
+  // landing assertion is about the URL (the page then renders the s10
+  // not-found Alert, re-confirming that contract in the logged-in state).
+  // This is the ONE new real login in the suite (7 of the 10/15-min total).
+  test("signing in from a ticket-details deep link returns to the same URL", async ({ page }) => {
+    await page.goto("/ticketdetails?id=e2e-nonexistent");
+    await page.waitForURL(/\/login\?from_url=/);
+    expect(
+      decodeURIComponent(page.url().match(/from_url=([^&]*)/)?.[1] ?? "")
+    ).toBe("http://localhost:3100/ticketdetails?id=e2e-nonexistent");
+
+    await page.getByLabel("Email").fill("demo@servicedesk.app");
+    await page.getByLabel("Password").fill("Demo1234!");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.waitForURL("**/ticketdetails?id=e2e-nonexistent");
+    await expect(page.getByText("Ticket not found")).toBeVisible();
   });
 
   // Session 10: the in-card signup view (the reference's login card swaps
