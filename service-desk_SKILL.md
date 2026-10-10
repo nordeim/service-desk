@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-14 remediation (2026-10-10).
+  functionality. Distilled through the session-15 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.12.0
+version: 2.13.0
 last_updated: 2026-10-10
-project_state: 55 unit tests + 181 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–14)
+project_state: 56 unit tests + 184 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–15)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -402,7 +402,10 @@ Manual/visual checks:
 
 57. **The response layer is a parity surface too.** (Session 14.) Thirteen sessions pinned markup, computed styles, and the head — but the HTTP response behind a link (Content-Disposition, content-type, redirect chain) was first probed this session, and it carried a real UX gap: our download route forced browser downloads for six sessions while the reference's new tab displayed the file inline. Every user-visible "click → what happens" has a DOM contract AND a response contract.
 58. **A pinned mechanism is only pinned on the states it was measured in.** (Session 14.) The s12 social-URL set was measured on query-less routes; the reference's canonicalization includes the query string on their one query-driven route. When pinning a mechanism, enumerate its input states — query/no-query is a state axis, like at-rest/active.
-59. **Reference platform artifacts age.** (Session 14.) Their CDN file URLs expire (the s13 probe's .txt 404s today). Durable storage on our side is a superset to keep — "their file is gone" must never be read as "delete ours to match." And beware the shell transmission layer: it mangles `a[href` sequences on both read and write display — verify selector bytes (hexdump) before diagnosing a "broken" locator, and never let String.replace's `
+59. **Reference platform artifacts age — but verify the probe method before believing it.** (Session 14, corrected in 15.) The s14 claim "their CDN file URLs expire" was a HEAD-method artifact — the base44 file proxy 404s HEAD and 302s GET; every probe URL from s13/s15 still serves via GET (see lesson 60). The standing principle survives: durable storage on our side is a superset to keep — "their file is gone" must never be read as "delete ours to match." And beware the shell transmission layer: it mangles `a[href` sequences on read display — verify selector bytes (hexdump) before diagnosing a "broken" locator, and never let String.replace's `$'` (after-match) expansion touch a replacement string — use plain concatenation.
+60. **The HTTP method is part of the measurement.** (Session 15.) `curl -I` (HEAD) on the base44 file proxy returns 404 while GET returns 302 → 200 — the s14 "CDN URLs are not durable" evidence was entirely this artifact. When probing a response layer, use the verb the browser actually uses (GET), follow redirects explicitly, and distinguish "the redirect hop 404s" from "the file 404s." A 404 is not a 404 until the method matches.
+61. **A pinned rendering is only pinned in the environment it was measured in — enumerate the environment axes.** (Session 15.) Fourteen sessions of date-format parity held because every probe and every E2E run executed at UTC; the timezone axis was invisible until a Singapore-context browser was driven. The reference's API returns NAIVE datetimes (no Z) that the browser parses-as-local and formats-as-local — the digits round-trip, so every viewer sees the stored UTC wall-clock. Ours returned Z-suffixed ISO and rendered the viewer's local time: an 8h-visible divergence for the Singapore operator. The fix: `timeZone: "UTC"` in the formatters, pinned by Singapore/extreme-timezone E2E contexts and TZ-hardened unit pins (RED verified under `TZ=Asia/Singapore`/`Pacific/Honolulu`). Enumerate locale, timezone, and viewport the way you enumerate at-rest/active and query/no-query.
+62. **Paired probes catch what single-site probes cannot.** (Session 15.) The timezone divergence was only visible because the SAME Playwright context drove both sites and rendered different strings for the same instant (reference "4:29 AM" vs ours "6:29 AM" under Europe/Berlin). Keep the probes paired — and for cache semantics, measure the full response-header set (the reference CDN's `public, max-age=31536000, immutable` vs our `private, max-age=3600`) from inside the authenticated page context, where the redirect hop's auth gate lets the fetch through.
 
 
 ---

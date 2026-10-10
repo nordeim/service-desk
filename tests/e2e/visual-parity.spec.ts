@@ -2529,3 +2529,141 @@ test.describe("session 14: the attachment download UX + the ticketdetails URL ca
     ).toBe(true);
   });
 });
+
+// ─── Session 15: the attachment cache semantics + the timezone-stable date
+// rendering (docs/remediation-plan-session15.md) ────────────────────────────
+// F1: the reference's CDN serves its attachment files with
+// `cache-control: public, max-age=31536000, immutable` (live-measured on a
+// fresh upload, authenticated fetch — the plain-URL GET is 404 at the
+// redirect hop). Ours keeps `private` (the route is owner-scoped; their
+// publicly-fetchable media posture is not a contract to mirror) but matches
+// the year-long immutable window — attachments have no mutation path, so
+// the window can never serve stale bytes.
+// F2: the reference's API returns NAIVE datetimes ("2026-10-10T04:29:36.328"
+// — no Z, XHR-intercepted) which the browser parses-as-local and
+// formats-as-local: the digits round-trip, so every viewer sees the STORED
+// UTC wall-clock. Ours returned Z-suffixed ISO and rendered the VIEWER's
+// local time — an 8h-visible divergence for the Singapore (UTC+8) operator.
+// The formatters pin timeZone: "UTC" (s15), rendering the same digits at
+// every viewer timezone. Verified RED in a Singapore-context browser before
+// the fix; a no-op for UTC viewers (this suite runs at UTC).
+test.describe("session 15: the attachment cache semantics + the timezone-stable date rendering", () => {
+  test("the attachment download route serves the reference CDN's year-long immutable window (F1)", async ({ page }) => {
+    const b64 = Buffer.from("s15 cache pin").toString("base64");
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S15 E2E cache-semantics fixture",
+        category: "other",
+        priority: "low",
+        description: "Fixture ticket for the attachment cache-control pin.",
+        attachments: [
+          { fileName: "s15-cache.txt", mimeType: "text/plain", sizeBytes: 15, data: b64 },
+        ],
+      },
+    });
+    expect(res.ok(), "fixture ticket created").toBe(true);
+    const { ticket } = (await res.json()) as {
+      ticket: { id: string; attachments: { id: string }[] };
+    };
+
+    const dl = await page.request.get(
+      "/api/tickets/" + ticket.id + "/attachments/" + ticket.attachments[0].id,
+    );
+    expect(dl.status()).toBe(200);
+    expect(dl.headers()["content-type"]).toBe("text/plain");
+    // The measured reference window (one year, immutable) with our private
+    // scope (owner-scoped route — their `public` is not a parity surface we
+    // mirror; see the plan's F1 reasoning).
+    expect(dl.headers()["cache-control"]).toBe("private, max-age=31536000, immutable");
+    // The s14 inline-disposition contract stands untouched.
+    expect(dl.headers()["content-disposition"]).toMatch(/^inline; filename="s15-cache\.txt"$/);
+  });
+
+  test("mytickets card dates render the UTC wall-clock under a Singapore browser (F2)", async ({ browser }) => {
+    // test.info().project.use.baseURL — manual contexts do not inherit the
+    // config's use block reliably; storageState + timezoneId are explicit.
+    const ctx = await browser.newContext({
+      timezoneId: "Asia/Singapore",
+      storageState: "tests/e2e/.auth/user.json",
+      baseURL: test.info().project.use.baseURL,
+    });
+    const sg = await ctx.newPage();
+    try {
+      await sg.goto("/mytickets");
+      const cardDate = await sg
+        .locator('main a span.text-sm.text-slate-500.font-medium')
+        .first()
+        .textContent();
+      const list = await sg.evaluate(async () => {
+        const r = await fetch("/api/tickets?scope=mine&sort=newest", { credentials: "include" });
+        return (await r.json()) as { tickets: { id: string; createdAt: string }[] };
+      });
+      expect(list.tickets.length, "the demo user has tickets").toBeGreaterThan(0);
+      // The first card is the newest ticket (the page's default sort).
+      const d = new Date(list.tickets[0].createdAt);
+      const datePart = new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(d);
+      const timePart = new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "UTC",
+      }).format(d);
+      expect(cardDate, "the card renders the stored UTC wall-clock").toBe(`${datePart} at ${timePart}`);
+    } finally {
+      await ctx.close();
+    }
+  });
+
+  test("dashboard recent-row dates render the UTC calendar day at extreme viewer timezones (F2)", async ({ browser }) => {
+    // A +14/-12 pair guarantees at least one zone renders a DIFFERENT
+    // calendar day than UTC for any run time (UTC hour ≥ 10 shifts east;
+    // < 12 shifts west; 10–12 shifts both) — so the pre-fix divergence is
+    // deterministic, never green-by-coincidence. NB "Etc/GMT+12" is UTC-12
+    // (the POSIX sign inversion).
+    const ctx = await browser.newContext({
+      timezoneId: "Pacific/Kiritimati",
+      storageState: "tests/e2e/.auth/user.json",
+      baseURL: test.info().project.use.baseURL,
+    });
+    const west = await browser.newContext({
+      timezoneId: "Etc/GMT+12",
+      storageState: "tests/e2e/.auth/user.json",
+      baseURL: test.info().project.use.baseURL,
+    });
+    const eastPage = await ctx.newPage();
+    const westPage = await west.newPage();
+    try {
+      await eastPage.goto("/dashboard");
+      const eastDate = await eastPage
+        .locator("main span.text-xs.text-slate-500.font-medium")
+        .first()
+        .textContent();
+      await westPage.goto("/dashboard");
+      const westDate = await westPage
+        .locator("main span.text-xs.text-slate-500.font-medium")
+        .first()
+        .textContent();
+      const list = await eastPage.evaluate(async () => {
+        const r = await fetch("/api/tickets", { credentials: "include" });
+        return (await r.json()) as { tickets: { id: string; createdAt: string }[] };
+      });
+      expect(list.tickets.length, "tickets exist for the recent list").toBeGreaterThan(0);
+      const datePart = new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(new Date(list.tickets[0].createdAt));
+      expect(eastDate, "the +14 viewer sees the UTC calendar day").toBe(datePart);
+      expect(westDate, "the -12 viewer sees the UTC calendar day").toBe(datePart);
+    } finally {
+      await ctx.close();
+      await west.close();
+    }
+  });
+});

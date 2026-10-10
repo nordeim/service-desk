@@ -505,3 +505,35 @@ Work Log:
 
 Stage Summary:
 - Both session-14 findings fixed and E2E-pinned (181 E2E total: visual-parity 147→151); production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 30
+Agent: main (Super Z)
+Task: Session 15 — refresh repo, review session_17/remediation-plan-session14/worklog/session_18 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git pull refresh (workspace survived) cd18869..74a0843 (the operator's session_18.md log commit); current session established as Session 15
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.12.0 + session_17.md + remediation-plan-session14.md + worklog + session_18.md — all aligned with the codebase; env contract verified standing (.env, db/ at root with the canonical 11-ticket seed, skills/ excluded in all 4 configs; .env.example matches)
+- Baseline gates: lint ✓ typecheck ✓ 55 unit ✓ build ✓ 181/181 E2E ✓ smoke 11/11 ✓; session-14 commit cd18869 audited CLEAN (F1 inline disposition; F2 the server-page wrapper + query-bearing breadcrumb); the s14-matrix fixture it re-created cleaned after (canonical 11-ticket seed re-verified)
+- Fresh gap analysis (agent-browser + Playwright paired probes, both sites) working the session-17 shortlist: F1 (LOW-MED) the attachment cache semantics — the reference CDN (fresh upload, authenticated fetch) serves public, max-age=31536000, immutable; ours served private, max-age=3600; F2 (MED-HIGH, THE HEADLINE) the date-rendering timezone — the reference's API returns naive datetimes that round-trip as the stored UTC wall-clock to every viewer; ours rendered the viewer's LOCAL time (paired measurement under Europe/Berlin: reference "4:29 AM" for 04:29:35Z vs ours "4:17 AM" for 02:17:50Z — an 8h-visible divergence for the Singapore operator, invisible at UTC where every probe and E2E run executes); F3 (documentation) the s14 "CDN URLs are not durable" evidence RETRACTED — the base44 file proxy 404s HEAD and 302s GET (curl -I artifact); every s13/s15 probe URL still serves via GET
+- Non-gaps verified: the reference pins en-US date formatting under de-DE/ja-JP (ours identical); standing drift pins stable (token block, sidebar #fafafa, button cursor, auth-route head set, hard-load ticketdetails query canonicalization); mobile nav matrix green on ours (s14 script) + reference stable (their overflow defect, their toast viewport blocking their own trigger re-confirmed via a rejected real click); NEW reference defect documented: their SPA client-side nav leaves the whole head stale (canonical/og/JSON-LD from the previous route); space-y trap scan clean
+- Wrote + validated docs/remediation-plan-session15.md
+
+Stage Summary:
+- Repo at 74a0843 + plan; 2 code findings (F1 cache window, F2 timezone rendering) + 1 documentation correction queued for TDD execution
+
+---
+Task ID: 31
+Agent: main (Super Z)
+Task: Session 15 — TDD remediation, verification, docs, SKILL.md v2.13.0, commit + push
+
+Work Log:
+- TDD RED: 3 E2E tests (F1 the exact cache-control string; F2 a Singapore-context mytickets pin against the same ticket's API createdAt; F2b a +14/-12 extreme pair on the dashboard date-only rows — deterministic at any run hour) + TZ-hardened unit pins (the tolerant Nov 30|Dec 1 regex replaced) — verified RED (E2E 3/3 for the designed reasons: expected "4:46 AM" vs received "12:46 PM"; unit failed under TZ=Asia/Singapore + Pacific/Honolulu, green at UTC)
+- Implemented: F1 private, max-age=31536000, immutable (private stays — owner-scoped route; the window is factually correct, no attachment mutation path; no validators — an immutable year never revalidates); F2 timeZone "UTC" in both formatters (the single seam; one pre-existing unit test's naive Date inputs hardened to Z-suffixed instants)
+- Gates: lint ✓ typecheck ✓ 56 unit ✓ (green at FIVE runner timezones: UTC/Singapore/Honolulu/New York/Berlin) build ✓ 184/184 E2E ✓ (181 + 3, zero regressions) smoke 11/11 ✓
+- Live paired re-verification (production standalone :3000): F1 the immutable private window + the s14 inline disposition + nosniff measured on a fixture; F2 the Berlin-context probe renders "Oct 10, 2026 at 4:51 AM" for a 04:51:23Z ticket — the reference's paired rendering; fixtures removed (canonical 11-ticket seed re-verified)
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s15.sh (the s14 lineage; both s15 fixes invisible at UTC — evidence lives in the E2E pins + paired measurements); VLM-verified shots 04 + 10
+- Updated README (56/184/154 counts + session-15 sentence + the attachments row)/AGENTS (the session-15 contracts section + the F3 correction on the s14 CDN-lifetime line + reference/screenshots lines)/CLAUDE (counts + two anti-patterns: the probe-method lesson, the timezone lesson)/PAD (the s15 known-issues row + the corrected s14 row + counts)/service-desk_SKILL.md v2.13.0 (lesson 59 repaired — it had shipped truncated from the s14 $' patch incident — and corrected; lessons 60-62 added); session_19.md narrative log; plan execution status; this worklog; the s15 probe/cleanup scripts committed (locale + tz probes, cleanup-s15)
+
+Stage Summary:
+- Both session-15 code findings fixed and E2E-pinned (184 E2E total: visual-parity 151→154); the s14 documentation finding corrected; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py

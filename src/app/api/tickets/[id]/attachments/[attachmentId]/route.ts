@@ -30,12 +30,22 @@ export async function GET(_req: Request, { params }: Params) {
   // name, and non-renderable types (zip/doc) download exactly as before.
   // Safe: the mimeType was pinned at upload to the closed accepted list
   // (no text/html, no svg — the s10 XSS decision) and nosniff ships globally.
+  // Session 15: the cache window matches the reference's CDN, which serves
+  // its files with `public, max-age=31536000, immutable` (live-measured on a
+  // fresh upload, authenticated fetch). `private` stays — the route is
+  // owner-scoped and our attachment URLs are not publicly fetchable by design
+  // (their `public` + open-media posture is not a contract to mirror); the
+  // year-long immutable window is factually correct here: attachments have
+  // no mutation path (created once at upload; no update/delete route exists),
+  // so the window can never serve stale bytes. No ETag/Last-Modified: with an
+  // immutable year a compliant client never revalidates. If a future feature
+  // adds attachment mutation, revisit this header.
   return new NextResponse(new Uint8Array(bytes), {
     headers: {
       "Content-Type": attachment.mimeType,
       "Content-Length": String(bytes.length),
       "Content-Disposition": `inline; filename="${safeName}"`,
-      "Cache-Control": "private, max-age=3600",
+      "Cache-Control": "private, max-age=31536000, immutable",
     },
   });
 }
