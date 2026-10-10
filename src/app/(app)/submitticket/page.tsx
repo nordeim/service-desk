@@ -140,7 +140,11 @@ export default function SubmitTicketPage() {
     // with text-4xl h1; a shadow-2xl form card whose header carries the
     // cyan→blue gradient; body p-8; button-style back control.
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
-      <div className="max-w-3xl mx-auto">
+      {/* Reference (session 16 re-measure): the [header + form] block rises
+          as ONE 500ms ease-out tween wrapper (their motion.div wraps the
+          header, the error alert, and the form card together — the form
+          itself carries no separate animation). */}
+      <div className="max-w-3xl mx-auto animate-rise-in motion-reduce:animate-none">
         <div className="mb-8">
           {/* Reference (measured session 4): the back control is the GHOST
               variant — borderless at rest, just the hover:bg-slate-100 wash. */}
@@ -158,7 +162,7 @@ export default function SubmitTicketPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="animate-rise-in motion-reduce:animate-none rounded-xl border text-card-foreground border-none shadow-2xl bg-white overflow-hidden"
+          className="rounded-xl border text-card-foreground border-none shadow-2xl bg-white overflow-hidden"
           noValidate
         >
           <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100 bg-gradient-to-r from-cyan-50/50 to-blue-50/50">

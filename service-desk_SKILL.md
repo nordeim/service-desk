@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-15 remediation (2026-10-10).
+  functionality. Distilled through the session-16 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.13.0
+version: 2.14.0
 last_updated: 2026-10-10
-project_state: 56 unit tests + 184 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–15)
+project_state: 56 unit tests + 191 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–16)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -406,6 +406,10 @@ Manual/visual checks:
 60. **The HTTP method is part of the measurement.** (Session 15.) `curl -I` (HEAD) on the base44 file proxy returns 404 while GET returns 302 → 200 — the s14 "CDN URLs are not durable" evidence was entirely this artifact. When probing a response layer, use the verb the browser actually uses (GET), follow redirects explicitly, and distinguish "the redirect hop 404s" from "the file 404s." A 404 is not a 404 until the method matches.
 61. **A pinned rendering is only pinned in the environment it was measured in — enumerate the environment axes.** (Session 15.) Fourteen sessions of date-format parity held because every probe and every E2E run executed at UTC; the timezone axis was invisible until a Singapore-context browser was driven. The reference's API returns NAIVE datetimes (no Z) that the browser parses-as-local and formats-as-local — the digits round-trip, so every viewer sees the stored UTC wall-clock. Ours returned Z-suffixed ISO and rendered the viewer's local time: an 8h-visible divergence for the Singapore operator. The fix: `timeZone: "UTC"` in the formatters, pinned by Singapore/extreme-timezone E2E contexts and TZ-hardened unit pins (RED verified under `TZ=Asia/Singapore`/`Pacific/Honolulu`). Enumerate locale, timezone, and viewport the way you enumerate at-rest/active and query/no-query.
 62. **Paired probes catch what single-site probes cannot.** (Session 15.) The timezone divergence was only visible because the SAME Playwright context drove both sites and rendered different strings for the same instant (reference "4:29 AM" vs ours "6:29 AM" under Europe/Berlin). Keep the probes paired — and for cache semantics, measure the full response-header set (the reference CDN's `public, max-age=31536000, immutable` vs our `private, max-age=3600`) from inside the authenticated page context, where the redirect hop's auth gate lets the fetch through.
+63. **A timing contract measured once and applied everywhere is a single-spring trap.** (Session 16.) Session 3 fitted one curve (~310ms spring, 12% overshoot, no stagger) to what are actually FOUR different reference animations: the stat cards + submit/detail wrappers run a 500ms ease-out TWEEN (cubic-bezier(0.61, 1, 0.88, 1) — framer-motion's default tween ease), the mytickets cards run a staggered spring (50ms/index), the recent rows run an X-AXIS slide (translateX(-20px), 100ms/index), and the spring surfaces' opacity settles on a DIFFERENT curve than their transform (framer-motion springs work in absolute units — the 0→1 opacity distance settles slower than the 20px transform). When a surface animates, enumerate the per-surface parameters (axis, duration, easing, stagger, per-property curves) independently.
+64. **The reference's production bundle is a legitimate measurement instrument — often the BEST one.** (Session 16.) The bundle carries the exact framer-motion `transition` objects (`duration:.5`, `delay:o*.05`, `initial:{opacity:0,x:-20}`) — no timing-probe approximation can beat the source values, and the bundle explains WHY probes read as they do (the absolute-unit spring). The method: extract the parameters from the bundle, then confirm the rendered behavior with live rAF timelines. The bundle defines; the probe confirms.
+65. **Some surfaces are unmeasurable without credentials — document them, never invent them.** (Session 16.) The reference's nav extends with All Tickets / Analytics / Settings / Developer items when `user.role === "admin"` (full implementations live in their bundle; the operator login is `role: "user"`). The parity doctrine (computed styles = ground truth) means unmeasured UI is out of scope by design — do not guess an admin UI into existence. Document the surface, note what a future session needs (admin credentials) to measure it, and move on. Meanwhile the cheap E2E false-green trap: a /api/stats polling pin on /dashboard counts the DASHBOARD's own stats fetch — run behavioral pins on a page where only the surface under test fetches.
+
 
 
 ---

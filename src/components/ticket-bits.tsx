@@ -108,14 +108,23 @@ export interface TicketCardData {
 export function TicketCard({
   ticket,
   formattedDate,
+  index = 0,
 }: {
   ticket: TicketCardData;
   formattedDate: string;
+  index?: number;
 }) {
   const emoji = CATEGORY_EMOJI[(ticket.category as TicketCategory) ?? "other"] ?? "📋";
   return (
     <Link href={`/ticketdetails?id=${ticket.id}`} className="block group">
-      <div className="animate-rise-in motion-reduce:animate-none rounded-xl border text-card-foreground p-6 border-none shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer bg-white">
+      {/* Reference (session 16 re-measure): the cards rise as a ~300ms
+          spring with overshoot, staggered 50ms per index (framer-motion
+          delay: i*0.05 — the fill-mode:backwards utility holds the
+          from-state through the delay, exactly their `initial`). */}
+      <div
+        className="animate-rise-in-spring motion-reduce:animate-none rounded-xl border text-card-foreground p-6 border-none shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer bg-white"
+        style={{ animationDelay: `${index * 50}ms` }}
+      >
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 text-2xl">
             {emoji}
@@ -153,11 +162,15 @@ export function TicketCard({
 // with the hover-sliding arrow; badges are status + priority only (no
 // category); the date is DATE-ONLY ("Oct 9, 2026") — mytickets cards keep
 // the full datetime.
-export function RecentTicketRow({ ticket }: { ticket: TicketCardData }) {
+export function RecentTicketRow({ ticket, index = 0 }: { ticket: TicketCardData; index?: number }) {
   return (
     <Link
       href={`/ticketdetails?id=${ticket.id}`}
-      className="animate-rise-in motion-reduce:animate-none block p-6 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-blue-50/50 transition-all duration-300 group"
+      /* Reference (session 16 re-measure): the rows SLIDE IN FROM THE LEFT
+         (translateX(-20px)→0, x-axis — never y) as a ~300ms spring with
+         overshoot, staggered 100ms per index (framer-motion delay: i*0.1). */
+      className="animate-slide-in motion-reduce:animate-none block p-6 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-blue-50/50 transition-all duration-300 group"
+      style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">

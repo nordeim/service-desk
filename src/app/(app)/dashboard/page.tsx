@@ -233,8 +233,8 @@ function DashboardContent({ userName }: { userName: string }) {
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
-                {recent.map((t) => (
-                  <RecentTicketRow key={t.id} ticket={t} />
+                {recent.map((t, i) => (
+                  <RecentTicketRow key={t.id} ticket={t} index={i} />
                 ))}
               </div>
             )}

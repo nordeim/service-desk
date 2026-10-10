@@ -203,15 +203,30 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Entrance animation (session 3). The reference animates cards/rows in with
-   framer-motion: opacity 0→1 + translateY(20px)→0, a spring with ~12%
-   overshoot settling in ~310 ms, NO stagger (measured with a MutationObserver
-   probe — docs/remediation-plan-session3.md). Reproduced in pure CSS:
-   cubic-bezier(0.34, 1.56, 0.64, 1) ≈ that spring. Fill mode `backwards`
-   only — the from-state applies immediately on mount and nothing lingers
-   after the animation ends (hover transitions keep working).
-   Applied as `animate-rise-in motion-reduce:animate-none` so
-   prefers-reduced-motion users get no motion at all.
+   Entrance animations. Session 16 re-measured the reference per-surface
+   (bundle framer-motion parameters + live rAF timelines — the session-3
+   single-spring contract is superseded):
+   - stat cards + the submit [header+form] / detail [back+grid] wrappers:
+     opacity 0→1 + translateY(20px)→0 over 0.5s with a GENTLE ease-out
+     tween — cubic-bezier(0.61, 1, 0.88, 1), framer-motion's default tween
+     ease (fitted RMSE 0.025 over 24 live samples). NO overshoot, no stagger.
+     ONE curve drives both properties (the tween's opacity progress ≈ its
+     transform progress at every measured sample).
+   - mytickets cards: the same y-rise as a ~300ms SPRING with overshoot
+     (cubic-bezier(0.34, 1.56, 0.64, 1) — the s3 fit, re-confirmed) +
+     a 50ms/index stagger (animation-delay inline per card). The opacity
+     rides a SEPARATE piecewise animation (fade-in-spring): framer-motion
+     springs work in absolute units, so the 0→1 opacity distance settles
+     slower than the 20px transform (opacity 0.52 at 33% duration, 0.91 at
+     67% — a single-bezier pair reached 1.0 at 53%, visibly ahead).
+   - dashboard recent rows: translateX(-20px)→0 — they slide in from the
+     LEFT (x-axis, never y) as the same ~300ms spring + the same split
+     fade + a 100ms/index stagger.
+   Fill mode `backwards` — the from-state applies immediately on mount
+   (and holds through each element's stagger delay, exactly framer-motion's
+   `initial` behavior) and nothing lingers after the animation ends (hover
+   transitions keep working). Applied as `animate-* motion-reduce:animate-none`
+   so prefers-reduced-motion users get no motion at all.
 --------------------------------------------------------------------------- */
 @keyframes rise-in {
   from {
@@ -224,8 +239,86 @@
   }
 }
 
+/* The 500ms ease-out tween (stat cards + the submit/detail wrappers):
+   ONE curve drives both properties — measured opacity progress ≈ y
+   progress at every sample on the reference (their single tween). */
 @utility animate-rise-in {
-  animation: rise-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation: rise-in 0.5s cubic-bezier(0.61, 1, 0.88, 1) backwards;
+}
+
+/* The ~300ms spring with overshoot (mytickets cards — stagger via delay).
+   Transform and opacity are SEPARATE animations: framer-motion's spring
+   dynamics work in absolute units, so the 0→1 opacity distance settles
+   with a DIFFERENT (slower) profile than the 20px transform — measured
+   on the reference's cards AND rows: opacity 0.11@33ms, 0.30@67ms,
+   0.52@100ms, 0.70@133ms, 0.82@167ms, 0.91@200ms, 0.96@233ms, 0.99@267ms
+   (both surfaces within 0.02 of each other — one piecewise fit serves both;
+   our old single-bezier keyframes hit opacity 1.0 at ~160ms, visibly
+   ahead of the reference's ~270ms settle). */
+@keyframes rise-in-y {
+  from {
+    transform: translateY(20px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-spring {
+  0% {
+    opacity: 0;
+  }
+  11% {
+    opacity: 0.11;
+  }
+  22% {
+    opacity: 0.3;
+  }
+  33% {
+    opacity: 0.52;
+  }
+  44% {
+    opacity: 0.7;
+  }
+  56% {
+    opacity: 0.82;
+  }
+  67% {
+    opacity: 0.91;
+  }
+  78% {
+    opacity: 0.96;
+  }
+  89% {
+    opacity: 0.99;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@utility animate-rise-in-spring {
+  animation:
+    rise-in-y 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) backwards,
+    fade-in-spring 0.3s linear backwards;
+}
+
+@keyframes slide-in-x {
+  from {
+    transform: translateX(-20px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* The x-axis slide-in (dashboard recent rows — stagger via delay); the
+   same split transform/opacity pair as the spring rise (the reference's
+   rows measure the same fade profile as their cards). */
+@utility animate-slide-in {
+  animation:
+    slide-in-x 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) backwards,
+    fade-in-spring 0.3s linear backwards;
 }
 
 /* Reduced motion (a11y, session 3): collapse every animation/transition to

@@ -192,8 +192,8 @@ export default function MyTicketsPage() {
           </div>
         ) : (
           <div className="grid gap-4">
-            {tickets.map((t) => (
-              <TicketCard key={t.id} ticket={t} formattedDate={formatDateTime(t.createdAt)} />
+            {tickets.map((t, i) => (
+              <TicketCard key={t.id} ticket={t} index={i} formattedDate={formatDateTime(t.createdAt)} />
             ))}
           </div>
         )}

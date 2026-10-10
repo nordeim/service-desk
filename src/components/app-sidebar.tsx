@@ -46,7 +46,8 @@ const NAV_ITEMS = [
 ];
 
 // The sidebar chrome is a client island: session user comes from the server
-// layout; QUICK STATS are refreshed on route change (cheap groupBy query).
+// layout; QUICK STATS refresh on route change AND every 5s (the reference's
+// freshness contract, session 16 — via the cheap /api/stats groupBy).
 export function AppSidebar({ user }: { user: SidebarUser }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -54,24 +55,36 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
   const { setOpenMobile } = useSidebar();
   const [stats, setStats] = React.useState<SidebarStats | null>(null);
 
+  // QUICK STATS freshness (session 16, F2): the reference's sidebar fetches
+  // ticket counts on mount AND every 5 seconds (setInterval(c, 5e3) in their
+  // bundle) — ours fetched only on route change, so a user sitting on one
+  // page saw stale counts. We keep our cheap /api/stats aggregate (their
+  // poll fetches the FULL ticket list and counts client-side) while matching
+  // the 5s freshness contract. The interval is re-armed on every pathname
+  // change and cleared on cleanup.
   React.useEffect(() => {
     let cancelled = false;
-    fetch("/api/stats")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.global) {
-          setStats({
-            open: data.global.open,
-            in_progress: data.global.in_progress,
-            total: data.global.total,
-          });
-        }
-      })
-      .catch(() => {
-        /* sidebar stats are non-critical; leave the skeleton */
-      });
+    const load = () => {
+      fetch("/api/stats")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (!cancelled && data?.global) {
+            setStats({
+              open: data.global.open,
+              in_progress: data.global.in_progress,
+              total: data.global.total,
+            });
+          }
+        })
+        .catch(() => {
+          /* sidebar stats are non-critical; leave the skeleton */
+        });
+    };
+    load();
+    const interval = setInterval(load, 5000);
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, [pathname]);
 

@@ -323,26 +323,31 @@ test.describe("session 3: badge case", () => {
   });
 });
 
-test.describe("session 3: entrance animations", () => {
-  test("dashboard stat cards and recent rows carry the rise-in animation", async ({ page }) => {
+test.describe("session 3: entrance animations (superseded by session 16 — per-surface timing in the s16 block)", () => {
+  test("dashboard stat cards carry the rise-in animation", async ({ page }) => {
     await page.goto("/dashboard");
     const firstCard = page.locator("main .grid > div", { hasText: "Total Tickets" }).first();
     await expect(firstCard).toHaveClass(/animate-rise-in/);
     await expect(firstCard).toHaveClass(/motion-reduce:animate-none/);
     await expect(firstCard).toHaveCSS("animation-name", "rise-in");
-    // Recent rows animate too (they mount when the tickets arrive).
+    // Recent rows animate too (they mount when the tickets arrive) — the
+    // session-16 re-measure: the reference slides them in from the LEFT
+    // (x −20→0), so the axis + stagger live in the s16 block below.
     const row = page.locator("div.divide-y a").first();
-    await expect(row).toHaveClass(/animate-rise-in/);
+    await expect(row).toHaveClass(/animate-slide-in/);
   });
 
-  test("mytickets cards, submit card, and detail wrapper animate in", async ({ page }) => {
+  test("mytickets cards, submit wrapper, and detail wrapper animate in", async ({ page }) => {
     await page.goto("/mytickets");
     const card = page.locator('a[href*="/ticketdetails"] > div').first();
-    await expect(card).toHaveClass(/animate-rise-in/);
-    await expect(card).toHaveCSS("animation-name", "rise-in");
+    await expect(card).toHaveClass(/animate-rise-in-spring/);
+    await expect(card).toHaveCSS("animation-name", "rise-in-y, fade-in-spring");
 
     await page.goto("/submitticket");
-    await expect(page.locator("form").first()).toHaveClass(/animate-rise-in/);
+    // Session-16 re-measure: the reference wraps [header + form] in ONE
+    // 500ms tween wrapper — the form itself carries no animation class.
+    await expect(page.locator("main .max-w-3xl")).toHaveClass(/animate-rise-in/);
+    await expect(page.locator("form").first()).not.toHaveClass(/animate-rise-in/);
 
     await page.goto("/mytickets");
     await page.locator('a[href*="/ticketdetails"]').first().click();
@@ -2665,5 +2670,131 @@ test.describe("session 15: the attachment cache semantics + the timezone-stable 
       await ctx.close();
       await west.close();
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session 16 contracts (docs/remediation-plan-session16.md) — the entrance
+// animation re-measured per-surface (the session-3 single-spring contract
+// superseded). The reference's production bundle carries the exact
+// framer-motion parameters, confirmed by live rAF timeline sampling:
+//   stat cards        y 20→0, 500ms ease-out tween (cubic-bezier(0.61, 1,
+//                     0.88, 1) — framer-motion's default tween ease, fitted
+//                     with RMSE 0.025 over 24 samples), NO overshoot, no stagger
+//   recent rows       x −20→0 (slides from the LEFT), ~300ms spring with
+//                     overshoot, 100ms/index stagger
+//   mytickets cards   y 20→0, ~300ms spring with overshoot, 50ms/index stagger
+//   submit + detail   [header + form] / [back + grid] wrapped in ONE 500ms
+//                     tween each
+// Plus F2: the sidebar QUICK STATS poll every 5s on the reference
+// (setInterval(c, 5e3) in their sidebar — bundle-verified); ours fetched
+// only on route change.
+// ---------------------------------------------------------------------------
+test.describe("session 16: the per-surface entrance-animation contract + the stats polling", () => {
+  test("stat cards rise with the 500ms ease-out tween (no overshoot)", async ({ page }) => {
+    await page.goto("/dashboard");
+    const firstCard = page.locator("main .grid > div", { hasText: "Total Tickets" }).first();
+    await expect(firstCard).toHaveCSS("animation-name", "rise-in");
+    await expect(firstCard).toHaveCSS("animation-duration", "0.5s");
+    await expect(firstCard).toHaveCSS(
+      "animation-timing-function",
+      "cubic-bezier(0.61, 1, 0.88, 1)"
+    );
+    // No stagger: every stat card starts immediately (delay 0s).
+    const cards = page.locator("main .grid > div");
+    for (let i = 0; i < await cards.count(); i++) {
+      await expect(cards.nth(i)).toHaveCSS("animation-delay", "0s");
+    }
+  });
+
+  test("recent rows slide in from the LEFT with the 100ms stagger", async ({ page }) => {
+    await page.goto("/dashboard");
+    const rows = page.locator("div.divide-y a");
+    await expect(rows.nth(0)).toHaveCSS("animation-name", "slide-in-x, fade-in-spring");
+    await expect(rows.nth(0)).toHaveCSS("animation-duration", "0.3s, 0.3s");
+    // The x-axis: the from-state translates −20px on X (never Y).
+    const fromTransform = await rows
+      .nth(0)
+      .evaluate((el) => getComputedStyle(el).animationName + "|" + getComputedStyle(el).transform);
+    expect(fromTransform.startsWith("slide-in-x")).toBe(true);
+    // The stagger: index 1 → 100ms, index 2 → 200ms (the reference's
+    // delay: o*0.1 — measured start times 24/99/199/298/399ms live).
+    await expect(rows.nth(1)).toHaveCSS("animation-delay", "0.1s");
+    await expect(rows.nth(2)).toHaveCSS("animation-delay", "0.2s");
+    await expect(rows.nth(3)).toHaveCSS("animation-delay", "0.3s");
+  });
+
+  test("mytickets cards rise with the spring + the 50ms stagger", async ({ page }) => {
+    await page.goto("/mytickets");
+    const cards = page.locator('a[href*="/ticketdetails"] > div');
+    const first = cards.nth(0);
+    await expect(first).toBeVisible();
+    await expect(first).toHaveCSS("animation-name", "rise-in-y, fade-in-spring");
+    await expect(first).toHaveCSS("animation-duration", "0.3s, 0.3s");
+    await expect(first).toHaveCSS(
+      "animation-timing-function",
+      "cubic-bezier(0.34, 1.56, 0.64, 1), linear"
+    );
+    // The stagger: index 1 → 50ms, index 2 → 100ms (the reference's
+    // delay: o*0.05 — measured start times 417/437/487/537/587/637ms live).
+    if ((await cards.count()) >= 3) {
+      await expect(cards.nth(1)).toHaveCSS("animation-delay", "0.05s");
+      await expect(cards.nth(2)).toHaveCSS("animation-delay", "0.1s");
+    }
+  });
+
+  test("the submit page animates [header + form] as one 500ms tween wrapper", async ({ page }) => {
+    await page.goto("/submitticket");
+    const wrapper = page.locator("main .max-w-3xl");
+    await expect(wrapper).toHaveCSS("animation-name", "rise-in");
+    await expect(wrapper).toHaveCSS("animation-duration", "0.5s");
+    await expect(wrapper).toHaveCSS(
+      "animation-timing-function",
+      "cubic-bezier(0.61, 1, 0.88, 1)"
+    );
+  });
+
+  test("the detail page wrapper rises with the same 500ms tween", async ({ page }) => {
+    await page.goto("/mytickets");
+    await page.locator('a[href*="/ticketdetails"]').first().click();
+    await page.waitForURL(/\/ticketdetails\?id=/);
+    const wrapper = page.locator("main div.animate-rise-in").first();
+    await expect(wrapper).toBeVisible();
+    await expect(wrapper).toHaveCSS("animation-name", "rise-in");
+    await expect(wrapper).toHaveCSS("animation-duration", "0.5s");
+  });
+
+  test("every entrance collapses under prefers-reduced-motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/dashboard");
+    await expect(
+      page.locator("main .grid > div", { hasText: "Total Tickets" }).first()
+    ).toHaveCSS("animation-name", "none");
+    await expect(page.locator("div.divide-y a").first()).toHaveCSS("animation-name", "none");
+    await page.goto("/mytickets");
+    await expect(page.locator('a[href*="/ticketdetails"] > div').first()).toHaveCSS(
+      "animation-name",
+      "none"
+    );
+    await page.goto("/submitticket");
+    await expect(page.locator("main .max-w-3xl")).toHaveCSS("animation-name", "none");
+  });
+
+  test("the sidebar QUICK STATS poll every 5 seconds (F2)", async ({ page }) => {
+    // The reference's sidebar fetches ticket counts on mount + every 5s
+    // (setInterval(c, 5e3), bundle-verified). Ours fetched only on route
+    // change — a user sitting on one page saw stale counts. Count the
+    // /api/stats interceptions over a 6.5s static window: mount fetch (t≈0)
+    // + the 5s interval ⇒ ≥ 2. NB: the test lives on /mytickets — the
+    // DASHBOARD page also fetches /api/stats for its own stat cards, which
+    // would false-green this pin there (two mount fetches, no interval).
+    let statsCalls = 0;
+    await page.route("**/api/stats", async (route) => {
+      statsCalls++;
+      await route.continue();
+    });
+    await page.goto("/mytickets");
+    await page.waitForTimeout(6500);
+    expect(statsCalls, "mount fetch + the 5s interval").toBeGreaterThanOrEqual(2);
   });
 });

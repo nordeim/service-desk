@@ -537,3 +537,35 @@ Work Log:
 
 Stage Summary:
 - Both session-15 code findings fixed and E2E-pinned (184 E2E total: visual-parity 151→154); the s14 documentation finding corrected; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py
+
+---
+Task ID: 32
+Agent: main (Super Z)
+Task: Session 16 — refresh repo, review session_19/remediation-plan-session15/worklog/session_20 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git clone (fresh workspace) at 32b7369 (the session-15 remediation cd65bfe + the operator's session_20.md log commit); current session established as Session 16 (agent log → docs/session_21.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.13.0 + session_19.md + remediation-plan-session15.md + worklog + session_20.md — all aligned with the codebase; env contract re-established on the fresh clone (.env from .env.example with generated AUTH_SECRET, DATABASE_URL=file:../db/custom.db, db/ at root pushed + seeded 4/11/3, skills/ excluded in all 4 configs); scandihaven repo re-cloned as the tech-stack pattern reference; npx playwright install chromium (the 1248 build — the s13 lesson)
+- Baseline gates: lint ✓ typecheck ✓ 56 unit ✓ build ✓ 184/184 E2E ✓ smoke 11/11 ✓; session-15 commit cd65bfe audited CLEAN (F1 the immutable cache window; F2 the UTC formatters)
+- Session-19 shortlist worked: hour12 axis closed at CODE level (their date-fns "MMM d, yyyy 'at' h:mm a" format string hard-pins 12-hour; ours hour12: true — NON-GAP); comment pagination NON-GAP (their flat 61-comment unpaginated array, client-side oldest-first rendering — ours per-ticket asc, visually identical); cache revalidation unprobeable (noted)
+- Fresh gap analysis (agent-browser + Playwright paired probes + the reference's production BUNDLE): standing drift pins stable; mobile matrix green on ours (s14 script) + reference stable (their overflow/sheet-lock/toast-block defects persist); fresh axes: dark mode (both light-only — NON-GAP) + reduced motion (theirs animates under reduce — our a11y superset stands); HEADLINE F1 (MED-HIGH) the entrance-animation contract re-measured per-surface from the bundle's exact framer-motion parameters + live rAF timelines: stat cards + submit/detail wrappers = 500ms ease-out tween (cubic-bezier(0.61, 1, 0.88, 1), no overshoot); mytickets cards = 300ms spring + 50ms stagger; recent rows = X-AXIS slide from -20 + 100ms stagger; the s3 single-spring contract superseded (the spring was only ever the mytickets cards) + the spring surfaces' opacity settles SLOWER than the transform (framer-motion's absolute-unit springs); F2 (LOW) the sidebar quick-stats poll every 5s (setInterval 5e3 — ours fetched only on route change); F3 (documentation) the reference's admin-gated surface (All Tickets/Analytics/Settings/Developer at role==="admin" — unmeasurable with the operator's role:"user" login; deliberately not implemented, documented)
+- Wrote + validated docs/remediation-plan-session16.md
+
+Stage Summary:
+- Repo at 32b7369 + plan; 2 code findings (F1 the per-surface animation contract, F2 the 5s stats polling) + 1 documentation finding queued for TDD execution
+
+---
+Task ID: 33
+Agent: main (Super Z)
+Task: Session 16 — TDD remediation, verification, docs, SKILL.md v2.14.0, commit + push
+
+Work Log:
+- TDD RED: the session-3 animation pins rewritten to the per-surface contract + a 7-test session-16 block (computed duration/easing/axis/stagger pins + the 5s polling pin) — verified RED 7/7 for the designed reasons; one authored-red fix: the polling pin moved off /dashboard (the dashboard's own /api/stats fetch false-greens it — run behavioral pins on a page where only the surface under test fetches)
+- GREEN: globals.css restructured (animate-rise-in = the 500ms tween; animate-rise-in-spring = the 300ms spring + the split piecewise fade-in-spring opacity curve sampled from the reference's measured profiles; animate-slide-in = the x-slide + the same fade — the split added mid-implementation when the paired profiles showed our single-bezier opacity reaching 1.0 at 53% of the motion vs the reference's ~90% settle); the staggers inline (animationDelay index*50/100ms, fill-mode backwards); the submit wrapper moved to the max-w-3xl div (zero DOM change; the form's own class removed); the sidebar's mount+5s+route-change interval added (cleanup clears)
+- Gates: lint ✓ typecheck ✓ 56 unit ✓ build ✓ 191/191 E2E ✓ (184 + 7, zero regressions) smoke 11/11 ✓
+- Live paired re-verification (production standalone :3000): our stat card 50→516ms monotonic (≈ their 500ms tween); our rows x-slide from -20, ~100ms stagger, ~280ms/row (theirs ~275ms); our cards ~50ms stagger, ~285ms (theirs ~270ms); the rendered opacity curve within one frame of theirs on both spring surfaces; mobile 375 = 375 (no overflow regression); 4 stats calls in 6.5s static (mount + interval + route fetch); canonical 11-ticket seed verified
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s16.sh (the s15 lineage); VLM-verified shots 02 + 04 (LAYOUT-OK — the animations complete; the s16 fixes are motion-timing-level, invisible at rest — the evidence lives in the E2E computed pins + the paired rAF timelines)
+- Updated README (56/191/161 counts + the per-surface animation row + the 5s stats row + the s16 E2E sentence)/AGENTS (the session-16 contracts section + counts)/CLAUDE (counts + the single-spring anti-pattern)/PAD (the s16 known-issues row + the F3 admin note)/service-desk_SKILL.md v2.14.0 (lessons 63-65: the single-spring trap, the bundle-as-instrument, the unmeasurable-surface doctrine + the false-green polling-pin trap); session_21.md narrative log; plan execution status; this worklog; the s16 probe scripts committed (fresh-axes, motion/dark, anim-timing, stagger probes + the fit script, the live-verify + VLM scripts)
+
+Stage Summary:
+- Both session-16 code findings fixed and E2E-pinned (191 E2E total: visual-parity 154→161); the admin-surface documentation finding recorded; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
