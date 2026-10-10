@@ -183,7 +183,7 @@ service-desk/
 │   │   │   ├── stats/route.ts                  ← mine + global counts + avg resolution
 │   │   │   └── health/route.ts                 ← liveness + DB probe
 │   │   ├── login/ · signup/ · forgotpassword/  ← standalone auth cards
-│   │   ├── layout.tsx           ← Inter font, metadata, globals.css
+│   │   ├── layout.tsx           ← root metadata/head (system font stack, OG images, viewport), globals.css
 │   │   ├── page.tsx             ← "/" → /dashboard | /login
 │   │   └── globals.css          ← Tailwind v4 tokens (@theme inline) + light/dark palettes
 │   ├── components/
@@ -352,8 +352,8 @@ Indexes: `Ticket(createdById, createdAt DESC)` (My Tickets + Recent Tickets), `T
 
 ### 5.1 Typographic System
 
-- **Typeface:** Inter (`next/font/google`, CSS variable `--font-sans`) — the reference renders a system-Inter stack.
-- **Scale:** page titles `text-3xl font-bold tracking-tight`; card titles `text-lg font-semibold`; stat values `text-4xl font-bold tabular-nums`; body `text-sm text-slate-600`; micro-labels `text-xs uppercase tracking-wider text-slate-500` (sidebar group labels).
+- **Typeface: the system stack** (session-5 re-measure — the reference loads NO webfont; `--font-sans` is pinned in `@theme inline` to `ui-sans-serif, system-ui, …`; do NOT reintroduce next/font Inter). Smoothing left at `auto` (no `antialiased`).
+- **Scale:** page titles `text-4xl font-bold tracking-tight` with `text-lg text-slate-600` subtitles (reference scale, session 2); card titles `text-lg font-semibold`; stat values `text-4xl font-bold` with proportional digits (no `tabular-nums` — the reference renders proportional); body `text-sm text-slate-600`; micro-labels `text-xs uppercase tracking-wider text-slate-500` (sidebar group labels).
 
 ### 5.2 Color Tokens
 
@@ -438,11 +438,11 @@ Single role today: **authenticated user**. Ownership is the authorization unit �
 | Unit — domain (constants + validation) | 1 | 20 | `src/lib/__tests__/domain.test.ts` | Vitest |
 | Unit — utils (date/duration formatting incl. `formatDate`; timezone-pinned at UTC — s15) | 1 | 10 | `src/lib/__tests__/utils.test.ts` | Vitest |
 | Unit — db-path URL contract | 1 | 15 | `tests/db-path.test.ts` | Vitest |
-| E2E — auth surface (logged-out) | 1 | 6 | `tests/e2e/auth.spec.ts` | Playwright |
+| E2E — auth surface (logged-out) | 1 | 7 | `tests/e2e/auth.spec.ts` | Playwright |
 | E2E — dashboard (incl. clean-hydration pin) | 1 | 8 | `tests/e2e/dashboard.spec.ts` | Playwright |
 | E2E — ticket lifecycle | 1 | 5 | `tests/e2e/tickets.spec.ts` | Playwright |
 | E2E — mobile + desktop navigation | 1 | 9 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
-| E2E — visual parity (session-2 through session-15 contracts) | 1 | 154 | `tests/e2e/visual-parity.spec.ts` | Playwright |
+| E2E — visual parity (session-2 through session-18 contracts) | 1 | 164 | `tests/e2e/visual-parity.spec.ts` | Playwright |
 | E2E — shared session setup project | 1 | 1 | `tests/e2e/auth.setup.ts` | Playwright |
 | API smoke | 1 | 11 steps | `scripts/smoke-test.sh` | bash + curl |
 
@@ -471,9 +471,9 @@ No numeric coverage gate is configured (documented honestly). The implicit contr
 
 - [ ] `bun run lint` — zero warnings
 - [ ] `bun run typecheck` — clean
-- [ ] `bun run test` — 50/50
+- [ ] `bun run test` — 56/56
 - [ ] `bun run build` — standalone assembles
-- [ ] `bun run test:e2e` — 28/28 (after build; UI/auth changes)
+- [ ] `bun run test:e2e` — 194/194 (after build; UI/auth changes) — with NO ambient server on :3000 (a coincidental listener can false-green absolute-URL fetches — the s18 lesson)
 - [ ] `bash scripts/smoke-test.sh` — all PASS (API changes)
 - [ ] Screenshot diff vs `docs/screenshots/` for visual changes
 - [ ] `git ls-files | grep -E '^\.env$|\.key$|ssh-key'` — empty (before doc-heavy commits)
@@ -572,6 +572,7 @@ Main-only trunk with atomic Conventional Commits. Feature branches are short-liv
 | RESOLVED | Session-16 parity gaps (2 code findings: the entrance-animation contract — re-measured per-surface from the reference's production bundle (the exact framer-motion `transition` objects) + live rAF timelines, superseding the session-3 single-spring contract: the stat cards + submit/detail wrappers rise as ONE 500ms ease-out tween each (cubic-bezier(0.61, 1, 0.88, 1), no overshoot) where ours shipped a 300ms springy overshoot everywhere; the recent rows SLIDE from the LEFT (translateX(-20px), x-axis) with a 100ms/index stagger where ours rose from below unstaggered; the mytickets cards stagger 50ms/index where ours arrived simultaneously; the spring surfaces' opacity settles on a separate piecewise curve (framer-motion's absolute-unit spring gives the 0→1 opacity distance a slower settle than the 20px transform — ours hit opacity 1.0 at 53% of the motion, visibly ahead of the reference's ~90%); and the sidebar QUICK STATS poll every 5s on the reference (setInterval(5e3), bundle-verified) where ours fetched only on route change) — plus F3 documentation: the reference ships an admin-gated surface (All Tickets/Analytics/Settings/Developer at role==="admin") that is unmeasurable without admin credentials — deliberately not implemented (the parity doctrine: unmeasured UI is out of scope; the functional core of All Tickets is our mytickets scope toggle) | Every dashboard/mytickets load rendered visibly different motion than the reference (wrong axis, wrong duration, no stagger, overshoot the reference never shows); stale sidebar counts for users sitting on one page | Fixed — all E2E-pinned (191 E2E, 161 parity); inventory in `docs/remediation-plan-session16.md` |
 
 | RESOLVED | Session-17 parity gaps (2 code findings, both head-layer VALUE contracts from the first value-level head sweep: the viewport meta — the reference ships `width=device-width, initial-scale=1.0, viewport-fit=cover` while ours rendered without the `viewport-fit` key (the notched-device/PWA full-bleed companion — without it the browser letterboxes the viewport to the safe area on every iPhone X+-class device; fixed via `viewportFit: "cover"` in the root layout's Viewport export); and the og:image asset truth — our declaration claimed `{ url: "/icon.png", 512, 512 }` while `/icon.png` (the Next file-convention route over the reference's logo) serves a 480×480 JPEG, false on both the dimensions and the type — fixed by pointing at `/icon-512.png` (the real 512×512 PNG from the s11 PWA-manifest set), with `OG_IMAGES` exported from `route-head.ts` as the SINGLE source shared by the root layout and routeHead (a child's openGraph replaces the parent's wholesale, so the root-only fix left every routeHead route serving the old URL — the drift class killed in the same change); the reference declares 1200×630 against the same ~480×480 file at both their raw object URL and their render endpoint (`?width=1200&height=630&resize=contain` serves ~480×480 as JPEG or WebP) — their platform default, never mirrored, the s11 size-correct precedent extended to the OG card) — plus F3 documentation: the reference's `last_active` heartbeat + online-presence UI verified at the bundle level (they `updateMe({last_active})` on sidebar mount; a 5-minute recency check drives a green-dot/Online/You/Assigned user table — all inside the admin-gated All Tickets page; no user-facing surface renders any of it; ours deliberately writes no heartbeat — the data-privacy stance) | Notched-device rendering letterboxed vs the reference's full-bleed; social-card crawlers read false og:image dimensions (cropped/mis-rendered previews) | Fixed — all E2E-pinned (193 E2E, 163 parity); inventory in `docs/remediation-plan-session17.md` |
+| RESOLVED | Session-18 parity gaps (2 code findings — both on the verification/asset-truth layer: the s17 og:image E2E pin was environment-dependent — it GET'd the rendered absolute URL (baked from NEXT_PUBLIC_SITE_URL, localhost:3000 by default) instead of the E2E server (:3100), so it passed in session 17 ONLY because a live-verification server was listening on :3000 and failed ECONNREFUSED in every clean environment, INCLUDING the CI run on the s17 push — the badge sat red between sessions; fixed by resolving the pathname against the page under test (`new URL(url, page.url()).pathname`), verified green 194/194 in a clean environment with :3000 down); and the favicon asset truth — `src/app/icon.png` (the Next file-convention route) was the reference's logo saved as a JPEG under a .png name, so the route served `image/png` over JPEG bytes and the generated `<link rel="icon">` claimed `type="image/png"` — the exact s17 og:image defect class on the one remaining head-facing asset; fixed with a pixel-identical PNG re-encode (numpy-verified), pinned by a new magic-bytes E2E test) — plus F3 documentation: the reference's viewport meta drifted to auth-pages-only (ours stays uniform — the documented notched-device superset), the AGENTS.md s7 title note corrected (ours is the proper-cased SUPERSET over their segment-verbatim set), the PAD's stale §5.1/§7.1/§7.4 counts aligned, and the s14-s17 screenshot-script lineage's mangled `aref*=` selector fixed in the s18 script (executed end-to-end green); the session's retracted "corrupted CI trigger" finding (a display-layer ANSI-eating artifact — the raw bytes were `branches: [main]` all along) kept in the plan as a process lesson | CI red on main between sessions 17-18 (a clean-env failure shipped unnoticed); mislabeled favicon body | Fixed — all E2E-pinned (194 E2E, 164 parity); inventory in `docs/remediation-plan-session18.md` |
 
 ---
 

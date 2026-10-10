@@ -2856,7 +2856,18 @@ test.describe("session 17: the viewport meta + the og:image asset truth (head-la
     // declaration is a CLAIM about an asset — GET it, read the content type,
     // and verify the PNG magic bytes (89 50 4E 47 0D 0A 1A 0A).
     expect(url, "og:image url").toBeTruthy();
-    const res = await page.request.get(url as string);
+    // Session 18: resolve the PATHNAME against the page under test and fetch
+    // through the E2E server (page.request resolves relative paths against
+    // the context baseURL). The rendered og:image is an ABSOLUTE URL baked
+    // from NEXT_PUBLIC_SITE_URL (localhost:3000 by default) — fetching it
+    // directly made this pin environment-dependent: it passed in session 17
+    // only because a live-verification server was listening on :3000 at the
+    // time, and it hard-fails (ECONNREFUSED) in any clean environment (a
+    // fresh clone, CI) where nothing listens there. The asset GET is about
+    // the ROUTE, not the origin — the URL-pattern assertions above it
+    // already pin the declaration.
+    const assetPath = new URL(url as string, page.url()).pathname;
+    const res = await page.request.get(assetPath);
     expect(res.status()).toBe(200);
     expect(res.headers()["content-type"]).toContain("image/png");
     const buf = await res.body();
@@ -2864,5 +2875,39 @@ test.describe("session 17: the viewport meta + the og:image asset truth (head-la
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
     expect(magic, "PNG magic bytes").toBe("89504e470d0a1a0a");
+  });
+});
+
+test.describe("session 18: the favicon asset truth (the s17 doctrine extended to the remaining head-facing asset)", () => {
+  // The s17 lesson 66 — "for every pinned meta, ask what its content
+  // resolves to and whether the asset behind it is what it claims" — applied
+  // to the LAST head-facing asset still carrying a false type: src/app/icon.png
+  // (the Next file-convention favicon route) was the reference's logo saved
+  // as a JPEG under a .png name, so the route served JPEG bytes with
+  // Content-Type: image/png and the generated <link rel="icon"> declared
+  // type="image/png" — false on the type axis exactly like the s17 og:image
+  // (which claimed 512x512 over the same 480x480 JPEG). Fixed by re-encoding
+  // the identical pixels as a real PNG; the visual rendering is unchanged.
+
+  test("the favicon route serves PNG magic bytes (the link's type claim is true)", async ({ page }) => {
+    await page.goto("/dashboard");
+    // The generated link declares the type Next derives from the file name —
+    // the declaration must match what the route actually serves.
+    const iconLink = page.locator('link[rel="icon"]');
+    await expect(iconLink).toHaveCount(1);
+    const linkType = await iconLink.getAttribute("type");
+    expect(linkType).toContain("image/png");
+    // The response layer (the s14/s17 doctrine): GET the asset, read the
+    // content type, and verify the PNG magic bytes (89 50 4E 47 0D 0A 1A 0A)
+    // — the pre-fix route served a JPEG body (ffd8ff...) under this exact
+    // PNG-typed link.
+    const res = await page.request.get("/icon.png");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("image/png");
+    const buf = await res.body();
+    const magic = Array.from(buf.slice(0, 8))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    expect(magic, "PNG magic bytes on the favicon body").toBe("89504e470d0a1a0a");
   });
 });

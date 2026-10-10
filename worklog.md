@@ -601,3 +601,35 @@ Work Log:
 
 Stage Summary:
 - Both session-17 head-layer findings fixed and E2E-pinned (193 E2E total: visual-parity 161→163); the last_active divergence documented; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 36
+Agent: main (Super Z)
+Task: Session 18 — refresh repo, review session_23/remediation-plan-session17/worklog/session_24 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git clone (fresh workspace — the prior workspace was reset) at 3046906 (the session-17 remediation 806a510 + the operator's session_24.md transcript commit); current session established as Session 18 (agent log → docs/session_25.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.15.0 + session_23.md + remediation-plan-session17.md + worklog + session_24.md — all aligned with the codebase; environment contract re-established on the fresh clone (.env from .env.example with generated AUTH_SECRET + DATABASE_URL=file:../db/custom.db, db/ at root pushed + seeded 4/11/3, skills/ excluded in all 4 configs, .env.example matches); the Playwright 1248 chromium build installed (the s13 lesson — the cache only had 1200/1243)
+- Baseline gates: lint ✓ typecheck ✓ 56 unit ✓ build ✓ smoke 11/11 ✓ — and E2E **192/193 in the CLEAN environment** (the first session to run the suite with no ambient :3000 listener): the s17 og:image pin ECONNREFUSED on the baked absolute origin (localhost:3000) while the E2E server runs on :3100; the GitHub CI badge reads "failing" — the s17 push shipped this clean-env failure and it sat unnoticed between sessions. Session-17 commit 806a510 audited CLEAN against its plan (viewportFit + OG_IMAGES single source)
+- RETRACTED FINDING (kept for the process lesson): the first plan draft claimed "the CI trigger is corrupted (branches: ain]) — CI never ran"; the raw bytes on disk + in the session-3 blob are branches: [main] (od-verified) — the corruption was an ANSI-eating artifact of my own cat/grep OUTPUT. The output layer is part of the measurement
+- Fresh gap analysis (agent-browser + curl on both sites + the reference bundle): standing drift pins stable (tokens, sidebar #fafafa, button cursor, system font, per-route canonical/og:url/twitter:url, ticketdetails canonicalization + JSON-LD, login-view machine re-exercised, detail headings + comment box + Attachment N labels, recent-row FileText tiles + lowercase badges); mobile matrix green on ours (s14 script) + reference sheet contract matches (their 468 overflow defect persists); REFERENCE DRIFT: viewport-fit=cover now auth-pages-only on their side (ours stays uniform — documented superset); their titles re-confirmed segment-verbatim (the AGENTS.md s7 note was garbled — corrected); their og:image/manifest falsity unchanged (1200x630 + 192/512 over the 480x480 JPEG); bundle re-swept — zero new user-facing features (notification 0, whileHover library-only, Export/print admin-gated, last_active present); OUR FINDING: /icon.png serves a 480x480 JPEG body under Content-Type image/png + a type="image/png" link claim (the last head-facing falsity — the s17 og:image defect class); the s14-s17 screenshot scripts carry a mangled aref*= selector (byte-verified) that FATALs under agent-browser 0.38.1
+- Wrote + validated docs/remediation-plan-session18.md (the pin's fetch isolated as the suite's ONLY absolute-URL fetch; the icon conversion pixel-identity numpy-verified; no imports; no pin conflicts)
+
+Stage Summary:
+- Repo at 3046906 + plan; 2 code findings (F1 the CI-red og:image pin made environment-independent, F2 the truth-telling favicon) + documentation findings queued for TDD execution
+
+---
+Task ID: 37
+Agent: main (Super Z)
+Task: Session 18 — TDD remediation, verification, docs, SKILL.md v2.16.0, commit + push
+
+Work Log:
+- TDD RED: the session-18 favicon pin (200 + image/png + PNG magic bytes + the link type claim) — RED verified (ffd8ff JPEG magic); F1's clean-env red re-verified with :3000 down (the baseline's ECONNREFUSED)
+- GREEN: F1 the og:image pin's asset fetch re-anchored to the E2E server (new URL(url, page.url()).pathname — the URL-pattern assertions untouched); F2 src/app/icon.png re-encoded as a true PNG in place (pixel-identical; route + link generation unchanged)
+- Gates in the CLEAN environment (:3000 confirmed down): lint ✓ typecheck ✓ 56 unit ✓ build ✓ **194/194 E2E** ✓ (193 + 1, zero regressions) smoke 11/11 ✓
+- Live paired re-verification (production standalone :3000): /icon.png → 200/image/png/real PNG magic (69,319 bytes); og:image → /icon-512.png → 200/image/png/magic (79,416 bytes); mobile matrix re-run green (375=375, 288px sheet, 80% overlay, auto-close, Escape); canonical 11-ticket seed re-verified after every fixture cleanup
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s18.sh (the s17 lineage + the F4 selector fix — main a[href*="ticketdetails"], replacing the mangled aref*=; executed end-to-end, all four FATAL guards green); VLM-verified shots 02 + 05 (LAYOUT-OK)
+- Updated README (56/194/164 counts + the s18 sentences)/AGENTS (the session-18 contracts section + the s7 title-note correction + the plan reference list through s18 + the s18 capture-script pointer)/CLAUDE (counts + two anti-patterns: the ambient-server false-green, the hex-dump-before-acting lesson)/PAD (the s18 known-issues row + the stale §5.1/§3.2/§7.1/§7.4 alignment to the current state)/service-desk_SKILL.md v2.16.0 (lessons 68-69: the ambient-infrastructure false-green, the output-layer-is-part-of-the-measurement doctrine); session_25.md narrative log; plan execution status; this worklog
+
+Stage Summary:
+- Both session-18 code findings fixed and E2E-pinned (194 E2E total, clean-environment verified: visual-parity 163→164); the CI-red state closed (the push's run executes the same clean-env conditions verified locally); production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
