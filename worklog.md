@@ -473,3 +473,35 @@ Work Log:
 
 Stage Summary:
 - All 3 session-13 findings fixed and E2E-pinned (176 E2E total: visual-parity 138→147); production-ready superset maintained; pushed to main @ 9f4183f (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 28
+Agent: main (Super Z)
+Task: Session 14 — refresh repo, review session_15/session_16 docs, audit recent changes, fresh gap analysis vs live reference, remediation plan
+
+Work Log:
+- git clone (fresh workspace) at a77d7e9 (session-13 remediation 9f4183f + log commits f7b2159/a77d7e9 — the latter the operator adding docs/session_16.md, the s13 transcript); current session established as Session 14
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.11.0 + session_15.md + remediation-plan-session13.md + worklog + session_16.md — all aligned with the codebase; env contract set up (.env from .env.example with generated AUTH_SECRET, DATABASE_URL=file:../db/custom.db, db/ at root pushed + seeded 4/11/3); the user's requested env/DB/vitest+playwright config items verified already satisfied (skills/ excluded in all 4 configs); scandihaven repo cloned as the tech-stack pattern reference
+- Baseline gates: lint ✓ typecheck ✓ 55 unit ✓ build ✓ 176/176 E2E ✓ smoke 11/11 ✓; session-13 commit 9f4183f audited CLEAN (F1/F2/F3 all match the plan); space-y trap scan clean
+- Fresh gap analysis vs live reference (agent-browser + Playwright paired probes, both sites): standing drift pins stable; mobile navigation full matrix green on both sites (ours 375=375 no overflow, 288px sheet, oklab-0.8 overlay, auto-close, Escape→body — committed as scripts/s14-mobile-matrix.mjs); HEADLINE #1 — the reference's CDN serves attachments with NO Content-Disposition (the new tab DISPLAYS the file inline; our route forced attachment downloads since s8 — F1, MED-HIGH); HEADLINE #2 — the reference's platform canonicalizes the FULL current URL (canonical + og:url + twitter:url + the breadcrumb JSON-LD item all carry ?id=X on the id-bearing detail route; ours shipped the bare segment — F2, MED-LOW); documentation findings — their CDN URLs are not durable (the s13 .txt probe 404s; our SQLite storage = retention superset), the unguarded :hover re-confirmed at the stylesheet layer
+- Non-gaps verified: avg-resolution N/A state (matches our formatDuration), mytickets filters push no query params, comment-form attributes, formatDateTime/date-only rows, platform console warnings + stale SPA titles persist (never mirror)
+- Wrote + validated docs/remediation-plan-session14.md
+
+Stage Summary:
+- Repo at a77d7e9 + plan; 2 findings queued for TDD execution
+
+---
+Task ID: 29
+Agent: main (Super Z)
+Task: Session 14 — TDD remediation, verification, docs, SKILL.md v2.12.0, commit + push
+
+Work Log:
+- TDD: 5 substantive E2E tests + the bare-route regression guard written first (one authored-red fix: the hostile-filename fixture retargeted from path separators — already rejected by upload validation — to the quoted-string break surface), verified RED (4 failed as designed); mid-session tooling lesson recorded: the shell layer mangles a[href sequences on read display (files verified byte-correct via hexdump) and String.replace's $' expansion ate a replacement string (fixed via git restore + plain-concatenation re-append) — SKILL lesson 59
+- Implemented: F1 the inline disposition (inline; filename="<sanitized>" — safe against the closed upload-validated mimeType list + global nosniff); F2 the ticketdetails page split (the client island byte-unchanged in ticket-details-view.tsx; the server wrapper's generateMetadata awaiting searchParams spreads routeHead("/ticketdetails?id=<id>"); the breadcrumb moved from the layout into the page with the query prop on BreadcrumbJsonLd)
+- Gates: lint ✓ typecheck ✓ 55 unit ✓ build ✓ 181/181 E2E ✓ (176 + 5, zero regressions) smoke 11/11 ✓
+- Live paired re-verification (production standalone :3000): F1 200 + text/plain + inline; F2 all three head URLs + the breadcrumb item equal and query-bearing; the bare route segment-canonical; clean hydration post-split (zero console errors); mobile sheet 288px; probe fixtures removed (canonical 11-ticket seed re-verified)
+- Screenshots: the standing 9 + the new 10-attachment-inline-view.png (the F1 fix documented visually) via scripts/capture-screenshots-s14.sh (the s13 lineage; all FATAL guards green; the fixture curl-created + removed); VLM-verified shot 10 renders the text in-page + the dashboard spot-check shows no visual regression
+- Updated README (181/151 counts + attachment-row amendment + s14 paragraph)/AGENTS (s14 contracts section)/CLAUDE (counts + the response-layer anti-pattern)/PAD (s14 known-issues row + 151 parity)/service-desk_SKILL.md v2.12.0 (lessons 57-59); session_17.md narrative log; plan execution status; this worklog
+
+Stage Summary:
+- Both session-14 findings fixed and E2E-pinned (181 E2E total: visual-parity 147→151); production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)

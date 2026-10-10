@@ -1,0 +1,385 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
+import { ArrowLeft, FileText, MessageSquare, Paperclip, Send, User as UserIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/components/toast";
+import { CategoryBadge, PriorityBadge, StatusBadge } from "@/components/ticket-bits";
+import { formatDateTime } from "@/lib/utils";
+import { STATUS_LABELS, TICKET_STATUSES, type TicketStatus } from "@/lib/constants";
+
+interface TicketDetail {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  priority: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: { id: string; name: string; email: string };
+  comments: {
+    id: string;
+    content: string;
+    createdAt: string;
+    author: { id: string; name: string; email: string };
+  }[];
+  attachments: {
+    id: string;
+    fileName: string;
+    mimeType: string;
+    sizeBytes: number;
+    createdAt: string;
+  }[];
+}
+
+export function TicketDetailsView() {
+  const params = useParams<{ id?: string }>();
+  const searchParams = useSearchParams();
+  const ticketId = searchParams.get("id") ?? params?.id;
+  const { toast } = useToast();
+
+  const [ticket, setTicket] = React.useState<TicketDetail | null>(null);
+  const [notFound, setNotFound] = React.useState(false);
+  const [comment, setComment] = React.useState("");
+  const [posting, setPosting] = React.useState(false);
+  const [updating, setUpdating] = React.useState(false);
+
+  const load = React.useCallback(() => {
+    if (!ticketId) return;
+    fetch(`/api/tickets/${ticketId}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => setTicket(d.ticket))
+      .catch(() => setNotFound(true));
+  }, [ticketId]);
+
+  React.useEffect(load, [load]);
+
+  async function handleAddComment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!comment.trim() || !ticketId) return;
+    setPosting(true);
+    try {
+      const res = await fetch(`/api/tickets/${ticketId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: comment }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        toast({
+          title: "Could not add comment",
+          description: data.error ?? "Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setComment("");
+      load();
+    } catch {
+      toast({ title: "Network error", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setPosting(false);
+    }
+  }
+
+  async function handleStatusChange(next: string) {
+    if (!ticketId || !ticket) return;
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/tickets/${ticketId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: next }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; ticket?: TicketDetail };
+      if (!res.ok) {
+        toast({
+          title: "Could not update status",
+          description: data.error ?? "Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setTicket(data.ticket ?? null);
+      toast({ title: "Status updated", description: `Ticket marked as ${next.replace("_", " ")}.`, variant: "success" });
+    } catch {
+      toast({ title: "Network error", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  // Session 11: the reference renders the not-found Alert on the id-less
+  // route too (live-measured on the bare /ticketdetails) — the same
+  // destructive Alert as the unknown-id case. Derived at render time (not
+  // setState in the effect body — that's an ESLint error in this config):
+  // a missing/empty id means there is no ticket to load, so we short-circuit
+  // straight to the terminal state instead of the loading skeleton (which
+  // previously rendered forever — the load callback early-returns and the
+  // ticket state never resolves).
+  const missingId = !ticketId;
+
+  if (notFound || missingId) {
+    return (
+      // Session 10: the reference renders a shadcn destructive Alert inline
+      // in the standard max-w-5xl page container (live-measured on
+      // /ticketdetails?id=unknown) — rounded-lg + px-4 py-3 + text-sm +
+      // border-destructive/50 + text-destructive, resolving red-500 text
+      // with a 50%-alpha border. Was a centered text-2xl card. The Back to
+      // Tickets control stays as the documented superset below the alert.
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
+        <div className="max-w-5xl mx-auto space-y-4">
+          <div
+            role="alert"
+            className="relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7 border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive"
+          >
+            <div className="text-sm [&_p]:leading-relaxed">Ticket not found</div>
+          </div>
+          <div>
+            <Button asChild variant="ghost" className="text-slate-500 hover:text-slate-700">
+              <Link href="/mytickets">
+                <ArrowLeft className="w-4 h-4 mr-2" aria-hidden />
+                Back to Tickets
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6" aria-label="Loading ticket">
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="h-10 w-3/4" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    // Reference structure (measured session 2): max-w-5xl container, a
+    // mb-6 back button, then grid lg:grid-cols-3 — left col-span-2 holds the
+    // ticket card (gradient header + description) and the comments card;
+    // the right column holds the Ticket Information panel.
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 md:p-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Reference (measured session 3): the back button + grid animate in
+            together inside ONE motion wrapper. */}
+        <div className="animate-rise-in motion-reduce:animate-none">
+        <div className="mb-6">
+          {/* Reference (measured session 4): the back control is the GHOST
+              variant — borderless at rest, just the hover:bg-slate-100 wash. */}
+          <Button asChild variant="ghost" className="mb-4 hover:bg-slate-100">
+            <Link href="/mytickets">
+              <ArrowLeft className="w-4 h-4 mr-2" aria-hidden />
+              Back to Tickets
+            </Link>
+          </Button>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main column (reference: lg:col-span-2 space-y-6) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Ticket card: gradient header with inline title + badges */}
+            <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100 bg-gradient-to-r from-cyan-50/50 to-blue-50/50">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="font-semibold tracking-tight text-2xl text-slate-900">
+                      {ticket.title}
+                    </div>
+                    <StatusBadge status={ticket.status as TicketStatus} detail />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {/* Reference (session 4): the detail priority badge uses the
+                        compact px-2.5 py-0.5 padding (the status badge above
+                        keeps the larger text-sm treatment). */}
+                    <PriorityBadge priority={ticket.priority as never} showWord compact />
+                    <CategoryBadge category={ticket.category as never} />
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 space-y-6">
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-cyan-500" aria-hidden />
+                    Description
+                  </h3>
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                    {ticket.description}
+                  </p>
+                </div>
+
+                {/* Session 13: the reference's attachment display
+                    (live-measured on their probe tickets) — neutral slate
+                    rows, the Paperclip icon, and the GENERIC indexed label
+                    "Attachment N" (never the filename), opening in a new
+                    tab like their CDN links. The at-rest dropzone was always
+                    byte-identical; only this detail state had drifted. */}
+                {ticket.attachments.length > 0 ? (
+                  <div>
+                    <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <Paperclip className="w-4 h-4 text-cyan-500" aria-hidden />
+                      Attachments
+                    </h3>
+                    <div className="space-y-2">
+                      {ticket.attachments.map((a, i) => (
+                        <a
+                          key={a.id}
+                          href={`/api/tickets/${ticket.id}/attachments/${a.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={a.fileName}
+                          className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200"
+                        >
+                          <Paperclip className="w-4 h-4 text-slate-500" aria-hidden />
+                          <span className="text-sm text-slate-700">Attachment {i + 1}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Comments card (reference: avatar circles + ml-10 indent) */}
+            <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100">
+                <div className="font-semibold leading-none tracking-tight flex items-center gap-2 text-slate-900">
+                  <MessageSquare className="w-5 h-5 text-cyan-500" aria-hidden />
+                  Comments &amp; Updates
+                </div>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="space-y-4">
+                  {ticket.comments.length === 0 ? (
+                    <p className="text-center text-slate-500 py-8">No comments yet</p>
+                  ) : (
+                    ticket.comments.map((c) => (
+                      <div
+                        key={c.id}
+                        className="p-4 rounded-xl border bg-slate-50 border-slate-200"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
+                              <UserIcon className="w-4 h-4 text-white" aria-hidden />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-900 text-sm">{c.author.name}</p>
+                              <p className="text-xs text-slate-500">{formatDateTime(c.createdAt)}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-slate-700 whitespace-pre-wrap ml-10">{c.content}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <form onSubmit={handleAddComment} className="space-y-3 pt-4 border-t border-slate-200">
+                  <Textarea
+                    placeholder="Add a comment or update..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    aria-label="Add a comment or update"
+                    className="min-h-24 border-slate-300 focus:border-cyan-500 shadow-xs"
+                  />
+                  <div className="flex items-center justify-between">
+                    <Button
+                      type="submit"
+                      disabled={posting || !comment.trim()}
+                      className="ml-auto bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                    >
+                      <Send className="w-4 h-4 mr-2" aria-hidden />
+                      {posting ? "Adding…" : "Add Comment"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          {/* Right column (reference: space-y-6) */}
+          <div className="space-y-6">
+            <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100">
+                <div className="tracking-tight text-sm font-semibold text-slate-900">
+                  Ticket Information
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                    Created By
+                  </p>
+                  <p className="text-sm text-slate-900 font-medium">{ticket.createdBy.email}</p>
+                </div>
+                <Separator className="h-[1px] w-full" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                    Created On
+                  </p>
+                  <p className="text-sm text-slate-900 font-medium">{formatDateTime(ticket.createdAt)}</p>
+                </div>
+                <Separator className="h-[1px] w-full" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                    Last Updated
+                  </p>
+                  <p className="text-sm text-slate-900 font-medium">{formatDateTime(ticket.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Superset: owner status control */}
+            <div className="rounded-xl border text-card-foreground border-none shadow-xl bg-white">
+              <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-100">
+                <div className="tracking-tight text-sm font-semibold text-slate-900">Update Status</div>
+              </div>
+              <div className="p-6 space-y-2">
+                <p className="text-xs text-slate-400">Owners can close or reopen their own tickets.</p>
+                <Select
+                  value={ticket.status}
+                  onValueChange={(v) => void handleStatusChange(v)}
+                  disabled={updating}
+                >
+                  <SelectTrigger className="w-full bg-white" aria-label="Ticket status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TICKET_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {STATUS_LABELS[s]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  );
+}

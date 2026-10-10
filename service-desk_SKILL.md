@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-13 remediation (2026-10-10).
+  functionality. Distilled through the session-14 remediation (2026-10-10).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.11.0
+version: 2.12.0
 last_updated: 2026-10-10
-project_state: 55 unit tests + 176 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–13)
+project_state: 55 unit tests + 181 E2E green; CI on GitHub Actions; all parity contracts E2E-pinned (sessions 1–14)
 ---
 
 # ServiceDesk — Complete Engineering Skill
@@ -399,6 +399,266 @@ Manual/visual checks:
 54. **A code comment's claim about the reference's feature set is a finding waiting to happen.** (Session 13.) "The reference has no attachments" shipped in session 8 and survived five sessions — while their full attach UI (multiple picker, appended rows, X icon removes, CDN uploads, the detail display) sat one probe away. Feature-level claims ("they don't have X") need the same live re-verification cadence as style claims; the s12 og:url belief was the same defect class.
 55. **Probe the STATES, not just the surfaces.** (Session 13.) The s3 dropzone measurement pinned the at-rest markup; the attached-file row — the state users spend time in — was never measured. Every interactive surface has at least two contracts: at-rest and active. Enumerate them when planning a gap analysis.
 56. **A guard nobody has fired is a guard that lies.** (Session 13.) The s12 screenshot script's FATAL checks were doubly broken — an inverted condition (`!=` fires on "ok", passes on "wrong:...") and a selector matching nothing on the target page (`.text-4xl` on the detail page, whose h1 is text-xl). Execute the failure path of every guard before trusting the success path.
+
+57. **The response layer is a parity surface too.** (Session 14.) Thirteen sessions pinned markup, computed styles, and the head — but the HTTP response behind a link (Content-Disposition, content-type, redirect chain) was first probed this session, and it carried a real UX gap: our download route forced browser downloads for six sessions while the reference's new tab displayed the file inline. Every user-visible "click → what happens" has a DOM contract AND a response contract.
+58. **A pinned mechanism is only pinned on the states it was measured in.** (Session 14.) The s12 social-URL set was measured on query-less routes; the reference's canonicalization includes the query string on their one query-driven route. When pinning a mechanism, enumerate its input states — query/no-query is a state axis, like at-rest/active.
+59. **Reference platform artifacts age.** (Session 14.) Their CDN file URLs expire (the s13 probe's .txt 404s today). Durable storage on our side is a superset to keep — "their file is gone" must never be read as "delete ours to match." And beware the shell transmission layer: it mangles `a[href` sequences on both read and write display — verify selector bytes (hexdump) before diagnosing a "broken" locator, and never let String.replace's `
+
+
+---
+
+## 13. Pitfalls to Avoid
+
+- Adding `tailwind.config.js` (v4 is CSS-first — tokens live in `globals.css`).
+- Plain `text-*`/`bg-*` overrides fighting shadcn variant utilities without `!`.
+- Trusting an ambient `DATABASE_URL` over the repo `.env` (scripts pin it for a reason).
+- "Fixing" the dark circle over the sidebar footer in dev screenshots (Next dev overlay, shadow DOM, dev-only).
+- Real logins per E2E test (rate limiter) — use the shared `storageState`.
+- `getByRole("alert")` in Playwright (route announcer ambiguity).
+- Bare `page.locator(...)` for parity probes (sidebar lives outside main).
+- Interchanging TicketCard and RecentTicketRow.
+- Adding `tabular-nums`, `sticky` headers, or logo tiles where the reference has none — each was measured absent and is E2E-pinned.
+- Running `db:push` outside the npm scripts (ambient env redirection).
+- Deleting `text-white!`'s comment — the rationale is load-bearing for future agents.
+
+---
+
+## 14. Best Practices
+
+- **Parity workflow (the clone-app-pat-pro discipline):** navigate the reference → `getComputedStyle` + `outerHTML` extraction → diff class structures programmatically → implement → E2E-pin → re-verify computed styles on both sites. Tools that worked: agent-browser (`eval`, `get styles`), a class-tuple SequenceMatcher diff (python), full-page composites only as VLM leads.
+- **TDD for every fix:** red test first (unit for domain seams, E2E for UI contract) → implement → full gate. The session-2 remediation followed exactly this: 18 red parity tests → implementation → 46 green.
+- **Comments explain why** (see the `text-white!` rationale), never narrate the obvious.
+- **One logical change per commit**; Conventional Commits; message explains why-not-just-what.
+- **State confidence labels** for non-trivial claims: Verified (executed) / Reasoned (code inspection) / Assumed.
+- **Keep the scratch probes out of the product tree:** parity probes live in `scripts/` or `/tmp`, never in `src/`; lint ignores `skills/`, `research/`, `tool-results/` — keep it that way.
+
+---
+
+## 15. Coding Patterns
+
+### 15.1 Client data fetching with cancellation (every `(app)` page)
+
+```tsx
+React.useEffect(() => {
+  const controller = new AbortController();
+  fetch(`/api/tickets?${params}`, { signal: controller.signal })
+    .then((r) => (r.ok ? r.json() : { tickets: [] }))
+    .then((d) => setTickets(d.tickets ?? []))
+    .catch((err) => { if (err.name !== "AbortError") setTickets([]); });
+  return () => controller.abort();
+}, [search, status, priority, sort, scope]);
+```
+
+### 15.2 Field-level API errors mapped onto forms
+
+```tsx
+// Route handler returns { error, errors?: Record<string,string> }
+if (!res.ok) { setErrors(data.errors ?? {}); return; }
+// UI renders <p className="text-xs text-red-600" role="alert">{errors.title}</p>
+```
+
+### 15.3 External-store media query (the ONLY sanctioned pattern)
+
+```tsx
+// src/hooks/use-mobile.ts — useSyncExternalStore over matchMedia
+const isMobile = useIsMobile();
+```
+
+### 15.4 Parity-pinned conditional classes (the active nav)
+
+```tsx
+className={`... ${isActive
+  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white! shadow-lg shadow-cyan-500/30"
+  : "text-slate-600 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 hover:text-cyan-700"}`}
+// text-white! — important modifier is load-bearing (variant cascade). See §9.1.
+```
+
+### 15.5 Two-renderer ticket rows
+
+```tsx
+// mytickets: <TicketCard ticket={t} formattedDate={formatDateTime(t.createdAt)} />
+// dashboard: <RecentTicketRow ticket={t} />  // formats its own date-only date
+// Same TicketCardData shape; different measured presentations.
+```
+
+### 15.6 Enumerated-string vocabulary (single source of truth)
+
+```ts
+// src/lib/constants.ts — the ONLY place the ticket vocabulary lives
+export const TICKET_STATUSES = ["open", "in_progress", "resolved", "closed"] as const;
+// type guards + label maps; API routes and tests import from here
+```
+
+---
+
+## 16. Coding Anti-Patterns
+
+- **Effect-body setState** (lint ERROR) — external stores use `useSyncExternalStore`.
+- **Inline enum vocabularies** — `"open"` literals in components; import from constants.
+- **Raw SQL with user input** — all queries go through Prisma.
+- **Throwing across the API boundary** — route handlers return typed JSON errors.
+- **Second error envelope shapes** — one `{ error, errors? }` contract.
+- **`forwardRef`** — React 19 ref props.
+- **`<img>` in lists without `alt`** — decorative images get `aria-hidden`; content images need alt text (the login logo carries `alt="ServiceDesk logo"`).
+- **Duplicated page shells** — copy-pasting the login card across auth pages; they share the same structure by convention (login/signup/forgotpassword all follow the reference login design language).
+
+---
+
+## 17. Responsive Breakpoint Reference
+
+Tailwind v4 default scale (no custom breakpoints):
+
+| Breakpoint | Width | Used for |
+|---|---|---|
+| `sm` | ≥ 640px | login card paddings (`p-8 sm:p-10`), logo size (`h-20 w-20 sm:h-24 sm:w-24`), input heights (`h-11 sm:h-12`), footer link row (`flex-col sm:flex-row`) |
+| `md` | ≥ 768px | **the sidebar/mobile split** (`md:hidden` header; `hidden md:flex` desktop panel); page padding (`p-6 md:p-8`); filter row (`grid-cols-1 md:grid-cols-3`); submit category/priority row (`sm:grid-cols-2`) |
+| `lg` | ≥ 1024px | stat cards (`md:grid-cols-2 lg:grid-cols-4`); **detail layout** (`grid lg:grid-cols-3` + `lg:col-span-2`) |
+| `xl` | ≥ 1280px | (available; not currently load-bearing) |
+
+Mobile behavior contract (E2E-pinned): below 768px the sidebar becomes an off-canvas Sheet (`slide-in-from-left`, 500ms), the mobile header (inside main, NOT sticky) shows the trigger + plain h1, and the scroll happens in the layout's `flex-1 overflow-auto` container.
+
+---
+
+## 18. Z-Index Layer Map
+
+| Layer | Z | Source |
+|---|---|---|
+| Sidebar panel (desktop, fixed) | 10 | `sidebar.tsx` (`z-10`) |
+| Mobile header / page chrome | z-40 default | header is static (no z fight) |
+| Sheet overlay + content | 50 | shadcn Sheet (`z-50`) |
+| Radix portals (select, toast viewport) | 50+ | `z-[50]`, viewport `top-0 z-[100]` (mobile) |
+| Next dev overlay | shadow DOM | bottom-left dark circle — dev only, invisible to z-index probing |
+
+Rules: never introduce a z above 50 for page chrome; portals own 50+; the dev overlay lives in a shadow root and cannot collide.
+
+---
+
+## 19. Color Reference (Complete)
+
+`src/app/globals.css` — light palette (verified against the file):
+
+| Token | Hex | Usage |
+|---|---|---|
+| `--background` | `#f8fafc` | page base (slate-50) |
+| `--foreground` | `#0f172a` | body text |
+| `--card` | `#ffffff` | cards (stat cards use `bg-card`) |
+| `--card-foreground` | `#0f172a` | card text |
+| `--sidebar` | `#fafafa` | sidebar panel — **measured, not white** |
+| `--sidebar-foreground` | `#0f172a` | sidebar text |
+| `--primary` | `#171717` | near-black (stock shadcn, session 9) — drives the dark `hover:bg-primary/80` badge washes; cyan accents come from explicit utilities |
+| `--primary-foreground` | `#ffffff` | text on primary |
+| `--secondary` | `#f1f5f9` | secondary bg |
+| `--muted` | `#f1f5f9` / `--muted-foreground: #64748b` | quiet text |
+| `--accent` | `#f1f5f9` | hover surfaces |
+| `--destructive` | `#ef4444` / fg `#fff` | destructive actions |
+| `--border` | `#e2e8f0` | hairlines |
+| `--ring` | `#0a0a0a` | focus rings (near-black, reference-measured session 6; cyan accents use explicit `*-cyan-500` utilities) |
+| `--navy-950` | `#0a1628` | darkest surface |
+| `--navy-900` | `#0f2744` | dark surface |
+| `--navy-800` | `#1a3a5c` | dark surface |
+| `--amber-500` | `#f59e0b` | Open stat badge, warning accents |
+| `--emerald-500` | `#10b981` | resolved accent |
+
+Frequently used raw utilities (not tokens — Tailwind palette): `slate-50/100/200/300/400/500/600/700/800/900`, `cyan-50/100/400/500/600`, `blue-50/100/200/300/400/500/600/700`, `amber-50/100/200/300/500/800`, `orange-50/600`, `violet-500`, `purple-600`, `emerald-100/300/500/800`, `red-100/200/500/700`, `slate-600` (Total badge).
+
+Signature gradients: `from-cyan-500 to-blue-600` (active nav, primary buttons) · `from-cyan-400 to-blue-500` (avatars) · `from-cyan-100 to-blue-100` (emoji tiles) · `from-violet-500 to-purple-600` / `from-amber-500 to-orange-600` / `from-blue-500 to-cyan-600` / `from-emerald-500 to-green-600` (stat icon tiles) · `from-slate-50 to-white` (performance card) · `from-amber-50 to-orange-50` / `from-blue-50 to-cyan-50` / `from-slate-50 to-gray-50` (quick stats) · `from-cyan-50/50 to-blue-50/50` (card headers) · `from-slate-200 to-slate-300` (login logo glow) · `from-slate-50 via-white to-slate-100` (app-wide shell gradient) · `from-slate-50 via-white to-blue-50/30` (page content gradient) · `from-slate-200 via-slate-300 to-slate-200` (login top bar).
+
+---
+
+## 20. The Complete TypeScript Interface Reference
+
+Core domain shapes (verified against source):
+
+```ts
+// src/lib/constants.ts
+type TicketStatus = "open" | "in_progress" | "resolved" | "closed";
+type TicketPriority = "low" | "medium" | "high" | "urgent";
+type TicketCategory = "hardware" | "software" | "network" | "access" | "email" | "other";
+const STATUS_LABELS: Record<TicketStatus, string>;
+const PRIORITY_LABELS: Record<TicketPriority, string>;
+const CATEGORY_LABELS: Record<TicketCategory, string>;
+const CATEGORY_EMOJI: Record<TicketCategory, string>;
+const ATTACHMENT_MAX_BYTES: number;   // 2 MiB
+const ATTACHMENT_MAX_COUNT: number;   // 3
+
+// src/components/ticket-bits.tsx
+interface TicketCardData {
+  id: string; title: string; description: string;
+  category: string; priority: string; status: string;
+  createdAt: string;
+  _count?: { comments: number };
+}
+
+// src/components/app-sidebar.tsx
+interface SidebarUser { id: string; email: string; name: string }
+interface SidebarStats { open: number; in_progress: number; total: number }
+
+// ticket detail page (client-side shape)
+interface TicketDetail {
+  id: string; title: string; description: string;
+  category: string; priority: string; status: string;
+  createdAt: string; updatedAt: string;
+  createdBy: { id: string; name: string; email: string };
+  comments: { id: string; content: string; createdAt: string;
+              author: { id: string; name: string; email: string } }[];
+  attachments: { id: string; fileName: string; mimeType: string;
+                 sizeBytes: number; createdAt: string }[];
+}
+
+// API contracts (route handlers)
+// POST /api/auth/login  → { user } | { error, errors? }
+// GET  /api/stats        → { mine: {total,open,in_progress,resolved,closed},
+//                             global: {open,in_progress,resolved,closed,total},
+//                             avgResolutionMs: number | null }
+// validation results: { ok: boolean; errors?: Record<string, string> }  (src/lib/validation.ts)
+```
+
+Prisma schema (73 lines): `User { id, email @unique, name, passwordHash, createdAt }` · `Ticket { id, title, description, category, priority, status, createdAt, updatedAt, createdBy → User, comments[], attachments[] }` · `Comment { id, content, createdAt, author → User, ticket → Ticket }` · `Attachment { id, fileName, mimeType, sizeBytes, data (base64), createdAt, ticket → Ticket }`.
+
+---
+
+## Appendix A: The Meticulous Approach
+
+The six-phase workflow every change follows (from CLAUDE.md):
+
+1. **ANALYZE** — read the relevant page/component/route and its tests in full; identify which contract governs (db-path, validation, auth session, UI parity).
+2. **PLAN** — state the smallest correct path; name the files touched and the specs updated alongside.
+3. **VALIDATE** — confirm scope for anything touching auth, sessions, or the ticket vocabulary before coding.
+4. **IMPLEMENT** — modular, typed, test-backed increments; domain rules in `src/lib/` seams; UI consumes them.
+5. **VERIFY** — run the full gate; for visual changes, capture a screenshot AND re-probe computed styles against the reference.
+6. **DELIVER** — report what was verified, what was not, and any deferred debt. Never claim "works" without executed evidence.
+
+Session-2 application of this loop: 25 findings → remediation plan (docs/remediation-plan-session2.md) → plan validated against source → 18 red parity tests → implementation (9 groups: tests, chrome, sidebar, dashboard, mytickets, detail, submit, login, housekeeping) → 46/46 E2E green → computed-style re-verification on both sites → docs + this skill.
+
+Session-3 application of this loop: fresh DOM/computed-style diff + a MutationObserver motion probe → 12 findings + 1 latent hydration bug (`<div>`-in-`<p>` Skeleton) → remediation plan (docs/remediation-plan-session3.md) → 11 red parity tests + clean-hydration pin + `formatDate` unit tests → implementation (recent-row rework, lowercase badges, CSS entrance animations + `prefers-reduced-motion`, submit-form details, login caption, search icon, info-panel tracking, transparent `<main>`, CI workflow) → 57/57 E2E green → live re-verification (all contracts + zero console errors) → docs + this skill (v2.1.0).
+
+Session-4 application of this loop: full 5-page DOM diff + live geometry probes + VLM lead-generation (9 claims, 5 refuted) → 16 findings — the headline one being the **sidebar nav layout bug present since session 1** (the missing inner `flex items-center gap-3` wrapper made `justify-between` push labels to the right edge AND let `[&>svg]:size-4` shrink icons to 16px) → remediation plan (docs/remediation-plan-session4.md) → 16 red parity tests → implementation (nav wrapper + semibold labels + active hover gradient, badge shadow + compact padding, submit labels/grid/cyan-focus controls, ghost back buttons, rounded-lg mobile trigger, Google-logo wrapper, tracking-wider revert, reference-designed 404 page) → 73/73 E2E green → live re-verification (12px gap / 20px icons / weight 600 on desktop AND mobile, zero console errors) → docs + this skill (v2.2.0).
+
+## Appendix B: Quick Reference Card
+
+```bash
+# gates (in order)
+bun run lint && bun run typecheck && bun run test && bun run build && bun run test:e2e  # 107 E2E
+bash scripts/smoke-test.sh
+
+# db
+bun run db:push && bun run db:seed      # db/custom.db at repo root
+bun run db:reset
+
+# dev / verify
+bun run dev                             # :3000 — demo@servicedesk.app / Demo1234!
+curl localhost:3000/api/health
+
+# parity probes (session-2 workflow)
+agent-browser open <reference-url>       # login as needed
+agent-browser eval "getComputedStyle(document.querySelector('<sel>')).<prop>"
+# diff class structures with a SequenceMatcher over (tag, class) tuples
+```
+
+Key files: `src/lib/auth.ts` (security core) · `src/lib/db-path.ts` (db anchor) · `src/lib/constants.ts` (vocabulary) · `src/components/ui/sidebar.tsx` (parity keystone) · `src/components/app-sidebar-chrome.tsx` (shell + scroll container) · `src/components/ticket-bits.tsx` (two row renderers + badges) · `tests/e2e/mobile-navigation.spec.ts` (highest-regression chrome) · `tests/e2e/visual-parity.spec.ts` (session-2 contracts) · `docs/remediation-plan-session2.md` (gap inventory).
+
+Push: `git@github.com:nordeim/service-desk.git` main-only via `docs/ssh_git_wrapper_v3.py` — key materialized to 0600 temp file, shredded after; remote ref re-verified against local HEAD.
+` expansion near a replacement string containing dollar-quote.
 
 
 ---

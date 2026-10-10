@@ -2338,3 +2338,194 @@ test.describe("session 13: the attachment UI parity (the reference ships a full 
     expect(cs.pad, "py-8 padding").toBe("32px 0px");
   });
 });
+
+test.describe("session 14: the attachment download UX + the ticketdetails URL canonicalization", () => {
+  // Two findings from the fresh paired probes (docs/remediation-plan-session14.md):
+  //
+  // F1 — the reference's CDN serves attachments INLINE (no Content-Disposition
+  // header, curl-verified on their s13 probe tickets' file URLs): clicking an
+  // 'Attachment N' row opens the file and the browser DISPLAYS it. Our download
+  // route shipped 'attachment' — the new tab forced a browser download. The
+  // disposition swaps to 'inline; filename=...' (RFC 6266: renderable types
+  // display; the sanitized filename stays the save-as name; zip/doc download
+  // exactly as before). Safe because the mimeType is pinned at upload to the
+  // closed ATTACHMENT_ACCEPTED_TYPES list (no text/html, no svg — the s10 XSS
+  // decision) and nosniff ships on every response.
+  //
+  // F2 — the reference's platform canonicalizes the FULL current URL: on
+  // /ticketdetails?id=X their canonical + og:url + twitter:url all carry the
+  // query, and their BreadcrumbList JSON-LD item does too. Ours shipped the
+  // bare segment (the route that renders the not-found Alert). The s12 set
+  // was measured only on query-less routes — the query state was never probed.
+
+  test("the attachment download route serves files INLINE with the sanitized filename (F1)", async ({ page }) => {
+    const b64 = Buffer.from("session-14 download probe").toString("base64");
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S14 E2E download-disposition fixture",
+        category: "other",
+        priority: "low",
+        description: "Fixture ticket carrying one text/plain attachment for the disposition pin.",
+        attachments: [
+          { fileName: "s14-probe.txt", mimeType: "text/plain", sizeBytes: 26, data: b64 },
+        ],
+      },
+    });
+    expect(res.ok(), "fixture ticket created").toBe(true);
+    const { ticket } = (await res.json()) as {
+      ticket: { id: string; attachments: { id: string }[] };
+    };
+    expect(ticket.attachments.length, "one attachment on the fixture").toBe(1);
+
+    // Fetch the download URL the detail page's Attachment N row points at.
+    const dl = await page.request.get(
+      "/api/tickets/" + ticket.id + "/attachments/" + ticket.attachments[0].id,
+    );
+    expect(dl.status(), "download route responds 200").toBe(200);
+    expect(dl.headers()["content-type"], "the stored mimeType re-serves").toContain("text/plain");
+    // THE PARITY PIN: inline, not attachment — the new tab displays the file
+    // like the reference's CDN links do.
+    expect(
+      dl.headers()["content-disposition"],
+      "inline disposition (the reference serves no attachment header)",
+    ).toBe('inline; filename="s14-probe.txt"');
+
+    // cleanup: no DELETE route exists (the reference has no delete affordance
+    // either) — scripts/cleanup-s14-tickets.mjs prunes fixtures after the run.
+  });
+
+  test("the inline disposition still sanitizes a hostile filename (F1 hardening pin)", async ({ page }) => {
+    // The upload validation already rejects path separators (/ and \), so the
+    // hostile surface left for the ROUTE sanitizer is the quoted-string break
+    // — quotes, semicolons, and unicode that would escape Content-Disposition.
+    const b64 = Buffer.from("hostile name probe").toString("base64");
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S14 E2E hostile-filename fixture",
+        category: "other",
+        priority: "low",
+        description: "Fixture ticket with a quote-bearing filename for the sanitization pin.",
+        attachments: [
+          { fileName: 's14 "quoted"; name.txt', mimeType: "text/plain", sizeBytes: 19, data: b64 },
+        ],
+      },
+    });
+    expect(res.ok(), "fixture ticket created").toBe(true);
+    const { ticket } = (await res.json()) as {
+      ticket: { id: string; attachments: { id: string }[] };
+    };
+
+    const dl = await page.request.get(
+      "/api/tickets/" + ticket.id + "/attachments/" + ticket.attachments[0].id,
+    );
+    expect(dl.status()).toBe(200);
+    const cd = dl.headers()["content-disposition"] ?? "";
+    expect(cd, "inline disposition on the hostile name").toMatch(/^inline; filename="[a-zA-Z0-9_.\- ]+\.txt"$/);
+    // the quoted-string value must not contain a raw quote or semicolon —
+    // the sanitizer's whole job (RFC 6266 quoted-string escape).
+    const value = cd.slice(cd.indexOf('"') + 1, -1);
+    expect(value, "no raw quote inside the quoted value").not.toContain('"');
+    expect(value, "no semicolon inside the quoted value").not.toContain(";");
+    expect(value, "the .txt suffix survives").toMatch(/\.txt$/);
+  });
+
+  test("the id-bearing detail route canonicalizes the full URL on all three social URLs (F2)", async ({ page }) => {
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S14 E2E canonicalization fixture",
+        category: "other",
+        priority: "low",
+        description: "Fixture ticket for the ticketdetails head-URL query pin.",
+      },
+    });
+    expect(res.ok(), "fixture ticket created").toBe(true);
+    const { ticket } = (await res.json()) as { ticket: { id: string } };
+
+    await page.goto("/ticketdetails?id=" + ticket.id);
+    const canonical = page.locator('link[rel="canonical"]');
+    await expect(canonical, "no canonical on the id-bearing detail route").toHaveCount(1);
+    const href = await canonical.getAttribute("href");
+    // THE PARITY PIN: the query rides the canonical (the reference's platform
+    // canonicalizes the full current URL — live-measured on their detail route).
+    // The href is absolute (resolved against metadataBase) — match the tail.
+    expect(href, "canonical carries the id query").toMatch(
+      new RegExp("ticketdetails\\?id=" + ticket.id + "$"),
+    );
+
+    // og:url — emitted only from openGraph.url (the s12 lesson).
+    const ogUrl = page.locator('meta[property="og:url"]');
+    await expect(ogUrl).toHaveCount(1);
+    await expect(ogUrl).toHaveAttribute("content", href!);
+
+    // twitter:url — rides metadata.other, must equal the canonical.
+    const twUrl = page.locator('meta[name="twitter:url"]');
+    await expect(twUrl).toHaveCount(1);
+    await expect(twUrl).toHaveAttribute("content", href!);
+
+    // the s12 mechanism pin survives the query: og:site_name + og:image still
+    // ship (a child's openGraph wholesale-replaces the parent's).
+    await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "ServiceDesk");
+    const ogImage = page.locator('meta[property="og:image"]:not([property="og:image:width"])');
+    await expect(ogImage).toHaveCount(1);
+  });
+
+  test("the id-bearing detail route breadcrumb JSON-LD item carries the query (F2)", async ({ page }) => {
+    const res = await page.request.post("/api/tickets", {
+      data: {
+        title: "S14 E2E breadcrumb fixture",
+        category: "other",
+        priority: "low",
+        description: "Fixture ticket for the breadcrumb JSON-LD query pin.",
+      },
+    });
+    expect(res.ok(), "fixture ticket created").toBe(true);
+    const { ticket } = (await res.json()) as { ticket: { id: string } };
+
+    await page.goto("/ticketdetails?id=" + ticket.id);
+    const ld = page.locator('script[type="application/ld+json"]');
+    await expect(ld).toHaveCount(1);
+    const parsed = JSON.parse((await ld.textContent()) ?? "{}") as {
+      itemListElement: { position: number; name: string; item: string }[];
+    };
+    expect(parsed.itemListElement.length, "Home + the segment").toBe(2);
+    expect(parsed.itemListElement[0].name).toBe("Home");
+    expect(parsed.itemListElement[1].name, "the segment name stays verbatim").toBe("ticketdetails");
+    // THE PARITY PIN: the reference's builder canonicalizes the current URL —
+    // the ticketdetails item carries ?id=<id> (live-measured this session).
+    // Base-agnostic: parse the item and compare pathname + search.
+    const itemUrl = new URL(parsed.itemListElement[1].item);
+    expect(itemUrl.pathname + itemUrl.search, "the breadcrumb item carries the id query").toBe(
+      "/ticketdetails?id=" + ticket.id,
+    );
+  });
+
+  test("the bare detail route keeps the segment URLs (no query invented) (F2)", async ({ page }) => {
+    await page.goto("/ticketdetails");
+    const canonical = page.locator('link[rel="canonical"]');
+    await expect(canonical).toHaveCount(1);
+    const href = await canonical.getAttribute("href");
+    // Base-agnostic: the bare route canonicalizes to the segment, no query.
+    const hrefUrl = new URL(href!);
+    expect(hrefUrl.pathname, "no query on the bare route").toBe("/ticketdetails");
+    expect(hrefUrl.search, "no query on the bare route").toBe("");
+
+    const ogUrl = page.locator('meta[property="og:url"]');
+    await expect(ogUrl).toHaveCount(1);
+    await expect(ogUrl).toHaveAttribute("content", href!);
+    const twUrl = page.locator('meta[name="twitter:url"]');
+    await expect(twUrl).toHaveCount(1);
+    await expect(twUrl).toHaveAttribute("content", href!);
+
+    // the breadcrumb stays the segment URL too (the s11 Alert state
+    // canonicalizes to the bare route — no query invented).
+    const ld = page.locator('script[type="application/ld+json"]');
+    await expect(ld).toHaveCount(1);
+    const parsed = JSON.parse((await ld.textContent()) ?? "{}") as {
+      itemListElement: { position: number; item: string }[];
+    };
+    expect(
+      parsed.itemListElement[1].item.endsWith("/ticketdetails"),
+      "the bare-route breadcrumb item",
+    ).toBe(true);
+  });
+});
