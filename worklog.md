@@ -633,3 +633,18 @@ Work Log:
 
 Stage Summary:
 - Both session-18 code findings fixed and E2E-pinned (194 E2E total, clean-environment verified: visual-parity 163→164); the CI-red state closed (the push's run executes the same clean-env conditions verified locally); production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 38
+Agent: main (Super Z)
+Task: Session 18 (post-push) — CI-still-red investigation, the F4 retraction, the F5 root cause (upload-artifact hidden-files exclusion), the second fix commit
+
+Work Log:
+- The push of the s18 fixes (8f41800) verified remotely, but the CI run on it STILL failed (verify job green, e2e job red at "Run E2E suite") — local CI-exact simulations (no .env, CI AUTH_SECRET, fresh clone + artifact round-trip via tar) all passed 194/194, eliminating the code
+- RETRACTION 2 (the display artifact struck twice): the s16 spec pins display as aref*= through the tool output yet execute green — the od dump of the s17 capture script's TID line shows the correct main a[href*="ticketdetails"] on disk; the earlier "F4: the lineage carries a mangled selector (byte-verified)" finding was FALSE (the verification had od'd MY s18 script, not the "mangle"; the rest was grep output through the same display layer that ate [main] as ain]); corrected in the plan, AGENTS.md, the s18 script header, session_25.md, this worklog, SKILL lesson 69
+- Scraped the anonymous run-history aria-labels: ALL 33 runs since the workflow's session-3 introduction FAILED — CI never green; a structural, environment-only break since day one
+- ROOT CAUSE (F5, HIGH): actions/upload-artifact@v4 (v4.4+) EXCLUDES hidden files by default (README-verified, include-hidden-files defaults false) — the e2e artifact never carried .next/standalone/.next/ (server chunks + manifests + static) nor node_modules/.prisma (the generated Prisma client): the restored server booted /api/health but could render no page and query no database; the s17 og:image pin was a REAL clean-env failure layered on top (verified locally under CI-exact conditions), but the permanent red predates it by five sessions; every local simulation passed because tar does not discriminate against dot-directories
+- FIX: include-hidden-files: true on the upload step (+ the documenting comment); YAML-validated (the with-block parses with the input true)
+
+Stage Summary:
+- F5 root cause found and fixed; F4 retracted with the display-artifact lesson extended; follow-up commit pushes the workflow fix — targeting the repo's FIRST-EVER green CI run (33 red runs since session 3)

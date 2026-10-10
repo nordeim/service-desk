@@ -2,11 +2,15 @@
 # Session-18 screenshot refresh (production standalone server on :3000, demo
 # user). Captures the standing 10-shot set into docs/screenshots/.
 # Lineage: the s17 script (which carries the s15/s14/s13 fixes: FATAL guards,
-# the curl fixture pattern, the setInputFiles helper) — with the s18 F4 fix:
-# the mytickets ticket-link selector is 'main a[href*="ticketdetails"]'
-# (the s14-s17 lineage shipped a shell-mangled 'aref*=' form that FATALs the
-# run under agent-browser 0.38.1 — byte-verified, and re-verified end-to-end
-# green by this session's run).
+# the curl fixture pattern, the setInputFiles helper) carried forward — the
+# mytickets ticket-link selector is the same correct 'main a[href*=
+# "ticketdetails"]' the lineage has always carried on disk. (An earlier
+# draft of the session-18 notes claimed the s14–s17 scripts shipped a
+# mangled 'aref*=' selector — that was an output-display artifact (the
+# tool layer eats '[' + one character in some contexts), retracted after an
+# od byte-verification showed the correct bytes; see the retraction notes in
+# docs/remediation-plan-session18.md. Re-verified end-to-end green by this
+# session's run.)
 set -e
 cd "$(dirname "$0")/.."
 CLONE="http://localhost:3000"

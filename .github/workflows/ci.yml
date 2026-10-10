@@ -64,6 +64,17 @@ jobs:
         with:
           name: standalone-build
           path: .next/standalone
+          # Session 18: REQUIRED — upload-artifact v4.4+ EXCLUDES hidden
+          # files by default, and the standalone build is full of them:
+          # .next/standalone/.next/ (the server chunks, every manifest, and
+          # the static assets — the server cannot render a single page
+          # without it) and .next/standalone/node_modules/.prisma (the
+          # generated Prisma client — no database access without it).
+          # The default silently stripped both from the artifact since the
+          # workflow's first run, so the e2e job's restored server 500'd
+          # everything and CI has been red on every push since session 3
+          # (all 33 runs) while the local suite stayed green everywhere.
+          include-hidden-files: true
           retention-days: 1
 
   e2e:
