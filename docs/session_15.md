@@ -34,7 +34,7 @@ Screenshots: the standing 7 + 2 new attachment shots (08-submit-attachment-row, 
 
 Docs updated: README (176/147 counts + the attachment feature row + the session-13 pin paragraph), AGENTS.md (the session-13 contracts section + corrected attachment lineage + the screenshot-script bugs + the reference list), CLAUDE.md (counts + two new anti-patterns), PAD (the session-13 known-issues row + the parity count), service-desk_SKILL.md v2.11.0 (lessons 54-56), the session_13.md retrospective, session_15.md (this log), the plan's execution status, the worklog.
 
-**Session 13 complete** — pushing to `main` via `docs/ssh_git_wrapper_v3.py` (the key materialized to a 0600 temp file, shredded after; remote verified, tree clean).
+**Session 13 complete** — pushed to `main` @ `9f4183f` via `docs/ssh_git_wrapper_v3.py` (the key materialized to a 0600 temp file, shredded after; remote ref verified `9f4183f == local HEAD`, tracking synced, tree clean).
 
 **What shipped** (10 red → **176/176 E2E** + 55 unit + smoke 11/11):
 - **F1 · the submit-form attachment rows (MED-HIGH)**: the "reference has no attachments" comment was false — five sessions of divergence fixed to the measured contract (p-3 rows, bare filename, the X icon button, mt-4).
