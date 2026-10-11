@@ -292,6 +292,33 @@ export function parseListQuery(
 export function parseStatsQuery(
   searchParams: URLSearchParams,
 ): { ok: true } | { ok: false; error: string } {
+  // Session 29: the empty-grammar contract is now the shared parseNoQuery
+  // seam (this route was its first consumer, s28); the delegation keeps the
+  // message + behavior byte-identical — the s28 pins pin both.
+  return parseNoQuery(searchParams);
+}
+
+// Session 29: the shared empty-grammar contract, wired API-wide. The s28
+// audit closed /api/stats; the s29 audit measured every remaining route
+// family and found the identical silently-open grammar — ten families, all
+// returning 200/201 with any query string ignored (`?scope=mine` — a REAL
+// param name from the sibling /api/tickets route — on /api/auth/me; a
+// `?banana=1` ticket CREATE that created the ticket; the same on login,
+// signup, forgot-password, logout, health, the detail GET/PATCH, comments,
+// and the attachment download). That is the cross-route confusion variant
+// of the lesson-82 class: a caller carrying a real sibling name over gets a
+// silently-wrong response with no signal. The seam carries the s27-
+// consistent ordering (unknown precedes duplicate — on an empty grammar
+// every name is unknown, so the unknown message subsumes duplicates: the
+// caller must drop the param entirely, not dedupe it) and the grammar
+// precedes the value level (an empty `?status=` is still an unknown NAME —
+// there are no known names on these routes). Callers audited (zero
+// breakage): every UI fetch, every E2E route mock, and every smoke probe
+// is bare — no legitimate caller sends any query param to any of these
+// routes.
+export function parseNoQuery(
+  searchParams: URLSearchParams,
+): { ok: true } | { ok: false; error: string } {
   for (const [name] of searchParams) {
     return {
       ok: false,

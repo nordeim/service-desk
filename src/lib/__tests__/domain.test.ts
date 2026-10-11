@@ -24,6 +24,7 @@ import {
   parseListParams,
   parseListQuery,
   parseListSearch,
+  parseNoQuery,
   parseStatsQuery,
   validateAttachments,
   validateCommentInput,
@@ -507,6 +508,65 @@ describe("parseStatsQuery (s28: the stats empty-grammar contract — the param-l
     if (!r.ok) {
       expect(r.error).toContain("unknown query parameter: scope");
       expect(r.error).toContain("this endpoint takes no query parameters");
+    }
+  });
+});
+
+describe("parseNoQuery (s29: the shared empty-grammar contract — every remaining route's query grammar closed API-wide)", () => {
+  const parse = (qs: string) => parseNoQuery(new URLSearchParams(qs));
+
+  it("accepts the no-param request (the only legal call — every UI/E2E/smoke caller is bare)", () => {
+    const r = parse("");
+    expect(r.ok).toBe(true);
+  });
+
+  it("rejects an unknown param name with the exact message naming it and the no-params contract", () => {
+    for (const qs of ["banana=1", "_t=123", "fields=id"]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("unknown query parameter");
+        expect(r.error).toContain(qs.split("=")[0]);
+        expect(r.error).toContain("this endpoint takes no query parameters");
+      }
+    }
+  });
+
+  it("rejects the real sibling-route param names — the cross-route confusion pin (scope/status/search are real params on /api/tickets, not on any of these routes)", () => {
+    for (const qs of ["scope=mine", "status=open&limit=5", "search=VPN", "sort=newest"]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) expect(r.error).toContain("unknown query parameter");
+    }
+  });
+
+  it("rejects an empty value too — the grammar precedes the value (an empty ?status= is still an unknown NAME here; there are no known names)", () => {
+    const r = parse("status=");
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("unknown query parameter: status");
+  });
+
+  it("rejects a duplicated param with the unknown message — the unknown subsumes the duplicate (the caller must drop the param, not dedupe it)", () => {
+    const r = parse("scope=a&scope=b");
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toContain("unknown query parameter: scope");
+      expect(r.error).toContain("this endpoint takes no query parameters");
+    }
+  });
+
+  it("names the first offending param when several are present", () => {
+    const r = parse("banana=1&apple=2");
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("unknown query parameter: banana");
+  });
+
+  it("matches the s28 parseStatsQuery contract exactly (the stats seam delegates to the shared seam — one message, one behavior)", () => {
+    for (const qs of ["", "banana=1", "scope=mine", "status="]) {
+      const shared = parseNoQuery(new URLSearchParams(qs));
+      const stats = parseStatsQuery(new URLSearchParams(qs));
+      expect(stats.ok, qs).toBe(shared.ok);
+      if (!shared.ok && !stats.ok) expect(stats.error).toBe(shared.error);
     }
   });
 });

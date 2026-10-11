@@ -9,7 +9,7 @@ import {
   sessionCookieOptions,
   signSession,
 } from "@/lib/auth";
-import { validateSignupInput } from "@/lib/validation";
+import { validateSignupInput, parseNoQuery } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -21,6 +21,15 @@ export async function POST(req: Request) {
       { error: `Too many attempts. Try again in ${Math.ceil(limit.retryAfterSeconds / 60)} minutes.` },
       { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
     );
+  }
+
+  // Session 29: the empty-grammar gate (the shared parseNoQuery seam) —
+  // after the rate limiter (the s21 convention), before the body level
+  // (the s27 convention). Before s29 `?banana=1` was silently ignored and
+  // the account was created (measured live at the s29 audit).
+  const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
   }
 
   let body: unknown;

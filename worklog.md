@@ -1050,3 +1050,20 @@ Work Log:
 
 Stage Summary:
 - Session 28 complete: the stats empty-grammar contract shipped (parseStatsQuery RED→GREEN, 99 unit; 3 smoke pins, 44 PASS lines; 196/196 E2E unchanged), the second /login rotation + the native-bridge decode + the s4-defect recurrence documented (all non-gaps), the drift ledger + mobile matrix + TW guards re-verified (tenth), pushed to main, CI Run 63 green
+
+---
+Task ID: 66
+Agent: main (Super Z) — session 29
+Task: Session-29 remediation — the API-wide empty-grammar contract (TDD) + full verification
+
+Work Log:
+- P1 TDD: RED (7 pins: the no-param happy path, the unknown reject with the exact message, the cross-route sibling-name pin, the empty-value-still-unknown, the duplicate-subsumed, the first-name, the stats-delegation contract) → GREEN (the shared parseNoQuery seam in validation.ts + parseStatsQuery delegating + the gate wired into 11 handlers across 10 route files: health, login POST+DELETE, signup, forgot-password, logout, me, tickets POST, detail GET+PATCH, comments POST, attachment GET — rate limiter first where present, auth before grammar, grammar before body) → 106 unit (99+7)
+- P2: 10 smoke pins (health ?banana=1 + happy path; me ?scope=mine + happy; signup/logout/CREATE/detail/PATCH ?banana=1; comments ?scope=mine) → smoke 54 PASS lines (44+10); the rate-limited login/forgot grammar pins live in s29-live-verify.mjs (fresh buckets — the s21 429 arithmetic untouched)
+- Full gate in the CLEAN environment: lint ✓ typecheck ✓ 106 unit ✓ build ✓ 196/196 E2E ✓ (unchanged) smoke 54 ✓; seed canonical (4/11/3/0) after
+- Live re-verification on :3000: the new s29-live-verify.mjs ALL GREEN (22 checks — one reorder fix: the canonical-counts check initially ran after the fixture creation, moved before it); s28 (12) + s27 (14) + s26 (15) + s25 (13) + s24 re-runs ALL GREEN; the UI round-trip (the dashboard + stat cards + QUICK STATS + Performance Metrics through the grammar gates) + the mobile matrix on the new build (375=375, real clicks, nav-tap auto-close + navigate) + the desktop paired VLM check (LAYOUT-OK — the first run's LAYOUT-DIFF was my own screenshot error, capturing /mytickets instead of /dashboard; re-captured → LAYOUT-OK)
+- Rate-budget lesson: the live-verify re-runs + UI round-trips + the capture script together exhausted the login bucket mid-session (the s13 shot helper timed out) — restarted the server (fresh in-memory buckets) before the capture phase → all 10 shots captured, FATAL guards green; VLM shots 02 + 05 LAYOUT-OK
+- Probe hygiene: the gap-analysis probe ticket + comment + user cleaned via scripts/cleanup-s29.mjs (the s23 convention); the seed canonical after every phase
+- Docs: README (badges 106 + the test lines + the smoke description + the s29 E2E-notes), AGENTS.md (the session-29 contracts + the commands table + the reference list + the screenshots-lineage refresh), CLAUDE.md (the counts + the smoke line + the s29 anti-pattern extension), PAD (§7.1 domain 61 + checklist 106/106 + the s29 row), service-desk_SKILL.md v2.27.0 (lesson 83 + the project_state), docs/session_47.md, the plan's execution status, this worklog; the s29 scripts committed (s29-live-verify, cleanup-s29, capture-screenshots-s29)
+
+Stage Summary:
+- The API-wide empty-grammar contract shipped (106 unit + 196/196 E2E + smoke 54, clean-environment verified; live-verified 22+12+14+15+13+13 checks + the UI round-trip + the mobile matrix); the third /login rotation + the desktop-overflow finding + the s4-defect persistence documented (all non-gaps on their side); production-ready superset maintained; ready for the push phase

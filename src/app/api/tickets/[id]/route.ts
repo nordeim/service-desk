@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { isTicketStatus } from "@/lib/constants";
+import { parseNoQuery } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -9,9 +10,18 @@ type Params = { params: Promise<{ id: string }> };
 
 // GET /api/tickets/[id] — ticket detail (owner-scoped read; any signed-in
 // user can view, mirroring the reference's shareable detail URLs).
-export async function GET(_req: Request, { params }: Params) {
+export async function GET(req: Request, { params }: Params) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Session 29: the empty-grammar gate (the shared parseNoQuery seam —
+  // the s28 stats convention: auth first, then the grammar level). The
+  // route's identity lives in the PATH param, not the query; before s29
+  // `?banana=1` was silently ignored (measured live at the s29 audit).
+  const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
 
   const { id } = await params;
   const ticket = await db.ticket.findUnique({
@@ -37,6 +47,14 @@ export async function GET(_req: Request, { params }: Params) {
 export async function PATCH(req: Request, { params }: Params) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Session 29: the empty-grammar gate on the mutation verb (the shared
+  // parseNoQuery seam). Before s29 `?banana=1` was silently ignored and
+  // the mutation applied (measured live at the s29 audit).
+  const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
 
   const { id } = await params;
   let body: unknown;

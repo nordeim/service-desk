@@ -10,7 +10,7 @@ import {
   signSession,
   verifyPassword,
 } from "@/lib/auth";
-import { validateLoginInput } from "@/lib/validation";
+import { validateLoginInput, parseNoQuery } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -22,6 +22,18 @@ export async function POST(req: Request) {
       { error: `Too many attempts. Try again in ${Math.ceil(limit.retryAfterSeconds / 60)} minutes.` },
       { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
     );
+  }
+
+  // Session 29: the empty-grammar gate (the shared parseNoQuery seam — the
+  // s28 stats contract extended API-wide). The rate limiter stays FIRST (the
+  // s21 429 contract pins the 11th attempt); then the grammar level precedes
+  // the body level (the s27 convention). Before s29 `?scope=mine` — a REAL
+  // param name from the sibling /api/tickets route — was silently ignored
+  // and the login proceeded (the cross-route confusion variant of the
+  // lesson-82 class, measured live at the s29 audit).
+  const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
   }
 
   let body: unknown;
@@ -55,6 +67,13 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  // Session 29: the DELETE variant carries the same empty-grammar gate
+  // (the shared seam — one contract per route, both verbs).
+  const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
+
   const res = NextResponse.json({ ok: true });
   res.cookies.set(SESSION_COOKIE, "", clearCookieOptions());
   return res;

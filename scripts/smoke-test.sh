@@ -210,6 +210,71 @@ grep -q '"avgResolutionMs"' "$RL_BODY_X" || fail "stats-grammar: the avgResoluti
 step "PASS" "stats-grammar: the no-param aggregate intact (mine + global + avgResolutionMs)"
 rm -f "$RL_BODY_X"
 
+# --- s29: the API-wide empty-grammar contract pins --------------------------------
+# Every remaining route's query grammar closed (the shared parseNoQuery seam,
+# the s28 stats contract extended API-wide). Before s29 all of these silently
+# ignored any query string — `?scope=mine` (a REAL param name from the sibling
+# /api/tickets route) on /api/auth/me, a `?banana=1` ticket CREATE that created
+# the ticket, etc. — the cross-route confusion variant of the lesson-82 class
+# (measured live at the s29 audit). The login + forgot-password grammar pins
+# live in scripts/s29-live-verify.mjs (their rate buckets are exactly consumed
+# by the s21 429 pins above).
+RL_BODY_X=$(mktemp)
+HEALTH_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" "$BASE/api/health?banana=1")
+[ "$HEALTH_CODE" = "400" ] || fail "s29-grammar: /api/health?banana=1 should 400 (got $HEALTH_CODE)"
+grep -q "unknown query parameter: banana" "$RL_BODY_X" || fail "s29-grammar: health unknown message"
+grep -q "this endpoint takes no query parameters" "$RL_BODY_X" || fail "s29-grammar: health no-params message"
+step "PASS" "s29-grammar: /api/health?banana=1 rejected (400 + both messages)"
+
+HEALTH_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" "$BASE/api/health")
+[ "$HEALTH_CODE" = "200" ] || fail "s29-grammar: the bare /api/health should stay 200 (got $HEALTH_CODE)"
+grep -q '"status":"ok"' "$RL_BODY_X" || fail "s29-grammar: health happy-path body"
+step "PASS" "s29-grammar: the bare /api/health happy path intact"
+
+ME_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/auth/me?scope=mine")
+[ "$ME_CODE" = "400" ] || fail "s29-grammar: /api/auth/me?scope=mine should 400 (got $ME_CODE)"
+grep -q "unknown query parameter: scope" "$RL_BODY_X" || fail "s29-grammar: me cross-route message"
+step "PASS" "s29-grammar: the cross-route ?scope=mine on /api/auth/me rejected (400)"
+
+ME_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/auth/me")
+[ "$ME_CODE" = "200" ] || fail "s29-grammar: the bare /api/auth/me should stay 200 (got $ME_CODE)"
+grep -q '"user"' "$RL_BODY_X" || fail "s29-grammar: me happy-path body"
+step "PASS" "s29-grammar: the bare /api/auth/me happy path intact"
+
+SIGNUP_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -X POST "$BASE/api/auth/signup?banana=1" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"s29-grammar-probe@example.com","password":"Probe1234!","name":"Probe"}')
+[ "$SIGNUP_CODE" = "400" ] || fail "s29-grammar: signup?banana=1 should 400 (got $SIGNUP_CODE)"
+grep -q "unknown query parameter: banana" "$RL_BODY_X" || fail "s29-grammar: signup unknown message"
+step "PASS" "s29-grammar: /api/auth/signup?banana=1 rejected (400, no account created)"
+
+LOGOUT_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/auth/logout?banana=1")
+[ "$LOGOUT_CODE" = "400" ] || fail "s29-grammar: logout?banana=1 should 400 (got $LOGOUT_CODE)"
+step "PASS" "s29-grammar: /api/auth/logout?banana=1 rejected (400, cookie NOT cleared)"
+
+CREATE_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets?banana=1" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"S29 grammar pin (must not persist)","description":"The query-grammar probe must be rejected.","category":"software","priority":"low"}')
+[ "$CREATE_CODE" = "400" ] || fail "s29-grammar: POST /api/tickets?banana=1 should 400 (got $CREATE_CODE)"
+grep -q "unknown query parameter: banana" "$RL_BODY_X" || fail "s29-grammar: create unknown message"
+step "PASS" "s29-grammar: POST /api/tickets?banana=1 rejected (400, no ticket created)"
+
+DETAIL_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets/$TICKET_ID?banana=1")
+[ "$DETAIL_CODE" = "400" ] || fail "s29-grammar: GET /api/tickets/[id]?banana=1 should 400 (got $DETAIL_CODE)"
+step "PASS" "s29-grammar: GET /api/tickets/[id]?banana=1 rejected (400)"
+
+PATCH_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" -X PATCH "$BASE/api/tickets/$TICKET_ID?banana=1" \
+  -H "Content-Type: application/json" -d '{"status":"open"}')
+[ "$PATCH_CODE" = "400" ] || fail "s29-grammar: PATCH /api/tickets/[id]?banana=1 should 400 (got $PATCH_CODE)"
+step "PASS" "s29-grammar: PATCH /api/tickets/[id]?banana=1 rejected (400, no mutation)"
+
+COMMENT_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments?scope=mine" \
+  -H "Content-Type: application/json" -d '{"content":"s29 grammar pin (must not persist)"}')
+[ "$COMMENT_CODE" = "400" ] || fail "s29-grammar: comments?scope=mine should 400 (got $COMMENT_CODE)"
+grep -q "unknown query parameter: scope" "$RL_BODY_X" || fail "s29-grammar: comments cross-route message"
+step "PASS" "s29-grammar: the cross-route ?scope=mine on comments rejected (400, no comment created)"
+rm -f "$RL_BODY_X"
+
 # --- Comment + status -------------------------------------------------------
 curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
   -H "Content-Type: application/json" \

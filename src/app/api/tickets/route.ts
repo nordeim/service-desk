@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { parseListFilters, parseListParams, parseListQuery, parseListSearch, validateAttachments, validateTicketInput } from "@/lib/validation";
+import { parseListFilters, parseListParams, parseListQuery, parseListSearch, parseNoQuery, validateAttachments, validateTicketInput } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -128,6 +128,16 @@ interface RawAttachmentInput {
 export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Session 29: the empty-grammar gate on the CREATE verb (the shared
+  // parseNoQuery seam — the GET above is s27-seamed with its seven-name
+  // set; the POST takes no query params at all). Before s29 `?banana=1`
+  // was silently ignored and the ticket was created (measured live at the
+  // s29 audit).
+  const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
 
   let body: unknown;
   try {

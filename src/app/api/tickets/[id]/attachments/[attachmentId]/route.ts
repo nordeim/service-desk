@@ -4,14 +4,24 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { parseNoQuery } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
 type Params = { params: Promise<{ id: string; attachmentId: string }> };
 
-export async function GET(_req: Request, { params }: Params) {
+export async function GET(req: Request, { params }: Params) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Session 29: the empty-grammar gate (the shared parseNoQuery seam). The
+  // route's identity lives in the PATH params; before s29 any query string
+  // was silently ignored (the same handler pattern as the ten families
+  // measured live at the s29 audit).
+  const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
 
   const { id, attachmentId } = await params;
   const attachment = await db.attachment.findFirst({

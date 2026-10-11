@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { validateCommentInput } from "@/lib/validation";
+import { parseNoQuery, validateCommentInput } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -11,6 +11,15 @@ type Params = { params: Promise<{ id: string }> };
 export async function POST(req: Request, { params }: Params) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Session 29: the empty-grammar gate (the shared parseNoQuery seam).
+  // The route's identity lives in the PATH param; before s29 `?scope=mine`
+  // — a REAL param name from the sibling list route — was silently ignored
+  // and the comment was created (measured live at the s29 audit).
+  const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
 
   const { id } = await params;
   let body: unknown;
