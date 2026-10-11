@@ -1214,3 +1214,17 @@ Work Log:
 
 Stage Summary:
 - All six documentation surfaces aligned with the s31 state (the response-schema contract + the six pins + the audit findings); ready for the final gate + the push phase
+
+---
+Task ID: 73
+Agent: main (Super Z) — session 31
+Task: Session-31 push + CI verification + final status
+
+Work Log:
+- Commit 7d6724d (the s31 remediation — 15 files: the six-pin s31 smoke block + the corrected rate-limiter arithmetic comment + the s31-live-verify script + the cleanup script + the capture script + 7 docs + the screenshot refresh (3 shots pixel-diff, 7 byte-identical re-renders)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko shim at /home/z/my-project/bin/ssh on PATH, extracted from the skill's Appendix A; the key fingerprint verified before the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, identical to the s30 record; the dry-run green first with the explicit --remote — the wrapper's default is task-management.git, the s28 lesson held; the real push verified: remote == local HEAD @ 7d6724d, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — a post-push shim invocation correctly fails with no key material)
+- One pre-push fix: the s31 login pin shifts the smoke rate-limiter arithmetic (slot 2) — the behavior verified green both before and after (the loop POSTs are unchecked; the asserted request still 429s; the contract — exactly 10 allowed, the 11th onward throttled — unchanged), the comment updated to describe the true slot bookkeeping (the prose-vs-reality drift discipline)
+- CI run 38153193239 on 7d6724d completed SUCCESS — verified via the GitHub API (a few transient API errors mid-polling, the final status authoritative; the runs on the operator's d72aea0 + the s30-closeout commits before it green as well)
+- The CI confirmation recorded in the plan's execution status (this follow-up commit, the s21–s30 convention)
+
+Stage Summary:
+- Session 31 complete: the response-schema contract shipped (six exact-key-set leak-guard pins — the me/login user keys, the list bounded row, the detail attachments without the data blob, the comment author, the stats symmetry — 64 smoke steps; 110 unit + 196/196 E2E unchanged; the mutation-RED proof + 14 live checks), the fifth /login rotation + the app-route re-split + the s4/desktop persistence documented (all non-gaps), the attachment-route header interplay verified explicitly for the first time, production-ready superset maintained, pushed to main (7d6724d + this status commit), CI green
