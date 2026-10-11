@@ -4,12 +4,12 @@ description: >
   Comprehensive engineering skill for the ServiceDesk IT support portal — a
   Next.js 16 / React 19 / Tailwind v4 / Prisma-SQLite clone of the base44
   ServiceDesk reference app, with visual parity as a contract and superset
-  functionality. Distilled through the session-20 remediation (2026-10-11).
+  functionality. Distilled through the session-21 remediation (2026-10-11).
   Use this when extending, debugging, onboarding onto, or replicating the
   ServiceDesk codebase or its design system.
-version: 2.18.0
+version: 2.19.0
 last_updated: 2026-10-11
-project_state: 65 unit tests + 196 E2E green (clean-environment verified); CI on GitHub Actions green (the s18 fix held through the s19/s20 pushes); all parity contracts E2E-pinned (sessions 1–20)
+project_state: 65 unit tests + 196 E2E green (clean-environment verified) + the s21 smoke rate-limiter pins (13 steps); CI on GitHub Actions green (the s18 fix held through the s19/s20/s21 pushes); all parity contracts E2E-pinned (sessions 1–20, the s21 429 contract smoke-pinned)
 ---
 
 # ServiceDesk — Complete Engineering Skill

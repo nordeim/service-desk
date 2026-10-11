@@ -727,3 +727,35 @@ Work Log:
 
 Stage Summary:
 - The session-20 compound-flow pin shipped (196 E2E total, clean-environment verified: 65 unit + smoke 11/11); the two first-measurement findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 44
+Agent: main (Super Z)
+Task: Session 21 — refresh repo, review session_29/remediation-plan-session20/worklog/session_30 docs, audit recent changes, fresh gap analysis vs live reference (the s21 shortlist probes), remediation plan
+
+Work Log:
+- git pull fast-forward 891bc75 → fefa76a (the operator's session_30.md transcript commit); current session established as Session 21 (agent log → docs/session_31.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.18.0 + session_29.md + remediation-plan-session20.md + worklog + session_30.md — all aligned with the codebase; environment contract verified standing (.env + db/ seeded 4/11/3/0 canonical, skills/ excluded in all 4 configs, .env.example matches, chromium 1248 present)
+- Baseline gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 65 unit ✓ build ✓ 196/196 E2E ✓ smoke 11/11 ✓; CI badge "CI - passing" (the s20 push held); session-20 commit 891bc75 audited CLEAN against its plan (the 20-file set + the E2E pin at auth.spec.ts:96)
+- Fresh gap analysis (agent-browser + curl both sides): the s21 shortlist probes executed — F1 (first measurement): the OAuth CANCEL path — backing out of the reference's Google flow returns a CLEAN login remount (no error state/toast/URL residue); from a deep-link entry the back returns to /login?from_url=<deep-link> (the from_url SURVIVES the cancel) and the state param carries the deep-linked from_url; ours never navigates (the truthful alert) — nothing to mirror. F2 (first measurement): the rate-limiter surface — their reset-password-request 200 to 20 sequential requests in ~1 min, their login 400 to 12 wrong-password attempts (NO visible throttle on either); their wrong-password envelope is a FastAPI 400 vs our semantically-correct 401 + {error} (UI message identical); their login response carries a JWT-in-body + geolocation + last_active (ours: the httpOnly HMAC cookie); OUR limiter (10+5 per IP/15-min) is the deliberate security superset — BUT the 429 API contract was pinned nowhere → P1. F3 (non-gap): the s19/s20 drift ledger holds EXACTLY (fresh hard-loads all 4 app routes + /login). F4 (non-gap, fresh axis): the HTTP security-header set — ours ships X-Frame-Options: DENY + Permissions-Policy the reference lacks
+- Standing pins re-verified stable: the mobile matrix green both sides (their 468-overflow + sheet-stays-open defects persist; ours 375=375 + 390=390 + auto-close); the TW v4 guards standing; the bundle sweep clean (same index-DhFaB31Z.js); the dashboard/submit/mytickets/detail structures match (recent-row h3 + bare lowercase badges; the detail "priority"-word badge)
+- Wrote + validated docs/remediation-plan-session21.md (the pin-layer decision: an E2E 429 pin rejected by the budget doctrine — the smoke layer's throwaway server pins it at zero fixture cost; the slot arithmetic documented)
+
+Stage Summary:
+- Repo at fefa76a + plan; 1 smoke pin (P1 the rate-limiter 429 contract on both buckets) + 2 first-measurement documentation findings (F1 the OAuth cancel path, F2 the auth-response layer) queued for execution
+
+---
+
+Task ID: 45
+Agent: main (Super Z)
+Task: Session 21 — the smoke pin execution, verification, docs, SKILL.md v2.19.0, commit + push
+
+Work Log:
+- The rate-limiter smoke pins added to scripts/smoke-test.sh (both buckets: the login 11th-attempt 429 + Retry-After + "Too many attempts"; the forgot 6th-attempt 429 + Retry-After; the failure-safe temp-file cleanup) — GREEN on first run (the regression pin, as designed)
+- Gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 65 unit ✓ build ✓ 196/196 E2E ✓ (unchanged; zero regressions) smoke 13 PASS lines ✓ (the standing 11 + 2 new)
+- Live paired re-verification (production standalone :3000): scripts/s20-live-verify.mjs re-run ALL GREEN (the detour chain + the bounce guards + the mobile matrix); the new scripts/s21-live-verify.mjs ALL GREEN (the security-header superset + the 401 envelope + the s19/s10 regressions); seed re-verified canonical (4/11/3/0) after the fixtures
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s21.sh (the s20 lineage verbatim; all four FATAL guards green); VLM-verified shots 02 + 05 (LAYOUT-OK)
+- Updated README (the smoke pins + the auth-flow row's s21 sentences)/AGENTS (the session-21 contracts section + the reference list through s21 + the screenshot-lineage pointer)/CLAUDE (the smoke line + the response-layer anti-pattern)/PAD (§7.1 smoke row 13 steps + the s21 known-issues row)/service-desk_SKILL.md v2.19.0 (lesson 75: the response-layer enumeration + the pin-layer doctrine); session_31.md narrative log; the plan's execution status; this worklog; the s21 scripts committed (s21-live-verify, s21-vlm-verify, capture-screenshots-s21)
+
+Stage Summary:
+- The session-21 rate-limiter pins shipped (smoke 13 PASS lines, clean-environment verified: 65 unit + 196/196 E2E); the two first-measurement findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
