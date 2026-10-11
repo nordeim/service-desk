@@ -1067,3 +1067,16 @@ Work Log:
 
 Stage Summary:
 - The API-wide empty-grammar contract shipped (106 unit + 196/196 E2E + smoke 54, clean-environment verified; live-verified 22+12+14+15+13+13 checks + the UI round-trip + the mobile matrix); the third /login rotation + the desktop-overflow finding + the s4-defect persistence documented (all non-gaps on their side); production-ready superset maintained; ready for the push phase
+
+---
+Task ID: 67
+Agent: main (Super Z) — session 29
+Task: Session-29 push + CI verification + final status
+
+Work Log:
+- Commit 74f124f (the s29 remediation — 26 files: the shared seam + the 10 route wirings + the 7 unit pins + the 10 smoke pins + the s29 scripts + 7 docs + the screenshot refresh) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko shim at /home/z/my-project/bin/ssh on PATH; the dry-run green first with the explicit --remote — the wrapper's default is task-management.git, the s28 lesson held; the real push verified: remote == local HEAD @ 74f124f, tracking synced, operator key + the wrapper's temp key both shredded, main only, tree clean)
+- CI Run 66 on 74f124f completed SUCCESS — verified via the browser aria-label method (the anonymous REST API 403 rate-limited, the standing condition); Run 65 (the operator's b171d1c) green before it
+- The CI confirmation recorded in the plan's execution status (this follow-up commit, the s21-s28 convention)
+
+Stage Summary:
+- Session 29 complete: the API-wide empty-grammar contract shipped (parseNoQuery RED→GREEN, 106 unit; 10 smoke pins, 54 PASS lines; 196/196 E2E unchanged; 22 live-verify checks + the s24-s28 re-runs all green), the third /login rotation + the desktop-overflow finding + the s4-defect persistence documented (all non-gaps), production-ready superset maintained, pushed to main (74f124f + this status commit), CI Run 66 green
