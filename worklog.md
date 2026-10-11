@@ -791,3 +791,35 @@ Work Log:
 
 Stage Summary:
 - The session-22 write-path pins shipped (smoke 19 PASS lines, clean-environment verified: 65 unit + 196/196 E2E); the first-measurement findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 48
+Agent: main (Super Z)
+Task: Session 23 — refresh repo, review session_33/remediation-plan-session22/worklog/session_34 docs, audit recent changes, fresh gap analysis vs live reference (the s23 shortlist probes), remediation plan
+
+Work Log:
+- git pull fast-forward 6d9a593 → c72c922 (the operator's session_34.md transcript commit); current session established as Session 23 (agent log → docs/session_35.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.20.0 + session_33.md + remediation-plan-session22.md + worklog + session_34.md — all aligned with the codebase; environment contract verified standing (.env with DATABASE_URL=file:../db/custom.db + AUTH_SECRET, db/ at root seeded 4/11/3/0 canonical, skills/ excluded in all 4 configs, .env.example matches)
+- Baseline gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 65 unit ✓ build ✓ 196/196 E2E ✓ smoke 19 PASS lines ✓; CI run-history aria-labels read "Run 45 completed successfully" (the s22 push held); session-22 commit 7e38b8a audited CLEAN against its plan (the 19-file set verified)
+- Fresh gap analysis (agent-browser + curl both sides): the s23 shortlist probes executed — F1 (first measurement): the ticket-CREATE validation surface — their create stores an EMPTY title (200), a "banana" STATUS (200 — rendered as a fallback near-black badge in their own UI, un-filterable by their fixed vocabulary), out-of-vocabulary category/priority (200), and a 10,000-char title (200 in full); only missing FIELDS → 422 (pydantic presence, never value); all five probe tickets deleted immediately (list re-verified 0). F2 (first measurement + the session's headline): the attachment-write surface — their upload (POST .../integration-endpoints/Core/UploadFile, fires at submit) accepts 5 MiB AND 15 MiB (no size cap), blocks .exe/.bat but stores .sh/.js/.html (mitigated only by media.base44.com octet-stream serving after a 302), is publicly fetchable with no auth, exposes no DELETE on files (405 — the five probe uploads orphaned), and attachment_urls is uncapped (10 URLs stored) — AND the audit turned inward: OUR closed MIME list (ATTACHMENT_ACCEPTED_TYPES) was enforced NOWHERE (the picker's accept attribute is a hint, the client checked only size, validateAttachments checked only count/size/filename, the download route serves the stored mimeType inline) — a direct API POST could store text/html for inline serving from OUR origin, a stored-XSS surface worse than the reference's octet-stream platform → P1. F3 (non-gap): the drift ledger holds EXACTLY (fifth re-verification). F4 (non-gap): their bundle hash NOT rotated (fourth consecutive sweep)
+- Standing pins re-verified: the mobile matrix green both sides (their 468-overflow + sheet-stays-open persist; ours 375=375 + 288px sheet + 80% overlay + nav-tap auto-close + navigate, re-verified live); TW v4 guards standing; the dashboard/submit/mytickets/detail structures match; one nuance recorded (neither side's sheet shows an inline body-lock style on the JS-dispatch path this session — identical behavior, no drift)
+- Wrote + validated docs/remediation-plan-session23.md (the P1 seam decision: the MIME guard belongs in validateAttachments — the one seam the POST route already calls; the client toast as the UX mirror; the smoke layer for the HTTP pins at zero fixture cost)
+
+Stage Summary:
+- Repo at c72c922 + plan; the MIME-allowlist server-side guard (P1) + 5 create-path smoke pins (P2) + the first-measurement documentation findings queued for execution
+
+---
+Task ID: 49
+Agent: main (Super Z)
+Task: Session 23 — the MIME-guard fix + create-path pin execution, verification, docs, SKILL.md v2.21.0, commit + push
+
+Work Log:
+- P1 (TDD): the RED pin added to domain.test.ts (text/html + application/x-msdownload + application/javascript rejected; every advertised type accepted) — RED confirmed (1 failed, the guard absent) → the GREEN: validateAttachments extended with the ATTACHMENT_ACCEPTED_TYPES.includes(mimeType) check ("unsupported file type") + the import + the client's handleFiles toast mirror → 67 unit GREEN (65 + 2)
+- P2: the five create-path smoke pins added to scripts/smoke-test.sh (the client-sent status ignored 201 + status:"open"; the count cap 400 + "At most 3 files can be attached"; the size cap via the declared-sizeBytes seam 400 + "exceeds the 2 MB per-file limit"; the path-traversal filename 400 + "invalid file name"; the MIME allowlist 400 + "unsupported file type") — the shared RL_HEADERS/RL_BODY lifecycle moved up before the s23 block (the s22 trap avoided by construction) — GREEN on first run (24 PASS lines: the standing 19 + 5 new)
+- Gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 67 unit ✓ build ✓ 196/196 E2E ✓ (unchanged; zero regressions — the E2E attachment specs use valid MIMEs) smoke 24 PASS lines ✓
+- Live paired re-verification (production standalone :3000): scripts/s22-live-verify.mjs re-run ALL GREEN (13 checks); the new scripts/s23-live-verify.mjs ALL GREEN (12 checks — the create-path matrix + the attachment-write matrix + the 307-bounce, via plain fetch + manual cookies); probe fixtures cleaned (cleanup-s23-tickets.mjs + the s22 re-run's fixtures); seed re-verified canonical (4/11/3/0) after the fixtures and after the screenshots
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s23.sh (the s22 lineage verbatim; all four FATAL guards green); VLM-verified shots 02 + 05 (LAYOUT-OK)
+- Updated README (badges 65→67 + the attachment row's s23 sentence + the smoke create-path pins + the E2E-notes s23 paragraph)/AGENTS (the session-23 contracts section + the commands-table unit/smoke lines + the reference list through s23 + the screenshot-lineage pointer)/CLAUDE (the unit/smoke lines + the own-side-UI-guard anti-pattern)/PAD (§7.1 counts — domain 22, smoke 24 — + the security-table MIME row + the s23 known-issues row)/service-desk_SKILL.md v2.21.0 (lesson 77: every advertised guard is a claim about a SEAM); session_35.md narrative log; the plan's execution status; this worklog; the s23 scripts committed (s23-live-verify, s23-vlm-verify, cleanup-s23-tickets, capture-screenshots-s23)
+
+Stage Summary:
+- The session-23 MIME-allowlist guard + create-path pins shipped (smoke 24 PASS lines, clean-environment verified: 67 unit + 196/196 E2E); the stored-XSS surface closed at the seam; the first-measurement findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)

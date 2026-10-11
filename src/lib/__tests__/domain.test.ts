@@ -187,4 +187,27 @@ describe("validateAttachments", () => {
       validateAttachments([{ fileName: "../evil.txt", mimeType: "text/plain", sizeBytes: 5 }]).ok,
     ).toBe(false);
   });
+  it("rejects a mimeType outside the accepted list (s23: the server-side MIME guard)", () => {
+    // The UI's accept attribute is a picker hint only; the seam must enforce
+    // the closed allowlist or the download route serves attacker-chosen
+    // content types inline from our origin (a stored-XSS surface).
+    expect(
+      validateAttachments([{ fileName: "evil.html", mimeType: "text/html", sizeBytes: 10 }]).ok,
+    ).toBe(false);
+    expect(
+      validateAttachments([
+        { fileName: "evil.exe", mimeType: "application/x-msdownload", sizeBytes: 10 },
+      ]).ok,
+    ).toBe(false);
+    expect(
+      validateAttachments([
+        { fileName: "evil.js", mimeType: "application/javascript", sizeBytes: 10 },
+      ]).ok,
+    ).toBe(false);
+  });
+  it("accepts every MIME in the advertised accept list", () => {
+    for (const mimeType of ATTACHMENT_ACCEPTED_TYPES) {
+      expect(validateAttachments([{ fileName: "f.bin", mimeType, sizeBytes: 1 }]).ok).toBe(true);
+    }
+  });
 });

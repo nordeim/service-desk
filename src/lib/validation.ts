@@ -3,6 +3,7 @@
 // unit-tested (tests/ticket-validation.test.ts).
 
 import {
+  ATTACHMENT_ACCEPTED_TYPES,
   ATTACHMENT_MAX_BYTES,
   ATTACHMENT_MAX_COUNT,
   isTicketCategory,
@@ -106,6 +107,13 @@ export function validateAttachments(
     }
     if (!f.fileName || f.fileName.length > 200 || /[\\/]/.test(f.fileName)) {
       return { ok: false, error: `"${f.fileName}" has an invalid file name` };
+    }
+    // Session 23: the closed MIME allowlist is enforced HERE, not in the
+    // picker — the accept attribute is a hint a user can bypass, and the
+    // download route serves the stored content type inline (a stored-XSS
+    // surface if an attacker-chosen type can be stored via the API).
+    if (!ATTACHMENT_ACCEPTED_TYPES.includes(f.mimeType)) {
+      return { ok: false, error: `"${f.fileName}" has an unsupported file type` };
     }
   }
   return { ok: true };

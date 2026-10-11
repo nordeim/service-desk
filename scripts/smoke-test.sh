@@ -85,6 +85,62 @@ CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/ap
 [ "$CODE" = "400" ] || fail "invalid category should 400 (got $CODE)"
 step "PASS" "validation guard (400)"
 
+# --- Create-path + attachment guards (the s23 pins) ---------------------------
+# The reference's create path accepts anything PRESENT (s23 live
+# measurements): an empty title stores, a "banana" status stores (rendered
+# as a fallback near-black badge in their UI), out-of-vocabulary categories
+# and priorities store, 10,000-char titles store, and their upload endpoint
+# caps nothing (15 MiB accepted, 10 attachment URLs per ticket, a partial
+# .exe/.bat extension blocklist with octet-stream serving). Ours validates
+# at the route layer and pins the mimeType to the closed allowlist; these
+# pins keep that contract from regressing toward theirs.
+#
+# Shared response-capture temp files (created once here; the s22 + s21
+# blocks below reuse them and the cleanup trap removes both at the end).
+RL_HEADERS="$(mktemp)"
+RL_BODY="$(mktemp)"
+# Server-controlled status: a client-sent status is IGNORED (the create data
+# pins status:"open"). Their create stores the "banana" (200, rendered).
+RESP=$(curl -s -w "\n%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Smoke banana status pin","description":"The client-sent status must be ignored.","category":"software","priority":"low","status":"banana"}')
+echo "$RESP" | tail -1 | grep -q "^201$" || fail "banana-status create should 201 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q '"status":"open"' || fail "created ticket must come back status:open (the server-controlled contract)"
+step "PASS" "create-path guard: client-sent status ignored (201 + open)"
+
+# Attachment count cap (theirs: 10 URLs per ticket, 200 — s23 measurement).
+CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Smoke attachment pin","description":"The four-file probe must be rejected.","category":"software","priority":"low","attachments":[{"fileName":"a.txt","mimeType":"text/plain","sizeBytes":10,"data":""},{"fileName":"b.txt","mimeType":"text/plain","sizeBytes":10,"data":""},{"fileName":"c.txt","mimeType":"text/plain","sizeBytes":10,"data":""},{"fileName":"d.txt","mimeType":"text/plain","sizeBytes":10,"data":""}]}')
+[ "$CODE" = "400" ] || fail "4 attachments should 400 (got $CODE)"
+grep -q "At most 3 files can be attached" "$RL_BODY" || fail "4-file body should say At most 3 files"
+step "PASS" "attachment guard: count cap (400 + At most 3 files)"
+
+# Per-file size cap via the declared-sizeBytes seam (theirs: 15 MiB, 200).
+CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Smoke attachment pin","description":"The oversized probe must be rejected.","category":"software","priority":"low","attachments":[{"fileName":"big.bin","mimeType":"text/plain","sizeBytes":2097153,"data":""}]}')
+[ "$CODE" = "400" ] || fail "2MiB+1 attachment should 400 (got $CODE)"
+grep -q "exceeds the 2 MB per-file limit" "$RL_BODY" || fail "oversized body should say exceeds the 2 MB per-file limit"
+step "PASS" "attachment guard: size cap (400 + 2 MB limit)"
+
+# Filename sanitation (path traversal).
+CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Smoke attachment pin","description":"The traversal probe must be rejected.","category":"software","priority":"low","attachments":[{"fileName":"../evil.txt","mimeType":"text/plain","sizeBytes":10,"data":""}]}')
+[ "$CODE" = "400" ] || fail "path-traversal file name should 400 (got $CODE)"
+grep -q "has an invalid file name" "$RL_BODY" || fail "traversal body should say invalid file name"
+step "PASS" "attachment guard: path-traversal filename (400)"
+
+# The closed MIME allowlist (the s23 P1 guard — the reference blocks .exe
+# server-side but stores .sh/.js/.html; ours pins the allowlist at the seam).
+CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Smoke attachment pin","description":"The executable probe must be rejected.","category":"software","priority":"low","attachments":[{"fileName":"evil.exe","mimeType":"application/x-msdownload","sizeBytes":10,"data":""}]}')
+[ "$CODE" = "400" ] || fail "unsupported mimeType should 400 (got $CODE)"
+grep -q "has an unsupported file type" "$RL_BODY" || fail "bad-MIME body should say unsupported file type"
+step "PASS" "attachment guard: closed MIME allowlist (400 + unsupported type)"
+
 # --- Ownership + comment-validation (the write-path guards — the s22 pins) ----
 # The reference's write path is UI-guarded only (s22 live measurements): their
 # comment API accepts empty/whitespace/50k content and even a bogus ticket_id
@@ -92,11 +148,6 @@ step "PASS" "validation guard (400)"
 # user's mutation on ANY ticket (no ownership check — the UI merely hides the
 # status control on non-owned detail pages). Ours validates and scopes at the
 # route layer; these pins keep that contract from regressing toward theirs.
-#
-# Shared response-capture temp files (created once here; the rate-limiter
-# block below reuses them and removes both at the end).
-RL_HEADERS="$(mktemp)"
-RL_BODY="$(mktemp)"
 #
 # Second user via signup (its own signup:${ip} rate bucket — zero login-budget
 # cost; the smoke DB is fresh each run so the fixed email is deterministic).

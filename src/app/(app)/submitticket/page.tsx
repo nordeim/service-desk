@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/toast";
 import {
+  ATTACHMENT_ACCEPTED_TYPES,
   ATTACHMENT_ACCEPT_ATTR,
   ATTACHMENT_MAX_BYTES,
   ATTACHMENT_MAX_COUNT,
@@ -78,6 +79,17 @@ export default function SubmitTicketPage() {
         toast({
           title: "File too large",
           description: `"${file.name}" exceeds the 2 MB per-file limit.`,
+          variant: "destructive",
+        });
+        continue;
+      }
+      // Session 23: the picker's accept attribute is a hint, not a guard —
+      // reject unsupported types here too (the server seam is authoritative,
+      // this is the UX mirror of the same closed allowlist).
+      if (!ATTACHMENT_ACCEPTED_TYPES.includes(file.type || "application/octet-stream")) {
+        toast({
+          title: "Unsupported file type",
+          description: `"${file.name}" is not an image, PDF, document, or archive.`,
           variant: "destructive",
         });
         continue;
