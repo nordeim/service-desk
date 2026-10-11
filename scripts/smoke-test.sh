@@ -18,7 +18,7 @@ RL_BODY=""
 
 cleanup() {
   [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null
-  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"}
+  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"}
 }
 trap cleanup EXIT
 
@@ -85,6 +85,67 @@ CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/ap
 [ "$CODE" = "400" ] || fail "invalid category should 400 (got $CODE)"
 step "PASS" "validation guard (400)"
 
+# --- Ownership + comment-validation (the write-path guards — the s22 pins) ----
+# The reference's write path is UI-guarded only (s22 live measurements): their
+# comment API accepts empty/whitespace/50k content and even a bogus ticket_id
+# (all 200, stored), and their ticket-update PUT applies ANY authenticated
+# user's mutation on ANY ticket (no ownership check — the UI merely hides the
+# status control on non-owned detail pages). Ours validates and scopes at the
+# route layer; these pins keep that contract from regressing toward theirs.
+#
+# Shared response-capture temp files (created once here; the rate-limiter
+# block below reuses them and removes both at the end).
+RL_HEADERS="$(mktemp)"
+RL_BODY="$(mktemp)"
+#
+# Second user via signup (its own signup:${ip} rate bucket — zero login-budget
+# cost; the smoke DB is fresh each run so the fixed email is deterministic).
+COOKIE_JAR_B="$(mktemp)"
+curl -sf -c "$COOKIE_JAR_B" -X POST "$BASE/api/auth/signup" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"smoke-nonowner@servicedesk.app","name":"Smoke NonOwner","password":"NonOwner1234"}' >/dev/null \
+  || fail "signup (user B)"
+
+# The shareable-URL read contract: ANY signed-in user can VIEW a ticket...
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR_B" "$BASE/api/tickets/$TICKET_ID")
+[ "$CODE" = "200" ] || fail "non-owner ticket read should 200 (got $CODE)"
+step "PASS" "non-owner can view ticket (200 — shareable URLs)"
+
+# ...but only the owner can mutate it.
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR_B" -X PATCH "$BASE/api/tickets/$TICKET_ID" \
+  -H "Content-Type: application/json" -d '{"status":"resolved"}')
+[ "$CODE" = "403" ] || fail "non-owner status update should 403 (got $CODE)"
+curl -s -b "$COOKIE_JAR_B" -X PATCH "$BASE/api/tickets/$TICKET_ID" \
+  -H "Content-Type: application/json" -d '{"status":"resolved"}' | grep -q "Only the ticket owner" \
+  || fail "403 body should say Only the ticket owner"
+step "PASS" "ownership guard (403 — non-owner PATCH rejected)"
+
+# Comment validation (all no-side-effect probes — nothing is stored):
+CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
+  -H "Content-Type: application/json" -d '{"content":""}')
+[ "$CODE" = "400" ] || fail "empty comment should 400 (got $CODE)"
+grep -q "Comment cannot be empty" "$RL_BODY" || fail "empty-comment body should say Comment cannot be empty"
+step "PASS" "comment validation: empty rejected (400)"
+
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
+  -H "Content-Type: application/json" -d '{"content":"   "}')
+[ "$CODE" = "400" ] || fail "whitespace comment should 400 (got $CODE)"
+step "PASS" "comment validation: whitespace rejected (400)"
+
+LONG_COMMENT=$(python3 -c "print('x' * 2001)")
+CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
+  -H "Content-Type: application/json" -d "{\"content\":\"$LONG_COMMENT\"}")
+[ "$CODE" = "400" ] || fail "overlong comment should 400 (got $CODE)"
+grep -q "at most 2000 characters" "$RL_BODY" || fail "overlong-comment body should say at most 2000 characters"
+step "PASS" "comment validation: overlong rejected (400)"
+
+CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/nonexistent-ticket/comments" \
+  -H "Content-Type: application/json" -d '{"content":"probe"}')
+[ "$CODE" = "404" ] || fail "comment on unknown ticket should 404 (got $CODE)"
+grep -q "Ticket not found" "$RL_BODY" || fail "unknown-ticket body should say Ticket not found"
+step "PASS" "comment guard: unknown ticket rejected (404)"
+rm -f "$COOKIE_JAR_B"
+
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +
 # 12 login attempts, all non-429 — s21 live measurement); ours deliberately
@@ -100,8 +161,6 @@ for _ in $(seq 1 9); do
     -d '{"email":"nobody@servicedesk.app","password":"wrong"}' >/dev/null
 done
 # ...so the 11th request must be throttled: 429 + Retry-After + the message.
-RL_HEADERS="$(mktemp)"
-RL_BODY="$(mktemp)"
 CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -D "$RL_HEADERS" -X POST "$BASE/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"email":"nobody@servicedesk.app","password":"wrong"}')

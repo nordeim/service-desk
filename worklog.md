@@ -759,3 +759,35 @@ Work Log:
 
 Stage Summary:
 - The session-21 rate-limiter pins shipped (smoke 13 PASS lines, clean-environment verified: 65 unit + 196/196 E2E); the two first-measurement findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 46
+Agent: main (Super Z)
+Task: Session 22 — refresh repo, review session_31/remediation-plan-session21/worklog/session_32 docs, audit recent changes, fresh gap analysis vs live reference (the s22 shortlist probes), remediation plan
+
+Work Log:
+- git clone (fresh workspace — the prior workspace was reset) at 43329f1 (the operator's session_32.md transcript commit); current session established as Session 22 (agent log → docs/session_33.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.19.0 + session_31.md + remediation-plan-session21.md + worklog + session_32.md — all aligned with the codebase; environment contract re-established on the fresh clone (.env created with generated AUTH_SECRET + DATABASE_URL=file:../db/custom.db, db/ at root pushed + seeded 4/11/3/0 canonical, skills/ excluded in all 4 configs, .env.example matches, chromium 1248 present)
+- Baseline gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 65 unit ✓ build ✓ 196/196 E2E ✓ smoke 13 PASS lines ✓; CI badge "CI - passing" (the s21 push held); session-21 commit 92fb4c8 audited CLEAN against its plan (the 19-file set verified) — one audit note: the s21 SKILL.md bump never landed lesson 75 in the lessons list (header-only) — closed this session
+- Fresh gap analysis (agent-browser + curl both sides): the s22 shortlist probes executed — F1 (first measurement): the comment-validation surface — their UI disables the empty submit (trims), but their comment API accepts ANYTHING: empty content → 200 stored; whitespace-only → 200 stored; 50,000 chars → 200 stored in full (no cap); a BOGUS ticket_id → 200 stored (no ticket-existence or referential-integrity check); only missing FIELDS → 422 (pydantic presence, never value); their entity CRUD also exposes DELETE on comments (used for probe cleanup); ours 400/400/400/404 — the documented superset, previously unpinned at the API layer → P1b. F2 (first measurement): the ticket-mutation permissions matrix — their UI hides the status control on non-owned tickets, but their PUT applies ANY authenticated user's mutation on ANY ticket (200, no ownership check; PATCH is 405); the probe was reverted immediately with a field-by-field verify pass (all fields intact); ours 403 owner-only + 200 shareable reads — zero test coverage (the exact s21 coverage-gap class) → P1a. F3 (non-gap): the s19/s20/s21 drift ledger holds EXACTLY (fourth re-verification). F4 (non-gap): their bundle hash NOT rotated (index-DhFaB31Z.js — third consecutive sweep)
+- Standing pins re-verified stable: the mobile matrix green both sides (their 468-overflow + sheet-stays-open + trigger-block persist — JS-dispatch workaround; ours 375=375 + 390=390 + 288px sheet + 80% overlay + auto-close/unlock/navigate); TW v4 guards standing; the dashboard/submit/mytickets/detail structures match; the from_url contract fired live unprompted during the paired probes
+- Wrote + validated docs/remediation-plan-session22.md (the pin-layer decision per the s21 doctrine: the smoke layer pins the write-path contracts at zero fixture cost — user B via signup, its own rate bucket, zero login-budget impact)
+
+Stage Summary:
+- Repo at 43329f1 + plan; 6 smoke pins (P1a the ownership matrix + P1b the comment-validation matrix) + first-measurement documentation findings (F1 the comment-validation surface, F2 the mutation-permissions surface) queued for execution
+
+---
+Task ID: 47
+Agent: main (Super Z)
+Task: Session 22 — the write-path smoke pin execution, verification, docs, SKILL.md v2.20.0, commit + push
+
+Work Log:
+- The write-path smoke pins added to scripts/smoke-test.sh (the non-owner read 200 + the non-owner PATCH 403 + "Only the ticket owner"; the comment-validation matrix: empty/whitespace/overlong 400 + the unknown-ticket 404; the failure-safe cleanup for the second user's cookie jar; the shared temp-file lifecycle fixed — RL_HEADERS/RL_BODY created once in the new block, the rate-limiter block's duplicate mktemp removed) — GREEN on first run (19 PASS lines: the standing 13 + 6 new)
+- Gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 65 unit ✓ build ✓ 196/196 E2E ✓ (unchanged; zero regressions) smoke 19 PASS lines ✓
+- Live paired re-verification (production standalone :3000): scripts/s21-live-verify.mjs re-run ALL GREEN; the new scripts/s22-live-verify.mjs ALL GREEN (the ownership matrix + the comment-validation matrix + the 307-bounce — via plain fetch + manual cookies after discovering the Bun page.request set-cookie crash on successful logins: TypeError "<path>" cannot be parsed as a URL — the tool lesson documented in AGENTS.md; the s21 script never hit it because its login probe is a 401 with no set-cookie)
+- Probe fixtures cleaned (scripts/cleanup-s22-tickets.mjs — the crashed-run artifacts included); seed re-verified canonical (4/11/3/0) after the fixtures and after the screenshots
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s22.sh (the s21 lineage verbatim; all four FATAL guards green); VLM-verified shots 02 + 05 (LAYOUT-OK)
+- Updated README (the smoke write-path pins + the ticket-lifecycle row's s22 sentences + the E2E-notes s22 paragraph)/AGENTS (the session-22 contracts section + the commands-table smoke line + the reference list through s22 + the screenshot-lineage pointer)/CLAUDE (the smoke line + the write-path anti-pattern)/PAD (§7.1 smoke row 19 steps + the s22 known-issues row)/service-desk_SKILL.md v2.20.0 (lesson 75 landed retroactively — the s21 audit finding — + lesson 76: the write-path enumeration); session_33.md narrative log; the plan's execution status; this worklog; the s22 scripts committed (s22-live-verify, s22-vlm-verify, cleanup-s22-tickets, capture-screenshots-s22)
+
+Stage Summary:
+- The session-22 write-path pins shipped (smoke 19 PASS lines, clean-environment verified: 65 unit + 196/196 E2E); the first-measurement findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
