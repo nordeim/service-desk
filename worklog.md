@@ -1297,3 +1297,16 @@ Work Log:
 
 Stage Summary:
 - All seven documentation surfaces aligned with the s32 state (the request-body grammar contract + the envelope + HEAD/OPTIONS pins + the audit findings); ready for the final gate + the push phase
+
+---
+Task ID: 77
+Agent: main (Super Z) — session 32
+Task: Session-32 push + CI verification + final status
+
+Work Log:
+- Commit 87a15cf (the s32 remediation — 24 files: the parseBodyKeys seam + the six per-route allowed sets + the six-route wiring + the 9 unit pins + the s32 smoke block (12 pins) + the evolved s23 pin + the corrected rate-limiter arithmetic + the s32-live-verify script + the capture script + 7 docs + the screenshot refresh (3 shots pixel-diff, 7 byte-identical re-renders)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko shim at /home/z/my-project/bin/ssh on PATH, the venv python carrying paramiko 5.0.0; the key fingerprint verified before the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, identical to the s30/s31 records; the dry-run green first with the explicit --remote — the wrapper's default is task-management.git, the s28 lesson held; the real push verified: remote == local HEAD @ 87a15cf, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — a post-push residue check found nothing)
+- CI verification: the run on the push (run 38173376131 on 87a15cf) completed SUCCESS — verified via the GitHub API after the unauthenticated rate-limit window cleared (~30 min of patient polling; the badge live-signal green throughout: "CI - passing", fetched with cache-busters — the repo's own CLAUDE.md names the badge as the live signal); the runs on the operator's 3e93c8b + f08a8cf before it green as well
+- The CI confirmation recorded in the plan's execution status (this follow-up commit, the s21–s31 convention)
+
+Stage Summary:
+- Session 32 complete: the request-body grammar contract shipped (the parseBodyKeys seam across all six write routes — a true TDD RED→GREEN, 9 unit pins; 12 new smoke pins — 76 steps; 196/196 E2E unchanged; 18 live checks), the error-envelope + HEAD/OPTIONS conventions pinned, the s23 pin evolved with its contract re-pinned on the happy path, the sixth /login rotation + the s4/desktop/mobile persistence documented (all non-gaps), production-ready superset maintained, pushed to main (87a15cf + this status commit), CI green
