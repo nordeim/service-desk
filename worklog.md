@@ -1389,3 +1389,16 @@ Work Log:
 
 Stage Summary:
 - All seven documentation surfaces aligned with the s33 state (the catch-all + the cookie/concurrency pins + the audit findings); ready for the final gate + the push phase
+
+---
+Task ID: 82
+Agent: main (Super Z) — session 33
+Task: Session-33 push + CI verification + final status
+
+Work Log:
+- Commit 39d0aa0 (the s33 remediation — 15 files: the catch-all route (src/app/api/[[...path]]/route.ts) + the 19 unit pins (tests/api-catchall.test.ts) + the s33 smoke block (9 pins) + the smoke failure-path hardening + the s33-live-verify script (24 checks) + the s33 capture script + the VLM spot-check script + 7 docs + the one pixel-diffed screenshot (09; the other 9 byte-identical re-renders)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko shim at /home/z/my-project/bin/ssh on PATH, the venv python carrying paramiko 5.0.0; the key fingerprint verified before the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, identical to the s30/s31/s32 records; the dry-run green first with the explicit --remote — the wrapper's default is task-management.git, the s28 lesson held; the real push verified: remote == local HEAD @ 39d0aa0, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — a post-push residue check found nothing outside the committed wrapper scripts themselves)
+- CI verification: the run on the push (run 38182505069 on 39d0aa0) completed SUCCESS — verified via the GitHub API after the initial rate-limit window (~7 min of polling; the badge live-signal green throughout: "CI - passing", fetched with cache-busters — the repo's own CLAUDE.md names the badge as the live signal)
+- The CI confirmation recorded in the plan's execution status (this follow-up commit, the s21–s32 convention)
+
+Stage Summary:
+- Session 33 complete: the API-namespace JSON 404 catch-all shipped (a true TDD RED→GREEN — 19 unit pins; 9 new smoke pins — 85 steps; 196/196 E2E unchanged; 24 live checks), the cookie-attribute + concurrency surfaces pinned (the clean-but-unpinned axes closed), the smoke script's failure path hardened, the seventh /login rotation + the s4/desktop/mobile persistence documented (all non-gaps), production-ready superset maintained, pushed to main (39d0aa0 + this status commit), CI green
