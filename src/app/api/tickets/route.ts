@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { parseListFilters, parseListParams, parseListQuery, parseListSearch, parseNoQuery, validateAttachments, validateTicketInput } from "@/lib/validation";
+import { TICKET_CREATE_BODY_FIELDS } from "@/lib/constants";
+import { parseBodyKeys, parseListFilters, parseListParams, parseListQuery, parseListSearch, parseNoQuery, validateAttachments, validateTicketInput } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -144,6 +145,20 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  // Session 32: the request-BODY grammar (the parseBodyKeys seam — the s27
+  // param-set doctrine at the body level). The create's allowed set is the
+  // five form fields + attachments; a client-sent `status` (the PATCH
+  // route's key — the cross-route shape the seam exists to catch) or any
+  // unknown field rejects with 400 here, BEFORE the value level. The s23
+  // server-controlled-status contract carries on the happy path: a bare
+  // create still 201s with `status: "open"` (pinned in the smoke suite).
+  // Before s32 the extra key was silently ignored — the create proceeded
+  // (measured live at the s32 audit).
+  const parsedBody = parseBodyKeys(body, TICKET_CREATE_BODY_FIELDS);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
   const input = (body ?? {}) as Partial<{

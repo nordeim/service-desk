@@ -9,7 +9,8 @@ import {
   sessionCookieOptions,
   signSession,
 } from "@/lib/auth";
-import { validateSignupInput, parseNoQuery } from "@/lib/validation";
+import { validateSignupInput, parseBodyKeys, parseNoQuery } from "@/lib/validation";
+import { SIGNUP_BODY_FIELDS } from "@/lib/constants";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,15 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  // Session 32: the request-BODY grammar (the parseBodyKeys seam — the
+  // signup's allowed set is exactly {email, name, password}). Before s32
+  // an unknown field was silently ignored — the account was created
+  // (measured live at the s32 audit).
+  const parsedBody = parseBodyKeys(body, SIGNUP_BODY_FIELDS);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
   const input = (body ?? {}) as Partial<{ email: string; name: string; password: string }>;

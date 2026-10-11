@@ -8,7 +8,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { clientIp, rateLimit } from "@/lib/auth";
-import { parseNoQuery } from "@/lib/validation";
+import { parseBodyKeys, parseNoQuery } from "@/lib/validation";
+import { FORGOT_PASSWORD_BODY_FIELDS } from "@/lib/constants";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,16 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  // Session 32: the request-BODY grammar (the parseBodyKeys seam — the
+  // route's allowed set is exactly {email}). Before s32 an unknown field
+  // was silently ignored — the request proceeded (measured live at the
+  // s32 audit). The grammar burns a rate-bucket attempt (the limiter
+  // runs first, the s21 convention).
+  const parsedBody = parseBodyKeys(body, FORGOT_PASSWORD_BODY_FIELDS);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
   const email = String((body as Partial<{ email: string }>)?.email ?? "")

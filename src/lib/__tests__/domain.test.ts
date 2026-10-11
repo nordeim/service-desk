@@ -15,11 +15,18 @@ import {
   TICKET_PRIORITIES,
   TICKET_STATUSES,
   LIST_QUERY_PARAMS,
+  COMMENT_CREATE_BODY_FIELDS,
+  FORGOT_PASSWORD_BODY_FIELDS,
+  LOGIN_BODY_FIELDS,
+  SIGNUP_BODY_FIELDS,
+  TICKET_CREATE_BODY_FIELDS,
+  TICKET_PATCH_BODY_FIELDS,
   isTicketCategory,
   isTicketPriority,
   isTicketStatus,
 } from "@/lib/constants";
 import {
+  parseBodyKeys,
   parseListFilters,
   parseListParams,
   parseListQuery,
@@ -568,5 +575,80 @@ describe("parseNoQuery (s29: the shared empty-grammar contract — every remaini
       expect(stats.ok, qs).toBe(shared.ok);
       if (!shared.ok && !stats.ok) expect(stats.error).toBe(shared.error);
     }
+  });
+});
+
+describe("parseBodyKeys (s32: the request-body grammar contract — the s27 param-set doctrine at the body level)", () => {
+  it("rejects an unknown top-level field with the self-documenting message", () => {
+    const r = parseBodyKeys(
+      { title: "x", description: "y", category: "software", priority: "low", banana: 1 },
+      TICKET_CREATE_BODY_FIELDS,
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toBe(
+        "unknown request-body field: banana (allowed: title, description, category, priority, attachments)",
+      );
+    }
+  });
+
+  it("names the first offending field when several are present", () => {
+    const r = parseBodyKeys({ banana: 1, apple: 2 }, LOGIN_BODY_FIELDS);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("unknown request-body field: banana");
+  });
+
+  it("passes a body whose keys are all in the allowed set", () => {
+    const r = parseBodyKeys(
+      { title: "x", description: "y", category: "software", priority: "low", attachments: [] },
+      TICKET_CREATE_BODY_FIELDS,
+    );
+    expect(r.ok).toBe(true);
+  });
+
+  it("passes a subset body (every field is optional at the grammar level — the value level owns requiredness)", () => {
+    const r = parseBodyKeys({ title: "x" }, TICKET_CREATE_BODY_FIELDS);
+    expect(r.ok).toBe(true);
+  });
+
+  it("passes an empty object", () => {
+    const r = parseBodyKeys({}, LOGIN_BODY_FIELDS);
+    expect(r.ok).toBe(true);
+  });
+
+  it("passes non-object bodies through (the existing value-level validators own them)", () => {
+    for (const body of [null, undefined, ["array"], "string", 42]) {
+      expect(parseBodyKeys(body, LOGIN_BODY_FIELDS).ok, JSON.stringify(body)).toBe(true);
+    }
+  });
+
+  it("pins each route's allowed set (the six write-route grammars)", () => {
+    expect([...TICKET_CREATE_BODY_FIELDS]).toEqual([
+      "title",
+      "description",
+      "category",
+      "priority",
+      "attachments",
+    ]);
+    expect([...TICKET_PATCH_BODY_FIELDS]).toEqual(["status"]);
+    expect([...COMMENT_CREATE_BODY_FIELDS]).toEqual(["content"]);
+    expect([...LOGIN_BODY_FIELDS]).toEqual(["email", "password"]);
+    expect([...SIGNUP_BODY_FIELDS]).toEqual(["email", "name", "password"]);
+    expect([...FORGOT_PASSWORD_BODY_FIELDS]).toEqual(["email"]);
+  });
+
+  it("rejects the cross-route shape: a client-sent status on the CREATE route (the s23 pin's evolved grammar)", () => {
+    const r = parseBodyKeys(
+      { title: "x", description: "y", category: "software", priority: "low", status: "resolved" },
+      TICKET_CREATE_BODY_FIELDS,
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("unknown request-body field: status");
+  });
+
+  it("rejects a login body carrying a signup-route field (the cross-route confusion variant)", () => {
+    const r = parseBodyKeys({ email: "a@b.co", password: "x", name: "Extra" }, LOGIN_BODY_FIELDS);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("unknown request-body field: name");
   });
 });

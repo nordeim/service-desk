@@ -189,3 +189,39 @@ export type ListQueryParam = (typeof LIST_QUERY_PARAMS)[number];
  * `%` in the user's search silently matched the whole unfiltered feed).
  */
 export const SEARCH_MAX_LENGTH = 200;
+
+/**
+ * The write-route request-BODY grammars (session 32). The s27 param-set
+ * doctrine extended from the query level to the BODY level: every write
+ * route accepts exactly its documented top-level field set, and an unknown
+ * field rejects with 400 + a self-documenting message naming the field and
+ * the allowed set. Before s32 the surface was silently open (measured live
+ * on every write route: a create carrying `banana:1` stored the ticket, a
+ * login carrying `banana` logged in — the body-level variant of the s25
+ * lesson-79 class; the reference's platform silently DROPS unknown body
+ * keys, the Pydantic ignore-extras default). Cross-route shapes are the
+ * catch: a client-sent `status` on the CREATE route (the PATCH shape) or
+ * a `name` on the LOGIN route (the signup shape) now rejects at the
+ * grammar level instead of being silently ignored. The s23 server-
+ * controlled-status contract carries forward on the happy path: a bare
+ * create still 201s with `status: "open"`.
+ *
+ * Scope decisions (documented in docs/remediation-plan-session32.md):
+ * non-object bodies pass the grammar through (the existing value-level
+ * validators already 400 them — measured: array/null bodies reject);
+ * nested keys inside attachment objects are narrowed-by-mapping (the
+ * route's normalizer rebuilds each row field-by-field, so nothing
+ * unknown is ever stored); GET/DELETE routes consume no body.
+ */
+export const TICKET_CREATE_BODY_FIELDS = [
+  "title",
+  "description",
+  "category",
+  "priority",
+  "attachments",
+] as const;
+export const TICKET_PATCH_BODY_FIELDS = ["status"] as const;
+export const COMMENT_CREATE_BODY_FIELDS = ["content"] as const;
+export const LOGIN_BODY_FIELDS = ["email", "password"] as const;
+export const SIGNUP_BODY_FIELDS = ["email", "name", "password"] as const;
+export const FORGOT_PASSWORD_BODY_FIELDS = ["email"] as const;

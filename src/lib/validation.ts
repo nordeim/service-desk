@@ -327,3 +327,40 @@ export function parseNoQuery(
   }
   return { ok: true };
 }
+
+// Session 32: the request-BODY grammar contract — the s27 param-set
+// doctrine extended from the query level to the body level. The s51
+// shortlist named the axis; the s32 audit measured every write route and
+// found the surface silently open: a create carrying `banana:1` stored the
+// ticket, a login carrying `banana` logged in, and — the cross-route
+// variant — a create carrying the PATCH route's `status` key was silently
+// accepted with the value ignored (the s25 lesson-79 class at the body
+// level; the reference's platform silently DROPS unknown body keys, the
+// Pydantic ignore-extras default — ours never does). The seam rejects any
+// TOP-LEVEL key outside the route's allowed set with a self-documenting
+// message; it runs after the JSON parse and before the field validators
+// (the grammar level precedes the value level, the s27 ordering), and
+// NON-OBJECT bodies pass through untouched — the existing value-level
+// validators already 400 those (measured: array/null bodies reject).
+// Nested keys inside attachment objects stay out of scope: the routes'
+// normalizer rebuilds each row field-by-field (fileName/mimeType/sizeBytes/
+// data), so nothing unknown is ever stored there. Callers audited (zero
+// breakage): every UI fetch, the E2E setup, and every smoke probe sends
+// only known keys.
+export function parseBodyKeys(
+  body: unknown,
+  allowed: readonly string[],
+): { ok: true } | { ok: false; error: string } {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return { ok: true };
+  }
+  for (const key of Object.keys(body)) {
+    if (!allowed.includes(key)) {
+      return {
+        ok: false,
+        error: `unknown request-body field: ${key} (allowed: ${allowed.join(", ")})`,
+      };
+    }
+  }
+  return { ok: true };
+}

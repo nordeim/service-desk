@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { isTicketStatus } from "@/lib/constants";
-import { parseNoQuery } from "@/lib/validation";
+import { isTicketStatus, TICKET_PATCH_BODY_FIELDS } from "@/lib/constants";
+import { parseBodyKeys, parseNoQuery } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -62,6 +62,16 @@ export async function PATCH(req: Request, { params }: Params) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  // Session 32: the request-BODY grammar (the parseBodyKeys seam — the
+  // PATCH's allowed set is exactly {status}; an unknown field rejects
+  // with 400 before the value level. Before s32 the extra key was
+  // silently ignored — the mutation applied (measured live at the s32
+  // audit).
+  const parsedBody = parseBodyKeys(body, TICKET_PATCH_BODY_FIELDS);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
   const status = (body as Partial<{ status: string }>)?.status;

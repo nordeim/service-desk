@@ -10,7 +10,8 @@ import {
   signSession,
   verifyPassword,
 } from "@/lib/auth";
-import { validateLoginInput, parseNoQuery } from "@/lib/validation";
+import { validateLoginInput, parseBodyKeys, parseNoQuery } from "@/lib/validation";
+import { LOGIN_BODY_FIELDS } from "@/lib/constants";
 
 export const runtime = "nodejs";
 
@@ -41,6 +42,18 @@ export async function POST(req: Request) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  // Session 32: the request-BODY grammar (the parseBodyKeys seam — the
+  // login's allowed set is exactly {email, password}; a signup-shape body
+  // carrying `name` rejects here, the cross-route catch). The grammar
+  // burns a rate-bucket attempt (the limiter runs first, the s21
+  // convention — the 400 is still an attempt). Before s32 an unknown
+  // field was silently ignored — the login proceeded (measured live at
+  // the s32 audit).
+  const parsedBody = parseBodyKeys(body, LOGIN_BODY_FIELDS);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
   const input = (body ?? {}) as Partial<{ email: string; password: string }>;

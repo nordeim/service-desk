@@ -377,6 +377,119 @@ assert s["avgResolutionMs"] is None or isinstance(s["avgResolutionMs"],(int,floa
 ' || fail "s31-schema: stats key sets must be the symmetric five-status vocabulary"
 step "PASS" "s31-schema: stats mine+global exactly the five-status vocabulary (symmetric aggregate)"
 
+# --- Request-body grammar + envelope + HEAD/OPTIONS contract (the s32 pins) --
+# Session 32: the s51-directed request-BODY audit measured every write route
+# silently accepting unknown top-level JSON keys (a create carrying banana:1
+# stored the ticket; a login carrying banana logged in — the body-level
+# variant of the s25 lesson-79 class; the reference's platform silently
+# DROPS the extra keys, the Pydantic ignore-extras default). The parseBodyKeys
+# seam closes it: every grammar pin below asserts 400 + the self-documenting
+# message (the s27 doctrine at the body level). The block also pins the two
+# companion axes the audit measured clean-but-unpinned: the error-envelope
+# convention ({error} everywhere; {error, errors} ONLY on form-validation
+# surfaces) and the HEAD/OPTIONS body surface (standard + header-gated).
+RESP=$(curl -s -w "\n%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"s32 body grammar probe","description":"an unknown top-level key must reject","category":"software","priority":"low","banana":1}')
+echo "$RESP" | tail -1 | grep -q "^400$" || fail "s32-body: create +banana should 400 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q 'unknown request-body field: banana (allowed: title, description, category, priority, attachments)' \
+  || fail "s32-body: create +banana message"
+step "PASS" "s32-body: create +banana rejected (400 + the allowed-set message)"
+
+RESP=$(curl -s -w "\n%{http_code}" -X POST "$BASE/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@servicedesk.app","password":"Demo1234!","banana":1}')
+echo "$RESP" | tail -1 | grep -q "^400$" || fail "s32-body: login +banana should 400 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q 'unknown request-body field: banana (allowed: email, password)' \
+  || fail "s32-body: login +banana message"
+step "PASS" "s32-body: login +banana rejected (400 + the allowed-set message)"
+
+RESP=$(curl -s -w "\n%{http_code}" -X POST "$BASE/api/auth/signup" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"s32-grammar-probe@servicedesk.app","name":"Grammar Probe","password":"Passw0rd123","banana":1}')
+echo "$RESP" | tail -1 | grep -q "^400$" || fail "s32-body: signup +banana should 400 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q 'unknown request-body field: banana (allowed: email, name, password)' \
+  || fail "s32-body: signup +banana message"
+step "PASS" "s32-body: signup +banana rejected (400 + the allowed-set message)"
+
+RESP=$(curl -s -w "\n%{http_code}" -X POST "$BASE/api/auth/forgot-password" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@servicedesk.app","banana":1}')
+echo "$RESP" | tail -1 | grep -q "^400$" || fail "s32-body: forgot-password +banana should 400 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q 'unknown request-body field: banana (allowed: email)' \
+  || fail "s32-body: forgot +banana message"
+step "PASS" "s32-body: forgot-password +banana rejected (400 + the allowed-set message)"
+
+RESP=$(curl -s -w "\n%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
+  -H "Content-Type: application/json" \
+  -d '{"content":"s32 grammar probe comment","banana":1}')
+echo "$RESP" | tail -1 | grep -q "^400$" || fail "s32-body: comment +banana should 400 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q 'unknown request-body field: banana (allowed: content)' \
+  || fail "s32-body: comment +banana message"
+step "PASS" "s32-body: comment +banana rejected (400 + the allowed-set message)"
+
+RESP=$(curl -s -w "\n%{http_code}" -b "$COOKIE_JAR" -X PATCH "$BASE/api/tickets/$TICKET_ID" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"in_progress","banana":1}')
+echo "$RESP" | tail -1 | grep -q "^400$" || fail "s32-body: PATCH +banana should 400 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q 'unknown request-body field: banana (allowed: status)' \
+  || fail "s32-body: PATCH +banana message"
+step "PASS" "s32-body: PATCH +banana rejected (400 + the allowed-set message)"
+
+# The s23 server-controlled contract re-pinned on the happy path: a bare
+# create (no status sent) still 201s with status:open.
+RESP=$(curl -s -w "\n%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"s32 happy path status pin","description":"the bare create pins the server-controlled status","category":"software","priority":"low"}')
+echo "$RESP" | tail -1 | grep -q "^201$" || fail "s32-body: bare create should 201 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q '"status":"open"' || fail "s32-body: bare create must come back status:open (the server-controlled contract)"
+step "PASS" "s32-body: bare create still 201 + status:open (the s23 contract carried forward)"
+
+# The error-envelope convention (the P2 axis): {error} exactly on every
+# single-message family; {error, errors} ONLY on form-validation surfaces.
+curl -s "$BASE/api/tickets" | python3 -c '
+import json,sys
+e = json.load(sys.stdin)
+assert sorted(e) == ["error"], "401 envelope got %s" % sorted(e)
+' || fail "s32-envelope: the 401 must be exactly {error}"
+step "PASS" "s32-envelope: 401 carries exactly {error} (the single-message convention)"
+
+curl -s -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"x","description":"y","category":"nope","priority":"low"}' | python3 -c '
+import json,sys
+e = json.load(sys.stdin)
+assert sorted(e) == ["error","errors"], "form-400 envelope got %s" % sorted(e)
+assert isinstance(e["errors"], dict) and e["errors"], "the errors field record must be non-empty"
+' || fail "s32-envelope: the form-validation 400 must be exactly {error, errors}"
+step "PASS" "s32-envelope: form-validation 400 carries {error, errors} (the field-record convention)"
+
+curl -s -b "$COOKIE_JAR" "$BASE/api/tickets/nonexistent-ticket" | python3 -c '
+import json,sys
+e = json.load(sys.stdin)
+assert sorted(e) == ["error"], "404 envelope got %s" % sorted(e)
+' || fail "s32-envelope: the 404 must be exactly {error}"
+step "PASS" "s32-envelope: 404 carries exactly {error} (the single-message convention)"
+
+# The HEAD/OPTIONS body surface (the P3 axis): standard + header-gated.
+S32_HEAD_HDRS="$(mktemp)"
+curl -s -I -D "$S32_HEAD_HDRS" -o /dev/null "$BASE/api/health"
+grep -qi '^HTTP' "$S32_HEAD_HDRS" || fail "s32-head: HEAD /api/health returned no status line"
+grep -qi '^strict-transport-security: max-age=31536000' "$S32_HEAD_HDRS" \
+  || fail "s32-head: HEAD /api/health must carry the s30 HSTS contract"
+grep -qi '^x-powered-by:' "$S32_HEAD_HDRS" \
+  && fail "s32-head: HEAD must NOT carry X-Powered-By"
+step "PASS" "s32-head: HEAD /api/health 200 + the header set (HSTS, no X-Powered-By)"
+
+S32_OPT_HDRS="$(mktemp)"
+OPT_CODE=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -X OPTIONS -D "$S32_OPT_HDRS" "$BASE/api/health")
+[ "$OPT_CODE" = "204" ] || fail "s32-head: OPTIONS /api/health should 204 (got $OPT_CODE)"
+grep -qi '^allow: GET, HEAD, OPTIONS' "$S32_OPT_HDRS" \
+  || fail "s32-head: OPTIONS must carry allow: GET, HEAD, OPTIONS"
+[ ! -s "$RL_BODY_X" ] || fail "s32-head: OPTIONS body must be empty"
+rm -f "$S32_HEAD_HDRS" "$S32_OPT_HDRS"
+step "PASS" "s32-head: OPTIONS /api/health 204 + allow: GET, HEAD, OPTIONS + empty body"
+
 # --- Comment + status -------------------------------------------------------
 curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
   -H "Content-Type: application/json" \
@@ -412,14 +525,20 @@ step "PASS" "validation guard (400)"
 # blocks below reuse them and the cleanup trap removes both at the end).
 RL_HEADERS="$(mktemp)"
 RL_BODY="$(mktemp)"
-# Server-controlled status: a client-sent status is IGNORED (the create data
-# pins status:"open"). Their create stores the "banana" (200, rendered).
+# Server-controlled status: a client-sent status is NOT part of the create
+# grammar (s32: the parseBodyKeys seam rejects it at the grammar level —
+# `status` is the PATCH route's key, the cross-route shape the s27-analog
+# exists to catch). Their create stores the "banana" (200, rendered). The
+# s23 contract — the SERVER controls the status — is now doubly guarded:
+# the grammar rejects the key here, and the s32 block below re-pins that a
+# bare create still 201s with status:open.
 RESP=$(curl -s -w "\n%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
   -H "Content-Type: application/json" \
-  -d '{"title":"Smoke banana status pin","description":"The client-sent status must be ignored.","category":"software","priority":"low","status":"banana"}')
-echo "$RESP" | tail -1 | grep -q "^201$" || fail "banana-status create should 201 (got $(echo "$RESP" | tail -1))"
-echo "$RESP" | head -1 | grep -q '"status":"open"' || fail "created ticket must come back status:open (the server-controlled contract)"
-step "PASS" "create-path guard: client-sent status ignored (201 + open)"
+  -d '{"title":"Smoke banana status pin","description":"The client-sent status must be rejected at the grammar level.","category":"software","priority":"low","status":"banana"}')
+echo "$RESP" | tail -1 | grep -q "^400$" || fail "banana-status create should 400 (got $(echo "$RESP" | tail -1))"
+echo "$RESP" | head -1 | grep -q 'unknown request-body field: status (allowed: title, description, category, priority, attachments)' \
+  || fail "banana-status create should name status as the unknown field"
+step "PASS" "create-path guard: client-sent status rejected at the grammar level (400 + the field message)"
 
 # Attachment count cap (theirs: 10 URLs per ticket, 200 — s23 measurement).
 CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
@@ -518,19 +637,21 @@ rm -f "$COOKIE_JAR_B"
 # would burn the whole login budget and cascade-flake the suite).
 #
 # Login bucket (10/IP/15-min): the demo login at the top consumed slot 1;
-# the s31 schema pin's login consumed slot 2; these 9 wrong-password POSTs
-# consume slots 3-11 (the first 8 answer 401; the 9th — the bucket's 11th —
-# is already throttled, unchecked in this loop)...
+# the s31 schema pin's login consumed slot 2; the s32 body-grammar login
+# probe consumed slot 3 (the limiter runs first — the grammar 400 still
+# burns the attempt); these 9 wrong-password POSTs consume slots 4-12 (the
+# first 7 answer 401; the 8th and 9th — the bucket's 11th and 12th — are
+# already throttled, unchecked in this loop)...
 for _ in $(seq 1 9); do
   curl -s -o /dev/null -X POST "$BASE/api/auth/login" \
     -H "Content-Type: application/json" \
     -d '{"email":"nobody@servicedesk.app","password":"wrong"}' >/dev/null
 done
-# ...so the next request (the 12th POST; the bucket exhausted at the 11th and
-# stays exhausted until the window rolls) must be throttled: 429 + Retry-After
-# + the message. The contract proven is unchanged: exactly 10 attempts allowed
-# per window (slot 2 returned 200, slots 3-10 returned 401), the 11th onward
-# throttled.
+# ...so the next request (the 13th POST; the bucket exhausted at the 11th
+# and stays exhausted until the window rolls) must be throttled: 429 +
+# Retry-After + the message. The contract proven is unchanged: exactly 10
+# attempts allowed per window (slots 1-3 answered 200/200/400, slots 4-10
+# returned 401), the 11th onward throttled.
 CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -D "$RL_HEADERS" -X POST "$BASE/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"email":"nobody@servicedesk.app","password":"wrong"}')
@@ -539,8 +660,11 @@ grep -qi '^retry-after:' "$RL_HEADERS" || fail "login 429 should carry Retry-Aft
 grep -q "Too many attempts" "$RL_BODY" || fail "login 429 body should say Too many attempts"
 step "PASS" "login rate limiter (429 + Retry-After after 10)"
 
-# Forgot bucket (its own forgot:${ip} key, 5/IP/15-min): 5 requests ok (the
-# anti-enumeration 200s), the 6th throttled.
+# Forgot bucket (its own forgot:${ip} key, 5/IP/15-min): the s32 body-grammar
+# probe consumed slot 1 (the 400 burns the attempt); these 5 requests land on
+# slots 2-6 — the 6th is already throttled (unchecked) — so the asserted request
+# (the 7th) must 429. The contract proven is unchanged: 5 attempts per window,
+# the 6th onward throttled.
 for _ in $(seq 1 5); do
   curl -s -o /dev/null -X POST "$BASE/api/auth/forgot-password" \
     -H "Content-Type: application/json" \

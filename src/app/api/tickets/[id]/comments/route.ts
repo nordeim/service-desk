@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { parseNoQuery, validateCommentInput } from "@/lib/validation";
+import { COMMENT_CREATE_BODY_FIELDS } from "@/lib/constants";
+import { parseBodyKeys, parseNoQuery, validateCommentInput } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -27,6 +28,15 @@ export async function POST(req: Request, { params }: Params) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  // Session 32: the request-BODY grammar (the parseBodyKeys seam — the
+  // comment's allowed set is exactly {content}). Before s32 an unknown
+  // field was silently ignored — the comment was created (measured live
+  // at the s32 audit).
+  const parsedBody = parseBodyKeys(body, COMMENT_CREATE_BODY_FIELDS);
+  if (!parsedBody.ok) {
+    return NextResponse.json({ error: parsedBody.error }, { status: 400 });
   }
 
   const input = (body ?? {}) as Partial<{ content: string }>;
