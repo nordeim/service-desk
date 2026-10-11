@@ -1130,3 +1130,16 @@ Work Log:
 
 Stage Summary:
 - The HSTS + X-Powered-By header contract shipped (110 unit + 196/196 E2E + smoke 58, clean-environment verified; the live header matrix + the s24-s29 re-runs + the UI round-trip + the mobile matrix + the VLM check all green); the s29 live-verify script hardened to self-contained; production-ready superset maintained; ready for the docs + push phase
+
+---
+Task ID: 70
+Agent: main (Super Z) — session 30
+Task: Session-30 push + CI verification + final status
+
+Work Log:
+- Commit aa578d6 (the s30 remediation — 15 files: the next.config keys + the 4 unit pins + the 10-smoke-pin block + the s29-live-verify hardening + the cleanup script + the capture script + 8 docs + the screenshot refresh) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko shim at /home/z/my-project/bin/ssh on PATH; the key fingerprint verified before the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU; the dry-run green first with the explicit --remote — the wrapper's default is task-management.git, the s28 lesson held; the real push verified: remote == local HEAD @ aa578d6, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — a post-push ls-remote via the shim correctly failed with no key material present)
+- CI run 38134373091 on aa578d6 completed SUCCESS — verified via the GitHub API this session (not rate-limited, unlike the s25+ standing condition; the runs on the operator's 25d329a + the s29-closeout aab56cc before it green as well)
+- The CI confirmation recorded in the plan's execution status (this follow-up commit, the s21-s29 convention)
+
+Stage Summary:
+- Session 30 complete: the response-header contract shipped (the HSTS parity entry + the poweredByHeader lockdown — RED→GREEN, 110 unit; 4 smoke pins, 58 PASS lines; 196/196 E2E unchanged; the live header matrix + the s24-s29 re-runs + the UI round-trip + the mobile matrix + the desktop VLM check all green), the app-route rotation (eleven sweeps → both routes share one pair) + the s4-defect persistence + the desktop-overflow persistence documented (all non-gaps on their side), the s29 live-verify script hardened to self-contained, production-ready superset maintained, pushed to main (aa578d6 + this status commit), CI green
