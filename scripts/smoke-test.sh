@@ -16,10 +16,24 @@ SERVER_LOG="$(mktemp)"
 RL_HEADERS=""
 RL_BODY=""
 RL_BODY_X="$(mktemp)"
+S33_HEADERS="$(mktemp)"
+S33_CATCHALL_HDRS="$(mktemp)"
+S33_SIGNUP_HDRS="$(mktemp)"
+S33_LOGOUT_HDRS="$(mktemp)"
+S33_BODY="$(mktemp)"
+S33_JAR_C="$(mktemp)"
+S33_CONCURRENCY_CODE="$(mktemp)"
 
 cleanup() {
   [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null
-  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"}
+  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"}
+  # Session 33 hardening: a FAILED mid-run exit used to leave db/smoke.db
+  # behind (the removal lived only on the success path), and the leftover
+  # mutated rows (probe tickets, PATCHed statuses) poisoned the NEXT run's
+  # filter pins with failures far from the real bug — the idempotent seed
+  # upserts the canonical rows but never deletes the residue. Remove it in
+  # the trap so every run starts clean regardless of the previous outcome.
+  rm -f "$(dirname "$0")/../db/smoke.db" "$(dirname "$0")/../db/smoke.db-journal"
 }
 trap cleanup EXIT
 
@@ -43,7 +57,11 @@ curl -sf "$BASE/api/health" >/dev/null || fail "server did not become healthy (s
 step "PASS" "server healthy on :$PORT"
 
 # --- Auth -------------------------------------------------------------------
-curl -sf -c "$COOKIE_JAR" -X POST "$BASE/api/auth/login" \
+# The s33 block pins the login set-cookie ATTRIBUTE set (Path, Max-Age,
+# Secure, HttpOnly, SameSite) from this call's response headers — the -D
+# dump adds zero requests, so the rate-limiter slot arithmetic at the
+# bottom of this script is UNCHANGED (this login stays slot 1).
+curl -sf -c "$COOKIE_JAR" -D "$S33_HEADERS" -X POST "$BASE/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"email":"demo@servicedesk.app","password":"Demo1234!"}' >/dev/null || fail "login"
 step "PASS" "login"
@@ -628,6 +646,152 @@ CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/a
 grep -q "Ticket not found" "$RL_BODY" || fail "unknown-ticket body should say Ticket not found"
 step "PASS" "comment guard: unknown ticket rejected (404)"
 rm -f "$COOKIE_JAR_B"
+
+# --- Session 33: the API-namespace JSON 404 catch-all + the cookie-attribute
+# + the concurrency pins -------------------------------------------------------
+# P1 (the catch-all): before s33 every UNKNOWN path under /api/** served the
+# framework's HTML 404 (content-type text/html) — the last non-JSON surface
+# in the API namespace. The known routes' error paths already speak JSON
+# (the s32 envelope pins); src/app/api/[[...path]]/route.ts extends the JSON
+# contract to the unknown paths. P2/P3 (the cookie attributes + the
+# concurrency) close the clean-but-unpinned axes measured this session.
+# NONE of these probes touch the rate-limited routes (login/forgot) — the
+# 429 slot arithmetic below is UNCHANGED.
+
+# The catch-all matrix: unknown paths (nested + deep + bare) → 404 + JSON.
+for S33_PATH in /api/banana /api/auth/banana /api/tickets/xyz/banana /api; do
+  CODE=$(curl -s -o "$S33_BODY" -w "%{http_code}" -D "$S33_CATCHALL_HDRS" "$BASE$S33_PATH")
+  [ "$CODE" = "404" ] || fail "s33-catchall: GET $S33_PATH should 404 (got $CODE)"
+  grep -qi '^content-type: application/json' "$S33_CATCHALL_HDRS" \
+    || fail "s33-catchall: GET $S33_PATH should be application/json"
+  grep -q '"error":"API route not found"' "$S33_BODY" \
+    || fail "s33-catchall: GET $S33_PATH body should say API route not found"
+  grep -qi '^strict-transport-security: max-age=31536000' "$S33_CATCHALL_HDRS" \
+    || fail "s33-catchall: GET $S33_PATH should carry HSTS (the s30 universal set)"
+done
+step "PASS" "s33-catchall: unknown API paths serve the JSON 404 (4-path matrix + HSTS)"
+
+# The HEAD variant: 404 + the header set + an EMPTY body (the auto-HEAD on
+# the GET handler — the HTTP layer strips the body; curl's -I writes the
+# HEADERS as its output, so the body-size check uses %{size_download}).
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -I "$BASE/api/banana")
+[ "$CODE" = "404" ] || fail "s33-catchall: HEAD /api/banana should 404 (got $CODE)"
+S33_HEAD_SIZE=$(curl -s -o /dev/null -w "%{size_download}" -I "$BASE/api/banana")
+[ "$S33_HEAD_SIZE" = "0" ] || fail "s33-catchall: HEAD /api/banana body should be empty (got $S33_HEAD_SIZE bytes)"
+curl -sI "$BASE/api/banana" | grep -qi '^strict-transport-security: max-age=31536000' \
+  || fail "s33-catchall: HEAD should carry HSTS"
+step "PASS" "s33-catchall: HEAD /api/banana 404 + headers + empty body"
+
+# The OPTIONS variant: 404 + the JSON body — NOT the framework's
+# 204-with-allow (a nonexistent path has no method set; the explicit
+# OPTIONS export exists precisely to prevent that implication).
+CODE=$(curl -s -o "$S33_BODY" -w "%{http_code}" -X OPTIONS "$BASE/api/banana")
+[ "$CODE" = "404" ] || fail "s33-catchall: OPTIONS /api/banana should 404 (got $CODE)"
+grep -q '"error":"API route not found"' "$S33_BODY" \
+  || fail "s33-catchall: OPTIONS /api/banana body should say API route not found"
+step "PASS" "s33-catchall: OPTIONS /api/banana 404 + JSON (no allow header)"
+
+# The non-shadow re-pins: the known routes stay in FRONT of the catch-all.
+# (The unauth /api/auth/me returns 401 + {"user":null} — the known-route
+# shape; the catch-all would answer 404, so the 401 + this body is the
+# proof. NOTE: no -D dump here — $S33_HEADERS still holds the LOGIN
+# response headers for the cookie-attribute pins below.)
+CODE=$(curl -s -o "$S33_BODY" -w "%{http_code}" "$BASE/api/auth/me")
+[ "$CODE" = "401" ] || fail "s33-shadow: /api/auth/me unauth should still 401 (got $CODE)"
+grep -q '"user":null' "$S33_BODY" \
+  || fail "s33-shadow: /api/auth/me should return the known-route shape ({\"user\":null}), not the catch-all"
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets/$TICKET_ID")
+[ "$CODE" = "200" ] || fail "s33-shadow: the real-ticket detail GET should still 200 (got $CODE)"
+step "PASS" "s33-shadow: known routes unaffected (me 401 JSON + real detail 200)"
+
+# P2 (the cookie attributes): the login set-cookie from the top-of-script
+# login (the -D dump — zero extra requests).
+grep -i '^set-cookie: servicedesk_session=' "$S33_HEADERS" | grep -q 'Path=/' \
+  || fail "s33-cookie: login set-cookie should carry Path=/"
+grep -i '^set-cookie: servicedesk_session=' "$S33_HEADERS" | grep -q 'Max-Age=604800' \
+  || fail "s33-cookie: login set-cookie should carry Max-Age=604800 (7-day TTL)"
+grep -i '^set-cookie: servicedesk_session=' "$S33_HEADERS" | grep -q 'Secure' \
+  || fail "s33-cookie: login set-cookie should carry Secure"
+grep -i '^set-cookie: servicedesk_session=' "$S33_HEADERS" | grep -q 'HttpOnly' \
+  || fail "s33-cookie: login set-cookie should carry HttpOnly"
+grep -i '^set-cookie: servicedesk_session=' "$S33_HEADERS" | grep -q 'SameSite=lax' \
+  || fail "s33-cookie: login set-cookie should carry SameSite=lax"
+step "PASS" "s33-cookie: login set-cookie attribute set (Path/Max-Age/Secure/HttpOnly/SameSite)"
+
+# The signup set-cookie: user C (signup is NOT rate-limited; the throwaway
+# db user needs no cleanup — db/smoke.db is deleted at the end).
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -D "$S33_SIGNUP_HDRS" -c "$S33_JAR_C" \
+  -X POST "$BASE/api/auth/signup" -H "Content-Type: application/json" \
+  -d '{"email":"s33-smoke@servicedesk.app","name":"S33 Smoke","password":"Smoke1234!"}')
+[ "$CODE" = "201" ] || fail "s33-cookie: signup should 201 (got $CODE)"
+grep -i '^set-cookie: servicedesk_session=' "$S33_SIGNUP_HDRS" | grep -q 'Path=/' \
+  || fail "s33-cookie: signup set-cookie should carry Path=/"
+grep -i '^set-cookie: servicedesk_session=' "$S33_SIGNUP_HDRS" | grep -q 'Max-Age=604800' \
+  || fail "s33-cookie: signup set-cookie should carry Max-Age=604800"
+grep -i '^set-cookie: servicedesk_session=' "$S33_SIGNUP_HDRS" | grep -q 'Secure' \
+  || fail "s33-cookie: signup set-cookie should carry Secure"
+grep -i '^set-cookie: servicedesk_session=' "$S33_SIGNUP_HDRS" | grep -q 'HttpOnly' \
+  || fail "s33-cookie: signup set-cookie should carry HttpOnly"
+grep -i '^set-cookie: servicedesk_session=' "$S33_SIGNUP_HDRS" | grep -q 'SameSite=lax' \
+  || fail "s33-cookie: signup set-cookie should carry SameSite=lax"
+step "PASS" "s33-cookie: signup set-cookie attribute set (identical)"
+
+# The logout clear-cookie: user C's session (logout is NOT rate-limited).
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -D "$S33_LOGOUT_HDRS" \
+  -b "$S33_JAR_C" -X POST "$BASE/api/auth/logout")
+[ "$CODE" = "200" ] || fail "s33-cookie: logout should 200 (got $CODE)"
+grep -i '^set-cookie: servicedesk_session=;' "$S33_LOGOUT_HDRS" | grep -q 'Path=/' \
+  || fail "s33-cookie: logout clear-cookie should carry Path=/"
+grep -i '^set-cookie: servicedesk_session=;' "$S33_LOGOUT_HDRS" | grep -q 'Max-Age=0' \
+  || fail "s33-cookie: logout clear-cookie should carry Max-Age=0"
+grep -i '^set-cookie: servicedesk_session=;' "$S33_LOGOUT_HDRS" | grep -q 'Secure' \
+  || fail "s33-cookie: logout clear-cookie should carry Secure"
+grep -i '^set-cookie: servicedesk_session=;' "$S33_LOGOUT_HDRS" | grep -q 'HttpOnly' \
+  || fail "s33-cookie: logout clear-cookie should carry HttpOnly"
+grep -i '^set-cookie: servicedesk_session=;' "$S33_LOGOUT_HDRS" | grep -q 'SameSite=lax' \
+  || fail "s33-cookie: logout clear-cookie should carry SameSite=lax"
+step "PASS" "s33-cookie: logout clear-cookie attribute set (Max-Age=0 + the same tails)"
+
+# P3 (the concurrency): 5 simultaneous comments on the smoke ticket, then
+# the coherent-final-state assertion (the detail GET embeds comments).
+# (NOTE: `wait` with no arguments would wait for the SERVER job too — the
+# server was started with `&` and never exits — so the probe PIDs are
+# collected and waited on explicitly.)
+S33_COUNT_BEFORE=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets/$TICKET_ID" \
+  | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["ticket"]["comments"]))')
+S33_PIDS=""
+for i in 1 2 3 4 5; do
+  curl -s -o /dev/null -w "%{http_code}\n" -b "$COOKIE_JAR" \
+    -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
+    -H "Content-Type: application/json" \
+    -d '{"content":"s33 concurrency comment"}' >> "$S33_CONCURRENCY_CODE" &
+  S33_PIDS="$S33_PIDS $!"
+done
+wait $S33_PIDS
+sort "$S33_CONCURRENCY_CODE" | uniq -c | grep -q '^ *5 201$' \
+  || fail "s33-concurrency: all 5 parallel comments should 201 (got $(sort "$S33_CONCURRENCY_CODE" | uniq -c | tr '\n' ' '))"
+: > "$S33_CONCURRENCY_CODE"
+S33_COUNT_AFTER=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets/$TICKET_ID" \
+  | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["ticket"]["comments"]))')
+[ "$S33_COUNT_AFTER" -eq $((S33_COUNT_BEFORE + 5)) ] \
+  || fail "s33-concurrency: final comment count should be $((S33_COUNT_BEFORE + 5)) (got $S33_COUNT_AFTER)"
+step "PASS" "s33-concurrency: 5 parallel comments all 201 + coherent final state"
+
+# 5 simultaneous PATCHes (interleaved status flips) — all 200.
+S33_PIDS=""
+for i in 1 2 3 4 5; do
+  if [ $((i % 2)) -eq 0 ]; then S33_STATUS=in_progress; else S33_STATUS=resolved; fi
+  curl -s -o /dev/null -w "%{http_code}\n" -b "$COOKIE_JAR" \
+    -X PATCH "$BASE/api/tickets/$TICKET_ID" \
+    -H "Content-Type: application/json" \
+    -d "{\"status\":\"$S33_STATUS\"}" >> "$S33_CONCURRENCY_CODE" &
+  S33_PIDS="$S33_PIDS $!"
+done
+wait $S33_PIDS
+sort "$S33_CONCURRENCY_CODE" | uniq -c | grep -q '^ *5 200$' \
+  || fail "s33-concurrency: all 5 parallel PATCHes should 200 (got $(sort "$S33_CONCURRENCY_CODE" | uniq -c | tr '\n' ' '))"
+step "PASS" "s33-concurrency: 5 parallel PATCHes all 200 (no SQLITE_BUSY)"
+rm -f "$S33_CONCURRENCY_CODE"
 
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +
