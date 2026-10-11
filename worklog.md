@@ -1037,3 +1037,16 @@ Work Log:
 
 Stage Summary:
 - The stats empty-grammar contract shipped (99 unit + 196/196 E2E + smoke 44, clean-environment verified; live-verified 12+14+15+13+13 checks + the UI round-trip + the mobile matrix); the second /login rotation + the native-bridge decode + the s4-defect recurrence documented; production-ready superset maintained; ready for the push phase
+
+---
+Task ID: 65
+Agent: main (Super Z) — session 28
+Task: Session-28 push + CI verification + final status
+
+Work Log:
+- Commit 752e333 (the s28 remediation — 15 files: the seam + wiring + tests + smoke + 7 docs + the s28 scripts) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko ssh shim at /home/z/my-project/bin/ssh on PATH; the first dry-run failed non-fast-forward — the wrapper's DEFAULT remote is task-management.git, the generic origin; re-run with the explicit --remote flag: dry-run green (5a4c334..752e333 clean fast-forward) then the real push; remote verified == local HEAD, tracking synced, operator key + the wrapper's temp key both shredded, main only, tree clean)
+- CI Run 63 on 752e333 completed SUCCESS — verified via the browser aria-label method (the anonymous REST API 403 rate-limited, the standing s25+ condition); Runs 61-62 (the s27 lineage) green before it
+- The CI confirmation recorded in the plan's execution status (this follow-up commit, the s21-s27 convention)
+
+Stage Summary:
+- Session 28 complete: the stats empty-grammar contract shipped (parseStatsQuery RED→GREEN, 99 unit; 3 smoke pins, 44 PASS lines; 196/196 E2E unchanged), the second /login rotation + the native-bridge decode + the s4-defect recurrence documented (all non-gaps), the drift ledger + mobile matrix + TW guards re-verified (tenth), pushed to main, CI Run 63 green
