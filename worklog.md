@@ -1310,3 +1310,15 @@ Work Log:
 
 Stage Summary:
 - Session 32 complete: the request-body grammar contract shipped (the parseBodyKeys seam across all six write routes — a true TDD RED→GREEN, 9 unit pins; 12 new smoke pins — 76 steps; 196/196 E2E unchanged; 18 live checks), the error-envelope + HEAD/OPTIONS conventions pinned, the s23 pin evolved with its contract re-pinned on the happy path, the sixth /login rotation + the s4/desktop/mobile persistence documented (all non-gaps), production-ready superset maintained, pushed to main (87a15cf + this status commit), CI green
+
+---
+Task ID: 78
+Agent: main (Super Z) — session 32 (addendum)
+Task: Status-commit CI verification + session closeout
+
+Work Log:
+- The status commit bbd8a1d pushed via the same wrapper protocol (fingerprint verified, dry-run green, remote == local HEAD, both keys shredded, no residue)
+- CI on bbd8a1d (a docs-only commit — 2 markdown files, zero code delta from the verified 87a15cf): the unauthenticated GitHub API stayed rate-limited through ~45 minutes of patient polling (the shared egress IPs exhausted); the live badge signal (the repo's own documented live check — CLAUDE.md names it) reads "CI - passing" throughout, fetched with cache-busters repeatedly. The remediation commit's CI (run 38173376131 on 87a15cf — the code-identical tree) was API-verified SUCCESS directly. The badge on main is green.
+
+Stage Summary:
+- Session 32 fully closed: both commits on main (87a15cf remediation + bbd8a1d status), CI green (the remediation run API-verified + the badge live signal), all keys shredded, the repo tree clean; the next session's shortlist recorded in docs/session_53.md (the seventh /login wave? the s4-defect re-check, the desktop-overflow axis, and the own-side audit candidates: the cookie-attribute mutation surface, the concurrency surface, the content-negotiation surface)
