@@ -148,3 +148,20 @@ export type ListSort = (typeof LIST_SORT_OPTIONS)[number];
 
 export const LIST_SCOPE_OPTIONS = ["mine", "all"] as const;
 export type ListScope = (typeof LIST_SCOPE_OPTIONS)[number];
+
+/**
+ * List-API search cap (session 26). The `search` param is free text — not a
+ * vocabulary — but the s25 lesson applies verbatim: every param family needs
+ * the same explicit strictness decision. A search term is capped at 200
+ * characters (the title cap's scale — a term longer than any title matches
+ * nothing); beyond it the API rejects with 400 + a self-documenting message
+ * instead of running a wasteful unbounded pattern. The mytickets search input
+ * mirrors the cap (`maxLength`) so the UI can never hit it. The semantics
+ * contract (also s26): search is a LITERAL case-insensitive substring match —
+ * `%` and `_` carry no wildcard meaning (the reference's measured client-side
+ * `.toLowerCase().includes()` semantics), enforced at the route with an
+ * `instr(lower(col), lower(?))` predicate because Prisma's SQLite `contains`
+ * compiles to a bare `LIKE` with no `ESCAPE` clause (measured s26: a literal
+ * `%` in the user's search silently matched the whole unfiltered feed).
+ */
+export const SEARCH_MAX_LENGTH = 200;

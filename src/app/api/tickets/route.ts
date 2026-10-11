@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { parseListFilters, parseListParams, validateAttachments, validateTicketInput } from "@/lib/validation";
+import { parseListFilters, parseListParams, parseListSearch, validateAttachments, validateTicketInput } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -13,7 +13,29 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = new URL(req.url);
-  const search = (url.searchParams.get("search") ?? "").trim();
+
+  // Session 26: the search contract — free text, trimmed, capped at
+  // SEARCH_MAX_LENGTH (the s24/s25 strict-validation doctrine completing
+  // the route's param matrix: pagination s24, vocabulary s25, free text
+  // s26). The LITERAL semantics: search is a case-insensitive substring
+  // match where `%` and `_` carry NO wildcard meaning — the reference's
+  // measured client-side `.toLowerCase().includes()` semantics (pinned at
+  // its bundle, s26). Prisma's SQLite `contains` cannot express that (it
+  // compiles to a bare LIKE with no ESCAPE clause — measured: a literal `%`
+  // silently matched the whole unfiltered feed), so the predicate is a
+  // raw-SQL id subquery: `instr(lower(col), lower(?))` is literal-contains
+  // by construction (no wildcards to interpret, no ESCAPE needed; ASCII
+  // case-folding — the same fold LIKE applied). The ids then feed
+  // `where.id = { in: [...] }` so the where-builder / orderBy / pagination
+  // / includes and the response shape stay byte-identical. The subquery is
+  // unbounded by design: it returns ids, not rows (the reference fetches
+  // the full ticket list client-side for the same feature — this scan is
+  // strictly cheaper); the visible slice stays capped by `limit`.
+  const parsedSearch = parseListSearch(url.searchParams);
+  if (!parsedSearch.ok) {
+    return NextResponse.json({ error: parsedSearch.error }, { status: 400 });
+  }
+  const search = parsedSearch.value;
 
   // Session 25: the filter-vocabulary contract — the s24 strict-validation
   // doctrine extended to the whole list route. The four filter params
@@ -42,10 +64,16 @@ export async function GET(req: Request) {
   if (status) where.status = status;
   if (priority) where.priority = priority;
   if (search) {
-    where.OR = [
-      { title: { contains: search } },
-      { description: { contains: search } },
-    ];
+    // The literal-contains predicate (see the s26 contract above): the
+    // matching ids come from the instr subquery — a literal `%`/`_` in the
+    // term now matches rows that CONTAIN those characters (or none), never
+    // the wildcard lie. An empty match set yields `in: []` → 0 rows, the
+    // correct no-match result.
+    const matches = await db.$queryRaw<Array<{ id: string }>>`
+      SELECT id FROM Ticket
+      WHERE instr(lower(title), lower(${search})) > 0
+         OR instr(lower(description), lower(${search})) > 0`;
+    where.id = { in: matches.map((m) => m.id) };
   }
 
   const orderBy: Record<string, "asc" | "desc"> =

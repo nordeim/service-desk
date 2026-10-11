@@ -15,6 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { TicketCard } from "@/components/ticket-bits";
 import { formatDateTime } from "@/lib/utils";
+import { SEARCH_MAX_LENGTH } from "@/lib/constants";
 import type { TicketCardData } from "@/components/ticket-bits";
 
 type StatusFilter = "all" | "open" | "in_progress" | "resolved" | "closed";
@@ -77,6 +78,7 @@ export default function MyTicketsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search tickets"
+              maxLength={SEARCH_MAX_LENGTH}
             />
           </div>
           <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>

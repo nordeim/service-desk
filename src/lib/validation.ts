@@ -13,6 +13,7 @@ import {
   LIST_MAX_LIMIT,
   LIST_SCOPE_OPTIONS,
   LIST_SORT_OPTIONS,
+  SEARCH_MAX_LENGTH,
 } from "./constants";
 
 export interface TicketInput {
@@ -217,4 +218,26 @@ export function parseListFilters(
       scope,
     },
   };
+}
+
+// Session 26: the list-API search contract — the last unaudited param
+// family on the route, completing the strictness matrix (pagination s24,
+// vocabulary s25, free text s26). `search` is free text, not a vocabulary,
+// so its explicit decision is a CAP: trimmed, and at most
+// SEARCH_MAX_LENGTH characters; beyond it the route rejects with 400 + a
+// self-documenting message (the s24/s25 doctrine — never a silently
+// wasteful unbounded pattern). Empty-after-trim reads as absent (the s24
+// convention). The LITERAL-contains semantics live at the route (the
+// instr-based predicate — Prisma's `contains` compiles to a bare LIKE with
+// no ESCAPE clause, so `%`/`_` in the term would act as wildcards there);
+// this seam passes the value through UNTOUCHED — it validates, it does not
+// mangle what it validates.
+export function parseListSearch(
+  searchParams: URLSearchParams,
+): { ok: true; value: string } | { ok: false; error: string } {
+  const raw = (searchParams.get("search") ?? "").trim();
+  if (raw.length > SEARCH_MAX_LENGTH) {
+    return { ok: false, error: `search must be at most ${SEARCH_MAX_LENGTH} characters` };
+  }
+  return { ok: true, value: raw };
 }

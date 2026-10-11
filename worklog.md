@@ -895,3 +895,25 @@ Work Log:
 
 Stage Summary:
 - Session 25 complete: the filter-vocabulary contract shipped (parseListFilters seam RED→GREEN, 81 unit; 6 smoke pins, 34 PASS lines; 196/196 E2E unchanged), the admin-tier question closed at the bundle level (no third tier — "IT staff" = admin copy), the comment-read path measured (a non-gap), the drift ledger + bundles + mobile/TW guards re-verified; pushed to main, CI Run 53 green
+
+---
+Task ID: 57
+Agent: main (Super Z) — session 26
+Task: Session-26 parity remediation — the literal-search contract + the s40 shortlist closures (agent log docs/session_41.md, plan docs/remediation-plan-session26.md)
+
+Work Log:
+- git pull 37a58c2 → 1bf702d (the operator's session_40 transcript); baseline gates ALL GREEN in the clean environment (lint, typecheck, 81 unit, build, 196/196 E2E, smoke 34) + CI Run 55 success at HEAD
+- F1 measured to closure: their entity-API filter grammar = generic exact-match equality on any known field (status=open → 116, category=hardware → 43), composing with pagination + sort; unknown values AND unknown fields both []; case-sensitive; duplicate last-wins; empty value → []; sort-garbage silently ignored (the one exception). Ours: the strict-vocabulary 400 superset — non-gap
+- F2 decoded + decided: their /analytics = an admin-gated print report (stat cards, % summary, category/priority chart bars, technician table by assigned_to, CSV + text exports, @media print + window.print), all client-computed from Ticket.list + Comment.list. DECISION: we do NOT add an analytics surface (no-roles doctrine; no assigned_to in our schema; the visible equivalents already ship) — documented in the plan
+- F3: the chrome ledger holds (eighth) + the app-route bundle pair unchanged (seventh) — BUT the /login JS chunk ROTATED for the first time since s24: index-BTm9sXpu.js → index-CM-qL9yl.js (a Rolldown platform rebuild; the CSS unchanged). Login UI + from_url (×14) verified present; the live login through the new bundle verified identical. Their /alltickets + entity leak persists (121 tickets / 102 creators)
+- F4 (eighth re-verification): their 468-vs-375 overflow + sheet-stays-open + rgba(0,0,0,0.8) overlay persist; ours 375=375 + oklab overlay + nav-tap auto-close; TW v4 guards code-verified standing; our from_url gate fired live; /api/stats 401 logged-out
+- P1 (the own-side audit): the list API's search param — the last unaudited family — carried a genuine parity bug: Prisma's SQLite contains compiles to a bare LIKE with NO ESCAPE clause (measured at the query log), so ?search=% returned ALL 11 rows (the unfiltered feed presented as matches) and there was no length cap; the reference's semantics (bundle-pinned): client-side literal .toLowerCase().includes()
+- TDD P1: RED (6 pins: parseListSearch — absent/whitespace → "", trim, the 200 boundary, the 201/250 rejects, wildcards pass through untouched) → GREEN (SEARCH_MAX_LENGTH in constants + parseListSearch in validation + the route's predicate rebuilt as the instr(lower(col), lower(?)) id-subquery feeding where.id in [...] — the where-builder/pagination/includes byte-identical + the UI maxLength mirror) → 87 unit (81+6)
+- TDD P2: 4 smoke pins (search=Outlook → 1; search=% → 0; search=_ → 0; a 250-char term → 400 + the cap message) → smoke 38 PASS lines (34+4), GREEN on first run
+- Full gate in the CLEAN environment: lint ✓ typecheck ✓ 87 unit ✓ build ✓ 196/196 E2E ✓ (unchanged) smoke 38 ✓; seed canonical (4/11/3/0) after
+- Live paired re-verification on :3000: s24 script ALL GREEN (13) + s25 script ALL GREEN (13) + the new s26-live-verify.mjs ALL GREEN (15 — the literal matrix + the composition + the boundary); UI round-trip: typing % in the mytickets box → 0 cards (was: all 5), VPN → 1, maxLength reads 200
+- Screenshots: the 10-shot set refreshed via capture-screenshots-s26.sh (the s25 lineage; FATAL guards green); VLM shots 02 + 05 LAYOUT-OK
+- Docs: README (badges 81→87 + the API-table search row + the smoke pins + the E2E-notes s26 paragraph), AGENTS.md (the session-26 contracts + the commands table + the reference list through s26 + the lineage line), CLAUDE.md (the unit/smoke lines + the LIKE-wildcard anti-pattern), PAD (§7.1 — domain 42, smoke 38, checklist 87/87 — + the s26 known-issues row), service-desk_SKILL.md v2.24.0 (lesson 80), docs/session_41.md, the plan's execution status, this worklog; the s26 scripts committed (s26-live-verify, s26-vlm-verify, capture-screenshots-s26)
+
+Stage Summary:
+- The session-26 literal-search contract shipped (87 unit + 196/196 E2E + smoke 38, clean-environment verified; live-verified 15+13+13 checks + the UI round-trip); the filter-grammar + analytics closures documented; the /login rotation recorded (behavior unchanged); production-ready superset maintained; to be pushed to main via docs/ssh_git_wrapper_v3.py

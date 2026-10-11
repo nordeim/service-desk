@@ -129,6 +129,33 @@ FILT_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/ap
 [ "$FILT_RESP" = "400" ] || fail "filter: ?scope=banana should 400 (got $FILT_RESP)"
 grep -q "scope must be one of: mine, all" "$RL_BODY_X" || fail "filter: scope reject message"
 step "PASS" "filter: scope=banana rejected (400 + the vocabulary message)"
+
+# --- s26: the literal-search contract pins ------------------------------------
+# The demo user's seeded corpus carries "Outlook" in exactly one title, and
+# NO literal % or _ in any title/description (measured, canonical seed since
+# session 2) — so a literal-% search MUST return 0 rows. Before the s26 fix
+# this returned ALL rows (Prisma's contains compiles to a bare LIKE — the
+# wildcard silently matched everything). The cap pin: 250 chars > the
+# SEARCH_MAX_LENGTH ceiling.
+SEARCH_COUNT=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?search=Outlook" \
+  | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["tickets"]))')
+[ "$SEARCH_COUNT" = "1" ] || fail "search: ?search=Outlook must return exactly 1 ticket (got $SEARCH_COUNT)"
+step "PASS" "search: literal term honored (Outlook — exactly 1)"
+
+SEARCH_COUNT=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?search=%25" \
+  | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["tickets"]))')
+[ "$SEARCH_COUNT" = "0" ] || fail "search: ?search=% must return 0 tickets — the wildcard lie (got $SEARCH_COUNT)"
+step "PASS" "search: literal % matches nothing (0 — no wildcard lie)"
+
+SEARCH_COUNT=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?search=_" \
+  | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["tickets"]))')
+[ "$SEARCH_COUNT" = "0" ] || fail "search: ?search=_ must return 0 tickets — the wildcard lie (got $SEARCH_COUNT)"
+step "PASS" "search: literal _ matches nothing (0 — no wildcard lie)"
+
+SEARCH_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?search=$(printf 'a%.0s' $(seq 1 250))")
+[ "$SEARCH_RESP" = "400" ] || fail "search: a 250-char term should 400 (got $SEARCH_RESP)"
+grep -q "search must be at most 200 characters" "$RL_BODY_X" || fail "search: cap reject message"
+step "PASS" "search: 250-char term rejected (400 + the cap message)"
 rm -f "$RL_BODY_X"
 
 # --- Comment + status -------------------------------------------------------

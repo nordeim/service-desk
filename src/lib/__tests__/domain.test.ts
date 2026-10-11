@@ -21,6 +21,7 @@ import {
 import {
   parseListFilters,
   parseListParams,
+  parseListSearch,
   validateAttachments,
   validateCommentInput,
   validateLoginInput,
@@ -357,5 +358,51 @@ describe("parseListFilters (s25: the list-API filter vocabulary — status/prior
       ok: true,
       value: { sort: "newest", scope: "mine" },
     });
+  });
+});
+
+describe("parseListSearch (s26: the literal-search contract — free text, trimmed, capped; the last unaudited param family on the list route)", () => {
+  const parse = (qs: string) => parseListSearch(new URLSearchParams(qs));
+
+  it("returns the empty string when the param is absent (no search)", () => {
+    const r = parse("");
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value).toBe("");
+  });
+
+  it("trims to absent on whitespace-only input (the s24 empty-string-as-absent convention)", () => {
+    const r = parse("search=%20%20%20"); // "   " URL-encoded
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value).toBe("");
+  });
+
+  it("trims surrounding whitespace from the value", () => {
+    const r = parse("search=%20%20Outlook%20%20"); // "  Outlook  "
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value).toBe("Outlook");
+  });
+
+  it("accepts a value at exactly the cap (200 characters)", () => {
+    const r = parse(`search=${"a".repeat(200)}`);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value).toHaveLength(200);
+  });
+
+  it("rejects a value beyond the cap with the exact message", () => {
+    for (const qs of [`search=${"a".repeat(201)}`, `search=${"a".repeat(250)}`]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("search must be at most 200 characters");
+      }
+    }
+  });
+
+  it("passes wildcard-bearing values through UNTOUCHED (the literal contract — the seam validates, it does not mangle)", () => {
+    for (const raw of ["%", "_", "%signature%", "100% CPU", "file_name.txt", "50%_off"]) {
+      const r = parse(`search=${encodeURIComponent(raw)}`);
+      expect(r.ok, raw).toBe(true);
+      if (r.ok) expect(r.value).toBe(raw);
+    }
   });
 });
