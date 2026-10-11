@@ -8,8 +8,11 @@ import {
   ATTACHMENT_MAX_COUNT,
   isTicketCategory,
   isTicketPriority,
+  isTicketStatus,
   LIST_DEFAULT_LIMIT,
   LIST_MAX_LIMIT,
+  LIST_SCOPE_OPTIONS,
+  LIST_SORT_OPTIONS,
 } from "./constants";
 
 export interface TicketInput {
@@ -158,4 +161,60 @@ export function parseListParams(
   }
 
   return { ok: true, value: { limit, skip } };
+}
+
+export interface ListFilters {
+  status?: import("./constants").TicketStatus;
+  priority?: import("./constants").TicketPriority;
+  sort: import("./constants").ListSort;
+  scope: import("./constants").ListScope;
+}
+
+// Session 25: the list-API filter-vocabulary contract — the s24
+// strict-validation doctrine extended from limit/skip to the whole list
+// route. The four filter params accept ONLY their documented vocabulary;
+// out-of-vocabulary values REJECT with 400 + a message naming the allowed
+// set (the reference's platform silently ignores unknown param values —
+// measured: ?sort=banana on their API returns the default order — ours
+// never does). Empty-string values read as absent (the s24 convention);
+// the UI's "All Status"/"All Priorities" select values are UI-only state
+// that OMITS the param — "all" is not an API value and rejects like any
+// other out-of-vocabulary input.
+export function parseListFilters(
+  searchParams: URLSearchParams,
+): { ok: true; value: ListFilters } | { ok: false; error: string } {
+  let sort: ListFilters["sort"] = "newest";
+  let scope: ListFilters["scope"] = "mine";
+
+  const rawStatus = searchParams.get("status");
+  if (rawStatus !== null && rawStatus !== "" && !isTicketStatus(rawStatus)) {
+    return { ok: false, error: "status must be one of: open, in_progress, resolved, closed" };
+  }
+
+  const rawPriority = searchParams.get("priority");
+  if (rawPriority !== null && rawPriority !== "" && !isTicketPriority(rawPriority)) {
+    return { ok: false, error: "priority must be one of: low, medium, high, urgent" };
+  }
+
+  const rawSort = searchParams.get("sort");
+  if (rawSort !== null && rawSort !== "" && !(LIST_SORT_OPTIONS as readonly string[]).includes(rawSort)) {
+    return { ok: false, error: "sort must be one of: newest, oldest, priority" };
+  }
+  if (rawSort) sort = rawSort as ListFilters["sort"];
+
+  const rawScope = searchParams.get("scope");
+  if (rawScope !== null && rawScope !== "" && !(LIST_SCOPE_OPTIONS as readonly string[]).includes(rawScope)) {
+    return { ok: false, error: "scope must be one of: mine, all" };
+  }
+  if (rawScope) scope = rawScope as ListFilters["scope"];
+
+  return {
+    ok: true,
+    value: {
+      ...(rawStatus ? { status: rawStatus as ListFilters["status"] } : {}),
+      ...(rawPriority ? { priority: rawPriority as ListFilters["priority"] } : {}),
+      sort,
+      scope,
+    },
+  };
 }

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   LIST_DEFAULT_LIMIT,
   LIST_MAX_LIMIT,
+  LIST_SCOPE_OPTIONS,
+  LIST_SORT_OPTIONS,
   ATTACHMENT_ACCEPTED_TYPES,
   ATTACHMENT_ACCEPT_ATTR,
   CATEGORY_EMOJI,
@@ -17,6 +19,7 @@ import {
   isTicketStatus,
 } from "@/lib/constants";
 import {
+  parseListFilters,
   parseListParams,
   validateAttachments,
   validateCommentInput,
@@ -262,6 +265,97 @@ describe("parseListParams (s24: the list-API pagination contract — limit/skip,
     expect(parse("limit=&skip=")).toMatchObject({
       ok: true,
       value: { limit: LIST_DEFAULT_LIMIT, skip: 0 },
+    });
+  });
+});
+
+describe("parseListFilters (s25: the list-API filter vocabulary — status/priority/sort/scope, the strict-validation doctrine extended to the whole list route)", () => {
+  const parse = (qs: string) => parseListFilters(new URLSearchParams(qs));
+
+  it("returns the documented defaults when no filter params are present", () => {
+    expect(parse("")).toMatchObject({
+      ok: true,
+      value: { sort: "newest", scope: "mine" },
+    });
+    const r = parse("");
+    if (r.ok) {
+      expect(r.value.status).toBeUndefined();
+      expect(r.value.priority).toBeUndefined();
+    }
+  });
+
+  it("honors valid status and priority values", () => {
+    for (const status of TICKET_STATUSES) {
+      expect(parse(`status=${status}`)).toMatchObject({
+        ok: true,
+        value: { status },
+      });
+    }
+    for (const priority of TICKET_PRIORITIES) {
+      expect(parse(`priority=${priority}`)).toMatchObject({
+        ok: true,
+        value: { priority },
+      });
+    }
+  });
+
+  it("honors valid sort and scope values and combines all four params", () => {
+    for (const sort of LIST_SORT_OPTIONS) {
+      expect(parse(`sort=${sort}`)).toMatchObject({ ok: true, value: { sort } });
+    }
+    for (const scope of LIST_SCOPE_OPTIONS) {
+      expect(parse(`scope=${scope}`)).toMatchObject({ ok: true, value: { scope } });
+    }
+    expect(parse("status=open&priority=urgent&sort=oldest&scope=all")).toMatchObject({
+      ok: true,
+      value: { status: "open", priority: "urgent", sort: "oldest", scope: "all" },
+    });
+  });
+
+  it("rejects out-of-vocabulary status values (the UI's all sentinel is NOT an API value — the UI omits the param)", () => {
+    for (const qs of ["status=banana", "status=all", "status=Resloved", "status=in-progress"]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("status must be one of: open, in_progress, resolved, closed");
+      }
+    }
+  });
+
+  it("rejects out-of-vocabulary priority values", () => {
+    for (const qs of ["priority=banana", "priority=all", "priority=ultra-critical"]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("priority must be one of: low, medium, high, urgent");
+      }
+    }
+  });
+
+  it("rejects out-of-vocabulary sort values", () => {
+    for (const qs of ["sort=banana", "sort=created_date", "sort=-created_date"]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("sort must be one of: newest, oldest, priority");
+      }
+    }
+  });
+
+  it("rejects out-of-vocabulary scope values", () => {
+    for (const qs of ["scope=banana", "scope=admin", "scope=mine tickets"]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("scope must be one of: mine, all");
+      }
+    }
+  });
+
+  it("treats empty-string values as absent (the s24 convention — an empty input renders as no param)", () => {
+    expect(parse("status=&priority=&sort=&scope=")).toMatchObject({
+      ok: true,
+      value: { sort: "newest", scope: "mine" },
     });
   });
 });

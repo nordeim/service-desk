@@ -15,10 +15,11 @@ COOKIE_JAR="$(mktemp)"
 SERVER_LOG="$(mktemp)"
 RL_HEADERS=""
 RL_BODY=""
+RL_BODY_X="$(mktemp)"
 
 cleanup() {
   [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null
-  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"}
+  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"}
 }
 trap cleanup EXIT
 
@@ -92,6 +93,43 @@ PAG_BODY=$(curl -s -b "$COOKIE_JAR" "$BASE/api/tickets?limit=501")
 [ "$PAG_RESP" = "400" ] || fail "pagination: ?limit=501 should 400 (got $PAG_RESP)"
 echo "$PAG_BODY" | grep -q "limit must be an integer between 1 and 500" || fail "pagination: ?limit=501 message"
 step "PASS" "pagination: limit=501 rejected (400 — the 500 ceiling)"
+
+# --- Filter vocabulary (session 25: the strict-validation doctrine extended) ---
+# The reference's entity API silently ignores out-of-vocabulary param values
+# (measured: ?sort=banana returns the default order); ours rejects with 400 +
+# a message naming the allowed set. The demo user owns 5 seeded tickets + the
+# open smoke ticket at this point — exactly 1 resolved + exactly 1 urgent (both
+# seeded rows, stable since session 2).
+FILTER_COUNT=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?status=resolved" \
+  | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["tickets"]))')
+[ "$FILTER_COUNT" = "1" ] || fail "filter: ?status=resolved must return exactly 1 ticket (got $FILTER_COUNT)"
+step "PASS" "filter: status=resolved honored (exactly 1)"
+
+FILTER_COUNT=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?priority=urgent" \
+  | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["tickets"]))')
+[ "$FILTER_COUNT" = "1" ] || fail "filter: ?priority=urgent must return exactly 1 ticket (got $FILTER_COUNT)"
+step "PASS" "filter: priority=urgent honored (exactly 1)"
+
+FILT_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?status=banana")
+[ "$FILT_RESP" = "400" ] || fail "filter: ?status=banana should 400 (got $FILT_RESP)"
+grep -q "status must be one of: open, in_progress, resolved, closed" "$RL_BODY_X" || fail "filter: status reject message"
+step "PASS" "filter: status=banana rejected (400 + the vocabulary message)"
+
+FILT_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?priority=banana")
+[ "$FILT_RESP" = "400" ] || fail "filter: ?priority=banana should 400 (got $FILT_RESP)"
+grep -q "priority must be one of: low, medium, high, urgent" "$RL_BODY_X" || fail "filter: priority reject message"
+step "PASS" "filter: priority=banana rejected (400 + the vocabulary message)"
+
+FILT_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?sort=banana")
+[ "$FILT_RESP" = "400" ] || fail "filter: ?sort=banana should 400 (got $FILT_RESP)"
+grep -q "sort must be one of: newest, oldest, priority" "$RL_BODY_X" || fail "filter: sort reject message"
+step "PASS" "filter: sort=banana rejected (400 + the vocabulary message)"
+
+FILT_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?scope=banana")
+[ "$FILT_RESP" = "400" ] || fail "filter: ?scope=banana should 400 (got $FILT_RESP)"
+grep -q "scope must be one of: mine, all" "$RL_BODY_X" || fail "filter: scope reject message"
+step "PASS" "filter: scope=banana rejected (400 + the vocabulary message)"
+rm -f "$RL_BODY_X"
 
 # --- Comment + status -------------------------------------------------------
 curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \

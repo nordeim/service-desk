@@ -866,3 +866,19 @@ Work Log:
 
 Stage Summary:
 - Session 24 complete: the list-API pagination contract shipped (parseListParams seam RED→GREEN, 73 unit; 4 smoke pins, 28 PASS lines; 196/196 E2E unchanged), the admin-surface access matrix measured (the /alltickets PII exposure documented, not mirrored), the drift ledger + bundle + mobile/TW guards re-verified; pushed to main, CI Run 50 green
+
+---
+Task ID: 55
+Agent: main (Super Z)
+Task: Session 25 — the filter-vocabulary seam fix + smoke-pin execution, verification, docs, SKILL.md v2.23.0, commit + push
+
+Work Log:
+- P1 (TDD): the RED pin added to domain.test.ts (a parseListFilters describe — 8 pins: the mine/newest defaults, valid status/priority/sort/scope honored alone + combined, the four out-of-vocabulary rejects with the exact messages, status=all rejected as the UI-only sentinel, empty-string-as-absent) — RED confirmed (8 failed: parseListFilters is not a function / LIST_SORT_OPTIONS is not iterable) → the GREEN: LIST_SORT_OPTIONS/LIST_SCOPE_OPTIONS + their types in constants.ts + parseListFilters in validation.ts + the GET handler rewired (the four ad-hoc reads replaced by the parsed values; the unused isTicketStatus/isTicketPriority imports removed) → 81 unit GREEN (73 + 8)
+- P2: the six filter smoke pins added to scripts/smoke-test.sh after the s24 pagination block (status=resolved → exactly 1 the seeded Outlook ticket; priority=urgent → exactly 1 the seeded finance-drive ticket; the four banana probes → 400 + the vocabulary messages; the shared RL_BODY_X temp file created in the header + the cleanup trap) — GREEN on first run (34 PASS lines: the standing 28 + 6 new)
+- Gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 81 unit ✓ build ✓ 196/196 E2E ✓ (unchanged; zero regressions — every UI-driven path sends valid vocabulary) smoke 34 PASS lines ✓
+- Live paired re-verification (production standalone :3000): scripts/s24-live-verify.mjs re-run ALL GREEN (13 checks); the new scripts/s25-live-verify.mjs ALL GREEN (13 checks — the filter matrix incl. the status=all sentinel reject + the filter+pagination composition, via plain fetch + manual cookies); the canonical seed re-verified (4/11/3/0) after the probes and after the screenshots
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s25.sh (the s24 lineage verbatim; all four FATAL guards green); VLM-verified shots 02 + 05 (LAYOUT-OK)
+- Updated README (badges 73→81 + the API-table filter-vocabulary row + the testing-notes filter pins + the E2E-notes s25 paragraph)/AGENTS (the session-25 contracts section + the commands-table unit/smoke lines + the reference list through s25)/CLAUDE (the unit/smoke lines + the silent-ignore anti-pattern)/PAD (§7.1 counts — domain 36, smoke 34 steps, the checklist 81/81 — + the s25 known-issues row)/service-desk_SKILL.md v2.23.0 (lesson 79: a silently-ignored param is a lie the caller pays for + the bundle-read and sweep-scope sibling lessons); session_39.md narrative log; the plan's execution status; this worklog; the s25 scripts committed (s25-live-verify, s25-vlm-verify, capture-screenshots-s25)
+
+Stage Summary:
+- The session-25 filter-vocabulary contract shipped (smoke 34 PASS lines, clean-environment verified: 81 unit + 196/196 E2E); the admin-tier question closed at the bundle level (no third tier — "IT staff" = admin copy); the comment-read path measured (a non-gap); the drift ledger + bundles + mobile/TW guards re-verified; production-ready superset maintained; to be pushed to main via docs/ssh_git_wrapper_v3.py

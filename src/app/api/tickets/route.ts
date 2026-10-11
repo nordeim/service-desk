@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { parseListParams, validateAttachments, validateTicketInput } from "@/lib/validation";
-import { isTicketPriority, isTicketStatus } from "@/lib/constants";
+import { parseListFilters, parseListParams, validateAttachments, validateTicketInput } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -15,10 +14,19 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const search = (url.searchParams.get("search") ?? "").trim();
-  const status = url.searchParams.get("status") ?? "all";
-  const priority = url.searchParams.get("priority") ?? "all";
-  const scope = url.searchParams.get("scope") ?? "mine";
-  const sort = url.searchParams.get("sort") ?? "newest";
+
+  // Session 25: the filter-vocabulary contract — the s24 strict-validation
+  // doctrine extended to the whole list route. The four filter params
+  // (status/priority/sort/scope) accept ONLY their documented vocabulary;
+  // out-of-vocabulary values reject with 400 (the reference's platform
+  // silently ignores them — ours never does). Empty-string values read as
+  // absent; the UI's "All Status"/"All Priorities" select values are UI
+  // state that omits the param ("all" is not an API value).
+  const parsedFilters = parseListFilters(url.searchParams);
+  if (!parsedFilters.ok) {
+    return NextResponse.json({ error: parsedFilters.error }, { status: 400 });
+  }
+  const { status, priority, sort, scope } = parsedFilters.value;
 
   // Session 24: the pagination contract — limit/skip (the reference entity
   // API's measured param names). The default ceiling (200) is the DoS-safety
@@ -31,12 +39,8 @@ export async function GET(req: Request) {
 
   const where: Record<string, unknown> = {};
   if (scope !== "all") where.createdById = user.id;
-  if (isTicketStatus(status) && status !== undefined && url.searchParams.get("status")) {
-    where.status = status;
-  }
-  if (isTicketPriority(priority) && url.searchParams.get("priority")) {
-    where.priority = priority;
-  }
+  if (status) where.status = status;
+  if (priority) where.priority = priority;
   if (search) {
     where.OR = [
       { title: { contains: search } },

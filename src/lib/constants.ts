@@ -127,3 +127,24 @@ export const ATTACHMENT_ACCEPT_ATTR =
  */
 export const LIST_DEFAULT_LIMIT = 200;
 export const LIST_MAX_LIMIT = 500;
+
+/**
+ * List-API filter vocabularies (session 25). The strict-validation doctrine
+ * (s24, applied there to limit/skip) extended to the whole list route: the
+ * four filter params accept ONLY these values; out-of-vocabulary input
+ * rejects with 400 + a message naming the allowed set, never a silent
+ * default. The reference's platform silently ignores unknown param values
+ * (measured s24/s25) — ours never does.
+ *
+ * - `sort` — the mytickets UI's sort control (the superset feature; the
+ *   reference ships no sort UI and its entity API's own sort vocabulary —
+ *   `created_date`/`-created_date` — is platform exhaust we deliberately do
+ *   not adopt).
+ * - `scope` — the My/All feed toggle (the documented superset over their
+ *   admin-leak /alltickets surface, s24 F1).
+ */
+export const LIST_SORT_OPTIONS = ["newest", "oldest", "priority"] as const;
+export type ListSort = (typeof LIST_SORT_OPTIONS)[number];
+
+export const LIST_SCOPE_OPTIONS = ["mine", "all"] as const;
+export type ListScope = (typeof LIST_SCOPE_OPTIONS)[number];
