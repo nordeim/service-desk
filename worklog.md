@@ -1143,3 +1143,74 @@ Work Log:
 
 Stage Summary:
 - Session 30 complete: the response-header contract shipped (the HSTS parity entry + the poweredByHeader lockdown — RED→GREEN, 110 unit; 4 smoke pins, 58 PASS lines; 196/196 E2E unchanged; the live header matrix + the s24-s29 re-runs + the UI round-trip + the mobile matrix + the desktop VLM check all green), the app-route rotation (eleven sweeps → both routes share one pair) + the s4-defect persistence + the desktop-overflow persistence documented (all non-gaps on their side), the s29 live-verify script hardened to self-contained, production-ready superset maintained, pushed to main (aa578d6 + this status commit), CI green
+
+---
+Task ID: 71-onboarding-s31
+Agent: main (Super Z) — session 31
+Task: Session-31 onboarding — workspace refresh + doc review + baseline gates
+
+Work Log:
+- Fresh clone (workspace was reset): git clone https://github.com/nordeim/service-desk.git → main @ d72aea0 (the operator's session_50.md transcript commit — the only commit after the s30 closeout a41d3a6). This run = Session 31 (numbering: session_51.md will be this agent's log; the plan = remediation-plan-session31.md)
+- Core docs reviewed: AGENTS.md (commands + invariants + the s23–s30 contract lines + conventions), CLAUDE.md (six-phase workflow + gate doctrine + anti-patterns through s30), README.md (badges 110+196 + the s30 notes), Project_Architecture_Document.md, service-desk_SKILL.md v2.28.0 (84 lessons), skills/skills-catalog.md
+- Briefing docs: session_49.md (the s30 agent log) + remediation-plan-session30.md (executed all green, CI run 38134373091 SUCCESS) + worklog.md (tasks 1–70) + session_50.md (the operator's s30 transcript — closing shortlist: the shared-pair rotation re-check (5th wave?), the s4 defect + desktop overflow against their next rebuild, and the own-side audit at the NEW level: the response-BODY schema surface — JSON key sets/types on the gated routes)
+- Environment contract established from scratch: .env created (DATABASE_URL="file:../db/custom.db" + fresh AUTH_SECRET + NEXT_PUBLIC_SITE_URL), .env.example matching, bun install clean (482 packages), db:push + db:seed clean, skills/ excluded in all 4 configs, ports 3000/3100/3999 all DOWN (clean environment)
+- Baseline gates ALL GREEN in the clean environment: lint ✓ typecheck ✓ 110 unit ✓ build ✓ 196/196 E2E ✓ (2.8m) smoke 58 PASS lines ✓
+- Seed verified canonical after the gate: 4 users / 11 tickets / 3 comments / 0 attachments / demo-owned 5
+
+Stage Summary:
+- Onboarding complete; the repo is at the s30 final state (d72aea0) with all gates green; next: the s50-shortlist gap analysis + the new own-side audit axis (the response-body schema surface — JSON key sets + types on the gated routes)
+
+---
+Task ID: 71-gap-s31
+Agent: main (Super Z) — session 31
+Task: Session-31 gap analysis — the s50 shortlist executed + the new own-side audit axis (the response-BODY schema surface)
+
+Work Log:
+- F1 (bundle sweep, thirteenth): the /login pair rotated a FIFTH time — BOTH halves this wave (JS index-Bv7e1rqD.js → index-yqAONkSu.js AND CSS index-CykrcFnx.css → index-BQkILzMl.css; the s30 wave had rotated only the JS half). The app-route pair RE-SPLIT exactly as the s49 shortlist predicted (both routes shared one pair in s30; now / serves the OLD pair index-DhFaB31Z.js + index-DFdILd41.css again). UserAppMain renamed CDUve4NQ → B2UjrI81. The login contract verified in the new UserAppMain bundle source: all five strings ("Sign in to continue" / "Forgot password?" / "Need an account" / "Sign up" / "Google") + from_url ×14 (byte-identical count to s29/s30); the session's own live login ran through the new bundles. NON-GAP (rotation, behavior unchanged).
+- F2 (chrome ledger, thirteenth): all axes hold exactly on both routes — /login: viewport-fit=cover + PWA trio (manifest + theme-color #000000 + apple-touch-icon) + apple pair + og:image 1200×630 true dims + twitter:card summary_large_image + canonical/og:url = /login; / (dashboard): plain viewport + NO PWA trio + apple pair + canonical/og:url at the origin root. NON-GAP.
+- F3 (the desktop-overflow axis): their 1328-vs-1280 PERSISTS (thirteenth; the same four decorative gradient blobs at absolute top-0 right-0 anchoring to the un-clipped wrapper). Ours: 1280 = 1280. Their defect, NOT cloned. NON-GAP.
+- F4 (the mobile matrix + the s4-defect re-check, thirteenth): their standing 468-vs-375 overflow persists AND the s4-documented toast-viewport blocking PERSISTS through the new bundle wave — geometry unchanged (two overlapping 32px bands at left 0 + left 16, both fixed top-0 z-[100] w-full p-4 pointer-events auto, both empty); the Toggle Sidebar button center (38,30) hit-tests to the container; a REAL mouse click (move+down+up) at the coordinates does NOT open the menu. Ours: 375=375, the button hit-tests to the BUTTON itself, the real click opens the sheet (Dashboard / Submit Ticket / My Tickets + QUICK STATS + Demo User footer + the Sign-out icon button), Escape closes, nav-tap auto-closes + navigates to /mytickets with the correct title. TW v4 guards code-verified standing. Their defect documented, NOT cloned. NON-GAP.
+- F5 (the desktop paired VLM check, glm-5v-turbo): LAYOUT-OK — no meaningful layout difference observed (only dynamic data content + the platform badge, both excluded by contract). NON-GAP.
+- P1 (the own-side audit — the s50-directed NEW axis: the response-BODY schema surface, JSON key sets + types, every route family probed live on both sides):
+  - /api/auth/me → {user:{id,name,email}} — exact select, NO passwordHash leak; /api/auth/login 200 {user} / 401 {error}; signup 201 {user}; logout 200 {ok:true}; forgot-password 200 {ok,message} — consistent envelopes, all clean
+  - /api/tickets GET → {tickets:[...]} — rows carry createdBy{id,name,email} + _count{comments}, NO comments array, NO attachment data; POST → 201 {ticket} (attachments select clean, no data; no comments — inert asymmetry, the UI reads only ticket.id and redirects); PATCH → 200 {ticket} (full detail shape); detail GET → {ticket} with attachments{id,fileName,mimeType,sizeBytes,createdAt} (NO data blob) + comments with author{id,name,email}
+  - /api/stats → {mine:{open,in_progress,resolved,closed,total}, global:{same}, avgResolutionMs:number|null} — symmetric, numeric
+  - HEAD/OPTIONS surface: HEAD /api/health → 200 + the header set; OPTIONS → 204 + allow: GET, HEAD, OPTIONS; HEAD / → the 307 redirect — standard + header-gated
+  - The reference's platform API (probed live: User/me + Ticket entity + a create-then-delete probe, cleaned up): bare entities (no wrapper), snake_case keys, 200-on-create, 15-key Ticket schema (assigned_to/attachment_urls/is_sample/resolution_notes/resolved_at platform fields our schema deliberately lacks — no UI parity surface) — the shape deltas are the documented internal-API class (our own frontend consumes our API), NOT parity gaps
+  - The attachment-route header interplay (the s49-named probe, first explicit verification): the s15 contract (content-disposition inline + cache-control private, max-age=31536000, immutable) coexists cleanly with the s30 universal five-header set — no conflict, no X-Powered-By
+  - VERDICT: the schema surface is CLEAN but UNPINNED — the leak-guard contracts (user select, attachment select, list boundedness, stats symmetry) are regression-unprotected: a future refactor adding include:{attachments:true} without a select would silently ship base64 blobs in every detail fetch; a select typo on the user would ship passwordHash
+
+Stage Summary:
+- All five visual/functional axes hold (F1 rotation-only, F2/F5 non-gaps, F3/F4 their documented defects — ours the working superset); the new audit axis (response-body schemas) measured CLEAN on every route family — the session's actionable remediation is closing the axis with regression pins (the smoke-layer key-set contracts), the standing pattern for audit-axes that come back clean
+
+---
+Task ID: 72
+Agent: main (Super Z) — session 31
+Task: Session-31 remediation — the response-schema contract pins (TDD) + full verification
+
+Work Log:
+- P1 TDD (the honest RED for pins-on-clean-contracts): the six pins written into the s31 smoke block FIRST (the me user keys exactly {id,name,email} + all-string values; the login user keys exact; the list row keys the bounded eleven-key set + createdBy/_count sub-keys; the detail attachment keys exactly {id,fileName,mimeType,sizeBytes,createdAt} with an explicit no-data assertion — via a create-with-one-base64-attachment fixture, the smoke suite's first attachment happy path; the comment keys + author keys exact; the stats top keys + the symmetric five-status mine/global vocabularies + int values + avgResolutionMs number-or-null) → the RED demonstrated by MUTATION: removed the select from getCurrentUser's findUnique in src/lib/auth.ts (the full user row incl. passwordHash flows into the me response), rebuilt, ran the smoke → FAIL s31-schema: /api/auth/me user keys must be exactly {id,name,email} (exit 1) → the select restored (git diff clean) → rebuilt → GREEN: 64 PASS lines (58 + 6), 0 failures
+- Full gate in the CLEAN environment (ports 3000/3100/3999 down first): lint ✓ typecheck ✓ 110 unit ✓ build ✓ 196/196 E2E ✓ (unchanged) smoke 64 ✓; seed canonical (4/11/3/0) after
+- Live re-verification on the production standalone :3000: the s30 header matrix by hand (the /api/health + /login + 400 + 404 response classes each carry all five security headers, zero X-Powered-By) + the standing re-runs ALL GREEN: s24 (ALL GREEN) + s25 (13) + s26 (15) + s27 (14) + s28 (12 PASS) + s29 (22/22) + the NEW s31 live schema matrix (scripts/s31-live-verify.mjs — 14/14: the six contracts on the real DB, the no-data-blob check asserting the base64 string is absent from the whole detail response, fixtures cleaned, seed canonical); one rate-budget lesson re-learned (the re-runs + probes exhausted the login bucket — server restarted for fresh buckets before the screenshots, the standing doctrine)
+- The UI round-trip (login → dashboard: the stat cards + QUICK STATS + Performance Metrics + Average Resolution Time + the 5 seeded recent tickets → /mytickets with the 5 demo tickets) + the mobile matrix on the new build (375=375, the button hit-tests to the BUTTON, the real click opens the sheet with the nav + quick stats + user footer + the Sign-out icon button, Escape closes, nav-tap auto-closes + navigates to /mytickets — one exit-animation timing artifact re-checked to closure) + the desktop paired VLM check (LAYOUT-OK, glm-5v-turbo; one retake — the first comparison shot captured /mytickets, probe hygiene)
+- Screenshots: the 10-shot set refreshed via capture-screenshots-s31.sh (the s30 lineage verbatim); FATAL guards green; VLM shots 02 + 05 RENDER-OK; seed re-verified canonical after the fixture removal
+- Cleanup hardening: scripts/cleanup-s31-fixture.mjs (the one-off probe-fixture remover) + the fixtures never persisted past their probes (seed verified canonical after every phase)
+
+Stage Summary:
+- The response-schema contract shipped (six exact-key-set pins, 64 smoke steps; 110 unit + 196/196 E2E unchanged; the mutation-RED → GREEN cycle proving the pins have teeth); the s50-directed audit axis closed with regression guards on the highest-risk leak seams (the login full-row-in-scope + the detail attachments' data-blob exclusion); production-ready superset maintained; ready for the docs + push phase
+
+---
+Task ID: 72-docs-s31
+Agent: main (Super Z) — session 31
+Task: Session-31 docs alignment — README/AGENTS/CLAUDE/PAD/SKILL/session_51/plan
+
+Work Log:
+- README: the commands-block smoke description extended with the s31 pins (64 steps) + the E2E-notes paragraph gained the session-31 sentence (the response-schema pins + the audit origin + the mutation-RED + the fifth /login rotation + the re-split + the persisting s4/desktop defects + the attachment-header interplay)
+- AGENTS.md: the commands-table smoke line extended; the Session-31 parity contracts section added (five contract paragraphs: the response-schema pins, the platform-API-shape documentation, the attachment-route header interplay, the fifth rotation + re-split, the s4/desktop persistence); the reference list extended through session 31; the screenshots lineage updated s30→s31
+- CLAUDE.md: the smoke line extended (64 steps); the s31 anti-pattern added (a clean audit axis is closed by pinning it — an unpinned clean contract is a future regression; a pin that has never failed is a pin you cannot trust — the mutation-RED doctrine)
+- PAD: the §7.1 smoke row updated (64 steps + the s31 ×6); the known-issues table gained the RESOLVED session-31 row
+- service-desk_SKILL.md v2.29.0: lesson 85 (the clean-audit-closed-by-pinning doctrine + the mutation-RED epistemics + the internal-API-class + the universal-rule-vs-route-override re-verification siblings) + the project_state updated (64 steps, the s31 pins) + the description line (session-31 remediation)
+- docs/session_51.md (this session's agent log per the numbering convention) + the plan's execution status updated (all items checked except the push)
+
+Stage Summary:
+- All six documentation surfaces aligned with the s31 state (the response-schema contract + the six pins + the audit findings); ready for the final gate + the push phase

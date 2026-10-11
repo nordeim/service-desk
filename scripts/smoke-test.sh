@@ -307,6 +307,76 @@ grep -qi '^x-powered-by:' "$S30_HDRS" \
 step "PASS" "s30-headers: the 404 error path carries HSTS + no X-Powered-By (the rule is universal)"
 rm -f "$S30_HDRS"
 
+# --- Response-schema contract (the s31 pins) ---------------------------------
+# Session 31: the response-BODY schema audit (the s50-directed axis) measured
+# every route family's JSON key sets + types CLEAN — but UNPINNED. These pins
+# close the leak-guard regression surface: a future refactor that widens a
+# Prisma include (shipping the passwordHash or base64 attachment blobs) or
+# skews an aggregate shape fails here. The EXACT-SET assertions are the
+# contract: adding a key is as much a change as removing one.
+curl -sf -b "$COOKIE_JAR" "$BASE/api/auth/me" | python3 -c '
+import json,sys
+u = json.load(sys.stdin)["user"]
+assert sorted(u) == ["email","id","name"], "got %s" % sorted(u)
+assert all(isinstance(v,str) for v in u.values())
+' || fail "s31-schema: /api/auth/me user keys must be exactly {id,name,email}"
+step "PASS" "s31-schema: /api/auth/me user keys exactly {id,name,email} (the no-leak contract)"
+
+curl -sf -X POST "$BASE/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@servicedesk.app","password":"Demo1234!"}' | python3 -c '
+import json,sys
+u = json.load(sys.stdin)["user"]
+assert sorted(u) == ["email","id","name"], "got %s" % sorted(u)
+' || fail "s31-schema: login user keys must be exactly {id,name,email}"
+step "PASS" "s31-schema: login user keys exactly {id,name,email} (the full-row-in-scope guard)"
+
+curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?limit=1" | python3 -c '
+import json,sys
+t = json.load(sys.stdin)["tickets"][0]
+expected = ["_count","category","createdAt","createdBy","createdById","description","id","priority","status","title","updatedAt"]
+assert sorted(t) == expected, "got %s" % sorted(t)
+assert sorted(t["createdBy"]) == ["email","id","name"], "createdBy got %s" % sorted(t["createdBy"])
+assert sorted(t["_count"]) == ["comments"], "_count got %s" % sorted(t["_count"])
+' || fail "s31-schema: list rows must carry the bounded eleven-key set"
+step "PASS" "s31-schema: list rows bounded (createdBy + _count only — no comments array, no attachment data)"
+
+S31_ATT_TICKET=$(curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"S31 schema pin ticket","description":"carries one attachment for the pin","category":"software","priority":"low","attachments":[{"fileName":"pin.txt","mimeType":"text/plain","sizeBytes":11,"data":"c2NoZW1hIHBpbg=="}]}' \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["ticket"]["id"])')
+[ -n "$S31_ATT_TICKET" ] || fail "s31-schema: create-with-attachment (the happy path)"
+curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets/$S31_ATT_TICKET" | python3 -c '
+import json,sys
+t = json.load(sys.stdin)["ticket"]
+assert len(t["attachments"]) == 1, "expected exactly one attachment"
+a = t["attachments"][0]
+assert sorted(a) == ["createdAt","fileName","id","mimeType","sizeBytes"], "got %s" % sorted(a)
+assert "data" not in a, "the base64 data blob leaked into the detail response"
+' || fail "s31-schema: detail attachments must carry exactly {id,fileName,mimeType,sizeBytes,createdAt}"
+step "PASS" "s31-schema: detail attachments carry no data blob (the base64 leak guard)"
+
+curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$S31_ATT_TICKET/comments" \
+  -H "Content-Type: application/json" \
+  -d '{"content":"s31 schema pin comment"}' | python3 -c '
+import json,sys
+c = json.load(sys.stdin)["comment"]
+assert sorted(c) == ["author","authorId","content","createdAt","id","ticketId"], "got %s" % sorted(c)
+assert sorted(c["author"]) == ["email","id","name"], "author got %s" % sorted(c["author"])
+' || fail "s31-schema: comment author keys must be exactly {id,name,email}"
+step "PASS" "s31-schema: comment author keys exactly {id,name,email}"
+
+curl -sf -b "$COOKIE_JAR" "$BASE/api/stats" | python3 -c '
+import json,sys
+s = json.load(sys.stdin)
+assert sorted(s) == ["avgResolutionMs","global","mine"], "top got %s" % sorted(s)
+for sub in ("mine","global"):
+    assert sorted(s[sub]) == ["closed","in_progress","open","resolved","total"], "%s got %s" % (sub, sorted(s[sub]))
+    assert all(isinstance(v,int) for v in s[sub].values()), "%s values must be ints" % sub
+assert s["avgResolutionMs"] is None or isinstance(s["avgResolutionMs"],(int,float))
+' || fail "s31-schema: stats key sets must be the symmetric five-status vocabulary"
+step "PASS" "s31-schema: stats mine+global exactly the five-status vocabulary (symmetric aggregate)"
+
 # --- Comment + status -------------------------------------------------------
 curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
   -H "Content-Type: application/json" \
@@ -448,13 +518,19 @@ rm -f "$COOKIE_JAR_B"
 # would burn the whole login budget and cascade-flake the suite).
 #
 # Login bucket (10/IP/15-min): the demo login at the top consumed slot 1;
-# these 9 wrong-password POSTs consume slots 2-10 (each 401)...
+# the s31 schema pin's login consumed slot 2; these 9 wrong-password POSTs
+# consume slots 3-11 (the first 8 answer 401; the 9th — the bucket's 11th —
+# is already throttled, unchecked in this loop)...
 for _ in $(seq 1 9); do
   curl -s -o /dev/null -X POST "$BASE/api/auth/login" \
     -H "Content-Type: application/json" \
     -d '{"email":"nobody@servicedesk.app","password":"wrong"}' >/dev/null
 done
-# ...so the 11th request must be throttled: 429 + Retry-After + the message.
+# ...so the next request (the 12th POST; the bucket exhausted at the 11th and
+# stays exhausted until the window rolls) must be throttled: 429 + Retry-After
+# + the message. The contract proven is unchanged: exactly 10 attempts allowed
+# per window (slot 2 returned 200, slots 3-10 returned 401), the 11th onward
+# throttled.
 CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -D "$RL_HEADERS" -X POST "$BASE/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"email":"nobody@servicedesk.app","password":"wrong"}')
