@@ -966,3 +966,16 @@ Work Log:
 
 Stage Summary:
 - The session-27 strict param-set contract shipped (94 unit + 196/196 E2E + smoke 41, clean-environment verified; live-verified 14+15+13+13 checks + the UI round-trip + the mobile matrix); the /count + routing/404 closures documented; both bundle pairs stable (no new Rolldown wave); production-ready superset maintained; to be pushed to main via docs/ssh_git_wrapper_v3.py
+
+---
+Task ID: 61
+Agent: main (Super Z) — session 27
+Task: Session-27 push + CI verification + final status
+
+Work Log:
+- Commit 0317db1 (the s27 remediation — 18 files) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko ssh shim at /home/z/my-project/bin/ssh — no OpenSSH binary in the sandbox; dry-run first: clean fast-forward 4f9ad25..0317db1; real push: remote verified == local HEAD, tracking synced, operator key shredded, shim kept outside the repo, tree clean, no new branches)
+- CI Run 59 on 0317db1 completed success — verified via the run-history aria-labels (the s18 method; the anonymous REST API 403 rate-limited, the standing condition); the badge stays green
+- The CI confirmation recorded in the plan's execution status (this follow-up commit cec1b77, the s21–s26 convention); Run 60 on the status commit also verified green
+
+Stage Summary:
+- Session 27 complete: the strict param-set contract shipped (parseListQuery seam RED→GREEN, 94 unit; 3 smoke pins, 41 PASS lines; 196/196 E2E unchanged), the /count + logged-in-routing closures documented (their platform's count endpoint never called by their app — no count endpoint on ours; their in-app 404 converged with our s4 design — our true-404 + real /signup stay the superset), both bundle pairs stable (no new Rolldown wave), the drift ledger + mobile + TW guards re-verified (ninth); pushed to main, CI Runs 59–60 green
