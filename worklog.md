@@ -917,3 +917,52 @@ Work Log:
 
 Stage Summary:
 - The session-26 literal-search contract shipped (87 unit + 196/196 E2E + smoke 38, clean-environment verified; live-verified 15+13+13 checks + the UI round-trip); the filter-grammar + analytics closures documented; the /login rotation recorded (behavior unchanged); production-ready superset maintained; to be pushed to main via docs/ssh_git_wrapper_v3.py
+
+---
+Task ID: 58
+Agent: main (Super Z) — session 27
+Task: Session-27 onboarding + baseline gates (agent log docs/session_43.md, plan docs/remediation-plan-session27.md)
+
+Work Log:
+- git pull 7b20a37 → 4f9ad25 (the operator's session_42 transcript — docs/session_42.md only); this run is Session 27 (odd-doc convention: agent log → session_43.md, plan → remediation-plan-session27.md)
+- Core docs reviewed: AGENTS.md (all s2–s26 contracts + framework quirks + conventions), CLAUDE.md (six-phase workflow + gate doctrine), README.md (badges 87 unit + 196 E2E + smoke), PAD, service-desk_SKILL.md v2.24.0 (lesson 80 the standing latest)
+- Briefing docs: session_41.md (the s26 agent log), remediation-plan-session26.md (executed all green, CI Run 56-57 verified), worklog.md (tasks 1-57), session_42.md (the operator's s26 transcript — closing shortlist: the /login rotation aftermath sweep, their entity-API aggregation surface, the standing drift ledger)
+- Environment contract verified: .env DATABASE_URL=file:../db/custom.db + AUTH_SECRET + NEXT_PUBLIC_SITE_URL; db/custom.db seeded canonical 4/11/3/0; ports 3000/3100/3999 all down (clean environment); npm scripts pin DATABASE_URL inline; .env.example matches codebase
+- Baseline gates ALL GREEN: lint ✓ typecheck ✓ 87 unit ✓ build ✓ 196/196 E2E ✓ smoke 38 PASS lines ✓; seed re-verified canonical after the smoke run; tree clean (only the new s27-seed-check script untracked)
+- CI: anonymous REST API 403 rate-limited (the standing condition) — to verify via the browser aria-label method during the push phase
+
+Stage Summary:
+- Onboarding complete; baseline fully green at 4f9ad25; the s27 probe shortlist confirmed: (1) the /login rotation aftermath — sweep both chunk pairs + the app-route graph for further Rolldown waves, (2) their entity-API aggregation surface vs our /api/stats superset, (3) the standing drift-ledger + bundle-hash re-check, plus the standing mobile matrix + TW v4 guards + a fresh own-side audit
+
+---
+Task ID: 59
+Agent: main (Super Z) — session 27
+Task: Session-27 gap analysis (the s41 shortlist executed)
+
+Work Log:
+- F1 (bundle sweep): both pairs UNCHANGED since s26 — /login serves index-CM-qL9yl.js + index-DWYJeyVS.css, the app route serves index-DhFaB31Z.js + index-DFdILd41.css (eighth app-route sweep). The login UI strings live in UserAppMain-12hFZEhy.js ("Sign in to continue", "Forgot password", "Need an account" all present); from_url x19 across the chunk graph (AuthAPI, AuthContext, axiosClient, UserAppMain) — the deep-link contract intact; the live login flow verified through the current bundles. NO new Rolldown wave.
+- F2 (aggregation surface): their platform HAS a /count endpoint — GET /entities/Ticket/count → 200 {"count":121}; composes with the q= JSON filter grammar (?q={"status":"open"} → 116) but NOT with ad-hoc query params (?status=open ignored → 121); garbage values/fields → 0; not-JSON q → 400 "q must be a JSON object"; User/count → 403 collaborator-only. The decoded SDK client (Le function in UserAppMain) has NO count method — their app never uses it; every metric stays client-computed. Our /api/stats remains the user-visible superset. NON-GAP, documented.
+- F3 (chrome ledger, ninth re-verification): all axes hold — viewport-fit=cover auth-pages-only; the PWA trio + og:image 1200x630 + twitter:card on /login; the apple pair on both routes; /dashboard canonical + og:url at origin root; segment-verbatim titles.
+- F4 (mobile + TW, ninth): their 468-vs-375 overflow on /dashboard re-verified (scrollWidth 468 at clientWidth 375); their sheet STAYS OPEN after nav-tap (288x812 drawer + overlay in the DOM post-navigation); their overlay rgba(0,0,0,0.8). Ours: 375=375 both routes, oklab(0 0 0 / 0.8) overlay, nav-tap auto-close + navigate. TW v4 guards code-verified standing (@theme inline x2, cursor preflight, --radius-sm, system font stack, no config file).
+- NEW (first measurement — the routing/404 surface): their logged-IN unknown-route render = in-app 404 ("404" h1, "Page Not Found" h2, "Go Home" button) at HTTP 200; their /signup ROUTE also 404s logged-in (the signup entry is the in-card view on /login only — "Need an account? Sign up" switches the login card to "Create your account" with Confirm Password); their logged-OUT catch-all gate HOLDS (the s20 ledger — /banana + /signup + /dashboard all bounce client-side to /login?from_url=...). Ours: true-404 status + the same 404 design (Go Home link → /dashboard) + the real /signup page + the same in-card signup view. PARITY + the SEO superset (convergence: their in-app 404 now matches our s4 design).
+- P1 (the own-side audit — a genuine finding): the list API's UNKNOWN-param surface is the last silent-lie — ?banana=1, ?category=hardware, ?q={"status":"open"}, ?fields=id, ?sort_dir=desc all return 200 with the unfiltered set (measured live). ALSO: duplicate params are first-wins by URLSearchParams.get() accident (?status=open&status=resolved → open's rows; the reference's platform is last-wins). The lesson-79 class on the route whose known families were all strict-validated (limit/skip s24, vocabulary s25, search s26) — the param SET itself was never closed.
+- Own-side audit completeness: the method matrix clean (PUT/DELETE/PATCH → 405, OPTIONS → 204, HEAD → auth'd GET on /api/tickets; /api/auth/login GET/PUT → 405); the signup/logout/me/health/stats routes reviewed clean; TWO suspected string-corruption defects (health "ealth]", stats "const ine,") REFUTED at the byte level (od dumps prove "[health]" + "[mine" intact — the tool display layer ate the bracket prefixes; process lesson recorded); no DELETE handlers exist by design (no user-visible delete anywhere)
+
+Stage Summary:
+- The s27 gap analysis complete: F1-F4 + the routing finding all documented; the P1 = the strict param-set contract (unknown params 400 + duplicate params 400, closing the route's param matrix); no visual gaps; production-ready superset maintained
+
+---
+Task ID: 60
+Agent: main (Super Z) — session 27
+Task: Session-27 parity remediation — the strict param-set contract + the aggregation/routing closures (agent log docs/session_43.md, plan docs/remediation-plan-session27.md)
+
+Work Log:
+- TDD P1: RED (7 pins: parseListQuery — the no-param happy path, every known name accepted, the all-seven composition, the unknown-name rejects with the exact message, the unknown-alongside-known reject, the duplicates across families, the s25 empty-as-absent convention for known names) → GREEN (LIST_QUERY_PARAMS in constants + parseListQuery in validation + the GET handler gated FIRST — unknown names + duplicates both 400) → 94 unit (87+7)
+- TDD P2: 3 smoke pins (banana=1 → 400 + the unknown message + the allowed set; a duplicate status → 400 + the duplicate message; the seven-known-param composition → exactly the seeded Outlook row) → smoke 41 PASS lines (38+3), GREEN on first run
+- Full gate in the CLEAN environment: lint ✓ typecheck ✓ 94 unit ✓ build ✓ 196/196 E2E ✓ (unchanged) smoke 41 ✓; seed canonical (4/11/3/0) after
+- Live paired re-verification on :3000: the new s27-live-verify.mjs ALL GREEN (14 checks — the unknown/duplicate matrix + the s25/s26 contracts re-verified through the grammar gate + the logged-out 401); s26 (15) + s25 (13) + s24 re-runs ALL GREEN; the UI round-trip (VPN → 1 card) + the mobile matrix on the new build (375=375, nav-tap auto-close via a real browser click — the eval-click false alarm recorded)
+- Screenshots: the 10-shot set refreshed via capture-screenshots-s27.sh (the s26 lineage; FATAL guards green); VLM shots 02 + 05 LAYOUT-OK
+- Docs: README (badges 87→94 + the command lines + the E2E-notes s27 paragraph), AGENTS.md (the session-27 contracts + the commands table + the reference list through s27), CLAUDE.md (the unit/smoke lines + the closed-set anti-pattern), PAD (§7.1 — domain 49, smoke 41, checklist 94/94 — + the s27 known-issues row), service-desk_SKILL.md v2.25.0 (lesson 81 + the no-caller-capability + byte-level-verification sibling lessons), docs/session_43.md, the plan's execution status, this worklog; the s27 scripts committed (s27-seed-check, s27-live-verify, s27-vlm-verify, capture-screenshots-s27)
+
+Stage Summary:
+- The session-27 strict param-set contract shipped (94 unit + 196/196 E2E + smoke 41, clean-environment verified; live-verified 14+15+13+13 checks + the UI round-trip + the mobile matrix); the /count + routing/404 closures documented; both bundle pairs stable (no new Rolldown wave); production-ready superset maintained; to be pushed to main via docs/ssh_git_wrapper_v3.py

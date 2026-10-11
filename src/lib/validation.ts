@@ -11,6 +11,7 @@ import {
   isTicketStatus,
   LIST_DEFAULT_LIMIT,
   LIST_MAX_LIMIT,
+  LIST_QUERY_PARAMS,
   LIST_SCOPE_OPTIONS,
   LIST_SORT_OPTIONS,
   SEARCH_MAX_LENGTH,
@@ -240,4 +241,34 @@ export function parseListSearch(
     return { ok: false, error: `search must be at most ${SEARCH_MAX_LENGTH} characters` };
   }
   return { ok: true, value: raw };
+}
+
+// Session 27: the strict param-set contract — the route's query grammar
+// closed. The value families were each strict-validated across s24–s26
+// (pagination, vocabularies, free text) while the SET itself stayed open:
+// an unknown name (`?banana=1`, `?category=hardware`, `?q={…}`) was
+// silently ignored — the unfiltered feed presented as matches, the s25
+// lesson-79 class (measured live at the s27 audit). A name appearing more
+// than once was FIRST-wins by the `URLSearchParams.get()` accident (the
+// reference's platform is last-wins) — a duplicate is a caller bug, and
+// the honest resolution is refusing to pick. This seam rejects both with
+// a self-documenting message; it runs BEFORE the family validators (the
+// grammar level precedes the value level) and changes nothing else — the
+// known families' semantics (including the s25 empty-as-absent convention
+// for KNOWN names) are untouched.
+export function parseListQuery(
+  searchParams: URLSearchParams,
+): { ok: true } | { ok: false; error: string } {
+  for (const [name] of searchParams) {
+    if (!(LIST_QUERY_PARAMS as readonly string[]).includes(name)) {
+      return {
+        ok: false,
+        error: `unknown query parameter: ${name} (allowed: ${LIST_QUERY_PARAMS.join(", ")})`,
+      };
+    }
+    if (searchParams.getAll(name).length > 1) {
+      return { ok: false, error: `duplicate query parameter: ${name}` };
+    }
+  }
+  return { ok: true };
 }

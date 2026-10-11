@@ -150,6 +150,30 @@ export const LIST_SCOPE_OPTIONS = ["mine", "all"] as const;
 export type ListScope = (typeof LIST_SCOPE_OPTIONS)[number];
 
 /**
+ * The list-API query-param grammar (session 27). The strict-validation
+ * doctrine completed at the SET level: these seven names are the ONLY
+ * query params GET /api/tickets accepts. An unknown name rejects with
+ * 400 + a message naming it and the allowed set; a name appearing more
+ * than once rejects with 400 too (a duplicate is a caller bug — the
+ * first-vs-last ambiguity is resolved honestly by refusing to pick).
+ * Before s27 the unknown/duplicate surface was silently ignored
+ * (measured live: `?banana=1` and `?category=hardware` returned the
+ * unfiltered feed presented as matches — the s25 lesson-79 class, the
+ * last open seam after the value families were closed: pagination s24,
+ * vocabularies s25, free text s26).
+ */
+export const LIST_QUERY_PARAMS = [
+  "search",
+  "status",
+  "priority",
+  "sort",
+  "scope",
+  "limit",
+  "skip",
+] as const;
+export type ListQueryParam = (typeof LIST_QUERY_PARAMS)[number];
+
+/**
  * List-API search cap (session 26). The `search` param is free text — not a
  * vocabulary — but the s25 lesson applies verbatim: every param family needs
  * the same explicit strictness decision. A search term is capped at 200

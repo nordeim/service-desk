@@ -14,6 +14,7 @@ import {
   TICKET_CATEGORIES,
   TICKET_PRIORITIES,
   TICKET_STATUSES,
+  LIST_QUERY_PARAMS,
   isTicketCategory,
   isTicketPriority,
   isTicketStatus,
@@ -21,6 +22,7 @@ import {
 import {
   parseListFilters,
   parseListParams,
+  parseListQuery,
   parseListSearch,
   validateAttachments,
   validateCommentInput,
@@ -404,5 +406,62 @@ describe("parseListSearch (s26: the literal-search contract — free text, trimm
       expect(r.ok, raw).toBe(true);
       if (r.ok) expect(r.value).toBe(raw);
     }
+  });
+});
+
+describe("parseListQuery (s27: the strict param-set contract — the route's query grammar closed: unknown names rejected, duplicates rejected)", () => {
+  const parse = (qs: string) => parseListQuery(new URLSearchParams(qs));
+
+  it("accepts the no-param request (the default view)", () => {
+    const r = parse("");
+    expect(r.ok).toBe(true);
+  });
+
+  it("accepts every known param name (the closed set of seven)", () => {
+    for (const name of LIST_QUERY_PARAMS) {
+      const r = parse(`${name}=x`);
+      expect(r.ok, name).toBe(true);
+    }
+  });
+
+  it("accepts all seven known params at once (the composition the route documents)", () => {
+    const r = parse("search=Outlook&status=resolved&priority=low&sort=newest&scope=mine&limit=5&skip=0");
+    expect(r.ok).toBe(true);
+  });
+
+  it("rejects an unknown param name with the exact message naming it and the allowed set", () => {
+    for (const qs of ["banana=1", "category=hardware", "q=%7B%7D", "fields=id", "sort_dir=desc"]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("unknown query parameter");
+        expect(r.error).toContain(qs.split("=")[0]);
+        expect(r.error).toContain("search, status, priority, sort, scope, limit, skip");
+      }
+    }
+  });
+
+  it("rejects an unknown param even when known params are present alongside it", () => {
+    const r = parse("status=open&banana=1");
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("unknown query parameter: banana");
+  });
+
+  it("rejects a duplicate param with the exact message (the first-vs-last ambiguity resolved honestly)", () => {
+    for (const qs of [
+      "status=open&status=resolved",
+      "limit=2&limit=5",
+      "search=a&search=b",
+      "sort=newest&sort=oldest&sort=priority",
+    ]) {
+      const r = parse(qs);
+      expect(r.ok, qs).toBe(false);
+      if (!r.ok) expect(r.error).toContain("duplicate query parameter");
+    }
+  });
+
+  it("accepts the s25 empty-string convention for KNOWN names (empty-as-absent is a value question, not a grammar question)", () => {
+    const r = parse("status=&priority=&sort=&scope=");
+    expect(r.ok).toBe(true);
   });
 });

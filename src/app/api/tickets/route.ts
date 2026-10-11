@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { parseListFilters, parseListParams, parseListSearch, validateAttachments, validateTicketInput } from "@/lib/validation";
+import { parseListFilters, parseListParams, parseListQuery, parseListSearch, validateAttachments, validateTicketInput } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -13,6 +13,20 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = new URL(req.url);
+
+  // Session 27: the strict param-set contract — the grammar level precedes
+  // the value level. The route's query grammar is the closed set of seven
+  // (LIST_QUERY_PARAMS); an unknown name (e.g. `?category=hardware` — a
+  // plausible filter the schema has a vocabulary for) or a duplicate name
+  // (a caller bug the URLSearchParams default would silently resolve
+  // first-wins) rejects with a self-documenting 400. Before this seam the
+  // unknown/duplicate surface was silently ignored — the unfiltered feed
+  // presented as matches (the s25 lesson-79 class, measured live at the
+  // s27 audit). The known families' validators below are untouched.
+  const parsedQuery = parseListQuery(url.searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
 
   // Session 26: the search contract — free text, trimmed, capped at
   // SEARCH_MAX_LENGTH (the s24/s25 strict-validation doctrine completing

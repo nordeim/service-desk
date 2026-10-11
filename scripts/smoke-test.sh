@@ -156,6 +156,32 @@ SEARCH_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/
 [ "$SEARCH_RESP" = "400" ] || fail "search: a 250-char term should 400 (got $SEARCH_RESP)"
 grep -q "search must be at most 200 characters" "$RL_BODY_X" || fail "search: cap reject message"
 step "PASS" "search: 250-char term rejected (400 + the cap message)"
+
+# --- s27: the strict param-set contract pins -----------------------------------
+# The route's query grammar is the closed set of seven (search, status,
+# priority, sort, scope, limit, skip). Before the s27 fix an unknown name
+# was silently ignored — the unfiltered feed presented as matches (the s25
+# lesson-79 class, measured live at the s27 audit: ?banana=1, ?category=
+# hardware, ?q={...} all returned 200 + the full list). Duplicates were
+# first-wins by the URLSearchParams.get() accident — now a self-documenting
+# 400. The composition pin: the Outlook ticket (resolved/low, the demo
+# user's) satisfies all seven known params at once.
+QUERY_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?banana=1")
+[ "$QUERY_RESP" = "400" ] || fail "param-set: ?banana=1 should 400 (got $QUERY_RESP)"
+grep -q "unknown query parameter: banana" "$RL_BODY_X" || fail "param-set: unknown reject message"
+grep -q "search, status, priority, sort, scope, limit, skip" "$RL_BODY_X" || fail "param-set: allowed-set in message"
+step "PASS" "param-set: ?banana=1 rejected (400 + the unknown message + the allowed set)"
+
+QUERY_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?status=open&status=resolved")
+[ "$QUERY_RESP" = "400" ] || fail "param-set: duplicate status should 400 (got $QUERY_RESP)"
+grep -q "duplicate query parameter: status" "$RL_BODY_X" || fail "param-set: duplicate reject message"
+step "PASS" "param-set: duplicate status rejected (400 + the duplicate message)"
+
+QUERY_COUNT=$(curl -sf -b "$COOKIE_JAR" \
+  "$BASE/api/tickets?search=Outlook&status=resolved&priority=low&sort=newest&scope=mine&limit=5&skip=0" \
+  | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["tickets"]))')
+[ "$QUERY_COUNT" = "1" ] || fail "param-set: the seven-param composition must return exactly 1 (got $QUERY_COUNT)"
+step "PASS" "param-set: all seven known params compose (Outlook — exactly 1)"
 rm -f "$RL_BODY_X"
 
 # --- Comment + status -------------------------------------------------------
