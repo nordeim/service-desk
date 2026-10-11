@@ -275,6 +275,38 @@ grep -q "unknown query parameter: scope" "$RL_BODY_X" || fail "s29-grammar: comm
 step "PASS" "s29-grammar: the cross-route ?scope=mine on comments rejected (400, no comment created)"
 rm -f "$RL_BODY_X"
 
+# --- Response-header contract (the s30 pins) ---------------------------------
+# Session 30: the reference's stack emits these five security headers on every
+# response (HSTS measured universally on their 200s/405s/catch-alls); ours now
+# emits the same set from next.config.ts — pinned here on the live standalone
+# server (API + page + error-path coverage) plus the X-Powered-By lockdown
+# (the reference sends no framework disclosure).
+S30_HDRS="$(mktemp)"
+curl -s -D "$S30_HDRS" -o /dev/null "$BASE/api/health"
+grep -qi '^strict-transport-security: max-age=31536000' "$S30_HDRS" \
+  || fail "s30-headers: /api/health should carry Strict-Transport-Security: max-age=31536000"
+step "PASS" "s30-headers: /api/health carries HSTS max-age=31536000 (the reference-parity contract)"
+grep -qi '^x-content-type-options: nosniff' "$S30_HDRS" \
+  || fail "s30-headers: /api/health should carry X-Content-Type-Options: nosniff"
+grep -qi '^x-frame-options: DENY' "$S30_HDRS" \
+  || fail "s30-headers: /api/health should carry X-Frame-Options: DENY"
+grep -qi '^referrer-policy: strict-origin-when-cross-origin' "$S30_HDRS" \
+  || fail "s30-headers: /api/health should carry Referrer-Policy: strict-origin-when-cross-origin"
+grep -qi '^permissions-policy: camera=(), microphone=(), geolocation=()' "$S30_HDRS" \
+  || fail "s30-headers: /api/health should carry the Permissions-Policy lockdown"
+step "PASS" "s30-headers: /api/health carries the full four-header baseline (nosniff/DENY/referrer/permissions)"
+grep -qi '^x-powered-by:' "$S30_HDRS" \
+  && fail "s30-headers: /api/health must NOT carry X-Powered-By (the disclosure lockdown)"
+step "PASS" "s30-headers: /api/health carries no X-Powered-By disclosure"
+
+curl -s -D "$S30_HDRS" -o /dev/null "$BASE/nonexistent-s30-header-probe"
+grep -qi '^strict-transport-security: max-age=31536000' "$S30_HDRS" \
+  || fail "s30-headers: the 404 page should carry the HSTS header (the universal rule)"
+grep -qi '^x-powered-by:' "$S30_HDRS" \
+  && fail "s30-headers: the 404 page must NOT carry X-Powered-By"
+step "PASS" "s30-headers: the 404 error path carries HSTS + no X-Powered-By (the rule is universal)"
+rm -f "$S30_HDRS"
+
 # --- Comment + status -------------------------------------------------------
 curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
   -H "Content-Type: application/json" \

@@ -1080,3 +1080,53 @@ Work Log:
 
 Stage Summary:
 - Session 29 complete: the API-wide empty-grammar contract shipped (parseNoQuery RED→GREEN, 106 unit; 10 smoke pins, 54 PASS lines; 196/196 E2E unchanged; 22 live-verify checks + the s24-s28 re-runs all green), the third /login rotation + the desktop-overflow finding + the s4-defect persistence documented (all non-gaps), production-ready superset maintained, pushed to main (74f124f + this status commit), CI Run 66 green
+
+---
+Task ID: 68-onboarding-s30
+Agent: main (Super Z) — session 30
+Task: Session-30 onboarding — workspace refresh + doc review + baseline gates
+
+Work Log:
+- git pull: aab56cc → 25d329a (one new commit — docs/session_48.md, the operator's s29 transcript). This run = Session 30 (numbering: session_49.md will be this agent's log; the plan = remediation-plan-session30.md)
+- Core docs reviewed: AGENTS.md (commands + invariants + the s23–s29 contract line + the conventions), CLAUDE.md (the six-phase workflow + the gate doctrine), README.md (badges 106+196 + the s29 notes), PAD, service-desk_SKILL.md v2.27.0 (83 lessons), skills-catalog.md (218 skills; relevant this session: clone-app-pat-pro, agent-browser, tdd, security-and-hardening, tailwind-patterns)
+- Briefing docs: session_47.md (the s29 agent log) + remediation-plan-session29.md (executed all green, CI Run 66) + worklog.md (tasks 1–67) + session_48.md (the operator's s29 transcript — closing shortlist: the rotation-wave re-check (app-route pair eleven sweeps old — watch for the rotation the /login waves may presage), the s4 toast-viewport defect re-check (their NEXT rebuild — fix, persist, or morph), the desktop-overflow axis re-check (1328-vs-1280), and the own-side audit at a NEW level: response HEADERS + status codes on the newly-gated routes or the cookie/session attribute surface)
+- Environment contract verified: .env (DATABASE_URL="file:../db/custom.db" + AUTH_SECRET + NEXT_PUBLIC_SITE_URL), .env.example matching, db/ at repo root (custom.db + e2e.db), node_modules intact, skills/ excluded in all 4 configs, ports 3000/3100/3999 all DOWN (clean environment)
+- Baseline gates ALL GREEN in the clean environment: lint ✓ typecheck ✓ 106 unit ✓ build ✓ 196/196 E2E ✓ smoke 54 PASS lines ✓
+- Seed verified canonical after the gate: 4 users / 11 tickets / 3 comments / 0 attachments / demo-owned 5 (demo@servicedesk.app)
+
+Stage Summary:
+- Onboarding complete; the repo is at the s29 final state (25d329a) with all gates green; next: the s48-shortlist gap analysis + the new own-side audit axis (response headers / cookie-session attributes)
+
+---
+Task ID: 68-gap-s30
+Agent: main (Super Z) — session 30
+Task: Session-30 gap analysis — the s48 shortlist executed + the new own-side audit axis (response headers / cookie attributes)
+
+Work Log:
+- F1 (bundle sweep, twelfth): the /login JS rotated a FOURTH time (index-NgIJwTZs.js → index-Bv7e1rqD.js; the CSS index-CykrcFnx.css held) AND — the headline the s48 shortlist predicted — THE APP-ROUTE PAIR FINALLY ROTATED after eleven unchanged sweeps (index-DhFaB31Z.js + index-DFdILd41.css → both routes now share index-Bv7e1rqD.js + index-CykrcFnx.css). UserAppMain renamed BgdljW3t → CDUve4NQ; the login contract verified in the new bundle source (all five strings — "Sign in to continue" / "Forgot password?" / "Need an account" / "Sign up" / "Google" ×2 — plus from_url ×14, byte-identical count to s29); the session's own live login ran through the new bundles. NON-GAP (rotation, behavior unchanged).
+- F2 (chrome ledger, twelfth): all axes hold exactly on both routes — viewport-fit=cover auth-pages-only; the PWA trio (manifest + theme-color #000000 + apple-touch-icon) on /login only; the apple pair on both; og:image 1200×630 with true declared dims; twitter:card summary_large_image; the dashboard-home canonical + og:url at the origin root; segment-verbatim titles. NON-GAP.
+- F3 (the desktop-overflow axis re-check): their 1328-vs-1280 PERSISTS (element-walk re-confirmed: the same four decorative gradient blobs at absolute top-0 right-0 anchoring to the un-clipped 1328-wide wrapper). Ours: 1280 = 1280. Their defect, NOT cloned — ours the working superset. NON-GAP.
+- F4 (the mobile matrix + the s4-defect re-check, twelfth): their standing 468-vs-375 persists AND the s4-documented toast-viewport blocking PERSISTS through their rebuild — the geometry unchanged from s29 (two overlapping 32px bands, one at left 0 and one at left 16, both fixed top-0 z-[100] w-full p-4 pointer-events auto, both EMPTY); the Toggle Sidebar button center (38,30) hit-tests to the container; a REAL mouse click at the button's coordinates does NOT open the menu. Ours: 375=375, the button hit-tests to the BUTTON itself, the real click opens the sheet (Dashboard / Submit Ticket / My Tickets + Sign out), nav-tap auto-closes + navigates to /mytickets with the correct title. TW v4 guards code-verified standing (@theme inline ×2, the cursor preflight, --radius-sm: 0.25rem, the pinned system font stack, no config file). Their defect, NOT cloned. NON-GAP.
+- F5 (the desktop paired VLM check): LAYOUT-OK modulo the known s20 quirk (their missing Dashboard active-highlight at / — our clone highlights it correctly; the VLM flagged exactly that one known difference, no other layout difference).
+- P1 (the own-side audit — THE actionable gap, the s47-directed new axis: response HEADERS + status codes + the cookie/session attribute surface): the cookie surface CLEAN (the session cookie sets + clears with Secure; HttpOnly; SameSite=lax — the security-skill doctrine exact); the status codes CLEAN (the s29-gated routes' 400s carry the full security-header set; 401-before-grammar ordering verified on the attachment route; the 404/405 method surface correct on both sides); THE GAP: our responses carry NO Strict-Transport-Security while the reference emits max-age=31536000 universally (measured on their 200s, their 405s, their catch-all 200s — every response, their Cloudflare/Caddy edge). Bundled minor: our HTML responses disclose X-Powered-By: Next.js (the reference sends none — no framework disclosure on their app responses). The s17/s21 doctrine deferred HSTS to "the TLS-terminating proxy" but DEPLOYMENT.md never operationalized that instruction — the deferral was prose-only, so a real deployment gets no HSTS unless the operator remembers an undocumented rule. The reference's access-control-allow-origin: * on OPTIONS = their platform default, deliberately NOT cloned (single-origin app; the security skill's CORS-approval rule).
+
+Stage Summary:
+- All five visual/functional axes hold (F1 rotation-only, F2/F5 non-gaps, F3/F4 their documented defects — ours the working superset); ONE actionable own-side gap on the new audit axis: the missing HSTS header (universal on the reference, absent on ours, the prior proxy-deferral never operationalized) + the X-Powered-By disclosure — both fixed in one next.config.ts change
+
+---
+Task ID: 69
+Agent: main (Super Z) — session 30
+Task: Session-30 remediation — the HSTS + X-Powered-By header contract (TDD) + full verification
+
+Work Log:
+- P1 TDD: RED (4 pins in the new tests/headers-config.test.ts — the poweredByHeader lockdown, the one-rule universal scope, the five-header exact set, the HSTS contract; 3 failed exactly as designed) → GREEN (the two next.config.ts keys: poweredByHeader: false + the Strict-Transport-Security: max-age=31536000 entry in the universal headers() rule) → 110 unit (106+4)
+- One RED-phase artifact fix: the Header type import from next/dist/server/config-shared isn't exported (TS2459) — replaced with a structural local type; one smoke-regex fix: grep BRE has no \r escape (the \r*$ anchor matched literal 'r') — dropped the end-anchor per the standing retry-after convention
+- P2: the s30 smoke block (5 pins — the live header surface on /api/health + the 404 error path: HSTS exact value, the four-header baseline, no X-Powered-By) → smoke 58 PASS lines (54+4: the four-header baseline pin + the HSTS pin + the no-X-Powered-By pin + the 404-universal pin)
+- Script hardening (found during the s29 re-run): a bare `node scripts/s29-live-verify.mjs` crashed at its PrismaClient cleanup with "Unable to open the database file" — the script relied on a correct ambient DATABASE_URL (Node does not auto-load .env), and this workspace's ambient var is stale (points at the parent workspace, not the repo). Fix: the deterministic DATABASE_URL pin + dynamic import (the npm-scripts inline-pin doctrine — the pin is authoritative, not the ambient); the one-off scripts/cleanup-s30-fixture.mjs removed the two leftover fixtures from the crashed runs; seed restored to canonical 4/11/3/0
+- Full gate in the CLEAN environment: lint ✓ typecheck ✓ 110 unit ✓ build ✓ 196/196 E2E ✓ (unchanged) smoke 58 ✓; seed canonical after
+- Live re-verification on :3000 (the new build): the header matrix by hand (every response class — /login page, /api/health 200, the 400 grammar rejection, the 404 page — carries Strict-Transport-Security: max-age=31536000 and none carries X-Powered-By) + the s24 (ALL GREEN) + s25 (13) + s26 (15) + s27 (14) + s28 (12) + s29 (22/22, hardened) re-runs ALL GREEN; one rate-budget lesson re-learned (the login bucket exhausted mid-re-runs — restarted the server for fresh buckets, per the s29 doctrine)
+- The UI round-trip (the login → dashboard: the stat cards + QUICK STATS Open 4/In Progress 2/Total 11 + Performance Metrics + Average Resolution Time 15d 0h + the 5 seeded recent tickets — all through the header-gated routes) + the mobile matrix on the new build (375=375, the button hit-tests to the BUTTON, the real click opens the sheet, nav-tap auto-closes + navigates to /mytickets) + the desktop paired VLM check (LAYOUT-OK)
+- Screenshots: the 10-shot set refreshed via capture-screenshots-s30.sh (the s29 lineage verbatim; FATAL guards green); VLM shots 02 + 05 RENDER-OK; the seed re-verified canonical after the fixture removal
+
+Stage Summary:
+- The HSTS + X-Powered-By header contract shipped (110 unit + 196/196 E2E + smoke 58, clean-environment verified; the live header matrix + the s24-s29 re-runs + the UI round-trip + the mobile matrix + the VLM check all green); the s29 live-verify script hardened to self-contained; production-ready superset maintained; ready for the docs + push phase

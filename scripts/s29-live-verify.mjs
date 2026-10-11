@@ -28,7 +28,15 @@
 //  16. the no-param happy paths intact (stats aggregate + tickets list)
 //  17. logged-out me → 401 (the grammar gate does not bypass auth)
 
-import { PrismaClient } from "@prisma/client";
+// Session-30 hardening: the cleanup block's PrismaClient needs DATABASE_URL
+// set BEFORE the module loads (Node does not auto-load .env — the s29 session
+// ran with a correct ambient env; a stale ambient pointing elsewhere crashes
+// cleanup with "Unable to open the database file", leaving the fixture in the
+// canonical db). The pin follows the repo doctrine (the npm scripts pin
+// DATABASE_URL inline — the pin is authoritative, not the ambient env): the
+// dynamic import + the deterministic pin make the script self-contained.
+process.env.DATABASE_URL = "file:../db/custom.db";
+const { PrismaClient } = await import("@prisma/client");
 
 const BASE = "http://localhost:3000";
 
@@ -306,6 +314,8 @@ ok(
 }
 
 // --- cleanup: the fixture ticket + attachment + any stray probes -------------------
+// (PrismaClient imported dynamically above, after DATABASE_URL is pinned —
+// the session-30 hardening.)
 const db = new PrismaClient();
 const delC = await db.comment.deleteMany({ where: { content: { contains: "s29 live-verify grammar probe" } } });
 const delT = await db.ticket.deleteMany({ where: { title: { contains: "s29 live-verify" } } });
