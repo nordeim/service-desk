@@ -1402,3 +1402,15 @@ Work Log:
 
 Stage Summary:
 - Session 33 complete: the API-namespace JSON 404 catch-all shipped (a true TDD RED→GREEN — 19 unit pins; 9 new smoke pins — 85 steps; 196/196 E2E unchanged; 24 live checks), the cookie-attribute + concurrency surfaces pinned (the clean-but-unpinned axes closed), the smoke script's failure path hardened, the seventh /login rotation + the s4/desktop/mobile persistence documented (all non-gaps), production-ready superset maintained, pushed to main (39d0aa0 + this status commit), CI green
+
+---
+Task ID: 82-addendum
+Agent: main (Super Z) — session 33 (addendum)
+Task: Status-commit CI verification + session closeout
+
+Work Log:
+- The status commit 741d53e pushed via the same wrapper protocol (fingerprint verified, dry-run green, remote == local HEAD, both keys shredded, no residue)
+- CI on 741d53e (a docs-only commit — 2 markdown files, zero code delta from the verified 39d0aa0): the unauthenticated GitHub API was rate-limited through the first ~12 minutes of polling; the run (38183035786 on 741d53e) then API-verified COMPLETED SUCCESS. The badge on main green throughout ("CI - passing", fetched with cache-busters — the repo's own documented live signal).
+
+Stage Summary:
+- Session 33 fully closed: both commits on main (39d0aa0 remediation + 741d53e status), CI green on BOTH (runs 38182505069 + 38183035786, both API-verified SUCCESS), all keys shredded, the repo tree clean; the next session's shortlist recorded in docs/session_55.md (the EIGHTH /login wave? the s4-defect re-check, the desktop-overflow axis, and the own-side audit candidates: the cache-behavior surface on the page routes, the auth-cookie lifetime under clock skew, or the request-size surface)
