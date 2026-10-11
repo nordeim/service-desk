@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  LIST_DEFAULT_LIMIT,
+  LIST_MAX_LIMIT,
   ATTACHMENT_ACCEPTED_TYPES,
   ATTACHMENT_ACCEPT_ATTR,
   CATEGORY_EMOJI,
@@ -15,6 +17,7 @@ import {
   isTicketStatus,
 } from "@/lib/constants";
 import {
+  parseListParams,
   validateAttachments,
   validateCommentInput,
   validateLoginInput,
@@ -209,5 +212,56 @@ describe("validateAttachments", () => {
     for (const mimeType of ATTACHMENT_ACCEPTED_TYPES) {
       expect(validateAttachments([{ fileName: "f.bin", mimeType, sizeBytes: 1 }]).ok).toBe(true);
     }
+  });
+});
+
+describe("parseListParams (s24: the list-API pagination contract — limit/skip, the reference's measured param names)", () => {
+  const parse = (qs: string) => parseListParams(new URLSearchParams(qs));
+
+  it("defaults to the 200-ceiling / 0-skip when no params are sent", () => {
+    const r = parse("");
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value).toEqual({ limit: LIST_DEFAULT_LIMIT, skip: 0 });
+    }
+  });
+
+  it("honors limit and skip, alone and combined", () => {
+    expect(parse("limit=5")).toMatchObject({ ok: true, value: { limit: 5, skip: 0 } });
+    expect(parse("skip=10")).toMatchObject({ ok: true, value: { limit: LIST_DEFAULT_LIMIT, skip: 10 } });
+    expect(parse("limit=25&skip=50")).toMatchObject({ ok: true, value: { limit: 25, skip: 50 } });
+  });
+
+  it("accepts the boundary values (limit 1 and 500, skip 0)", () => {
+    expect(parse("limit=1")).toMatchObject({ ok: true, value: { limit: 1 } });
+    expect(parse("limit=" + LIST_MAX_LIMIT)).toMatchObject({ ok: true, value: { limit: LIST_MAX_LIMIT } });
+    expect(parse("skip=0")).toMatchObject({ ok: true, value: { skip: 0 } });
+  });
+
+  it("rejects limit=0, negative, over-ceiling, non-integer, and non-numeric values", () => {
+    for (const qs of ["limit=0", "limit=-1", "limit=501", "limit=abc", "limit=1.5"]) {
+      const r = parse(qs);
+      expect(r.ok).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("limit must be an integer between 1 and " + LIST_MAX_LIMIT);
+      }
+    }
+  });
+
+  it("rejects negative and non-numeric skip values", () => {
+    for (const qs of ["skip=-1", "skip=abc", "skip=1.5"]) {
+      const r = parse(qs);
+      expect(r.ok).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toContain("skip must be a non-negative integer");
+      }
+    }
+  });
+
+  it("treats empty-string values as absent (an empty input renders as no param)", () => {
+    expect(parse("limit=&skip=")).toMatchObject({
+      ok: true,
+      value: { limit: LIST_DEFAULT_LIMIT, skip: 0 },
+    });
   });
 });

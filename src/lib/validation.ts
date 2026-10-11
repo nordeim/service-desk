@@ -8,6 +8,8 @@ import {
   ATTACHMENT_MAX_COUNT,
   isTicketCategory,
   isTicketPriority,
+  LIST_DEFAULT_LIMIT,
+  LIST_MAX_LIMIT,
 } from "./constants";
 
 export interface TicketInput {
@@ -117,4 +119,43 @@ export function validateAttachments(
     }
   }
   return { ok: true };
+}
+
+export interface ListParams {
+  limit: number;
+  skip: number;
+}
+
+// Session 24: the list-API pagination contract — `limit`/`skip` are the
+// reference entity API's measured param names (its `offset` is not
+// supported and yields an empty result). Our default ceiling (200) is the
+// deliberate DoS-safety superset over their unbounded default; garbage
+// values REJECT with 400 (the strict-validation doctrine — their platform
+// silently ignores unknown params, ours never does). Empty-string values
+// read as absent (an empty form input renders as a bare param).
+export function parseListParams(
+  searchParams: URLSearchParams,
+): { ok: true; value: ListParams } | { ok: false; error: string } {
+  let limit = LIST_DEFAULT_LIMIT;
+  let skip = 0;
+
+  const rawLimit = searchParams.get("limit");
+  if (rawLimit !== null && rawLimit !== "") {
+    const n = Number(rawLimit);
+    if (!Number.isInteger(n) || n < 1 || n > LIST_MAX_LIMIT) {
+      return { ok: false, error: `limit must be an integer between 1 and ${LIST_MAX_LIMIT}` };
+    }
+    limit = n;
+  }
+
+  const rawSkip = searchParams.get("skip");
+  if (rawSkip !== null && rawSkip !== "") {
+    const n = Number(rawSkip);
+    if (!Number.isInteger(n) || n < 0) {
+      return { ok: false, error: "skip must be a non-negative integer" };
+    }
+    skip = n;
+  }
+
+  return { ok: true, value: { limit, skip } };
 }

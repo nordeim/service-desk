@@ -823,3 +823,34 @@ Work Log:
 
 Stage Summary:
 - The session-23 MIME-allowlist guard + create-path pins shipped (smoke 24 PASS lines, clean-environment verified: 67 unit + 196/196 E2E); the stored-XSS surface closed at the seam; the first-measurement findings recorded across the ledger; production-ready superset maintained; pushed to main via docs/ssh_git_wrapper_v3.py (remote verified, operator key shredded, tree clean)
+
+---
+Task ID: 51
+Agent: main (Super Z)
+Task: Session 24 — refresh repo, review session_35/remediation-plan-session23/worklog/session_36 docs, audit recent changes, fresh gap analysis vs live reference (the s24 shortlist probes), remediation plan
+
+Work Log:
+- git pull fast-forward 4d1a31c → 31cab65 (the operator's session_36.md transcript commit); current session established as Session 24 (agent log → docs/session_37.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL v2.21.0 + session_35.md + remediation-plan-session23.md + worklog + session_36.md — all aligned with the codebase; environment contract verified standing (.env with DATABASE_URL=file:../db/custom.db + AUTH_SECRET, db/ at root seeded 4/11/3/0 canonical, skills/ excluded in all 4 configs, .env.example matches)
+- Baseline gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 67 unit ✓ build ✓ 196/196 E2E ✓ smoke 24 PASS lines ✓; CI on HEAD (31cab65) completed success; session-23 commit 0e7ea78 audited CLEAN against its plan (the 17-file set + the MIME-guard diff reviewed)
+- Fresh gap analysis (agent-browser + curl both sides): the s24 shortlist probes executed — F1 (first measurement): the admin-surface access-control matrix — their /alltickets RENDERS the full 121-ticket global feed with 95+ distinct users' emails to ANY authenticated regular user (the admin gate is a hidden nav item only, the s22 UI-only-guard class on routes — the s16 "unmeasurable surface" note closed); /analytics renders an "IT staff" permission notice; /settings + /developer render administrator permission notices; their /api/entities/User list is the ONE server-side 403 ("Only collaborators can view the list of users"); their /mytickets re-verified own-tickets-only. Decision: do NOT mirror /alltickets (the s22 intent-over-leak precedent + our no-roles architecture — ours 404s the route, the My/All scope toggle is the honest global-feed surface). F2 (first measurement → P1): the pagination surface — their entity APIs page with limit + skip (offset yields []) against an unbounded default (121 tickets / 61 comments in one bare array); OURS had a silent take: 200 with NO pagination params (a cap without an escape hatch, unpinned since session 2). F3 (non-gap): the drift ledger holds EXACTLY (sixth re-verification) + the app-route bundle hash not rotated (fifth consecutive sweep) + the NEW /login-own-chunk-pair note (per-route code splitting — the sweeps had sampled /dashboard only). F4 (non-gap): the mobile matrix green both sides (their 468-overflow + sheet-stays-open persist; ours 375=375 + 80% oklab overlay + nav-tap auto-close + navigate) + the TW v4 guards standing (code-verified)
+- Wrote + validated docs/remediation-plan-session24.md (the P1 seam decision: the reference's measured param names limit/skip; the 200 default as the documented DoS-safety ceiling; strict 400-on-garbage; the parsing extracted into parseListParams for unit-pinnability; the smoke layer for the HTTP pins at zero fixture cost; the /alltickets non-implementation decision documented)
+
+Stage Summary:
+- Repo at 31cab65 + plan; the parseListParams pagination seam (P1) + 4 smoke pins (P2) + the admin-surface access-matrix documentation finding queued for execution
+
+---
+Task ID: 52
+Agent: main (Super Z)
+Task: Session 24 — the pagination-seam fix + smoke-pin execution, verification, docs, SKILL.md v2.22.0, commit + push
+
+Work Log:
+- P1 (TDD): the RED pin added to domain.test.ts (a parseListParams describe — 6 pins: the 200/0 defaults, limit/skip honored alone + combined, the 1/500/0 boundaries, the limit=0/-1/501/abc/1.5 rejects, the skip=-1/abc/1.5 rejects, empty-string-as-absent) — RED confirmed (6 failed, parseListParams is not a function) → the GREEN: LIST_DEFAULT_LIMIT/LIST_MAX_LIMIT in constants.ts + parseListParams in validation.ts + the GET handler wired (take: limit, skip; 400 + {error} on garbage) → 73 unit GREEN (67 + 6)
+- P2: the four pagination smoke pins added to scripts/smoke-test.sh after the standing search step (?limit=2 → exactly 2; ?limit=2&skip=2 → exactly 2 AND disjoint from page 1 via the id-set comm -12 check; ?limit=0 → 400 + "limit must be an integer between 1 and 500"; ?limit=501 → 400) — GREEN on first run (28 PASS lines: the standing 24 + 4 new)
+- Gates in the CLEAN environment (:3000 down): lint ✓ typecheck ✓ 73 unit ✓ build ✓ 196/196 E2E ✓ (unchanged; zero regressions — the default path is byte-identical) smoke 28 PASS lines ✓
+- Live paired re-verification (production standalone :3000): scripts/s23-live-verify.mjs re-run ALL GREEN (12 checks); the new scripts/s24-live-verify.mjs ALL GREEN (13 checks — the pagination matrix incl. default == ?limit=200&skip=0 byte-identical id order); probe fixtures cleaned (cleanup-s23-tickets.mjs); seed re-verified canonical (4/11/3/0) after the fixtures and after the screenshots
+- Screenshots: the standing 10-shot set refreshed via scripts/capture-screenshots-s24.sh (the s23 lineage verbatim; all four FATAL guards green); VLM-verified shots 02 + 05 (LAYOUT-OK)
+- Updated README (badges 67→73 + the API-table pagination row + the testing-notes pagination pins + the E2E-notes s24 paragraph)/AGENTS (the session-24 contracts section + the commands-table unit/smoke lines + the reference list through s24)/CLAUDE (the unit/smoke lines + the silent-cap anti-pattern)/PAD (§7.1 counts — domain 28, smoke 28 steps, the checklist 73/73 — + the s24 known-issues row)/service-desk_SKILL.md v2.22.0 (lesson 78: a cap without params is a silent truncation + the route-matrix + sweep-scope sibling lessons); session_37.md narrative log; the plan's execution status; this worklog; the s24 scripts committed (s24-live-verify, s24-vlm-verify, capture-screenshots-s24)
+
+Stage Summary:
+- The session-24 pagination contract shipped (smoke 28 PASS lines, clean-environment verified: 73 unit + 196/196 E2E); the admin-surface access matrix + the drift ledger recorded across the ledger; production-ready superset maintained; to be pushed to main via docs/ssh_git_wrapper_v3.py

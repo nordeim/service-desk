@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { validateAttachments, validateTicketInput } from "@/lib/validation";
+import { parseListParams, validateAttachments, validateTicketInput } from "@/lib/validation";
 import { isTicketPriority, isTicketStatus } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -19,6 +19,15 @@ export async function GET(req: Request) {
   const priority = url.searchParams.get("priority") ?? "all";
   const scope = url.searchParams.get("scope") ?? "mine";
   const sort = url.searchParams.get("sort") ?? "newest";
+
+  // Session 24: the pagination contract — limit/skip (the reference entity
+  // API's measured param names). The default ceiling (200) is the DoS-safety
+  // superset; garbage values reject with 400 rather than silently ignoring
+  // (the strict-validation doctrine).
+  const parsed = parseListParams(url.searchParams);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
 
   const where: Record<string, unknown> = {};
   if (scope !== "all") where.createdById = user.id;
@@ -49,7 +58,8 @@ export async function GET(req: Request) {
       createdBy: { select: { id: true, name: true, email: true } },
       _count: { select: { comments: true } },
     },
-    take: 200,
+    take: parsed.value.limit,
+    skip: parsed.value.skip,
   });
 
   if (sort === "priority") {

@@ -64,6 +64,35 @@ step "PASS" "read ticket"
 curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?search=Smoke" | grep -q "Smoke test ticket" || fail "search"
 step "PASS" "search tickets"
 
+# --- Pagination (session 24: the list-API limit/skip contract) ---------------
+# The demo user owns 5 seeded tickets + the smoke ticket above = 6 at this
+# point, so two 2-ticket pages page disjointly through the mine-scope feed.
+PAGE1_IDS=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?limit=2" \
+  | python3 -c 'import json,sys; ts=json.load(sys.stdin)["tickets"]; print(len(ts)); print(",".join(t["id"] for t in ts))')
+echo "$PAGE1_IDS" | head -1 | grep -q "^2$" || fail "pagination: ?limit=2 must return exactly 2 tickets (got $(echo "$PAGE1_IDS" | head -1))"
+step "PASS" "pagination: limit=2 honored (exactly 2 returned)"
+PAGE2_IDS=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?limit=2&skip=2" \
+  | python3 -c 'import json,sys; ts=json.load(sys.stdin)["tickets"]; print(len(ts)); print(",".join(t["id"] for t in ts))')
+echo "$PAGE2_IDS" | head -1 | grep -q "^2$" || fail "pagination: ?limit=2&skip=2 must return exactly 2 tickets (got $(echo "$PAGE2_IDS" | head -1))"
+P1_SET=$(echo "$PAGE1_IDS" | tail -1 | tr ',' '\n' | sort)
+P2_SET=$(echo "$PAGE2_IDS" | tail -1 | tr ',' '\n' | sort)
+if [ -n "$(comm -12 <(printf '%s\n' "$P1_SET") <(printf '%s\n' "$P2_SET"))" ]; then
+  fail "pagination: page 2 (skip=2) overlaps page 1 — skip must advance the window"
+fi
+step "PASS" "pagination: skip=2 pages disjointly"
+
+PAG_RESP=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?limit=0")
+PAG_BODY=$(curl -s -b "$COOKIE_JAR" "$BASE/api/tickets?limit=0")
+[ "$PAG_RESP" = "400" ] || fail "pagination: ?limit=0 should 400 (got $PAG_RESP)"
+echo "$PAG_BODY" | grep -q "limit must be an integer between 1 and 500" || fail "pagination: ?limit=0 message"
+step "PASS" "pagination: limit=0 rejected (400 + the range message)"
+
+PAG_RESP=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/tickets?limit=501")
+PAG_BODY=$(curl -s -b "$COOKIE_JAR" "$BASE/api/tickets?limit=501")
+[ "$PAG_RESP" = "400" ] || fail "pagination: ?limit=501 should 400 (got $PAG_RESP)"
+echo "$PAG_BODY" | grep -q "limit must be an integer between 1 and 500" || fail "pagination: ?limit=501 message"
+step "PASS" "pagination: limit=501 rejected (400 — the 500 ceiling)"
+
 # --- Comment + status -------------------------------------------------------
 curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
   -H "Content-Type: application/json" \

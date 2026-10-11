@@ -115,3 +115,15 @@ export const ATTACHMENT_ACCEPTED_TYPES = [
 // drift apart again.
 export const ATTACHMENT_ACCEPT_ATTR =
   ".png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx,.txt,.md,.csv,.json,.zip";
+
+/**
+ * List-API pagination (session 24). The reference's entity APIs page with
+ * `limit` + `skip` (their measured param names — `offset` is NOT supported
+ * and yields `[]`); their DEFAULT is unbounded (all 121 tickets in one
+ * response). Our default ceiling is the deliberate DoS-safety superset — a
+ * cap without params would be a silent truncation, so the escape hatch ships
+ * with the ceiling: callers can page the full corpus with limit (≤ 500) and
+ * skip (≥ 0).
+ */
+export const LIST_DEFAULT_LIMIT = 200;
+export const LIST_MAX_LIMIT = 500;
