@@ -272,3 +272,31 @@ export function parseListQuery(
   }
   return { ok: true };
 }
+
+// Session 28: the stats empty-grammar contract. /api/stats is our
+// server-computed superset surface (the reference has no equivalent — their
+// metrics are client-computed, the s26/s27 no-analytics doctrine) and it
+// takes NO query params. Before s28 the empty grammar was silently open:
+// `?scope=mine`, `?status=open&limit=5` — REAL param names from the sibling
+// /api/tickets route — were ignored, returning the identical full aggregate
+// (measured live at the s28 audit). That is the cross-route variant of the
+// s25 lesson-79 class: a caller carrying real param names over gets a
+// silently-wrong-shaped response. The seam closes it with the same
+// s27-consistent ordering (unknown precedes duplicate): on an empty grammar
+// every name is unknown, so the unknown message subsumes duplicates — the
+// caller must drop the param entirely, not dedupe it. The grammar precedes
+// the value level, so an empty value (`?status=`) is still an unknown NAME
+// — there are no known names on this route. Callers audited (zero
+// breakage): the sidebar mount fetch, the dashboard fetch, and the E2E
+// route mocks all send no query string.
+export function parseStatsQuery(
+  searchParams: URLSearchParams,
+): { ok: true } | { ok: false; error: string } {
+  for (const [name] of searchParams) {
+    return {
+      ok: false,
+      error: `unknown query parameter: ${name} (this endpoint takes no query parameters)`,
+    };
+  }
+  return { ok: true };
+}

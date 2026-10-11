@@ -979,3 +979,61 @@ Work Log:
 
 Stage Summary:
 - Session 27 complete: the strict param-set contract shipped (parseListQuery seam RED→GREEN, 94 unit; 3 smoke pins, 41 PASS lines; 196/196 E2E unchanged), the /count + logged-in-routing closures documented (their platform's count endpoint never called by their app — no count endpoint on ours; their in-app 404 converged with our s4 design — our true-404 + real /signup stay the superset), both bundle pairs stable (no new Rolldown wave), the drift ledger + mobile + TW guards re-verified (ninth); pushed to main, CI Runs 59–60 green
+
+---
+Task ID: 62
+Agent: main (Super Z) — session 28
+Task: Session-28 onboarding + baseline gates (agent log docs/session_45.md, plan docs/remediation-plan-session28.md)
+
+Work Log:
+- git pull af7bb65 → 5a4c334 (the operator's session_44.md transcript — the only change); this run = Session 28
+- Briefing docs reviewed: session_43.md (the s27 agent log) + remediation-plan-session27.md (executed all green, CI Runs 59–61 verified) + session_44.md (the operator's s27 transcript — closing shortlist: the standing ledger re-check, the /api/stats param-surface question, their mobile-app chunks native-mobile-app/useHideNativeBottomTabs) + worklog.md (tasks 1–61)
+- Core docs aligned: AGENTS.md (all session-2..27 contracts), CLAUDE.md, README, PAD, SKILL v2.25.0; environment contract verified (.env DATABASE_URL=file:../db/custom.db + AUTH_SECRET + NEXT_PUBLIC_SITE_URL, .env.example matches, scripts pin DATABASE_URL inline, db/ at root, skills/ excluded in all 4 configs)
+- Baseline gates ALL GREEN in the CLEAN environment (:3000/:3100/:3999 confirmed down pre-E2E): lint ✓ typecheck ✓ 94 unit ✓ build ✓ 196/196 E2E ✓ smoke 41 PASS lines ✓; seed canonical 4/11/3/0 re-verified post-gate; :3999 down after smoke
+
+Stage Summary:
+- Onboarding complete; the s44 shortlist (ledger re-check, /api/stats param surface, mobile-app chunks) + the standing probes (bundle sweep, mobile matrix, TW v4 guards, own-side audit) = this session's gap-analysis list
+
+---
+Task ID: 63-gap-s28
+Agent: main (Super Z) — session 28
+Task: Session-28 gap analysis — the s44 shortlist probes + the own-side audit
+
+Work Log:
+- F1 (bundle sweep, tenth): the /login pair ROTATED AGAIN (second rotation since s24): index-CM-qL9yl.js+DWYJeyVS.css → index-GvewFNv-.js + index-DGHUKY5V.css; UserAppMain renamed 12hFZEhy → BZ-6C68G; the graph re-split (new platform chunks: WorkspaceAPI/Context, i18n, mixpanelUtils, errorReporting, featureFlags, useDesignSystem, usePlatform, useWorkspaceUnlockState + the rolldown-runtime marker). The app-route pair UNCHANGED (DhFaB31Z + DFdILd41, ninth sweep). UI strings verified in the new UserAppMain; from_url ×1 in each of AuthAPI/AuthContext/axiosClient/UserAppMain; the live login + logged-out gate ran through the new bundles. NON-GAP (rotation, behavior unchanged).
+- F2 (the s44 shortlist mobile chunks decoded, first measurement): useHideNativeBottomTabs + native-mobile-app = the Wix native-shell bridge (window.wixMobileNativeBridge.base44.* — onItemClicked, openBottomSheet, requestWebViewNavigation, setBottomTabsVisible, handlePageNotFoundRetry), ALL guarded by isNativeMobile — inert in the browser. Platform infrastructure, not app features (the s2 no-platform-chrome doctrine). NON-GAP, documented.
+- F3 (chrome ledger, tenth): all axes hold exactly (viewport-fit auth-only, PWA trio login-only, apple pair both, canonical/og:url at origin root, og:image 1200x630 true dims, twitter:card, segment-verbatim titles). NON-GAP.
+- F4 (mobile matrix, tenth): their 468-vs-375 overflow persists (tenth); NEW THIRD DEFECT on theirs: the mobile menu button is BLOCKED by empty toast-viewport divs (fixed top-0 z-[100] w-full + pointer-events:auto, ~64px stacked pair, empty children) — a real mouse click at the button's coordinates (38,30) lands on the container, the menu does NOT open, persistent after reload. Ours: 375=375 both routes, menu opens, nav-tap auto-closes + navigates, button clickable. OURS = the working superset; their defect documented, NOT cloned.
+- F5 (desktop paired VLM check): LAYOUT-OK (all differences data-content only: usernames, counts, titles; the Edit-with-Base44 badge = the s2 platform-chrome exclusion).
+- P1 (own-side audit — THE actionable fix): /api/stats empty grammar — the last open param surface (the s44 shortlist question closed). Measured live: ?banana=1, ?scope=mine, ?status=open&limit=5 (REAL sibling-route param names) all silently ignored → the identical full aggregate (the cross-route param-confusion variant of the lesson-79 class). Callers audited: the sidebar + the dashboard + the E2E route mocks all send ZERO params → closing the empty grammar breaks nothing. All other routes re-audited clean (auth family, health, tickets list+detail+attachments+comments POST-only).
+
+Stage Summary:
+- One actionable fix (P1: the stats empty-grammar contract); F1/F2/F4 = documented reference-side findings (the second /login rotation + the native-bridge decode + their new mobile menu-blocking defect); F3/F5 hold; production-ready superset maintained
+
+---
+Task ID: 63-gap-s28-correction
+Agent: main (Super Z) — session 28
+Task: Correction to the task-63 F4 finding (the honest-ledger convention)
+
+Work Log:
+- Re-verified against docs/remediation-plan-session4.md (its mobile-nav-hazard row + its "Toast viewport blocks the mobile trigger" finding): the toast-viewport blocking of their mobile menu trigger is the S4-DOCUMENTED DEFECT, not a first measurement — the s4 era measured a single 390×32 partially-blocking band; the defect receded through s8–s27 (the sheet-openable state the mobile matrix measured those sessions) and has RETURNED with their second /login rotation, DOUBLED (two stacked ~64px bands at 375; the button's click center now fully inside — the menu does not open)
+- All s28 documentation corrected from "NEW/first measurement" to "recurred and worsened" (AGENTS.md s28 section + reference list, PAD s28 row, README E2E-notes, the plan's F4); our side unchanged (the inline pointer-events:none on the Radix viewport region — the s4 correct-by-construction finding)
+
+Stage Summary:
+- The finding stands (their defect, ours the working superset); the attribution corrected: s4-documented, recurred + worsened after their rebuild
+
+---
+Task ID: 64
+Agent: main (Super Z) — session 28
+Task: Session-28 remediation — the stats empty-grammar contract (TDD) + full verification
+
+Work Log:
+- P1 TDD: RED (5 pins: the no-param happy path, the unknown-name reject with the exact message, the cross-route confusion pin, the empty-value-still-unknown reject, the duplicate-subsumed-by-unknown) → GREEN (parseStatsQuery in validation.ts + the stats GET handler wiring) → 99 unit (94+5)
+- P2: 3 smoke pins (banana=1 → 400 + both messages; the cross-route scope=mine → 400; the no-param aggregate shape intact) → smoke 44 PASS lines (41+3)
+- Full gate in the CLEAN environment: lint ✓ typecheck ✓ 99 unit ✓ build ✓ 196/196 E2E ✓ (unchanged) smoke 44 ✓; seed canonical (4/11/3/0) after
+- Live paired re-verification on :3000: the new s28-live-verify.mjs ALL GREEN (12 checks); s27 (14) + s26 (15) + s25 (13) + s24 re-runs ALL GREEN; the UI round-trip (the dashboard + QUICK STATS + Performance Metrics through the grammar gate) + the mobile matrix on the new build (375=375, real clicks, nav-tap auto-close + navigate)
+- Screenshots: the 10-shot set refreshed via capture-screenshots-s28.sh (the s27 lineage; FATAL guards green); VLM shots 02 + 05 LAYOUT-OK
+- Docs: README (badges 99 + the command lines + the smoke description + the s28 E2E-notes), AGENTS.md (the session-28 contracts + the commands table + the reference list), CLAUDE.md (the counts + the smoke line + the param-less-grammar anti-pattern), PAD (§7.1 domain 54 + the checklist 99/99 + the s28 row), service-desk_SKILL.md v2.26.0 (lesson 82 + the three sibling lessons), docs/session_45.md, the plan's execution status, this worklog; the s28 scripts committed (s28-live-verify, capture-screenshots-s28)
+
+Stage Summary:
+- The stats empty-grammar contract shipped (99 unit + 196/196 E2E + smoke 44, clean-environment verified; live-verified 12+14+15+13+13 checks + the UI round-trip + the mobile matrix); the second /login rotation + the native-bridge decode + the s4-defect recurrence documented; production-ready superset maintained; ready for the push phase

@@ -184,6 +184,32 @@ QUERY_COUNT=$(curl -sf -b "$COOKIE_JAR" \
 step "PASS" "param-set: all seven known params compose (Outlook — exactly 1)"
 rm -f "$RL_BODY_X"
 
+# --- s28: the stats empty-grammar contract pins ---------------------------------
+# /api/stats takes NO query params (our server-computed superset surface;
+# the reference has no equivalent). Before s28 the empty grammar was
+# silently open: ?scope=mine and ?status=open&limit=5 — REAL sibling-route
+# param names — returned 200 + the identical full aggregate (the cross-route
+# variant of the s25 lesson-79 class, measured live at the s28 audit).
+# Callers (sidebar + dashboard + E2E mocks) send no query string.
+STATS_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/stats?banana=1")
+[ "$STATS_RESP" = "400" ] || fail "stats-grammar: ?banana=1 should 400 (got $STATS_RESP)"
+grep -q "unknown query parameter: banana" "$RL_BODY_X" || fail "stats-grammar: unknown reject message"
+grep -q "this endpoint takes no query parameters" "$RL_BODY_X" || fail "stats-grammar: no-params message"
+step "PASS" "stats-grammar: ?banana=1 rejected (400 + the unknown + no-params messages)"
+
+STATS_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/stats?scope=mine")
+[ "$STATS_RESP" = "400" ] || fail "stats-grammar: ?scope=mine should 400 (got $STATS_RESP)"
+grep -q "unknown query parameter: scope" "$RL_BODY_X" || fail "stats-grammar: cross-route pin message"
+step "PASS" "stats-grammar: the cross-route name ?scope=mine rejected (400)"
+
+STATS_RESP=$(curl -s -o "$RL_BODY_X" -w "%{http_code}" -b "$COOKIE_JAR" "$BASE/api/stats")
+[ "$STATS_RESP" = "200" ] || fail "stats-grammar: the no-param happy path should 200 (got $STATS_RESP)"
+grep -q '"mine"' "$RL_BODY_X" || fail "stats-grammar: the mine shape"
+grep -q '"global"' "$RL_BODY_X" || fail "stats-grammar: the global shape"
+grep -q '"avgResolutionMs"' "$RL_BODY_X" || fail "stats-grammar: the avgResolutionMs shape"
+step "PASS" "stats-grammar: the no-param aggregate intact (mine + global + avgResolutionMs)"
+rm -f "$RL_BODY_X"
+
 # --- Comment + status -------------------------------------------------------
 curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$TICKET_ID/comments" \
   -H "Content-Type: application/json" \

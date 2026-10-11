@@ -4,12 +4,24 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { parseStatsQuery } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Session 28: the empty-grammar gate, FIRST (the s27 convention — the
+  // grammar level precedes everything). This endpoint takes no query
+  // params; before s28 `?scope=mine` or `?status=open&limit=5` — real
+  // sibling-route names — were silently ignored, returning the identical
+  // full aggregate: the cross-route variant of the s25 lesson-79 class.
+  // Callers (sidebar + dashboard + E2E mocks) send no query string.
+  const parsedQuery = parseStatsQuery(new URL(req.url).searchParams);
+  if (!parsedQuery.ok) {
+    return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
 
   const [mine, global] = await Promise.all([
     db.ticket.findMany({
