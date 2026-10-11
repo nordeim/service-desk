@@ -882,3 +882,16 @@ Work Log:
 
 Stage Summary:
 - The session-25 filter-vocabulary contract shipped (smoke 34 PASS lines, clean-environment verified: 81 unit + 196/196 E2E); the admin-tier question closed at the bundle level (no third tier — "IT staff" = admin copy); the comment-read path measured (a non-gap); the drift ledger + bundles + mobile/TW guards re-verified; production-ready superset maintained; to be pushed to main via docs/ssh_git_wrapper_v3.py
+
+---
+Task ID: 56
+Agent: main (Super Z)
+Task: Session 25 — push + CI verification + final status
+
+Work Log:
+- Commit c3ba48e (the s25 remediation — 19 files) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko ssh shim deployed outside the repo at /home/z/my-project/bin/ssh — no OpenSSH binary in the sandbox; dry-run first: clean fast-forward b6ce792..c3ba48e; real push: remote verified == local HEAD, tracking synced, operator key shredded, shim removed, tree clean, no new branches)
+- CI Run 53 on c3ba48e completed success — verified via the anonymous run-history aria-labels (the s18 method; the anonymous REST API 403 rate-limited); the badge stays green
+- The CI confirmation recorded in the plan's execution status (this follow-up commit, the s21–s24 convention)
+
+Stage Summary:
+- Session 25 complete: the filter-vocabulary contract shipped (parseListFilters seam RED→GREEN, 81 unit; 6 smoke pins, 34 PASS lines; 196/196 E2E unchanged), the admin-tier question closed at the bundle level (no third tier — "IT staff" = admin copy), the comment-read path measured (a non-gap), the drift ledger + bundles + mobile/TW guards re-verified; pushed to main, CI Run 53 green
