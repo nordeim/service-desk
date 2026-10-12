@@ -1577,3 +1577,26 @@ Work Log:
 
 Stage Summary:
 - All seven documentation surfaces aligned with the s35 state (the request-size contract + the data honesty + the fixture audit + the first quiet bundle session); ready for the final gate + the push phase
+
+---
+Task ID: 90
+Agent: main (Super Z) — session 35
+Task: Session-35 push + CI verification + final status
+
+Work Log:
+- Commit a04ba6a (the s35 remediation — 26 files: the parseBodySize seam + the validateAttachments data contract + the MAX_BODY_BYTES constant + the six route wirings + the 16 new unit pins (the new tests/body-size.test.ts + the domain data pins) + the 6 s35 smoke pins + the trap-cleanup entries + the s35 live-verify script (13 checks) + the s35 capture script + the fixture corrections (7 E2E sites + the smoke s31 + the s29/s31 live-verify + the screenshot fixture) + 7 docs + the remediation plan + session_59.md + 4 re-rendered screenshots (01/04/05/09; the other 6 byte-identical)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko shim at /home/z/my-project/bin/ssh on PATH, the venv python carrying paramiko 5.0.0; the key fingerprint verified before the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, identical to the s30/s31/s32/s33/s34 records; the dry-run green first with the explicit --remote — the wrapper's default is task-management.git, the s28 lesson held; the real push verified: remote == local HEAD @ a04ba6a, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the run on the push (run 38195123643 on a04ba6a) completed SUCCESS — verified via the GitHub API runs-list endpoint (the single-run endpoint rate-limited as in s34; the runs-list resolved it); the prior runs on d12e4ec (38191151896) + 84aab53 (38190476319) also green
+
+Stage Summary:
+- Session 35 complete: the request-size contract shipped (a true TDD RED→GREEN — the parseBodySize 10 MiB ceiling checked before the body is read on all six write routes + the attachment data-honesty checks (the canonical-form + the declared-size equality); 11 + 5 unit pins, 6 smoke pins — 95 steps, 13 live checks, 196/196 E2E unchanged at 159 unit), the fixture audit landed (the declared sizes corrected to their true decoded lengths across the E2E/smoke/live-verify/screenshot fixtures), the first fully quiet bundle session since s26 recorded, the s4/desktop/mobile persistence documented (all non-gaps — ours the working superset), production-ready superset maintained, pushed to main (a04ba6a + this status commit), CI green
+
+---
+Task ID: 90-addendum
+Agent: main (Super Z) — session 35 (addendum)
+Task: Status-commit CI verification + session closeout
+
+Work Log:
+- The status commit (the plan's execution status + this worklog record) pushed via the same wrapper protocol (fingerprint verified, dry-run green, remote == local HEAD, both keys shredded, no residue)
+
+Stage Summary:
+- Session 35 fully closed: both commits on main (a04ba6a remediation + the status commit), CI green on the remediation run (38195123643 API-verified SUCCESS), all keys shredded, the repo tree clean; the next session's shortlist recorded in docs/session_59.md (the NINTH /login wave? the s4-defect + the desktop-overflow re-checks, and the own-side audit candidates: the proxy/matcher header surface (from_url under spoofed Host/X-Forwarded-Proto — the s19 seam at the header level) or the static-asset cache posture, plus anything NEW the codebase grows)
