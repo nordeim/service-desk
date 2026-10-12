@@ -1765,3 +1765,17 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the lifecycle matrix, the thirteen-session standing contract set, the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set, and all seven documentation surfaces aligned; ready for the commit + push phase
+
+---
+Task ID: 98
+Agent: main (Super Z) — session 37
+Task: Session-37 push + CI verification + final status
+
+Work Log:
+- The workspace reset had removed the SSH infrastructure — rebuilt: paramiko 5.0.0 installed (python3 -m pip install --break-system-packages), the paramiko ssh shim redeployed at /home/z/my-project/bin/ssh (the Appendix A implementation from docs/how-to-git-push-using-ssh-wrapper_SKILL.md), placed on PATH
+- The operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30/s31/s32/s33/s34/s35/s36 records
+- Commit afc3a25 (the s37 remediation — 24 files: the proxy header-forwarding seam + the loginBounceUrl pure seam + the layout bounce + the sign-out from_url carry + 4 unit pins (2 in redirect.test.ts + 2 in proxy-fromurl.test.ts) + 2 E2E pins (the expired-session round-trip + the superseded sign-out pin) + the s37 smoke block (3 pins, 104 steps) + the NEW scripts/s37-live-verify.mjs (11 checks) + the NEW scripts/capture-screenshots-s37.sh + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.35.0/DEPLOYMENT/session_63.md/plan) + the worklog + 4 benign screenshot re-renders (pixel-diffed: ≤0.06% — the seed's time-of-day rendering + the S37 fixture title)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the explicit --remote — the s28 lesson held; the remote verified untouched after the dry-run, then the real push verified: remote == local HEAD @ afc3a25, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the run on the push (run 38209295092 on afc3a25) completed SUCCESS — verified via the GitHub API runs-list endpoint after the rate-limit window (~45 min across the egress IP pool, the documented s34–s36 pattern; the badge endpoint used as the interim live signal, passing throughout); the prior runs on 50f2707 (38204776410) + 774ba15 (38202879947) also green
+
+Stage Summary:
+- Session 37 complete: the auth-cookie lifecycle remediation shipped (the expired-cookie deep-link preservation — the proxy forwards its constructed target as the x-sd-from-url request header (the overwrite total), the layout's verify-failure bounce consumes it via loginBounceUrl, the reference's always-preserve gate matched with the ADR-001 boundary intact; the sign-out from_url carry; the DEPLOYMENT.md accuracy fix), a REAL red-green TDD cycle (every pin observed RED against the pre-fix tree, the mutation check proving the pins bite), the full gate green (lint/typecheck/169 unit/build/198 E2E/smoke 104), the live matrix 11/11 + the s24–s36 standing re-runs ALL GREEN, the nineteenth sweep recorded (the fourth consecutive quiet bundle session; their s4/desktop/mobile defects persist — ours the working superset, re-verified via real clicks), production-ready superset maintained, pushed to main (afc3a25 + this status commit), CI green (API-verified)
