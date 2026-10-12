@@ -1684,3 +1684,15 @@ Work Log:
 
 Stage Summary:
 - Session 36 complete: the proxy-contract pin set shipped (a mutation-checked pin-only remediation — the 6 direct-call unit pins in the NEW tests/proxy-fromurl.test.ts + the E2E cross-origin wiring pin + the 6 smoke pins (101 steps) + the 13-check live matrix; ZERO production code changes — the audit verified the s19 seam's two-layer guard architecture holds under the full header matrix, and the pins freeze it), the mutation check proved the pins bite (three deliberate breaks, three observed single-pin failures, three clean reverts), the standing re-runs s24–s35 ALL GREEN, the eighteenth sweep recorded (the third consecutive quiet bundle session; their s4/desktop/mobile defects persist — ours the working superset, re-verified via real clicks), production-ready superset maintained, pushed to main (42c3b92 + this status commit), CI green
+
+---
+Task ID: 94-addendum
+Agent: main (Super Z) — session 36 (addendum)
+Task: Status-commit CI verification + session closeout
+
+Work Log:
+- The status commit (the plan's final execution-status checkbox + this worklog record, 2 files, zero code delta from the verified 42c3b92) pushed via the same wrapper protocol (fingerprint verified, dry-run semantics confirmed via a pre-push ls-remote, remote == local HEAD @ c65eb96, both keys shredded, no residue)
+- CI verification: the run on the status commit (run 38200211375 on c65eb96) completed SUCCESS — verified via the GitHub API runs-list endpoint (the API rate-limited across the session's egress IP pool for ~40 minutes; the badge endpoint used as the interim live signal per the s34/s35 fallback — passing throughout; the runs-list resolved it once the window lifted); the run on the remediation commit (38199539146 on 42c3b92) also verified SUCCESS + the prior runs (dffd9e3 38196310273, 482e8e6 38195557891) green
+
+Stage Summary:
+- Session 36 fully closed: both commits on main (42c3b92 the pin-set remediation + c65eb96 the status commit), CI green on BOTH runs (API-verified), all keys shredded, the repo tree clean; the next session's shortlist recorded in docs/session_61.md (the NINTH /login wave after three consecutive quiet sessions? the s4-defect + desktop-overflow re-checks, and the own-side audit candidates: the static-asset cache posture if a deployment story emerges, the auth-cookie lifecycle surface, or the XFF-trust posture in clientIp, plus anything NEW the codebase grows)
