@@ -166,9 +166,26 @@ export function rateLimit(key: string, limit = 10, windowMs = 15 * 60 * 1000): R
   return { ok: true, retryAfterSeconds: 0 };
 }
 
-/** Best-effort client IP for rate-limit keys (proxy-aware). */
+/**
+ * Best-effort client IP for rate-limit keys (single-trusted-proxy-aware).
+ *
+ * X-Forwarded-For is an APPEND list: each hop adds the socket address it
+ * saw to the END of the list. The client controls the FRONT — it can send
+ * an arbitrary XFF prefix to rotate its rate-limit key (the s38 live
+ * measurement: 30 rotating-prefix logins, zero 429s under the old
+ * first-element trust) — while the LAST element is the address the
+ * CLOSEST proxy observed. Behind the single TLS-terminating proxy that
+ * docs/DEPLOYMENT.md documents (nginx `proxy_add_x_forwarded_for`,
+ * Caddy's default, the Render platform proxy — all APPEND), the rightmost
+ * element is therefore the proxy-controlled truth and every client-chosen
+ * prefix is discarded. Direct (proxy-less) access has no trusted element
+ * at all — the socket address is not exposed to route handlers, so the
+ * header stays best-effort: the limiter is a backstop, not a boundary.
+ * A malformed/empty tail falls back to "unknown" (never to a
+ * client-chosen element).
+ */
 export function clientIp(req: Request): string {
   const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0]!.trim();
+  if (fwd) return fwd.split(",").at(-1)?.trim() || "unknown";
   return req.headers.get("x-real-ip") ?? "unknown";
 }

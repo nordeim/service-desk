@@ -1085,6 +1085,58 @@ S37_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/dashboard/nonexistent" 
 step "PASS" "s37-lifecycle: the header mechanism never decorates unguarded routes (the matcher boundary)"
 rm -f "$S37_HDRS"
 
+# --- s38: the XFF rightmost-element trust (the rate-limit key hardening) -----
+# The s38 live measurement on the production standalone: 30 login POSTs with
+# a ROTATING client-supplied X-Forwarded-For → zero 429s — the first-element
+# trust let the attacker mint a fresh rate-limit bucket per request (the s21
+# security superset defanged behind any XFF-forwarding proxy). The fix: XFF
+# is an APPEND list — the client controls the FRONT, the closest trusted
+# proxy appends the socket address it saw to the END — so clientIp now takes
+# the RIGHTMOST element. These pins simulate the trusted proxy at the HTTP
+# boundary: the client-controlled prefix ROTATES per request while the
+# proxy-appended suffix stays STABLE. XFF-keyed requests never touch the
+# "unknown" bucket, so the s21 slot arithmetic below stays exact.
+#
+# Pin 1 — the bypass closure (the login bucket, 10/15-min): 10 rotating-
+# prefix attempts must exhaust ONE stable bucket keyed on the rightmost
+# (10.0.0.38), so the 11th answers 429. Pre-fix: each request minted a
+# fresh first-element key → the 11th answered 401 (the RED).
+for i in $(seq 1 10); do
+  curl -s -o /dev/null -X POST "$BASE/api/auth/login" \
+    -H "Content-Type: application/json" \
+    -H "X-Forwarded-For: attacker-rotate-$i, 10.0.0.38" \
+    -d '{"email":"nobody@servicedesk.app","password":"wrong"}' >/dev/null
+done
+S38_CODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -D "$RL_HEADERS" -X POST "$BASE/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -H "X-Forwarded-For: attacker-rotate-11, 10.0.0.38" \
+  -d '{"email":"nobody@servicedesk.app","password":"wrong"}')
+[ "$S38_CODE" = "429" ] || fail "s38-xff: the rotating client prefix must NOT mint fresh buckets — the 11th attempt on the stable proxy-appended key should 429 (got $S38_CODE)"
+grep -qi '^retry-after:' "$RL_HEADERS" || fail "s38-xff: the 429 should carry Retry-After"
+step "PASS" "s38-xff: the rotating client prefix cannot bypass the login limiter (the rightmost-element trust)"
+
+# Pin 2 — the injected-XFF shadowing (the s38 platform discovery): the
+# standalone Next server INJECTS x-forwarded-for: <socket address> into
+# every XFF-less request — so the x-real-ip fallback branch is UNREACHABLE
+# behind the standalone (the XFF precedence always wins) and honest direct
+# clients key on their REAL socket IP (a stronger no-proxy posture than
+# the s21 "unknown" narrative). This pin proves the shadowing on the
+# forgot bucket: 5 requests carrying X-Real-IP (but NO XFF) key on the
+# INJECTED socket IP — the shared bucket — so the 6th (no headers at all,
+# the same injected key) answers 429. If x-real-ip were the key, the 6th
+# would land on a fresh bucket and answer 200 — the pin distinguishes.
+for i in $(seq 1 5); do
+  curl -s -o /dev/null -X POST "$BASE/api/auth/forgot-password" \
+    -H "Content-Type: application/json" \
+    -H "X-Real-IP: 10.0.0.99" \
+    -d '{"email":"nobody@servicedesk.app"}' >/dev/null
+done
+S38_FCODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -X POST "$BASE/api/auth/forgot-password" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"nobody@servicedesk.app"}')
+[ "$S38_FCODE" = "429" ] || fail "s38-xff: the injected XFF must shadow x-real-ip — 5 X-Real-IP-only requests exhaust the shared socket-IP bucket, so the 6th (no headers) should 429 (got $S38_FCODE)"
+step "PASS" "s38-xff: the standalone's injected XFF shadows x-real-ip (the honest-client socket-IP keying)"
+
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +
 # 12 login attempts, all non-429 — s21 live measurement); ours deliberately

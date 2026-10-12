@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  clientIp,
   createSessionPayload,
   hashPassword,
   rateLimit,
@@ -90,5 +91,54 @@ describe("rateLimit", () => {
     expect(rateLimit(a, 1).ok).toBe(true);
     expect(rateLimit(b, 1).ok).toBe(true);
     expect(rateLimit(a, 1).ok).toBe(false);
+  });
+});
+
+// Session 38: the clientIp contract — the XFF rightmost-element trust.
+//
+// The seam had ZERO direct pins (the s21 "best-effort" posture was
+// documentation-only). The s38 live measurement: 30 login attempts with a
+// ROTATING client-supplied X-Forwarded-For → zero 429s — first-element
+// trust lets the attacker mint a fresh rate-limit bucket per request.
+// XFF is an APPEND list: the client controls the FRONT, the closest
+// trusted proxy appends the socket address it saw to the END — so the
+// RIGHTMOST element is the proxy-controlled value behind the single-proxy
+// deployment DEPLOYMENT.md documents, and every client-chosen prefix is
+// discarded. The direct-call pattern (the api-catchall precedent): the
+// seam reads the request's headers and returns a string.
+describe("clientIp", () => {
+  function reqWith(headers: Record<string, string>): Request {
+    return new Request("http://localhost:3000/api/auth/login", { headers });
+  }
+
+  it("derives the RIGHTMOST XFF element — the proxy-appended value (the client-chosen prefix is discarded)", () => {
+    // The simulated trusted proxy: the client sent an arbitrary XFF prefix,
+    // the proxy appended the real socket address it saw ("spoofed-prefix, 203.0.113.9").
+    expect(clientIp(reqWith({ "x-forwarded-for": "spoofed-prefix, 203.0.113.9" }))).toBe(
+      "203.0.113.9"
+    );
+  });
+
+  it("trims the rightmost element (spaces between list items)", () => {
+    expect(
+      clientIp(reqWith({ "x-forwarded-for": "client-a, client-b, proxy-seen" }))
+    ).toBe("proxy-seen");
+  });
+
+  it("uses the single element when XFF has exactly one (the direct/proxy-less case)", () => {
+    expect(clientIp(reqWith({ "x-forwarded-for": "198.51.100.7" }))).toBe("198.51.100.7");
+  });
+
+  it("falls back to x-real-ip when XFF is absent (the nginx alternative, proxy-controlled)", () => {
+    expect(clientIp(reqWith({ "x-real-ip": "10.0.0.99" }))).toBe("10.0.0.99");
+  });
+
+  it("falls back to unknown when no IP headers exist (the s21 contract)", () => {
+    expect(clientIp(reqWith({}))).toBe("unknown");
+  });
+
+  it("falls back to unknown when the XFF tail is empty (a malformed list — never a client-chosen element)", () => {
+    expect(clientIp(reqWith({ "x-forwarded-for": "spoofed-prefix, " }))).toBe("unknown");
+    expect(clientIp(reqWith({ "x-forwarded-for": "" }))).toBe("unknown");
   });
 });
