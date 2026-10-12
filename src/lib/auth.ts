@@ -147,6 +147,38 @@ interface Bucket {
 
 const buckets = new Map<string, Bucket>();
 
+// Session 39: the eviction seam. For 38 sessions every unique key ever seen
+// left a PERMANENT entry — the hits expire from the array on access, but the
+// SHELL never leaves the Map (buckets.delete was never called anywhere): a
+// slow leak under honest traffic (one entry per unique (IP, route) pair ever
+// seen — monotonic growth over process lifetime) and an OOM vector under a
+// unique-XFF flood (measured live, s39: a 50k unique-key flood left +111 MB
+// of RETAINED RSS after GC settle — the memory never comes back). The sweep
+// deletes entries whose hits are ALL expired. Two gates keep it free of
+// steady-state cost and free of the flood amplification a naive every-call
+// sweep would add (O(size) per request):
+//   1. the size threshold — honest traffic never crosses it (zero sweeps);
+//   2. the time gate — at most one sweep per minute whatever the request
+//      rate, and the gate RE-ARMS (a stale shell above the threshold leaves
+//      on the first threshold-crossing call after its window AND the gate —
+//      no ratchet: the gate never wedges the Map above the threshold).
+// A bucket with ANY live hit is never touched (the s21/s38 window contract).
+// All current callers share the default 15-min window, so sweeping with the
+// current call's windowMs is consistent; the flood-shape ceiling (memory ≤
+// unique keys × window × ~2.2 KB during an ACTIVE window) is inherent to
+// every sliding-window limiter and documented in docs/DEPLOYMENT.md.
+const BUCKETS_SWEEP_THRESHOLD = 1_000;
+const BUCKETS_SWEEP_MIN_INTERVAL_MS = 60_000;
+let bucketsNextSweepAt = 0;
+
+function sweepExpiredBuckets(now: number, windowMs: number): void {
+  for (const [key, bucket] of buckets) {
+    if (bucket.hits.length === 0 || bucket.hits.every((t) => now - t >= windowMs)) {
+      buckets.delete(key);
+    }
+  }
+}
+
 export interface RateLimitResult {
   ok: boolean;
   retryAfterSeconds: number;
@@ -154,6 +186,10 @@ export interface RateLimitResult {
 
 export function rateLimit(key: string, limit = 10, windowMs = 15 * 60 * 1000): RateLimitResult {
   const now = Date.now();
+  if (buckets.size >= BUCKETS_SWEEP_THRESHOLD && now >= bucketsNextSweepAt) {
+    bucketsNextSweepAt = now + BUCKETS_SWEEP_MIN_INTERVAL_MS;
+    sweepExpiredBuckets(now, windowMs);
+  }
   const bucket = buckets.get(key) ?? { hits: [] };
   bucket.hits = bucket.hits.filter((t) => now - t < windowMs);
   if (bucket.hits.length >= limit) {
@@ -164,6 +200,11 @@ export function rateLimit(key: string, limit = 10, windowMs = 15 * 60 * 1000): R
   bucket.hits.push(now);
   buckets.set(key, bucket);
   return { ok: true, retryAfterSeconds: 0 };
+}
+
+/** Test-only observer for the s39 eviction pins — never call from app code. */
+export function __rateLimitBucketCountForTests(): number {
+  return buckets.size;
 }
 
 /**

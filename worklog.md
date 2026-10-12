@@ -1860,3 +1860,67 @@ Work Log:
 
 Stage Summary:
 - Session 38 complete: the XFF-trust remediation shipped (the rightmost-element rate-limit-key hardening closing the measured rotation bypass — a genuine red-green cycle with the mutation check), the standalone XFF-injection platform discovery measured + documented (the honest-pins corrections), the twentieth sweep recorded (the tenth /login wave as a pure Rolldown re-hash — non-gap; their s4/desktop/mobile defects persist — ours the working superset, re-verified via real clicks), the shortlist re-examinations closed (the cache posture non-gap; the auth budget noted), production-ready superset maintained, pushed to main (221141a + this status commit), CI green (API-verified)
+
+---
+Task ID: 104
+Agent: main (Super Z) — session 39
+Task: Session-39 onboarding: workspace refresh + core-doc review + baseline gate in a clean environment
+
+Work Log:
+- The workspace had been RESET (no service-desk directory) — re-cloned https://github.com/nordeim/service-desk.git → main @ 352fd34 (the operator's session_66.md transcript commit on top of the s38 closeout 7fa3c8f + 221141a), tree clean, main only
+- Core docs reviewed: AGENTS.md (session-2..38 contracts), CLAUDE.md (v1.0.0 2026-10-09), README.md, Project_Architecture_Document.md, service-desk_SKILL.md v2.36.0, docs/session_65.md (the s38 agent log), docs/session_66.md (the operator transcript), docs/remediation-plan-session38.md, worklog.md (tasks 1–103), skills/skills-catalog.md (agent-browser + clone-app-pat-pro + tdd + tailwind-patterns identified)
+- Environment re-established from scratch: .env created from .env.example (DATABASE_URL="file:../db/custom.db" + AUTH_SECRET), bun install (482 packages), db:push + db:seed → the canonical seed (4 users / 11 tickets / 3 comments)
+- Codebase validated against the s38 closeout: the clientIp rightmost-element seam + its ADR-grade comment present; the vitest + playwright configs intact; the (app) group + API surface structure as documented; db/ at the repo root (git-ignored as designed)
+- Baseline gates ALL GREEN in the clean environment: lint ✓ typecheck ✓ 175/175 unit ✓ build ✓ 198/198 E2E (2.8m) ✓ smoke 106 ✓
+
+Stage Summary:
+- The s38 closeout state confirmed intact at 352fd34; this session is Session 39 executing the session_65 next-step shortlist: the standing ledger re-checks (an ELEVENTH /login wave?), the s4-defect + overflow ledgers, and the own-side audit candidates (the signup bucket's XFF interplay; the rate-limit bucket memory growth — the leading candidate, the in-memory Map never evicts expired buckets; anything NEW unaudited)
+
+---
+Task ID: 105-gap-s39
+Agent: main (Super Z) — session 39
+Task: Session-39 gap analysis: the standing F1–F5 axes (twenty-first sweep) + the own-side audit (the signup XFF interplay + the rate-limit bucket memory growth — the session_65 shortlist)
+
+Work Log:
+- F1 (the bundle sweep, twenty-first): **THE ELEVENTH /login WAVE** — the entry pair rotated again (index-DubVZJFz.js+j9r1q4QJ.css → index-CBO659Ce.js+index-BWbcAqev.css; AuthAPI/AuthContext/axiosClient re-hashed) BUT with real byte deltas (index +371B, CSS +2384B, AuthAPI +83B, UserAppMain -319B after renaming BG9KtJ0q → DJkeAsKI) — the string-literal diff shows ONLY minifier identifier renames (kt→Tt, Oe→we, ct→it — the same letters shifted): the login view code is functionally UNCHANGED. The login contract verified: from_url ×14/1/2/2 in UserAppMain/AuthAPI/AuthContext/axiosClient (identical counts to s38), all six login-card strings present. The app-route pair UNCHANGED (index-DhFaB31Z.js + index-DFdILd41.css — still the pre-s30 split, live-verified via the performance API). logoutReturnPath-HjtsxsFd.js hash UNCHANGED. The LIVE logout measured: /login?from_url=<current href> — the s37 contract intact in the eleventh-wave bundle. **Non-gap (rotation).**
+- F2 (the chrome ledger, twenty-first): all axes exact, both routes — /login: viewport-fit=cover + the PWA trio + og:image; /dashboard: plain viewport + NO PWA trio. **Non-gap.**
+- F3 (the desktop-overflow axis, twenty-first): their 1328-vs-1280 persists at 1280×800. Ours: 1280 = 1280. **Their defect, NOT cloned.**
+- F4 (the mobile matrix + the s4-defect, twenty-first): their 468-vs-375 overflow persists AND the s4 toast-viewport blocking PERSISTS (the elementFromPoint(38,30) = the fixed top-0 z-[100] toast div; the real click does NOT open the menu — re-verified). Ours: 375 = 375, the REAL click opens the sheet (dialog rect 0,0,288,667), Escape closes it, the My-Tickets nav-tap auto-closes + navigates (/mytickets, correct title). **Ours the working superset.** (Measurement note: the sheet-visibility check must read the dialog rect, not offsetParent — a fixed-position sheet has offsetParent null while open.)
+- F5 (the desktop paired VLM check, 1280×800, via the z-ai vision CLI — the chat API rejects image content): **LAYOUT-OK. Non-gap.**
+- P2 (the signup bucket's XFF interplay — the s65 shortlist item): **VERIFIED CLEAN, LIVE** — 10 rotating-prefix signup POSTs (X-Forwarded-For: attacker-N, 10.0.0.39) exhausted the stable rightmost-keyed bucket and the 11th answered 429 + Retry-After: 900 (the shared clientIp seam covers the signup route — the s38 fix works there). The surface is UNPINNED (the s38 pins cover login + forgot only) → per the s31 doctrine (a clean-but-unpinned contract is a future regression with no alarm), pin it at the smoke layer.
+- P1 (the rate-limit bucket memory growth — the leading s65 candidate): **CONFIRMED ACTIONABLE, MEASURED LIVE** on the production standalone (PID-managed): a 50k-request unique-rightmost-XFF flood (each request minting a fresh bucket key; login 401s, zero DB writes) took the server's RSS from 191.6 MB → 344.7 MB, settling at **302.8 MB retained (+111 MB / ~2.2 KB per entry) after GC settle + a health request** — the buckets Map has NO eviction: `buckets.delete` is never called anywhere; entries whose hits have ALL expired remain in the Map forever. The defect shape: (a) honest traffic — a slow leak (one permanent entry per unique (IP, route) pair ever seen — monotonic growth over process lifetime); (b) a deliberate unique-XFF flood — an OOM vector (~2.2 KB × unique keys, never reclaimed even after the 15-min window expires). The seam: src/lib/auth.ts rateLimit/buckets.
+
+Stage Summary:
+- The twenty-first sweep: the eleventh /login wave = another pure re-hash (non-gap), the chrome ledger exact, their three standing defects persist (ours the working superset — mobile matrix re-verified via real clicks), VLM LAYOUT-OK; the own-side audit: P1 CONFIRMED (the measured memory leak — the leading candidate) + P2 verified-clean-but-unpinned (the signup surface) → remediation plan → docs/remediation-plan-session39.md
+
+---
+Task ID: 106
+Agent: main (Super Z) — session 39
+Task: Session-39 remediation: the rate-limit bucket eviction (P1) + the signup XFF pin (P2 closure)
+
+Work Log:
+- The TDD RED observed: the 3 eviction unit pins failed against the never-deleting Map (the eviction pin expected 1 got 1001; the live-survival pin expected 1 got 1001; the time-gate pin expected 1001 got 2001) — the observer export added FIRST as a pure additive test seam (zero behavior change; the other 17 tests stayed green)
+- The GREEN implementation: src/lib/auth.ts — sweepExpiredBuckets (deletes entries whose hits are ALL expired) + the two gates (BUCKETS_SWEEP_THRESHOLD=1000 — honest traffic never crosses it; BUCKETS_SWEEP_MIN_INTERVAL_MS=60s — the flood-amplifier guard, at most one O(size) sweep per minute whatever the request rate) + the re-arm semantics (the gate never wedges the Map above the threshold — stale shells leave on the first threshold-crossing call after their window AND the gate)
+- The mixed-bucket strengthening: the first mutation-B check (some-for-every) did NOT bite — the pin only created single-hit buckets (some == every when all hits share one timestamp); the strengthened pin 2 creates the MIXED shape (one expired + one live hit — the real over-eviction case: a sweep dropping it would silently reset that key's window)
+- The mutation check: mutation A (sweep disabled) bit exactly the 3 eviction pins; mutation B (some-for-every over-eviction) bit exactly the live-survival pin; each observed, reverted, the tree re-verified clean
+- The smoke s39 block (2 pins): the signup XFF rotating-prefix closure (the s65 shortlist item pinned — the 11th 429s on the stable rightmost key) + the flood-survival guard (1050 unique-XFF requests cross the sweep threshold mid-flood; the server stays healthy, the limiter stays exact — a fresh key 401s) — 106 → 108 steps
+- The full gate in the clean environment: lint ✓ typecheck ✓ 178/178 unit ✓ (175 + 3) build ✓ 198/198 E2E ✓ (unchanged — the login budget untouched) smoke 108 ✓ (the s21 slot arithmetic verified intact on the fixed build)
+
+Stage Summary:
+- The s39 remediation shipped: the eviction seam closes the measured memory leak (+111 MB retained / 50k unique keys → bounded by the active window) with the honest RED→GREEN cycle + the strengthened mutation check; the signup surface pinned (the s65 shortlist closed); all gates green (178 unit / 198 E2E / 108 smoke)
+
+---
+Task ID: 107
+Agent: main (Super Z) — session 39
+Task: Session-39 live re-verification + the mid-run cleanup-corruption discovery + screenshots + docs alignment
+
+Work Log:
+- The s39 live-verify on the properly-managed fresh server: 11/11 GREEN (the 50k unique-XFF flood survival in 111s with the RSS signal 154→291 MB recorded as the documented active-window ceiling, the fresh-key limiter exactness, the signup XFF closure, the s38 pins re-verified on the changed seam, the s33 login set-cookie, the s19/s37 bounce contracts, the seed canonical)
+- **The mid-run discovery (the standing re-run batch corruption)**: the first batch ran s24–s34 on ONE server boot (violating the s37 fresh-boot-between-batches doctrine) — the login bucket exhausted at s33 (its login 429'd → the unguarded `.ticket.comments` read on the error body CRASHED the script) and at s34 (its demo login 429'd → the fixture create 401'd → `ticketId` undefined → the cleanup's `ticket.deleteMany({ where: { id: undefined } })` — Prisma treats an all-undefined where as NO FILTER — WIPED the tickets table; the cascade took the comments; the `| tail` pipes masked the non-zero exit codes so the chain continued). Measured: the seed zeroed (4/0/0) — root-caused, re-seeded (canonical 4/11/3), BOTH scripts hardened (s33: `if (ticket?.id)` cleanup guard + the crash point reports a failed check; s34: `if (ticketId)` guard), and the re-runs repeated with fresh boots: s24 ✓ s25 13 ✓ s26 15 ✓ s27 14 ✓ s28 12 ✓ s29 22 ✓ s31 14 ✓ s32 18 ✓ s33 24/24 ✓ s34 17/17 ✓ s35 13 ✓ (node) s36 13 ✓ s37 11 ✓ s38 10 ✓ — the seed canonical throughout
+- The UI round-trip on the fixed build: real login → dashboard → submitticket → the category dropdown (the Radix option click) → typed title/description → submit → the navigation to /mytickets → the probe listed → the probe cleaned via Prisma → the seed canonical (4/11/3)
+- The mobile matrix on the new build: 375=375, the REAL click opens the sheet (dialog 0,0,288,667), Escape closes it, the My-Tickets nav-tap auto-closes + navigates; the desktop paired VLM check: LAYOUT-OK (the fixed build, via the z-ai vision CLI)
+- Screenshots: the 10-shot set via scripts/capture-screenshots-s39.sh (the s38 lineage + the header + the fixture title S39; all FATAL guards passed); VLM spot-checks 02 + 05 LAYOUT-OK; the three changed shots (04/05 the time-relative seed dates, 09 the S39 fixture title) VLM-diffed benign; the seed re-verified canonical after (4/11/3/0)
+- Docs aligned: README (178/108 counts + the s39 lines), AGENTS.md (the commands table + the Session-39 contracts section + the reference list + the screenshots lineage), CLAUDE.md (the counts + the s39 anti-pattern), PAD (§7.1 + the checklist + the RESOLVED session-39 row), service-desk_SKILL.md v2.37.0 (lesson 93), docs/DEPLOYMENT.md (the memory-posture paragraph), docs/session_67.md (the s39 agent log), the plan's execution status, the worklog
+
+Stage Summary:
+- Everything verified live on the remediated build: the s39 matrix (11/11), the fifteen-session standing contract set (with the s33/s34 hardening shipped after the root-caused mid-batch corruption), the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (VLM-diffed benign), and all documentation surfaces aligned; ready for the commit + push phase

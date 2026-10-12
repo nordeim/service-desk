@@ -74,6 +74,19 @@ narrative. The only no-proxy bypass left is deliberate XFF forging (send
 API (no socket address), closed by putting the appending proxy in front
 per the guidance above.
 
+**The limiter's memory posture (the s39 eviction contract).** The in-memory
+`buckets` Map evicts fully-expired entries once it crosses 1,000 live keys
+(at most one sweep per minute; a bucket with any live hit is never touched).
+The honest bound during an ACTIVE window is inherent to every sliding-window
+limiter: memory grows with the number of unique keys seen in the last 15
+minutes (~2.2 KB per key, measured) — an attacker forging unique XFF values
+at high rate can hold that much for the window's duration, but the memory
+now RETURNS when the window expires instead of accumulating monotonically
+over the process lifetime (the pre-s39 behavior: measured +111 MB retained
+per 50k unique keys, never reclaimed). The limiter remains per-instance
+(the s21 doctrine: a backstop, not a boundary; horizontal scale needs an
+external store).
+
 ## 3. Environment variables
 
 | Variable | Required | Purpose |

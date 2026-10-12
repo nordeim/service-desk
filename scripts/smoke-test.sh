@@ -1137,6 +1137,56 @@ S38_FCODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -X POST "$BASE/api/auth/forg
 [ "$S38_FCODE" = "429" ] || fail "s38-xff: the injected XFF must shadow x-real-ip — 5 X-Real-IP-only requests exhaust the shared socket-IP bucket, so the 6th (no headers) should 429 (got $S38_FCODE)"
 step "PASS" "s38-xff: the standalone's injected XFF shadows x-real-ip (the honest-client socket-IP keying)"
 
+# --- s39: the signup-bucket XFF pin + the eviction flood-survival guard ------
+# The s65 shortlist item closed: the signup route derives its limiter key
+# through the shared clientIp seam (verified live — the s38 rightmost fix
+# covers it), but the surface was UNPINNED (the s38 pins cover login +
+# forgot only). Per the s31 doctrine (a clean-but-unpinned contract is a
+# future regression with no alarm), pin it. The flood pin guards the s39
+# eviction change at the integration level: a unique-key flood crosses the
+# sweep threshold (exercising the sweep path mid-flood) and the server must
+# stay healthy with the limiter's semantics byte-identical (the sweep never
+# touches live buckets). XFF-keyed requests ride their own keys — the s21
+# slot arithmetic below stays exact.
+#
+# Pin 1 — the signup bucket (10/15-min via the shared seam): 10 rotating-
+# prefix signup POSTs (invalid bodies — 400s, zero DB writes) with the
+# STABLE proxy-appended suffix 10.0.0.39 must exhaust ONE bucket keyed on
+# the rightmost, so the 11th answers 429.
+for i in $(seq 1 10); do
+  curl -s -o /dev/null -X POST "$BASE/api/auth/signup" \
+    -H "Content-Type: application/json" \
+    -H "X-Forwarded-For: attacker-rotate-$i, 10.0.0.39" \
+    -d '{"email":"not-an-email","name":"","password":"x"}' >/dev/null
+done
+S39_SCODE=$(curl -s -o "$RL_BODY" -w "%{http_code}" -D "$RL_HEADERS" -X POST "$BASE/api/auth/signup" \
+  -H "Content-Type: application/json" \
+  -H "X-Forwarded-For: attacker-rotate-11, 10.0.0.39" \
+  -d '{"email":"not-an-email","name":"","password":"x"}')
+[ "$S39_SCODE" = "429" ] || fail "s39-evict: the rotating client prefix must NOT mint fresh signup buckets — the 11th attempt on the stable proxy-appended key should 429 (got $S39_SCODE)"
+grep -qi '^retry-after:' "$RL_HEADERS" || fail "s39-evict: the signup 429 should carry Retry-After"
+step "PASS" "s39-evict: the signup bucket rides the shared rightmost-element seam (the s65 shortlist closed)"
+
+# Pin 2 — the eviction flood-survival guard: 1050 unique-rightmost-XFF login
+# POSTs (each 401, zero DB writes) cross the 1000 sweep threshold — the
+# sweep fires mid-flood (time-gated) — and the server must stay healthy
+# with the limiter exact: a FRESH unique key answers 401 (its own bucket's
+# first slot — the sweep never touched live entries) and health is 200.
+for i in $(seq 0 1049); do
+  curl -s -o /dev/null -X POST "$BASE/api/auth/login" \
+    -H "Content-Type: application/json" \
+    -H "X-Forwarded-For: 10.71.$((i / 250)).$((i % 250 + 1))" \
+    -d '{"email":"nobody@servicedesk.app","password":"wrong"}' >/dev/null
+done
+S39_HCODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/api/health")
+[ "$S39_HCODE" = "200" ] || fail "s39-evict: the server must stay healthy after the unique-key flood (health got $S39_HCODE)"
+S39_FCODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -H "X-Forwarded-For: 10.72.99.99" \
+  -d '{"email":"nobody@servicedesk.app","password":"wrong"}')
+[ "$S39_FCODE" = "401" ] || fail "s39-evict: a fresh unique-XFF key must answer 401 (its own bucket's first slot — the limiter exact after the flood; got $S39_FCODE)"
+step "PASS" "s39-evict: the flood crosses the sweep threshold and the limiter stays exact (the eviction integration guard)"
+
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +
 # 12 login attempts, all non-429 — s21 live measurement); ours deliberately

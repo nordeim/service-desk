@@ -161,6 +161,17 @@ const create = await fetch(BASE + "/api/tickets", {
 const ticket = (await create.json()).ticket;
 ok("concurrency: fixture ticket created", create.status === 201 && !!ticket?.id, `status=${create.status}`);
 
+// s39 hardening: if the fixture create failed (the exhausted-bucket shape),
+// report the dependent checks as failed and skip to cleanup — reading
+// `.ticket.comments` on the error body crashed the script mid-run for 38
+// sessions (the un-run cleanup then left the failure without a verdict).
+if (!ticket?.id) {
+  ok(
+    "concurrency: the fixture-dependent checks skipped (fixture missing)",
+    false,
+    "the create failed — see the fixture check above"
+  );
+} else {
 const before = await fetch(BASE + `/api/tickets/${ticket.id}`, { headers: { cookie: cookieHeader } });
 const beforeCount = (await before.json()).ticket.comments.length;
 
@@ -195,10 +206,20 @@ ok(
   patchResults.every((s) => s === 200),
   `results=${JSON.stringify(patchResults)}`,
 );
+}
 
 // --- cleanup: fixtures removed, seed canonical ---
-await p.comment.deleteMany({ where: { ticketId: ticket.id } });
-await p.ticket.delete({ where: { id: ticket.id } });
+// s39 hardening: the fixture create can FAIL (an exhausted login bucket 429s
+// the auth, the create answers 401, ticket is undefined) — an unguarded
+// cleanup then deletes with an all-undefined where, which Prisma treats as
+// NO FILTER (deleteMany wipes the whole table; the cascade wipes comments —
+// the s39 mid-run corruption, measured live). Guard: skip the fixture
+// deletes when the fixture never existed; the seed-canonical check below
+// still fails loudly so the run never passes on a broken fixture path.
+if (ticket?.id) {
+  await p.comment.deleteMany({ where: { ticketId: ticket.id } });
+  await p.ticket.delete({ where: { id: ticket.id } });
+}
 await p.user.delete({ where: { email: "s33-live@servicedesk.app" } });
 const [tu, tt, tc, ta] = await Promise.all([
   p.user.count(),

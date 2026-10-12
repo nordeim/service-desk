@@ -173,7 +173,16 @@ ok(
 );
 
 // --- 5. cleanup: the fixture removed + the canonical seed intact ---------------
-await p.ticket.deleteMany({ where: { id: ticketId } });
+// s39 hardening: the fixture create can FAIL (an exhausted login bucket 429s
+// the auth, the create answers 401, ticketId stays undefined) — the unguarded
+// deleteMany({ where: { id: undefined } }) then treats the all-undefined
+// where as NO FILTER and WIPES THE TICKETS TABLE (the cascade takes the
+// comments — the s39 mid-run corruption of the canonical seed, measured
+// live: 11 tickets → 0 in one cleanup). Guard: delete only when the fixture
+// id exists; the seed-canonical check below still fails loudly.
+if (ticketId) {
+  await p.ticket.deleteMany({ where: { id: ticketId } });
+}
 const [u, t, c, a] = await Promise.all([
   p.user.count(),
   p.ticket.count(),
