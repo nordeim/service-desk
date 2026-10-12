@@ -114,6 +114,31 @@ test.describe("login page", () => {
     await expect(page.getByText("Ticket not found")).toBeVisible();
   });
 
+  // Session 36 (P1): the cross-origin from_url REJECTION — the open-redirect
+  // guard firing end-to-end. The unit pins prove safeRedirectTarget rejects
+  // a cross-origin value at the function level, and the s19/s20 pins prove
+  // the SAME-ORIGIN round-trip; this pin guards the WIRING between them:
+  // the login page must pass the raw param through the guard (never
+  // router.push the raw string) when the value points off-origin. The s36
+  // audit measured the proxy reflecting a spoofed Host into the param
+  // (inert by this exact guard) — this is the end-to-end half of that
+  // two-layer defense. One real login (the suite moves 6 → 7 of the
+  // 10-per-15-min budget).
+  test("signing in from a cross-origin from_url lands on the dashboard (open-redirect guard)", async ({ page }) => {
+    await page.goto("/login?from_url=" + encodeURIComponent("https://evil.example/dashboard"));
+    await expect(
+      page.getByRole("heading", { name: "Welcome to ServiceDesk" })
+    ).toBeVisible();
+
+    await page.getByLabel("Email").fill("demo@servicedesk.app");
+    await page.getByLabel("Password").fill("Demo1234!");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    // The guard must fall back to /dashboard — NEVER the off-origin value.
+    await page.waitForURL("**/dashboard");
+    expect(page.url()).toContain("localhost:3100");
+    expect(page.url()).not.toContain("evil.example");
+  });
+
   // Session 10: the in-card signup view (the reference's login card swaps
   // in place on "Need an account? Sign up"). No name field — the account
   // name derives from the email local-part (base44 auth has no name

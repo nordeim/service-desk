@@ -30,10 +30,12 @@ S35_MAXLEGIT="$(mktemp)"   # the 3x2MiB boundary body
 S35_PROBE="$(mktemp)"      # the divergence/garbage/chunked probe bodies
 S35_HDRS="$(mktemp)"
 S35_BODY="$(mktemp)"
+S36_HDRS="$(mktemp)"      # the s36 proxy-surface header captures
+S36_BODY="$(mktemp)"      # the s36 login-page reflection body
 
 cleanup() {
   [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null
-  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"} ${S35_BIG:+"$S35_BIG"} ${S35_BIG_C:+"$S35_BIG_C"} ${S35_MAXLEGIT:+"$S35_MAXLEGIT"} ${S35_PROBE:+"$S35_PROBE"} ${S35_HDRS:+"$S35_HDRS"} ${S35_BODY:+"$S35_BODY"}
+  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"} ${S35_BIG:+"$S35_BIG"} ${S35_BIG_C:+"$S35_BIG_C"} ${S35_MAXLEGIT:+"$S35_MAXLEGIT"} ${S35_PROBE:+"$S35_PROBE"} ${S35_HDRS:+"$S35_HDRS"} ${S35_BODY:+"$S35_BODY"} ${S36_HDRS:+"$S36_HDRS"} ${S36_BODY:+"$S36_BODY"}
   # Session 33 hardening: a FAILED mid-run exit used to leave db/smoke.db
   # behind (the removal lived only on the success path), and the leftover
   # mutated rows (probe tickets, PATCHed statuses) poisoned the NEXT run's
@@ -958,6 +960,81 @@ CODE=$(curl -s -o "$S35_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/
 grep -q "at most 120 characters" "$S35_BODY" || fail "s35-size: the chunked body should hit the title value cap"
 step "PASS" "s35-size: chunked bodies pass the seam and hit the value level (the documented pass-through)"
 rm -f "$S35_BIG" "$S35_BIG_C" "$S35_MAXLEGIT" "$S35_PROBE" "$S35_HDRS" "$S35_BODY"
+
+# --- Session 36: the proxy-surface contract (the from_url construction under
+# the header matrix — the s19 seam at the header level, the session_59
+# shortlist's leading candidate). The audit measured the construction live
+# and found the architecture HOLDS: a spoofed Host reflects into the from_url
+# but is INERT by two independent layers (the LIVE Location stays RELATIVE —
+# /login, so the browser never leaves the real origin — and the value is
+# rejected at use time by safeRedirectTarget's browser-origin check, the
+# unit-pinned guard the E2E cross-origin pin fires end-to-end);
+# X-Forwarded-Proto flips the protocol (correct behind a legit TLS proxy —
+# the middleware runner honors it in nextUrl.protocol); X-Forwarded-Host is
+# ignored; the /login page reflects NOTHING server-side; the matcher
+# boundary leaves unguarded sub-paths public. These pins FREEZE that
+# verified behavior so it cannot drift silently (the s32 pin-evolution
+# doctrine). NONE of these probes touch the rate-limited routes — the 429
+# slot arithmetic is UNCHANGED (all unauthenticated GETs/redirects).
+
+# The spoofed-Host bounce: 307 + the RELATIVE Location + the reflected
+# (inert) from_url value.
+S36_CODE=$(curl -s -o /dev/null -w "%{http_code}" -D "$S36_HDRS" \
+  -H "Host: evil.example" "$BASE/dashboard")
+[ "$S36_CODE" = "307" ] || fail "s36-proxy: the spoofed-Host bounce should 307 (got $S36_CODE)"
+S36_LOC=$(grep -i '^location:' "$S36_HDRS" | head -1 | tr -d '\r')
+case "$S36_LOC" in
+  location:\ /login*|Location:\ /login*) : ;;
+  *) fail "s36-proxy: the Location must stay RELATIVE /login (got: $S36_LOC)" ;;
+esac
+echo "$S36_LOC" | grep -q "from_url=http%3A%2F%2Fevil.example%2Fdashboard" \
+  || fail "s36-proxy: the from_url should carry the reflected Host (got: $S36_LOC)"
+step "PASS" "s36-proxy: spoofed Host reflects into from_url, Location stays relative (the inert reflection)"
+
+# The X-Forwarded-Proto flip: the from_url protocol honors XFP (the
+# middleware-runner contract — behind a legit TLS proxy this is what keeps
+# the deep link same-origin with the browser).
+S36_CODE=$(curl -s -o /dev/null -w "%{http_code}" -D "$S36_HDRS" \
+  -H "X-Forwarded-Proto: https" "$BASE/dashboard")
+[ "$S36_CODE" = "307" ] || fail "s36-proxy: the XFP bounce should 307 (got $S36_CODE)"
+S36_LOC=$(grep -i '^location:' "$S36_HDRS" | head -1 | tr -d '\r')
+S36_FROM=$(echo "$S36_LOC" | python3 -c 'import sys,urllib.parse; print(urllib.parse.unquote(sys.stdin.read()))')
+echo "$S36_FROM" | grep -q "from_url=https://localhost:3999/dashboard" \
+  || fail "s36-proxy: XFP should flip the from_url protocol (got: $S36_FROM)"
+step "PASS" "s36-proxy: X-Forwarded-Proto flips the from_url protocol (the runner contract)"
+
+# The X-Forwarded-Host no-op: the Host header wins.
+curl -s -o /dev/null -D "$S36_HDRS" -H "X-Forwarded-Host: evil.example" "$BASE/dashboard"
+S36_LOC=$(grep -i '^location:' "$S36_HDRS" | head -1 | tr -d '\r')
+S36_FROM=$(echo "$S36_LOC" | python3 -c 'import sys,urllib.parse; print(urllib.parse.unquote(sys.stdin.read()))')
+echo "$S36_FROM" | grep -q "from_url=http://localhost:3999/dashboard" \
+  || fail "s36-proxy: X-Forwarded-Host must not leak into the from_url (got: $S36_FROM)"
+step "PASS" "s36-proxy: X-Forwarded-Host ignored (the Host header wins)"
+
+# The /login non-reflection: a cross-origin from_url param never renders
+# server-side (the page reads it client-side at submit time only — the XSS
+# surface stays closed).
+curl -s -o "$S36_BODY" \
+  "$BASE/login?from_url=https%3A%2F%2Fevil.example%2Fdashboard"
+[ "$(grep -c 'evil.example' "$S36_BODY")" = "0" ] \
+  || fail "s36-proxy: the login page must not reflect the from_url into the HTML"
+step "PASS" "s36-proxy: the login page reflects nothing server-side (the XSS surface closed)"
+
+# The matcher boundary: an unmatched (app)-group sub-path renders the public
+# 404, NOT the login bounce (the s19 ADR boundary — and no API route is
+# ever decorated).
+S36_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/dashboard/nonexistent")
+[ "$S36_CODE" = "404" ] || fail "s36-proxy: /dashboard/nonexistent should render the public 404 (got $S36_CODE)"
+step "PASS" "s36-proxy: unmatched sub-paths render the public 404 (the matcher boundary)"
+
+# The deep-link query survival: the from_url carries the query (the
+# ticketdetails ?id= shared-link contract).
+curl -s -o /dev/null -D "$S36_HDRS" "$BASE/ticketdetails?id=abc123"
+S36_LOC=$(grep -i '^location:' "$S36_HDRS" | head -1 | tr -d '\r')
+echo "$S36_LOC" | grep -q "from_url=http%3A%2F%2Flocalhost%3A3999%2Fticketdetails%3Fid%3Dabc123" \
+  || fail "s36-proxy: the from_url must carry the deep-link query (got: $S36_LOC)"
+step "PASS" "s36-proxy: the from_url preserves the deep-link query (the s19 contract)"
+rm -f "$S36_HDRS" "$S36_BODY"
 
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +
