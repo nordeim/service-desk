@@ -23,10 +23,11 @@ S33_LOGOUT_HDRS="$(mktemp)"
 S33_BODY="$(mktemp)"
 S33_JAR_C="$(mktemp)"
 S33_CONCURRENCY_CODE="$(mktemp)"
+S34_HDRS="$(mktemp)"
 
 cleanup() {
   [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null
-  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"}
+  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"}
   # Session 33 hardening: a FAILED mid-run exit used to leave db/smoke.db
   # behind (the removal lived only on the success path), and the leftover
   # mutated rows (probe tickets, PATCHed statuses) poisoned the NEXT run's
@@ -792,6 +793,65 @@ sort "$S33_CONCURRENCY_CODE" | uniq -c | grep -q '^ *5 200$' \
   || fail "s33-concurrency: all 5 parallel PATCHes should 200 (got $(sort "$S33_CONCURRENCY_CODE" | uniq -c | tr '\n' ' '))"
 step "PASS" "s33-concurrency: 5 parallel PATCHes all 200 (no SQLITE_BUSY)"
 rm -f "$S33_CONCURRENCY_CODE"
+
+# --- Session 34: the API-namespace no-store contract + the s15 interplay -----
+# The cache-behavior remediation: every authenticated JSON response under
+# /api/** shipped with NO Cache-Control (measured live: /api/auth/me — the
+# user's id/name/email — /api/tickets, /api/stats). Cookie sessions ride the
+# Cookie header, which RFC 9111's mandatory shared-cache no-store (the
+# Authorization-header rule) does NOT cover — a shared intermediary could
+# store these responses keyed by URL and serve one user's identity JSON to
+# another. The next.config.ts two-rule design closes it: the blanket
+# /api/:path* no-store + the LATER-LISTED more-specific attachment exception
+# (a headers() rule overrides route-level Cache-Control — measured empirically
+# — so the exception must win by rule order). NONE of these probes touch the
+# rate-limited routes (login/forgot) — the 429 slot arithmetic is UNCHANGED
+# (every probe reuses the existing $COOKIE_JAR session; the attachment
+# fixture reuses the s31 schema-pin ticket's attachment).
+
+S34_HDRS="$(mktemp)"
+
+# The identity-leak pin: the authenticated me response carries no-store.
+curl -s -o /dev/null -D "$S34_HDRS" -b "$COOKIE_JAR" "$BASE/api/auth/me"
+grep -qi '^cache-control: no-store' "$S34_HDRS" \
+  || fail "s34-cache: /api/auth/me should carry Cache-Control: no-store (got $(grep -i '^cache-control' "$S34_HDRS" || echo 'NO HEADER'))"
+step "PASS" "s34-cache: /api/auth/me no-store (the identity-leak pin)"
+
+# The list + stats routes: the same no-store contract on the data surface.
+curl -s -o /dev/null -D "$S34_HDRS" -b "$COOKIE_JAR" "$BASE/api/tickets"
+grep -qi '^cache-control: no-store' "$S34_HDRS" \
+  || fail "s34-cache: /api/tickets should carry Cache-Control: no-store"
+curl -s -o /dev/null -D "$S34_HDRS" -b "$COOKIE_JAR" "$BASE/api/stats"
+grep -qi '^cache-control: no-store' "$S34_HDRS" \
+  || fail "s34-cache: /api/stats should carry Cache-Control: no-store"
+step "PASS" "s34-cache: /api/tickets + /api/stats no-store (the data surface)"
+
+# The error-path + public-surface pins: the catch-all 404 and health.
+curl -s -o /dev/null -D "$S34_HDRS" "$BASE/api/banana"
+grep -qi '^cache-control: no-store' "$S34_HDRS" \
+  || fail "s34-cache: the catch-all 404 should carry no-store (error paths too)"
+grep -qi '^content-type: application/json' "$S34_HDRS" \
+  || fail "s34-cache: the catch-all 404 should still be JSON (the s33 contract)"
+curl -s -o /dev/null -D "$S34_HDRS" "$BASE/api/health"
+grep -qi '^cache-control: no-store' "$S34_HDRS" \
+  || fail "s34-cache: /api/health should carry no-store (caching defeats the liveness probe)"
+step "PASS" "s34-cache: the catch-all 404 + /api/health no-store (error + public surfaces)"
+
+# THE INTERPLAY PIN — the s15 attachment contract survives the blanket rule:
+# the download still carries the year-long immutable private window (a Next.js
+# precedence change that lets the blanket clobber the exception — or the route
+# code — FAILS HERE instead of silently shipping a broken contract).
+S34_ATT_ID=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets/$S31_ATT_TICKET" \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["ticket"]["attachments"][0]["id"])')
+[ -n "$S34_ATT_ID" ] || fail "s34-interplay: fetch the s31 fixture attachment id"
+curl -s -o /dev/null -D "$S34_HDRS" -b "$COOKIE_JAR" \
+  "$BASE/api/tickets/$S31_ATT_TICKET/attachments/$S34_ATT_ID"
+grep -qi '^cache-control: private, max-age=31536000, immutable' "$S34_HDRS" \
+  || fail "s34-interplay: the attachment download must keep the s15 window (got $(grep -i '^cache-control' "$S34_HDRS" || echo 'NO HEADER'))"
+grep -qi '^content-disposition: inline' "$S34_HDRS" \
+  || fail "s34-interplay: the attachment download must keep the s14 inline disposition"
+step "PASS" "s34-interplay: attachment download keeps s15 (immutable window + inline) under the blanket no-store"
+rm -f "$S34_HDRS"
 
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +

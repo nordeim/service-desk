@@ -32,6 +32,39 @@ const nextConfig: NextConfig = {
   // No includeSubDomains/preload: host-policy decisions, not parity.
   async headers() {
     return [
+      // Session 34 — the API-namespace no-store contract (the cache-behavior
+      // remediation): every authenticated JSON response under /api/** shipped
+      // with NO Cache-Control (measured live: /api/auth/me — the user's
+      // id/name/email — /api/tickets, /api/stats). Cookie sessions ride the
+      // Cookie header, which RFC 9111's mandatory shared-cache no-store (the
+      // Authorization-header rule) does NOT cover, so a shared intermediary
+      // (corporate proxy / ISP cache / a CDN in front of the standalone) could
+      // store these responses keyed by URL and serve one user's identity JSON
+      // to another — the cross-user shared-cache leak, invisible in dev/E2E
+      // exactly like the s15 timezone divergence. no-store (not private):
+      // the strongest single directive; nothing in the app benefits from
+      // caching these responses (the sidebar re-fetches /api/stats every 5s
+      // by contract).
+      {
+        source: "/api/:path*",
+        headers: [{ key: "Cache-Control", value: "no-store" }],
+      },
+      // Session 34 — the s15 exception (load-bearing ORDER): a headers()
+      // rule OVERRIDES the route handler's own Cache-Control (measured
+      // empirically: the blanket above alone clobbered the attachment
+      // route's `private, max-age=31536000, immutable`), and a more-specific
+      // rule listed AFTER the blanket WINS for the same key. This rule
+      // restores the s15 year-long immutable private window on the
+      // attachment download path — the byte-identical value the route sets
+      // in code (src/app/api/tickets/[id]/attachments/[attachmentId]/route.ts
+      // stays untouched; the config now owns the final value and the
+      // config-contract pin owns the config). Do NOT reorder these rules.
+      {
+        source: "/api/tickets/:id/attachments/:attachmentId",
+        headers: [
+          { key: "Cache-Control", value: "private, max-age=31536000, immutable" },
+        ],
+      },
       {
         source: "/(.*)",
         headers: [
