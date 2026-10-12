@@ -1480,3 +1480,27 @@ Work Log:
 
 Stage Summary:
 - All seven documentation surfaces aligned with the s34 state (the no-store contract + the interplay + the audit findings); ready for the final gate + the push phase
+---
+Task ID: 86
+Agent: main (Super Z) — session 34
+Task: Session-34 push + CI verification + final status
+
+Work Log:
+- Commit 2a9b5dd (the s34 remediation — 18 files: the two next.config.ts rules + the 5 unit pins (tests/headers-config.test.ts) + the s34 smoke block (4 pins) + the trap-cleanup entry + the s34 live-verify script (17 checks) + the s34 capture script + the VLM spot-check script + 7 docs + the remediation plan + session_57.md + 5 re-rendered screenshots (01/02/04/05/09; the other 5 byte-identical)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko shim at /home/z/my-project/bin/ssh on PATH, the venv python carrying paramiko 5.0.0; the key fingerprint verified before the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, identical to the s30/s31/s32/s33 records; the dry-run green first with the explicit --remote — the wrapper's default is task-management.git, the s28 lesson held; the real push verified: remote == local HEAD @ 2a9b5dd, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — a post-push residue check found nothing outside the shim itself which carries no secrets)
+- CI verification: the run on the push (run 38188845776 on 2a9b5dd) completed SUCCESS — verified via the GitHub API after the rate-limit windows (the single-run endpoint stayed rate-limited through the mid-run polls; the runs-list endpoint resolved it; the badge live-signal green throughout: "CI - passing", fetched with cache-busters — the repo's own CLAUDE.md names the badge as the live signal)
+- The CI confirmation recorded in the plan's execution status (this follow-up commit, the s21–s33 convention)
+
+Stage Summary:
+- Session 34 complete: the API-namespace no-store cache contract shipped (a true TDD RED→GREEN — 5 unit pins incl. the ORDER pin; 4 new smoke pins — 89 steps; 196/196 E2E unchanged; 17 live checks), the s15 attachment interplay pinned (the empirically-measured headers()-overrides-route-code + the more-specific-later-rule-wins facts, both now contract-pinned), the clock-skew candidate closed as a verified non-gap, the request-size surface measured + deferred as the next-session candidate, the eighth /login rotation + the s4/desktop/mobile persistence documented (all non-gaps), production-ready superset maintained, pushed to main (2a9b5dd + this status commit), CI green
+
+---
+Task ID: 86-addendum
+Agent: main (Super Z) — session 34 (addendum)
+Task: Status-commit CI verification + session closeout
+
+Work Log:
+- The status commit pushed via the same wrapper protocol (fingerprint verified, dry-run green, remote == local HEAD, both keys shredded, no residue)
+- CI on the status commit (a docs-only commit — the plan's execution status + the worklog record, zero code delta from the verified 2a9b5dd): verified via the GitHub API (the badge live signal green throughout)
+
+Stage Summary:
+- Session 34 fully closed: both commits on main (2a9b5dd remediation + the status commit), CI green on the remediation run (38188845776 API-verified SUCCESS), all keys shredded, the repo tree clean; the next session's shortlist recorded in docs/session_57.md (the NINTH /login wave? the s4-defect re-check, the desktop-overflow axis, and the own-side audit candidates: the request-size surface (the leading candidate — the 20 MB-buffered finding), the proxy/matcher header surface, or the static-asset cache posture)
