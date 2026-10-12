@@ -1672,3 +1672,15 @@ Work Log:
 
 Stage Summary:
 - All seven documentation surfaces aligned with the s36 state (the proxy-contract pin set + the mutation check + the probe-tooling lessons); ready for the final gate + the push phase
+
+---
+Task ID: 94
+Agent: main (Super Z) — session 36
+Task: Session-36 push + CI verification + final status
+
+Work Log:
+- Commit 42c3b92 (the s36 remediation — 14 files: the NEW tests/proxy-fromurl.test.ts (6 direct-call pins) + the E2E wiring pin in auth.spec.ts + the s36 smoke block (6 pins, 101 steps) + the trap-cleanup entries + the NEW scripts/s36-live-verify.mjs (13 checks) + the NEW scripts/capture-screenshots-s36.sh + 7 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.34.0/session_61.md/plan) + the worklog + 1 re-rendered screenshot (09 — the fixture title S35→S36; the other 9 byte-identical, the pin-only session's expected result)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the paramiko shim at /home/z/my-project/bin/ssh on PATH, the venv python carrying paramiko 5.0.0; the key fingerprint verified before the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, identical to the s30/s31/s32/s33/s34/s35 records; the dry-run green first with the explicit --remote — the wrapper's default is task-management.git, the s28 lesson held; the remote verified untouched after the dry-run via ls-remote, then the real push verified: remote == local HEAD @ 42c3b92, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the run on the push (run 38199539146 on 42c3b92) completed SUCCESS — verified via the GitHub API runs-list endpoint (the API rate-limited for ~10 minutes after the push — the badge endpoint used as the interim signal per the s34/s35 fallback; the runs-list resolved it once the window lifted); the prior runs on dffd9e3 (38196310273) + 482e8e6 (38195557891) also green
+
+Stage Summary:
+- Session 36 complete: the proxy-contract pin set shipped (a mutation-checked pin-only remediation — the 6 direct-call unit pins in the NEW tests/proxy-fromurl.test.ts + the E2E cross-origin wiring pin + the 6 smoke pins (101 steps) + the 13-check live matrix; ZERO production code changes — the audit verified the s19 seam's two-layer guard architecture holds under the full header matrix, and the pins freeze it), the mutation check proved the pins bite (three deliberate breaks, three observed single-pin failures, three clean reverts), the standing re-runs s24–s35 ALL GREEN, the eighteenth sweep recorded (the third consecutive quiet bundle session; their s4/desktop/mobile defects persist — ours the working superset, re-verified via real clicks), production-ready superset maintained, pushed to main (42c3b92 + this status commit), CI green
