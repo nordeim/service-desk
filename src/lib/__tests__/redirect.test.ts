@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { safeRedirectTarget } from "@/lib/redirect";
+import { loginBounceUrl, safeRedirectTarget } from "@/lib/redirect";
 
 // Session 19 (F1): the reference preserves the user's pre-auth destination
 // via /login?from_url=<absolute url> — after login they land back on the
@@ -71,5 +71,32 @@ describe("safeRedirectTarget", () => {
     // either — the path lands outside the (app) group's routes and the
     // router handles it as a normal internal navigation (404 if unknown).
     expect(safeRedirectTarget("dashboard", ORIGIN)).toBe("/dashboard");
+  });
+});
+
+// Session 37 (P1): the layout-side from_url bounce. The reference's
+// client-side gate preserves the pre-auth destination in ALL unauthenticated
+// cases — expired session included (bundle-verified). Our server-side split
+// only decorated the cookie-less fast path (the proxy's 307); the
+// cookie-present-but-INVALID request hit the (app) layout's plain /login
+// redirect and LOST the deep link (measured: 307 Location: /login). The fix
+// passes the proxy-constructed target to the layout as a request header;
+// loginBounceUrl is the pure seam the layout consumes to build the bounce
+// URL — the mirror of the proxy's Location construction.
+describe("loginBounceUrl", () => {
+  it("returns the plain /login when no target is available (the defensive fallback)", () => {
+    expect(loginBounceUrl(null)).toBe("/login");
+    expect(loginBounceUrl(undefined)).toBe("/login");
+  });
+
+  it("encodes the target as the from_url param (the layout-side deep-link bounce)", () => {
+    expect(loginBounceUrl("http://localhost:3000/ticketdetails?id=abc123")).toBe(
+      "/login?from_url=http%3A%2F%2Flocalhost%3A3000%2Fticketdetails%3Fid%3Dabc123"
+    );
+    // The query inside the target survives as encoded data, not as live
+    // params of the bounce URL — one from_url param exactly.
+    expect(loginBounceUrl("http://localhost:3000/dashboard")).toBe(
+      "/login?from_url=http%3A%2F%2Flocalhost%3A3000%2Fdashboard"
+    );
   });
 });

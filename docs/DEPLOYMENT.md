@@ -25,8 +25,16 @@ bun run start          # NODE_ENV=production bun .next/standalone/server.js
 The server listens on port 3000 by default (`PORT` overrides). Always start
 it from the repo root via the npm/bun script — the scripts guarantee the
 working directory that the SQLite path resolution and the standalone trace
-rely on. Behind a reverse proxy, forward `X-Forwarded-Proto` so cookie
-attributes derive the right scheme.
+rely on. Behind a reverse proxy, forward `X-Forwarded-Proto` so the
+auth-gate `from_url` deep links carry the right scheme (the middleware
+runner honors it when constructing the pre-auth destination URL — session 36
+contract). Note the cookie's `Secure` attribute derives from `NODE_ENV`
+alone, not from `X-Forwarded-Proto`: the production standalone ships
+`Secure` cookies, and browsers DROP `Secure` set-cookies on plain-HTTP
+non-localhost origins — a production deployment on `http://<lan-host>:3000`
+fails login silently. Terminate TLS in front of the app (the forwarded
+`X-Forwarded-Proto` then also makes the from_url protocol correct); plain
+HTTP is only for `localhost` development.
 
 ## 3. Environment variables
 

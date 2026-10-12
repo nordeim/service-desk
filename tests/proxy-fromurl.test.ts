@@ -120,3 +120,53 @@ describe("proxy: the matcher boundary (the four-route contract)", () => {
     ]);
   });
 });
+
+// Session 37 (P1): the expired-cookie deep-link preservation. The s37 audit
+// measured the asymmetry: the cookie-less bounce decorates from_url (the
+// s19 contract) but a cookie-present-but-INVALID request (tampered/expired
+// token) passed through to the (app) layout, whose plain /login redirect
+// LOST the deep link — while the reference's client-side gate preserves it
+// in ALL unauthenticated cases (bundle-verified). The fix: the proxy passes
+// its constructed target downstream on the cookie-present path too, as the
+// x-sd-from-url REQUEST header (the runner applies it via the
+// x-middleware-request-* mechanism — probed: the override set is total),
+// and the layout consumes it at verify time (loginBounceUrl — the pure seam
+// pinned in src/lib/__tests__/redirect.test.ts). The proxy still does NO
+// session resolution (the ADR-001 boundary): it forwards information, the
+// layout remains the authoritative verifier.
+describe("proxy: the downstream from_url header (the s37 expired-cookie seam)", () => {
+  it("passes the constructed target downstream on the cookie-present passthrough", () => {
+    // NextResponse.next({ request: { headers } }) surfaces the override on
+    // the response as x-middleware-request-<name> (the runner strips and
+    // applies it to the downstream request — the layout reads it via
+    // await headers()).
+    const res = call("/ticketdetails?id=abc123", {
+      cookie: `${SESSION_COOKIE}=stale-or-tampered`,
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-middleware-next")).toBe("1");
+    expect(res.headers.get("x-middleware-request-x-sd-from-url")).toBe(
+      "http://localhost:3000/ticketdetails?id=abc123"
+    );
+  });
+
+  it("OVERWRITES a client-supplied x-sd-from-url (the spoof-resistance pin)", () => {
+    // A client can send its own x-sd-from-url header hoping the layout
+    // would honor it. The proxy's override is TOTAL — the client value is
+    // replaced by the construction from the request's own Host + path,
+    // never merged. (Belt-and-braces: even a surviving value would be
+    // inert at use time — safeRedirectTarget validates the from_url
+    // against the browser's origin at submit time.)
+    const res = proxy(
+      new NextRequest(`${ORIGIN}/dashboard`, {
+        headers: {
+          cookie: `${SESSION_COOKIE}=abc`,
+          "x-sd-from-url": "http://client-evil.example/spoof",
+        },
+      })
+    );
+    expect(res.headers.get("x-middleware-request-x-sd-from-url")).toBe(
+      "http://localhost:3000/dashboard"
+    );
+  });
+});

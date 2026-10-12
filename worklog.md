@@ -1696,3 +1696,72 @@ Work Log:
 
 Stage Summary:
 - Session 36 fully closed: both commits on main (42c3b92 the pin-set remediation + c65eb96 the status commit), CI green on BOTH runs (API-verified), all keys shredded, the repo tree clean; the next session's shortlist recorded in docs/session_61.md (the NINTH /login wave after three consecutive quiet sessions? the s4-defect + desktop-overflow re-checks, and the own-side audit candidates: the static-asset cache posture if a deployment story emerges, the auth-cookie lifecycle surface, or the XFF-trust posture in clientIp, plus anything NEW the codebase grows)
+
+---
+Task ID: 95
+Agent: main (Super Z) — session 37
+Task: Session-37 onboarding: workspace refresh, docs review, codebase validation, baseline gates
+
+Work Log:
+- Workspace was reset — fresh clone of github.com/nordeim/service-desk.git at 50f2707 (the operator's session_62.md transcript commit on top of the s36 status commit c65eb96; tree clean, main only)
+- Read the pasted operating-instructions file in full (coding specialist standards: Generation/Debugging/Audit modes, decision priority hierarchy, evidence-based verification, TDD, mutation checks, security-first)
+- Core docs reviewed: AGENTS.md (the session-2..36 parity contracts incl. the s36 proxy pins), CLAUDE.md (six-phase workflow + gate doctrine), README.md, PAD (6 ADRs + layer model), service-desk_SKILL.md v2.34.0 (90 lessons), session_61.md (the s36 agent log + the next-session shortlist), session_62.md (the s36 transcript), remediation-plan-session36.md, worklog.md (tasks 1–94)
+- Codebase validated against the docs: package.json scripts pin DATABASE_URL='file:../db/custom.db' inline; vitest.config.ts matches src+tests *.test.ts only (skills/ never picked up); playwright.config.ts boots the production standalone :3100 with db/e2e.db + storageState; tsconfig + eslint exclude skills/; .env.example aligned; db/ at repo root (.gitkeep tracked, *.db ignored); the s36 seams present (tests/proxy-fromurl.test.ts 6 pins, scripts/s36-live-verify.mjs, the smoke s36 block)
+- Environment setup: .env created (DATABASE_URL="file:../db/custom.db" + generated AUTH_SECRET + NEXT_PUBLIC_SITE_URL); bun install (482 packages); db:push + db:seed — canonical (4 users, 11 tickets, 3 comments)
+- Baseline gates ALL GREEN in the clean environment (no ambient :3000/:3100/:3999): lint ✓ typecheck ✓ 165/165 unit ✓ build ✓ 197/197 E2E (2.8m) ✓ smoke 101 PASS ✓
+
+Stage Summary:
+- Onboarding complete; the repo is exactly at the s36 closeout state with all gates green; this run is Session 37 (agent log → docs/session_63.md per the odd/even numbering convention); next: the s36 shortlist probes (the ninth /login rotation check after three quiet sessions, the s4-defect + overflow ledgers, the own-side audit axis) + the user-directed parity sweep vs the reference
+
+---
+Task ID: 96-gap-s37
+Agent: main (Super Z) — session 37
+Task: Session-37 gap analysis: the standing F1–F5 axes + the own-side audit (the auth-cookie lifecycle surface, the s36 shortlist's leading candidate)
+
+Work Log:
+- F1 (the bundle sweep, nineteenth): NO ninth /login rotation — the FOURTH consecutive quiet session. /login pair `index-BqoEA--d.js` + `index-C15ZH32J.css` identical to the s34/s35/s36 record; the app-route pair STAYS on the old pre-s30 split (`index-DhFaB31Z.js` + `index-DFdILd41.css`, verified live via performance resource entries + the DOM script tags); UserAppMain-CDMsumUd.js still 200 on the CDN (59075 bytes); the login contract verified (all five strings + from_url ×1 in each of UserAppMain/AuthAPI-Ic7wCbYu/AuthContext-BTluc1QR/axiosClient-oQdHWduI). Non-gap.
+- F2 (the chrome ledger, nineteenth): all axes exact, both routes. /login: viewport-fit=cover + the PWA trio (manifest + theme-color #000000 + apple-touch-icon 180x180) + og:image 1200x630 + twitter:card. /dashboard: plain viewport + NO PWA trio + canonical/og:url/twitter:url at the origin root. Non-gap.
+- F3 (the desktop-overflow axis, nineteenth): their 1328-vs-1280 persists at 1280x800. Ours: 1280 = 1280. Their defect, NOT cloned.
+- F4 (the mobile matrix + the s4-defect, nineteenth): their 468-vs-375 overflow persists AND the s4 toast-viewport blocking persists (the hit-test at the Toggle-Sidebar center (38,30) lands on the `fixed top-0 z-[100]` toast container; their menu does NOT open). Ours: 375 = 375, the REAL agent-browser click opens the sheet, Escape closes it, the My-Tickets nav-tap auto-closes + navigates (/mytickets, correct title). Ours the working superset. Non-gap.
+- F5 (the desktop paired VLM check, 1280x800, both captures verified on-page first): LAYOUT-OK. Non-gap.
+- P1 (the own-side audit — the auth-cookie lifecycle surface, the session_61 shortlist's leading candidate): the lifecycle measured live on the production standalone :3000 —
+  * the login set-cookie: the exact s33 attribute set (Path=/, Max-Age=604800, Secure, HttpOnly, SameSite=lax); no Domain attribute → host-only → NO cross-origin cookie-scoping surface;
+  * the logout-under-spoofed-Host: the clear-cookie carries the exact s33 set (Path=/, Max-Age=0, Secure, HttpOnly, SameSite=lax); host-only → the spoofed Host cannot redirect the cookie to another host; after logout the from_url bounce returns with the spoofed host reflected — the same INERT two-layer guard (s36). CLEAN;
+  * **FINDING (the actionable gap): the invalid/expired-cookie deep-link is LOST.** Cookie-less `/ticketdetails?id=abc123` → 307 `/login?from_url=http%3A%2F%2Flocalhost%3A3000%2Fticketdetails%3Fid%3Dabc123` (the s19 contract) BUT cookie-present-but-invalid (tampered/expired) → 307 PLAIN `/login` (measured). The reference's gate is CLIENT-SIDE (bundle-verified: `window.location.href = /login?from_url=encodeURIComponent(window.location.href)`) — it preserves the deep link in ALL unauthenticated cases INCLUDING the expired-JWT case. Our expired-session user clicking a shared /ticketdetails?id=X link lands on /dashboard after re-login instead of the ticket — a real parity + UX gap, live since the s19 proxy split (the asymmetry was documented as a trade-off but never measured against the reference's expired-session behavior);
+  * **P2 (the logout from_url parity):** the reference's logout navigates to `/login?from_url=<current page href>` (bundle: the v() function) — after re-login they RETURN to where they were; ours pushes plain `/login` → after re-login /dashboard. A minor, cheap-to-mirror parity gap;
+  * **P3 (doc accuracy):** DEPLOYMENT.md's "forward X-Forwarded-Proto so cookie attributes derive the right scheme" is inaccurate — the cookie Secure attribute derives from NODE_ENV ONLY; XFP affects the proxy's from_url protocol (the s36 contract). The Secure-cookie-over-plain-HTTP trap (production standalone on a non-localhost plain-HTTP host → browsers drop the Secure cookie → login silently fails) is undocumented.
+
+Stage Summary:
+- All five standing axes hold (the fourth consecutive quiet bundle session; their s4/desktop/mobile defects persist — ours the working superset, the mobile matrix re-verified via real clicks); the auth-cookie lifecycle audit found ONE actionable parity gap (the expired-cookie deep-link loss) + one minor parity item (the logout from_url) + one doc-accuracy item (the DEPLOYMENT.md XFP line + the Secure-plain-HTTP trap); remediation plan → docs/remediation-plan-session37.md
+
+---
+Task ID: 97
+Agent: main (Super Z) — session 37
+Task: Session-37 remediation: the expired-cookie deep-link preservation (P1) + the sign-out from_url carry (P2) + the DEPLOYMENT.md accuracy fix (P3)
+
+Work Log:
+- Wrote + validated docs/remediation-plan-session37.md (the three-component design, the REAL red-green TDD plan — every pin RED against the pre-fix tree first, the mutation check as the belt-and-braces)
+- The TDD RED observed: the loginBounceUrl pair (the import failed — the seam didn't exist), the downstream-header pair (no x-middleware-request-x-sd-from-url on the passthrough), the auth.spec expired-session round-trip (the bounce was plain /login), the dashboard.spec sign-out pin (the documented SUPERSEDE of the s2-era assertion; the push was plain), the smoke s37 pin 1 (identical)
+- The GREEN implementation: src/lib/redirect.ts gained loginBounceUrl (the pure seam: absent → /login, present → the encoded from_url — the mirror of the proxy's Location construction); src/proxy.ts now forwards its constructed target on the cookie-present path via NextResponse.next({ request: { headers } }) with x-sd-from-url SET on a fresh header copy (the override TOTAL — a client-supplied value never survives the matcher; the mechanism probed first: x-middleware-request-<name> + x-middleware-override-headers); src/app/(app)/layout.tsx's verify-failure bounce consumes the header (redirect(loginBounceUrl(target)) — plain /login only as the defensive fallback); src/components/app-sidebar.tsx's sign-out pushes /login?from_url=<current href> (the reference's v() behavior)
+- The full gate: lint ✓ typecheck ✓ 169/169 unit ✓ (165 + 4) build ✓ 198/198 E2E ✓ (197 + 1 net; the sign-out pin superseded in place) smoke 104 PASS ✓ (101 + 3) — in the clean environment
+- The mutation check: mutation A (the proxy's header-set removed) → exactly the two downstream pins failed; mutation B (loginBounceUrl hardcoded to /login) → exactly the encoding pin failed; each reverted, re-verified clean (19/19 across the two files)
+- P3: docs/DEPLOYMENT.md — the XFP line corrected (it feeds the from_url scheme, NOT the cookie Secure attribute — that derives from NODE_ENV) + the Secure-cookie-over-plain-HTTP trap documented (browsers drop Secure set-cookies on plain-HTTP non-localhost origins — a TLS-less production deployment fails login silently)
+
+Stage Summary:
+- The s37 remediation shipped: the expired-session deep link survives the auth gate on BOTH paths (the cookie-less proxy bounce AND the invalid-cookie layout bounce — the reference's always-preserve gate, matched without moving session resolution out of the layout, the ADR-001 boundary intact), the sign-out carries the return-to-page context, and the deployment docs tell the truth about XFP + Secure cookies; 169 unit / 198 E2E / 104 smoke, mutation-checked, all gates green
+
+---
+Task ID: 97-verify-s37
+Agent: main (Super Z) — session 37
+Task: Session-37 live re-verification + screenshots + docs alignment
+
+Work Log:
+- The NEW scripts/s37-live-verify.mjs — 11/11: the invalid-cookie bounce matrix (the deep-link from_url carried + the cookie-less s19 contract re-verified), the LIVE header-overwrite proof (a client-supplied x-sd-from-url loses to the proxy's construction), the login set-cookie attributes (the s33 set + the node-fetch Expires serialization tolerated), the expired-session round-trip at the HTTP layer, the logout clear-cookie + the {ok:true} body, the seed canonical + the status distribution
+- The standing re-runs s24–s36 ALL GREEN: s24 + s25 13 + s26 15 + s27 14 + s28 12 + s29 22/22 + s31 14/14 + s32 18/18 + s33 24/24 + s34 17/17 + s35 13/13 (run under node — Bun's fetch times out on the ~20 MB localhost request bodies, a tool note) + s36 13/13
+- Two operational incidents, both fully recovered: (1) a tool TIMEOUT killed the first s33 run mid-write and corrupted the seed (tickets=0) — re-seeded via the PINNED npm script (a bare `bun prisma/seed.ts` hit the documented ambient-DATABASE_URL gotcha), the canonical check re-verified (4/11/3/0 + demo-owned 5); (2) an accidental run of the retired s13 probe script left a probe ticket (cleaned; the seed re-verified) — the lessons recorded in CLAUDE.md's s37 anti-pattern
+- The UI round-trip: real login → dashboard → submitticket → the category dropdown → submit → the "Ticket submitted" toast → mytickets lists the probe ticket → the probe cleaned (11 tickets restored); the mobile matrix on the new build: 375=375, the REAL click opens the sheet, Escape closes it, the nav-tap auto-closes + navigates; the desktop paired VLM check: LAYOUT-OK on the new build
+- Screenshots: the 10-shot set refreshed via scripts/capture-screenshots-s37.sh (the s36 lineage verbatim + the header updated + the fixture title S37; all FATAL guards passed); VLM spot-checks 02 + 05 LAYOUT-OK; the seed re-verified canonical after
+- Docs aligned: README (the badges/counts 169/198 + the s37 test-command lines + the smoke 104 + the E2E-notes s37 sentence), AGENTS.md (the commands table + the NEW Session-37 contracts section + the reference list through s37 + the s36/s37 summary sentences + the screenshots lineage), CLAUDE.md (the counts + the smoke line + the s37 anti-pattern), PAD (§7.1 + the checklist + Pattern 1 amended + the RESOLVED session-37 row), service-desk_SKILL.md v2.35.0 (lesson 91), docs/DEPLOYMENT.md (P3), docs/session_63.md (the s37 agent log), the plan's execution status
+
+Stage Summary:
+- Everything verified live on the remediated build: the lifecycle matrix, the thirteen-session standing contract set, the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set, and all seven documentation surfaces aligned; ready for the commit + push phase

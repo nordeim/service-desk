@@ -139,6 +139,42 @@ test.describe("login page", () => {
     expect(page.url()).not.toContain("evil.example");
   });
 
+  // Session 37 (P1): the expired-cookie deep-link preservation. The s37
+  // audit measured the asymmetry: a cookie-less request bounced with
+  // from_url (the s19 contract), but a cookie-present-but-INVALID request
+  // (a tampered or expired session token) passed the proxy's presence
+  // check, hit the (app) layout's plain /login redirect, and LOST the deep
+  // link — while the reference's client-side gate preserves it in ALL
+  // unauthenticated cases (bundle-verified). The fix: the proxy passes its
+  // constructed target downstream (the x-sd-from-url request header) and
+  // the layout bounces with the same from_url the cookie-less path gets.
+  // This pin injects a tampered cookie — the proxy passes it through (it
+  // never resolves sessions, the ADR-001 boundary), the layout's verify
+  // rejects it, and the bounce must carry the deep link. One real login
+  // (the suite moves 7 → 8 of the 10-per-15-min budget).
+  test("an expired-session deep link bounces to /login carrying from_url and returns after sign-in", async ({ page }) => {
+    // A tampered token is the same code path as an expired one: the proxy
+    // checks PRESENCE only; the layout's verifySessionToken rejects both.
+    await page.context().addCookies([
+      {
+        name: "servicedesk_session",
+        value: "tampered-body.broken-mac",
+        url: "http://localhost:3100",
+      },
+    ]);
+    await page.goto("/ticketdetails?id=e2e-expired-session");
+    await page.waitForURL(/\/login\?from_url=/);
+    expect(
+      decodeURIComponent(page.url().match(/from_url=([^&]*)/)?.[1] ?? "")
+    ).toBe("http://localhost:3100/ticketdetails?id=e2e-expired-session");
+
+    await page.getByLabel("Email").fill("demo@servicedesk.app");
+    await page.getByLabel("Password").fill("Demo1234!");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await page.waitForURL("**/ticketdetails?id=e2e-expired-session");
+    await expect(page.getByText("Ticket not found")).toBeVisible();
+  });
+
   // Session 10: the in-card signup view (the reference's login card swaps
   // in place on "Need an account? Sign up"). No name field — the account
   // name derives from the email local-part (base44 auth has no name

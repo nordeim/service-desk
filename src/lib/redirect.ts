@@ -51,3 +51,17 @@ export function safeRedirectTarget(
   // the hash is client-side-only state and never a server target.
   return path + url.search;
 }
+
+// Session 37 (P1): the layout-side from_url bounce. The (app) layout's
+// verify-failure redirect consumes the proxy-constructed target (the
+// x-sd-from-url request header) through this pure seam — the mirror of
+// the proxy's Location construction, so the cookie-present-but-INVALID
+// path (tampered/expired token) preserves the deep link exactly like the
+// cookie-less path (the s19 contract) and the reference's client-side
+// gate. The value itself stays unvalidated here by design: it is
+// RELAYED, not trusted — the login page validates it at use time via
+// safeRedirectTarget (the browser-origin check, the s36 two-layer guard).
+export function loginBounceUrl(fromUrl: string | null | undefined): string {
+  if (!fromUrl) return "/login";
+  return `/login?from_url=${encodeURIComponent(fromUrl)}`;
+}

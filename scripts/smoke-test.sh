@@ -32,10 +32,11 @@ S35_HDRS="$(mktemp)"
 S35_BODY="$(mktemp)"
 S36_HDRS="$(mktemp)"      # the s36 proxy-surface header captures
 S36_BODY="$(mktemp)"      # the s36 login-page reflection body
+S37_HDRS="$(mktemp)"      # the s37 auth-cookie lifecycle header captures
 
 cleanup() {
   [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null
-  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"} ${S35_BIG:+"$S35_BIG"} ${S35_BIG_C:+"$S35_BIG_C"} ${S35_MAXLEGIT:+"$S35_MAXLEGIT"} ${S35_PROBE:+"$S35_PROBE"} ${S35_HDRS:+"$S35_HDRS"} ${S35_BODY:+"$S35_BODY"} ${S36_HDRS:+"$S36_HDRS"} ${S36_BODY:+"$S36_BODY"}
+  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"} ${S35_BIG:+"$S35_BIG"} ${S35_BIG_C:+"$S35_BIG_C"} ${S35_MAXLEGIT:+"$S35_MAXLEGIT"} ${S35_PROBE:+"$S35_PROBE"} ${S35_HDRS:+"$S35_HDRS"} ${S35_BODY:+"$S35_BODY"} ${S36_HDRS:+"$S36_HDRS"} ${S36_BODY:+"$S36_BODY"} ${S37_HDRS:+"$S37_HDRS"}
   # Session 33 hardening: a FAILED mid-run exit used to leave db/smoke.db
   # behind (the removal lived only on the success path), and the leftover
   # mutated rows (probe tickets, PATCHed statuses) poisoned the NEXT run's
@@ -1035,6 +1036,54 @@ echo "$S36_LOC" | grep -q "from_url=http%3A%2F%2Flocalhost%3A3999%2Fticketdetail
   || fail "s36-proxy: the from_url must carry the deep-link query (got: $S36_LOC)"
 step "PASS" "s36-proxy: the from_url preserves the deep-link query (the s19 contract)"
 rm -f "$S36_HDRS" "$S36_BODY"
+
+# --- s37: the auth-cookie lifecycle pins (the expired-cookie deep link) ------
+# The s37 audit measured the asymmetry: the cookie-less bounce carries
+# from_url (the s19 contract), but a cookie-present-but-INVALID request
+# (a tampered/expired token) redirected PLAIN to /login — the deep link
+# lost (the reference's client-side gate preserves it in ALL
+# unauthenticated cases). The proxy now forwards its constructed target
+# downstream (the x-sd-from-url request header) and the (app) layout's
+# verify-failure bounce consumes it. These pins freeze the live behavior
+# at zero auth-budget cost (a tampered cookie never touches the limiter).
+#
+# Pin 1: the invalid-cookie deep-link bounce carries from_url. The proxy
+# passes the cookie-present request through (presence check only, the
+# ADR-001 boundary); the layout's verifySessionToken rejects the tampered
+# token; the bounce must carry the deep link (query included).
+curl -s -o /dev/null -D "$S37_HDRS" "$BASE/ticketdetails?id=abc123" \
+  -H "Cookie: servicedesk_session=tampered-body.broken-mac"
+S37_CODE=$(head -1 "$S37_HDRS" | tr -d '\r' | awk '{print $2}')
+S37_LOC=$(grep -i '^location:' "$S37_HDRS" | head -1 | tr -d '\r')
+[ "$S37_CODE" = "307" ] || fail "s37-lifecycle: the invalid-cookie bounce should 307 (got $S37_CODE)"
+echo "$S37_LOC" | grep -q "from_url=http%3A%2F%2Flocalhost%3A3999%2Fticketdetails%3Fid%3Dabc123" \
+  || fail "s37-lifecycle: the invalid-cookie bounce must carry the deep-link from_url (got: $S37_LOC)"
+step "PASS" "s37-lifecycle: the invalid-cookie deep link carries from_url (the expired-session contract)"
+
+# Pin 2: the invalid-cookie bounce under a SPOOFED Host keeps the RELATIVE
+# Location (the s36 two-layer guard preserved on the new path — the value
+# is reflected inertly, the browser never leaves the origin).
+curl -s -o /dev/null -D "$S37_HDRS" "$BASE/dashboard" \
+  -H "Host: evil.example" \
+  -H "Cookie: servicedesk_session=tampered-body.broken-mac"
+S37_CODE=$(head -1 "$S37_HDRS" | tr -d '\r' | awk '{print $2}')
+S37_LOC=$(grep -i '^location:' "$S37_HDRS" | head -1 | tr -d '\r')
+[ "$S37_CODE" = "307" ] || fail "s37-lifecycle: the spoofed-Host invalid-cookie bounce should 307 (got $S37_CODE)"
+case "$S37_LOC" in
+  Location:\ /login*) : ;;
+  *) fail "s37-lifecycle: the Location must stay RELATIVE /login under a spoofed Host (got: $S37_LOC)" ;;
+esac
+step "PASS" "s37-lifecycle: the spoofed-Host invalid-cookie bounce stays relative (the two-layer guard holds)"
+
+# Pin 3: the header mechanism does NOT decorate unguarded routes — a
+# request carrying a CLIENT-SUPPLIED x-sd-from-url to an unmatched path
+# must render the public 404 (the matcher boundary unchanged; the client
+# value never reaches a layout that would consume it).
+S37_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/dashboard/nonexistent" \
+  -H "x-sd-from-url: http://client-evil.example/spoof")
+[ "$S37_CODE" = "404" ] || fail "s37-lifecycle: an unmatched sub-path with a client-supplied header must 404 (got $S37_CODE)"
+step "PASS" "s37-lifecycle: the header mechanism never decorates unguarded routes (the matcher boundary)"
+rm -f "$S37_HDRS"
 
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +

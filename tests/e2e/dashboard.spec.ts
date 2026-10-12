@@ -84,9 +84,18 @@ test.describe("dashboard", () => {
     await expect(cta).toBeVisible();
   });
 
-  test("signs out via the footer button", async ({ page }) => {
+  // Session 37 (P2): the sign-out navigation carries from_url (the
+  // reference's measured v() behavior: their logout navigates to
+  // /login?from_url=<current page href> — after re-login the user returns
+  // to where they signed out from). Supersedes the s2-era plain-**/login
+  // assertion. The value is same-origin by construction and validated at
+  // use time by safeRedirectTarget.
+  test("signs out via the footer button (carrying the from_url deep link)", async ({ page }) => {
     await page.locator('[data-sidebar="footer"]').getByRole("button", { name: "Sign out" }).click();
-    await page.waitForURL("**/login");
+    await page.waitForURL(/\/login\?from_url=/);
+    expect(
+      decodeURIComponent(page.url().match(/from_url=([^&]*)/)?.[1] ?? "")
+    ).toBe("http://localhost:3100/dashboard");
   });
 
   // Session 3: the performance-value <p> used to hold the Skeleton <div>

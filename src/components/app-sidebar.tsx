@@ -92,7 +92,12 @@ export function AppSidebar({ user }: { user: SidebarUser }) {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       toast({ title: "Signed out", description: "See you soon!" });
-      router.push("/login");
+      // Session 37 (P2): the reference's logout navigates to
+      // /login?from_url=<current page href> (their v() function) — after
+      // re-login the user RETURNS to where they signed out from instead of
+      // the dashboard. window.location.href is same-origin by construction
+      // and validated at use time by safeRedirectTarget on the login page.
+      router.push(`/login?from_url=${encodeURIComponent(window.location.href)}`);
       router.refresh();
     } catch {
       toast({ title: "Sign out failed", description: "Please try again.", variant: "destructive" });
