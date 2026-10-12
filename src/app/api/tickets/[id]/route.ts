@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { isTicketStatus, TICKET_PATCH_BODY_FIELDS } from "@/lib/constants";
-import { parseBodyKeys, parseNoQuery } from "@/lib/validation";
+import { parseBodyKeys, parseBodySize, parseNoQuery } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -54,6 +54,13 @@ export async function PATCH(req: Request, { params }: Params) {
   const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
   if (!parsedQuery.ok) {
     return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
+
+  // Session 35: the request-body ceiling (the shared parseBodySize seam) —
+  // BEFORE req.json(), the header-read cost (see the create route's comment).
+  const parsedSize = parseBodySize(req.headers.get("content-length"));
+  if (!parsedSize.ok) {
+    return NextResponse.json({ error: parsedSize.error }, { status: 413 });
   }
 
   const { id } = await params;

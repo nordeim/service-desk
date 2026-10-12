@@ -180,8 +180,18 @@ describe("validateAttachments", () => {
   it("accepts within count/size limits", () => {
     expect(
       validateAttachments([
-        { fileName: "a.png", mimeType: "image/png", sizeBytes: 1024 },
-        { fileName: "b.pdf", mimeType: "application/pdf", sizeBytes: 2 * 1024 * 1024 },
+        {
+          fileName: "a.png",
+          mimeType: "image/png",
+          sizeBytes: 1024,
+          data: Buffer.alloc(1024, 65).toString("base64"),
+        },
+        {
+          fileName: "b.pdf",
+          mimeType: "application/pdf",
+          sizeBytes: 2 * 1024 * 1024,
+          data: Buffer.alloc(2 * 1024 * 1024, 66).toString("base64"),
+        },
       ]).ok,
     ).toBe(true);
   });
@@ -190,19 +200,20 @@ describe("validateAttachments", () => {
       fileName: `f${i}.txt`,
       mimeType: "text/plain",
       sizeBytes: 10,
+      data: "",
     }));
     expect(validateAttachments(files).ok).toBe(false);
   });
   it("rejects a file over 2 MiB", () => {
     expect(
       validateAttachments([
-        { fileName: "big.png", mimeType: "image/png", sizeBytes: 2 * 1024 * 1024 + 1 },
+        { fileName: "big.png", mimeType: "image/png", sizeBytes: 2 * 1024 * 1024 + 1, data: "" },
       ]).ok,
     ).toBe(false);
   });
   it("rejects path-traversal file names", () => {
     expect(
-      validateAttachments([{ fileName: "../evil.txt", mimeType: "text/plain", sizeBytes: 5 }]).ok,
+      validateAttachments([{ fileName: "../evil.txt", mimeType: "text/plain", sizeBytes: 5, data: "" }]).ok,
     ).toBe(false);
   });
   it("rejects a mimeType outside the accepted list (s23: the server-side MIME guard)", () => {
@@ -210,23 +221,80 @@ describe("validateAttachments", () => {
     // the closed allowlist or the download route serves attacker-chosen
     // content types inline from our origin (a stored-XSS surface).
     expect(
-      validateAttachments([{ fileName: "evil.html", mimeType: "text/html", sizeBytes: 10 }]).ok,
+      validateAttachments([{ fileName: "evil.html", mimeType: "text/html", sizeBytes: 10, data: "" }]).ok,
     ).toBe(false);
     expect(
       validateAttachments([
-        { fileName: "evil.exe", mimeType: "application/x-msdownload", sizeBytes: 10 },
+        { fileName: "evil.exe", mimeType: "application/x-msdownload", sizeBytes: 10, data: "" },
       ]).ok,
     ).toBe(false);
     expect(
       validateAttachments([
-        { fileName: "evil.js", mimeType: "application/javascript", sizeBytes: 10 },
+        { fileName: "evil.js", mimeType: "application/javascript", sizeBytes: 10, data: "" },
       ]).ok,
     ).toBe(false);
   });
   it("accepts every MIME in the advertised accept list", () => {
     for (const mimeType of ATTACHMENT_ACCEPTED_TYPES) {
-      expect(validateAttachments([{ fileName: "f.bin", mimeType, sizeBytes: 1 }]).ok).toBe(true);
+      expect(
+        validateAttachments([{ fileName: "f.bin", mimeType, sizeBytes: 1, data: "QQ==" }]).ok,
+      ).toBe(true);
     }
+  });
+  it("s35: rejects a data payload that does not match its declared size (the divergence probe)", () => {
+    // Measured live pre-fix: sizeBytes 11 declared + ~100 KB actual base64
+    // → 201 stored — the per-file cap checked the DECLARED number (attacker
+    // controlled) while the payload was stored unchecked. The honesty
+    // contract: the declared size must be the true size.
+    const hundredKb = Buffer.alloc(100 * 1024, 65).toString("base64");
+    const r = validateAttachments([
+      { fileName: "lie.txt", mimeType: "text/plain", sizeBytes: 11, data: hundredKb },
+    ]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("does not match its declared size");
+  });
+  it("s35: rejects a non-canonical encoded payload (the garbage-base64 form hole)", () => {
+    // Measured live pre-fix: 1 MB of '!' chars decodes to 0 bytes — with
+    // sizeBytes: 0 a decoded-length-equality check alone passes (0 === 0)
+    // while megabytes of garbage are stored verbatim. Node's decoder
+    // silently DROPS non-alphabet characters, so the FORM must be checked:
+    // canonical base64 (alphabet + 0-2 trailing pads) only.
+    const garbage = "!".repeat(1024 * 1024);
+    const r = validateAttachments([
+      { fileName: "g.bin", mimeType: "text/plain", sizeBytes: 0, data: garbage },
+    ]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("invalid encoded payload");
+  });
+  it("s35: rejects an overlong canonical payload via the declared-size interplay", () => {
+    // An alphabet-only payload decoding past 2 MiB can only pass the
+    // equality with a declared sizeBytes over the cap — which the first
+    // guard already rejects; the direct path (declared within cap, payload
+    // honest) is the accept-boundary test below.
+    const overlong = "A".repeat(4 * Math.ceil((2 * 1024 * 1024 + 3) / 3));
+    const r = validateAttachments([
+      { fileName: "big.bin", mimeType: "text/plain", sizeBytes: 2 * 1024 * 1024 + 3, data: overlong },
+    ]);
+    expect(r.ok).toBe(false);
+  });
+  it("s35: accepts the honest boundary — a full 2 MiB attachment as canonical base64", () => {
+    const twoMiB = 2 * 1024 * 1024;
+    const r = validateAttachments([
+      {
+        fileName: "legit.txt",
+        mimeType: "text/plain",
+        sizeBytes: twoMiB,
+        data: Buffer.alloc(twoMiB, 65).toString("base64"),
+      },
+    ]);
+    expect(r.ok).toBe(true);
+  });
+  it("s35: rejects a zero-byte payload declared as non-zero (the empty-data lie)", () => {
+    const r = validateAttachments([
+      { fileName: "empty.txt", mimeType: "text/plain", sizeBytes: 10, data: "" },
+    ]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("does not match its declared size");
   });
 });
 

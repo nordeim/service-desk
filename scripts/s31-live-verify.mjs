@@ -39,7 +39,8 @@ async function main() {
     body: JSON.stringify({
       title: "s31 live schema matrix ticket", description: "carries one attachment for the live matrix",
       category: "software", priority: "low",
-      attachments: [{ fileName: "pin.txt", mimeType: "text/plain", sizeBytes: 11, data: "c2NoZW1hIHBpbg==" }],
+      // s35 fixture honesty: "schema pin" decodes to 10 bytes (was 11).
+      attachments: [{ fileName: "pin.txt", mimeType: "text/plain", sizeBytes: 10, data: "c2NoZW1hIHBpbg==" }],
     }),
   });
   const cj = await cr.json();

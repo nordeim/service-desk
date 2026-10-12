@@ -225,3 +225,26 @@ export const COMMENT_CREATE_BODY_FIELDS = ["content"] as const;
 export const LOGIN_BODY_FIELDS = ["email", "password"] as const;
 export const SIGNUP_BODY_FIELDS = ["email", "name", "password"] as const;
 export const FORGOT_PASSWORD_BODY_FIELDS = ["email"] as const;
+
+/**
+ * The write-route request-body ceiling (session 35). The request-size audit
+ * (the s34-deferred leading candidate) measured: a 20 MB JSON body on the
+ * ticket CREATE was fully buffered + parsed + rejected at the VALUE level
+ * (the title-length 400, 199 ms) — no route-level cap existed, so every
+ * oversized request burned its whole size in memory plus the JSON-parse
+ * CPU before the cheap value-level rejection. The ceiling is checked
+ * BEFORE the body is read (the parseBodySize seam reads the Content-Length
+ * header — the only pre-read signal) on all six write routes.
+ *
+ * The number: the legitimate maximum request is a create carrying 3 x 2 MiB
+ * attachments as canonical base64 (measured 8,394,006 bytes with the
+ * 5000-char description + title + JSON structure); 10 MiB gives ~20%
+ * headroom above it while bounding the abuse at half the s34 probe. The
+ * reference's platform caps nothing (the s23 15 MiB measurement) — the cap
+ * is OUR DoS-hardening superset, the same class as the s21 rate limiter.
+ *
+ * Chunked bodies carry no Content-Length header and pass the seam through
+ * (documented): the value-level caps still apply downstream. Malformed
+ * lengths never reach the handler (Node's HTTP parser rejects them first).
+ */
+export const MAX_BODY_BYTES = 10 * 1024 * 1024;

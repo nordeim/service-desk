@@ -227,7 +227,9 @@ const fx = await fetch(`${BASE}/api/tickets`, {
       {
         fileName: "s29-probe.txt",
         mimeType: "text/plain",
-        sizeBytes: 4,
+        // s35 fixture honesty: the declared size must be the true decoded
+        // size ("probe" = 5 bytes; it was 4 before the contract existed).
+        sizeBytes: 5,
         data: Buffer.from("probe").toString("base64"),
       },
     ],

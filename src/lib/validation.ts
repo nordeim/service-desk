@@ -14,6 +14,7 @@ import {
   LIST_QUERY_PARAMS,
   LIST_SCOPE_OPTIONS,
   LIST_SORT_OPTIONS,
+  MAX_BODY_BYTES,
   SEARCH_MAX_LENGTH,
 } from "./constants";
 
@@ -100,6 +101,10 @@ export interface RawAttachment {
   fileName: string;
   mimeType: string;
   sizeBytes: number;
+  // Session 35: the data field is part of the validated contract — the
+  // declared size must be the TRUE decoded size of this payload (see the
+  // two s35 checks in validateAttachments below).
+  data: string;
 }
 
 export function validateAttachments(
@@ -121,6 +126,36 @@ export function validateAttachments(
     // surface if an attacker-chosen type can be stored via the API).
     if (!ATTACHMENT_ACCEPTED_TYPES.includes(f.mimeType)) {
       return { ok: false, error: `"${f.fileName}" has an unsupported file type` };
+    }
+    // Session 35 (the request-size surface, component 2): the two data
+    // checks, appended AFTER the four pinned guards above so no existing
+    // error message moves (the smoke count/size/traversal/MIME probes all
+    // reject before reaching here).
+    //
+    // (a) The FORM check: canonical base64 only (the base64 alphabet,
+    // with 0-2 trailing padding chars). Node's decoder is lenient — it
+    // silently DROPS non-alphabet characters, so a megabyte of '!'
+    // decodes to 0 bytes and would sail past a decoded-length check with
+    // sizeBytes: 0 while the megabyte is stored verbatim (measured live
+    // at the s35 audit — the garbage-base64 hole; a bare string-length
+    // bound only bounds the waste, the form check eliminates it). Every
+    // legitimate caller sends canonical base64 (FileReader.readAsDataURL
+    // and Buffer.toString("base64") both produce it).
+    if (!/^[A-Za-z0-9+/]*={0,2}$/.test(f.data)) {
+      return { ok: false, error: `"${f.fileName}" has an invalid encoded payload` };
+    }
+    // (b) The HONESTY contract: the DECLARED sizeBytes must equal the
+    // payload's actual decoded length. Before s35 the declaration was the
+    // only thing checked — a sizeBytes: 11 row carrying ~100 KB of real
+    // data was stored verbatim (measured live: 201 stored; the per-file
+    // cap was enforcing a number the attacker fully controlled). The UI
+    // satisfies the equality exactly: both sizeBytes and data derive
+    // from the same File object (src/app/(app)/submitticket/page.tsx).
+    // Together with (a) and the declared cap this bounds the stored
+    // string: an alphabet-only payload decoding to <=2 MiB cannot exceed
+    // the canonical maximum length for that payload.
+    if (Buffer.from(f.data, "base64").length !== f.sizeBytes) {
+      return { ok: false, error: `"${f.fileName}" does not match its declared size` };
     }
   }
   return { ok: true };
@@ -361,6 +396,42 @@ export function parseBodyKeys(
         error: `unknown request-body field: ${key} (allowed: ${allowed.join(", ")})`,
       };
     }
+  }
+  return { ok: true };
+}
+
+// Session 35: the write-route request-body ceiling — the request-size
+// surface, component 1 (the s34-deferred leading candidate, measured this
+// session: a 20 MB JSON body on the CREATE was fully buffered + parsed +
+// rejected at the VALUE level — no route-level cap existed). The seam reads
+// the Content-Length header — the ONLY signal available BEFORE the body is
+// read — and rejects the request at the header-read cost instead of the
+// buffered-parse cost. The callers wire it between parseNoQuery and
+// req.json() (the grammar level precedes the body level, the s27
+// convention) and return 413 on failure (Payload Too Large — the semantic
+// code; the envelope stays the family's {error}).
+//
+// The pass-through cases, documented honestly:
+//   - a NULL header (chunked transfer encoding) — there is no pre-read
+//     signal for chunked bodies; the value-level caps still apply
+//     downstream once the body is read;
+//   - an empty or non-numeric value — malformed Content-Lengths never
+//     reach the handler (Node's HTTP parser rejects them first), so the
+//     seam's only job is the ceiling on well-formed lengths.
+// The boundary is INCLUSIVE: exactly MAX_BODY_BYTES passes (the legitimate
+// maximum create measured at 8,394,006 bytes carries ~20% headroom under
+// the 10 MiB ceiling; tests/body-size.test.ts pins the relation).
+export function parseBodySize(
+  contentLength: string | null,
+): { ok: true } | { ok: false; error: string } {
+  if (contentLength === null) return { ok: true };
+  const length = Number(contentLength);
+  if (!Number.isFinite(length)) return { ok: true };
+  if (length > MAX_BODY_BYTES) {
+    return {
+      ok: false,
+      error: `request body too large: ${length} bytes (max ${MAX_BODY_BYTES})`,
+    };
   }
   return { ok: true };
 }

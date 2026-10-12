@@ -10,7 +10,7 @@ import {
   signSession,
   verifyPassword,
 } from "@/lib/auth";
-import { validateLoginInput, parseBodyKeys, parseNoQuery } from "@/lib/validation";
+import { validateLoginInput, parseBodyKeys, parseBodySize, parseNoQuery } from "@/lib/validation";
 import { LOGIN_BODY_FIELDS } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -35,6 +35,15 @@ export async function POST(req: Request) {
   const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
   if (!parsedQuery.ok) {
     return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
+
+  // Session 35: the request-body ceiling (the shared parseBodySize seam) —
+  // AFTER the rate limiter (the s21/s29/s32 convention: every attempt burns
+  // a bucket slot, even one rejected before its body is read), BEFORE
+  // req.json() (the header-read cost; see the create route's comment).
+  const parsedSize = parseBodySize(req.headers.get("content-length"));
+  if (!parsedSize.ok) {
+    return NextResponse.json({ error: parsedSize.error }, { status: 413 });
   }
 
   let body: unknown;

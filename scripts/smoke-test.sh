@@ -24,10 +24,16 @@ S33_BODY="$(mktemp)"
 S33_JAR_C="$(mktemp)"
 S33_CONCURRENCY_CODE="$(mktemp)"
 S34_HDRS="$(mktemp)"
+S35_BIG="$(mktemp)"        # the 20 MB create body
+S35_BIG_C="$(mktemp)"      # the 20 MB comment body
+S35_MAXLEGIT="$(mktemp)"   # the 3x2MiB boundary body
+S35_PROBE="$(mktemp)"      # the divergence/garbage/chunked probe bodies
+S35_HDRS="$(mktemp)"
+S35_BODY="$(mktemp)"
 
 cleanup() {
   [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null
-  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"}
+  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"} ${S35_BIG:+"$S35_BIG"} ${S35_BIG_C:+"$S35_BIG_C"} ${S35_MAXLEGIT:+"$S35_MAXLEGIT"} ${S35_PROBE:+"$S35_PROBE"} ${S35_HDRS:+"$S35_HDRS"} ${S35_BODY:+"$S35_BODY"}
   # Session 33 hardening: a FAILED mid-run exit used to leave db/smoke.db
   # behind (the removal lived only on the success path), and the leftover
   # mutated rows (probe tickets, PATCHed statuses) poisoned the NEXT run's
@@ -362,7 +368,7 @@ step "PASS" "s31-schema: list rows bounded (createdBy + _count only — no comme
 
 S31_ATT_TICKET=$(curl -sf -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
   -H "Content-Type: application/json" \
-  -d '{"title":"S31 schema pin ticket","description":"carries one attachment for the pin","category":"software","priority":"low","attachments":[{"fileName":"pin.txt","mimeType":"text/plain","sizeBytes":11,"data":"c2NoZW1hIHBpbg=="}]}' \
+  -d '{"title":"S31 schema pin ticket","description":"carries one attachment for the pin","category":"software","priority":"low","attachments":[{"fileName":"pin.txt","mimeType":"text/plain","sizeBytes":10,"data":"c2NoZW1hIHBpbg=="}]}' \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)["ticket"]["id"])')
 [ -n "$S31_ATT_TICKET" ] || fail "s31-schema: create-with-attachment (the happy path)"
 curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets/$S31_ATT_TICKET" | python3 -c '
@@ -852,6 +858,106 @@ grep -qi '^content-disposition: inline' "$S34_HDRS" \
   || fail "s34-interplay: the attachment download must keep the s14 inline disposition"
 step "PASS" "s34-interplay: attachment download keeps s15 (immutable window + inline) under the blanket no-store"
 rm -f "$S34_HDRS"
+
+# --- Session 35: the request-size contract (the Content-Length ceiling + the
+# attachment data-honesty checks). The audit measured: a 20 MB JSON body on
+# the CREATE was fully buffered + parsed + rejected at the VALUE level
+# (199 ms) — no route-level cap existed; a sizeBytes: 11 row carrying ~100 KB
+# of real data was stored verbatim (the per-file cap was enforcing a number
+# the attacker controlled); a 1 MB '!' payload with sizeBytes: 0 was stored
+# (Node's decoder drops non-alphabet chars — the equality alone is blind to
+# it). The remediation: the shared parseBodySize seam (413 BEFORE the body
+# is read) + the canonical-form + declared-size-equality checks in
+# validateAttachments. The reference's platform caps nothing (the s23 15 MiB
+# record) — the ceiling is OUR DoS-hardening superset (the s21 rate-limiter
+# class). The rate-limiter arithmetic is UNTOUCHED: zero new login/forgot
+# requests (every probe rides the existing top-of-script session; the
+# comment-route cross-pin was chosen over login precisely to keep it).
+
+# The 20 MB body (generated once, reused by the create + comment probes).
+python3 - "$S35_BIG" "$S35_BIG_C" <<'PYEOF'
+import json, sys
+big = {"title": "x" * (20 * 1024 * 1024), "description": "s35 smoke probe",
+       "category": "software", "priority": "low"}
+open(sys.argv[1], "w").write(json.dumps(big))
+open(sys.argv[2], "w").write(json.dumps({"content": "x" * (20 * 1024 * 1024)}))
+PYEOF
+
+# (a) The envelope pin: the 20 MB create rejects 413 at the header-read cost.
+CODE=$(curl -s -o "$S35_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" --data-binary @"$S35_BIG")
+[ "$CODE" = "413" ] || fail "s35-size: the 20 MB create should 413 (got $CODE)"
+grep -q "request body too large" "$S35_BODY" || fail "s35-size: the 413 body should say request body too large"
+grep -q "max 10485760" "$S35_BODY" || fail "s35-size: the 413 body should name the 10485760 ceiling"
+step "PASS" "s35-size: the 20 MB create 413s before the body is read (the envelope pin)"
+
+# (b) The shared-seam cross-route pin: the comment route rejects the same way.
+S35_TID=$(curl -sf -b "$COOKIE_JAR" "$BASE/api/tickets?limit=1" \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["tickets"][0]["id"])')
+[ -n "$S35_TID" ] || fail "s35-size: fetch a ticket id for the comment probe"
+CODE=$(curl -s -o "$S35_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets/$S35_TID/comments" \
+  -H "Content-Type: application/json" --data-binary @"$S35_BIG_C")
+[ "$CODE" = "413" ] || fail "s35-size: the 20 MB comment should 413 (got $CODE)"
+grep -q "request body too large" "$S35_BODY" || fail "s35-size: the comment 413 body should say request body too large"
+step "PASS" "s35-size: the 20 MB comment 413s too (the shared seam across routes)"
+
+# (c) The declared-size honesty pin: 11 declared + ~100 KB actual rejects.
+python3 - "$S35_PROBE" <<'PYEOF'
+import json, sys
+open(sys.argv[1], "w").write(json.dumps({
+    "title": "s35 divergence probe", "description": "declared 11, actual ~100KB",
+    "category": "software", "priority": "low",
+    "attachments": [{"fileName": "probe.txt", "mimeType": "text/plain",
+                     "sizeBytes": 11, "data": "A" * (4 * ((100 * 1024) // 3))}]}))
+PYEOF
+CODE=$(curl -s -o "$S35_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" --data-binary @"$S35_PROBE")
+[ "$CODE" = "400" ] || fail "s35-honesty: the divergence probe should 400 (got $CODE)"
+grep -q "does not match its declared size" "$S35_BODY" || fail "s35-honesty: the divergence body should name the mismatch"
+step "PASS" "s35-honesty: a data payload that is not its declared size rejects (the divergence pin)"
+
+# (d) The canonical-form pin: 100 KB of '!' (decodes to 0 bytes) rejects.
+python3 - "$S35_PROBE" <<'PYEOF'
+import json, sys
+open(sys.argv[1], "w").write(json.dumps({
+    "title": "s35 garbage probe", "description": "non-alphabet chars with sizeBytes 0",
+    "category": "software", "priority": "low",
+    "attachments": [{"fileName": "g.txt", "mimeType": "text/plain",
+                     "sizeBytes": 0, "data": "!" * (100 * 1024)}]}))
+PYEOF
+CODE=$(curl -s -o "$S35_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" --data-binary @"$S35_PROBE")
+[ "$CODE" = "400" ] || fail "s35-honesty: the garbage probe should 400 (got $CODE)"
+grep -q "invalid encoded payload" "$S35_BODY" || fail "s35-honesty: the garbage body should say invalid encoded payload"
+step "PASS" "s35-honesty: non-canonical base64 rejects (the garbage-form pin)"
+
+# (e) The no-false-rejection pin: the legitimate maximum (3 x 2 MiB, the
+# body ~8.4 MB — under the 10 MiB ceiling) still creates. The fixture rows
+# live only in the throwaway db/smoke.db (trap-cleaned).
+python3 - "$S35_MAXLEGIT" <<'PYEOF'
+import base64, json, sys
+two_mib = 2 * 1024 * 1024
+b64 = base64.b64encode(b"A" * two_mib).decode()
+open(sys.argv[1], "w").write(json.dumps({
+    "title": "s35 max-legit boundary probe", "description": "three legitimate 2 MiB attachments",
+    "category": "software", "priority": "low",
+    "attachments": [{"fileName": f"legit-{i}.txt", "mimeType": "text/plain",
+                     "sizeBytes": two_mib, "data": b64} for i in range(3)]}))
+PYEOF
+CODE=$(curl -s -o "$S35_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" --data-binary @"$S35_MAXLEGIT")
+[ "$CODE" = "201" ] || fail "s35-honesty: the 3x2MiB max-legit create should 201 (got $CODE: $(cat "$S35_BODY" | head -c 200))"
+step "PASS" "s35-honesty: the 3x2MiB maximum legitimate create still 201s (the boundary pin)"
+
+# (f) The chunked pass-through pin: no Content-Length → the seam passes, the
+# value level catches (a 400, NOT a 413 — the documented honest behavior).
+CODE=$(curl -s -o "$S35_BODY" -w "%{http_code}" -b "$COOKIE_JAR" -X POST "$BASE/api/tickets" \
+  -H "Content-Type: application/json" -H "Transfer-Encoding: chunked" \
+  -d '{"title":"this title is deliberately far over the one hundred and twenty character limit so the value level must reject it after the chunked body is read through the seam which passes because there is no content-length header present at all in this request body here","description":"chunked probe","category":"software","priority":"low"}')
+[ "$CODE" = "400" ] || fail "s35-size: the chunked probe should 400 at the value level, not 413 (got $CODE)"
+grep -q "at most 120 characters" "$S35_BODY" || fail "s35-size: the chunked body should hit the title value cap"
+step "PASS" "s35-size: chunked bodies pass the seam and hit the value level (the documented pass-through)"
+rm -f "$S35_BIG" "$S35_BIG_C" "$S35_MAXLEGIT" "$S35_PROBE" "$S35_HDRS" "$S35_BODY"
 
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +

@@ -2232,8 +2232,8 @@ test.describe("session 13: the attachment UI parity (the reference ships a full 
         priority: "medium",
         description: "Fixture ticket carrying two attachments for the parity pins.",
         attachments: [
-          { fileName: "first.txt", mimeType: "text/plain", sizeBytes: 8, data: b64 },
-          { fileName: "second.pdf", mimeType: "application/pdf", sizeBytes: 8, data: b64 },
+          { fileName: "first.txt", mimeType: "text/plain", sizeBytes: 25, data: b64 },
+          { fileName: "second.pdf", mimeType: "application/pdf", sizeBytes: 25, data: b64 },
         ],
       },
     });
@@ -2282,7 +2282,7 @@ test.describe("session 13: the attachment UI parity (the reference ships a full 
         priority: "low",
         description: "Fixture for the heading pin.",
         attachments: [
-          { fileName: "one.txt", mimeType: "text/plain", sizeBytes: 8, data: b64 },
+          { fileName: "one.txt", mimeType: "text/plain", sizeBytes: 26, data: b64 },
         ],
       },
     });
@@ -2307,7 +2307,7 @@ test.describe("session 13: the attachment UI parity (the reference ships a full 
         priority: "low",
         description: "Fixture for the Description heading icon pin.",
         attachments: [
-          { fileName: "one.txt", mimeType: "text/plain", sizeBytes: 8, data: b64 },
+          { fileName: "one.txt", mimeType: "text/plain", sizeBytes: 30, data: b64 },
         ],
       },
     });
@@ -2375,7 +2375,7 @@ test.describe("session 14: the attachment download UX + the ticketdetails URL ca
         priority: "low",
         description: "Fixture ticket carrying one text/plain attachment for the disposition pin.",
         attachments: [
-          { fileName: "s14-probe.txt", mimeType: "text/plain", sizeBytes: 26, data: b64 },
+          { fileName: "s14-probe.txt", mimeType: "text/plain", sizeBytes: 25, data: b64 },
         ],
       },
     });
@@ -2414,7 +2414,7 @@ test.describe("session 14: the attachment download UX + the ticketdetails URL ca
         priority: "low",
         description: "Fixture ticket with a quote-bearing filename for the sanitization pin.",
         attachments: [
-          { fileName: 's14 "quoted"; name.txt', mimeType: "text/plain", sizeBytes: 19, data: b64 },
+          { fileName: 's14 "quoted"; name.txt', mimeType: "text/plain", sizeBytes: 18, data: b64 },
         ],
       },
     });
@@ -2565,7 +2565,7 @@ test.describe("session 15: the attachment cache semantics + the timezone-stable 
         priority: "low",
         description: "Fixture ticket for the attachment cache-control pin.",
         attachments: [
-          { fileName: "s15-cache.txt", mimeType: "text/plain", sizeBytes: 15, data: b64 },
+          { fileName: "s15-cache.txt", mimeType: "text/plain", sizeBytes: 13, data: b64 },
         ],
       },
     });

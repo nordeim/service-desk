@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { TICKET_CREATE_BODY_FIELDS } from "@/lib/constants";
-import { parseBodyKeys, parseListFilters, parseListParams, parseListQuery, parseListSearch, parseNoQuery, validateAttachments, validateTicketInput } from "@/lib/validation";
+import { parseBodyKeys, parseBodySize, parseListFilters, parseListParams, parseListQuery, parseListSearch, parseNoQuery, validateAttachments, validateTicketInput } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -138,6 +138,16 @@ export async function POST(req: Request) {
   const parsedQuery = parseNoQuery(new URL(req.url).searchParams);
   if (!parsedQuery.ok) {
     return NextResponse.json({ error: parsedQuery.error }, { status: 400 });
+  }
+
+  // Session 35: the request-body ceiling (the shared parseBodySize seam) —
+  // checked BEFORE req.json() so an oversized body is rejected at the
+  // header-read cost, never buffered + parsed (the s34-measured 20 MB
+  // probe burned both before the value-level rejection). 413: Payload Too
+  // Large, the semantic code; the envelope stays {error}.
+  const parsedSize = parseBodySize(req.headers.get("content-length"));
+  if (!parsedSize.ok) {
+    return NextResponse.json({ error: parsedSize.error }, { status: 413 });
   }
 
   let body: unknown;
