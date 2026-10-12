@@ -1924,3 +1924,29 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the s39 matrix (11/11), the fifteen-session standing contract set (with the s33/s34 hardening shipped after the root-caused mid-batch corruption), the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (VLM-diffed benign), and all documentation surfaces aligned; ready for the commit + push phase
+
+---
+Task ID: 108
+Agent: main (Super Z) — session 39
+Task: Session-39 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 178/178 unit ✓ build ✓ 198/198 E2E ✓ (2.8m) smoke 108 ✓
+- The SSH infrastructure re-established (the workspace had been RESET: paramiko reinstalled with --break-system-packages — 5.0.0; the paramiko shim intact at /home/z/my-project/bin/ssh); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s38 records
+- Commit 3f67029 (the s39 remediation — 19 files: the sweepExpiredBuckets seam + the two gates + the observer + the 3-pin eviction unit block + the s39 smoke block (2 pins, 108 steps) + the hardened s33/s34 live-verify cleanups + the NEW scripts/s39-live-verify.mjs (11 checks) + the NEW scripts/capture-screenshots-s39.sh + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.37.0/DEPLOYMENT/session_67.md/plan) + the worklog + 3 benign screenshot re-renders (04/05: the time-relative seed dates, VLM-diffed LAYOUT-OK; 09: the S39 fixture title)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the explicit --remote git@github.com:nordeim/service-desk.git — the s28 lesson held: the wrapper's default is task-management.git; the real push verified: remote == local HEAD @ 3f67029, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the run on the push (run 38317464954 on 3f67029) registered; the GitHub API rate-limited from this sandbox's egress IPs for the direct conclusion read — the LIVE BADGE (the documented doctrine: "its badge is a live signal — check the badge when a push lands") read with cache-busters at 12/17/22 minutes post-push: **build: passing on main** (the badge renders "building" while a run is in progress; main's HEAD is the 3f67029 push, and the local gate — the exact same command set — was ALL GREEN in the clean environment: lint ✓ typecheck ✓ 178/178 unit ✓ build ✓ 198/198 E2E ✓ smoke 108 ✓); the prior runs on 352fd34 (38312045031), 7fa3c8f (38223386803), 221141a (38222837506) + 21c7c06 (38217641463) all completed SUCCESS — consistent with the s38 record
+
+Stage Summary:
+- Session 39 complete (pending the CI conclusion): the bucket-eviction remediation shipped (the measured +111 MB leak closed with the honest red-green cycle + the strengthened mutation check), the signup surface pinned (the s65 shortlist closed), the s33/s34 cleanup hardening shipped after the root-caused mid-batch corruption, the twenty-first sweep recorded (the eleventh /login wave as another pure re-hash — non-gap; their s4/desktop/mobile defects persist — ours the working superset, re-verified via real clicks), production-ready superset maintained, pushed to main (3f67029)
+
+---
+Task ID: 109
+Agent: main (Super Z) — session 39
+Task: Session-39 final status commit
+
+Work Log:
+- The CI verification concluded via the live badge (build: passing on main, cache-buster-read at 12/17/22 min post-push — the s18 doctrine applied when the API rate-limits the direct read); the session's evidence set complete
+- The final status commit: the worklog task-108 CI conclusion + the plan's final checkbox updated with the badge evidence
+
+Stage Summary:
+- Session 39 fully closed: the bucket-eviction remediation (the +111 MB measured leak closed, the honest red-green cycle + the strengthened mutation check), the signup XFF pin (the s65 shortlist closed), the s33/s34 cleanup hardening (the root-caused mid-batch corruption), the twenty-first sweep (the eleventh /login wave — non-gap), all gates green (178 unit / 198 E2E / 108 smoke), pushed to main (3f67029 + this status commit), CI green (badge-verified)
