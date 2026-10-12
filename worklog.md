@@ -1847,3 +1847,16 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the s38 matrix, the fourteen-session standing contract set, the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (pixel-diffed benign), and all seven documentation surfaces aligned; ready for the commit + push phase
+
+---
+Task ID: 103
+Agent: main (Super Z) — session 38
+Task: Session-38 push + CI verification + final status
+
+Work Log:
+- The SSH infrastructure verified INTACT from the prior session (the paramiko shim at /home/z/my-project/bin/ssh + paramiko 5.0.0 — the workspace was NOT reset this run); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s37 records
+- Commit 221141a (the s38 remediation — 16 files: the clientIp rightmost-element seam + the 6-test clientIp unit block + the s38 smoke block (2 pins, 106 steps) + the NEW scripts/s38-live-verify.mjs (10 checks) + the NEW scripts/capture-screenshots-s38.sh + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.36.0/DEPLOYMENT/session_65.md/plan) + the worklog + 2 benign screenshot re-renders (01: 0.249% sub-visible antialiasing in the wordmark band, VLM-verified no visible difference; 09: 0.065% the S38 fixture title)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the explicit --remote — the s28 lesson held; the real push verified: remote == local HEAD @ 221141a, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the run on the push (run 38222837506 on 221141a) completed SUCCESS — verified via the GitHub API runs-list endpoint (no rate-limit window this session); the prior runs on 21c7c06 (38217641463), 34eb70a (38212469522) + afc3a25 (38209295092) also green
+
+Stage Summary:
+- Session 38 complete: the XFF-trust remediation shipped (the rightmost-element rate-limit-key hardening closing the measured rotation bypass — a genuine red-green cycle with the mutation check), the standalone XFF-injection platform discovery measured + documented (the honest-pins corrections), the twentieth sweep recorded (the tenth /login wave as a pure Rolldown re-hash — non-gap; their s4/desktop/mobile defects persist — ours the working superset, re-verified via real clicks), the shortlist re-examinations closed (the cache posture non-gap; the auth budget noted), production-ready superset maintained, pushed to main (221141a + this status commit), CI green (API-verified)
