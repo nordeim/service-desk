@@ -2046,3 +2046,16 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s40, fresh boots), the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (VLM-diffed benign), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 119
+Agent: main (Super Z) — session 41
+Task: Session-41 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 200/200 unit ✓ build ✓ 198/198 E2E ✓ (2.9m) smoke 121 ✓
+- The SSH infrastructure intact from s40 (paramiko 5.0.0 + the shim at /home/z/my-project/bin/ssh on PATH); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s40 records
+- Commit ac7601d (the s41 remediation — 24 files: the routeAllow seam + the 11-route single-source refactor + the 2 new test files (17 + 2 pins) + the NEW scripts/capture-screenshots-s41.sh + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.39.0/session_71.md/plan/worklog) + 1 benign screenshot re-render (09: the S41 fixture title, VLM-diffed BENIGN)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ ac7601d, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the run on the push (run 38343002663, run_number 105, head_sha ac7601d) polled — COMPLETED, conclusion SUCCESS — verified directly via the GitHub API (after an initial rate-limit window) + the live badge cache-buster-read three times (build: passing on main — the s18 doctrine's documented fallback applied during the rate-limit window)
+
+Stage Summary:
+- Session 41 complete: the allow-list single-source remediation shipped (the s69 drift candidate closed — behavior-preserving and PROVEN so by the untouched live pins), the health degraded-path closure (the unpinned 503 + the log layer), the s18 display-layer lesson's third firing documented as the session's process lesson (the false-finding root-caused by hex-dump before a phantom fix shipped), the 23rd parity sweep ALL NON-GAP (ours the working superset), all gates green (200 unit / 198 E2E / 121 smoke), pushed to main (ac7601d), CI green (run 105 success)
