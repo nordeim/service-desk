@@ -2265,3 +2265,17 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the mobile matrix, the desktop overflow axis, the VLM parity check, the UI round-trip, the screenshot set (seven byte-identical + three BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 135
+Agent: main (Super Z) — session 45
+Task: Session-45 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after the full docs + scripts landing): lint ✓ typecheck ✓ 235/235 unit ✓ build ✓ 198/198 E2E ✓ (2.9m) smoke 121 ✓ — the s45 files (the 2 scripts + the plan + the log + the test) all inside the gate, per the after-EVERY-file doctrine
+- The SSH infrastructure rebuilt for the reset workspace: paramiko 5.0.0 reinstalled (--break-system-packages) + the shim at /home/z/my-project/bin/ssh on PATH (outside the repo, per the wrapper skill's rule 5); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s44 records
+- Commit 50a79ca (the s45 remediation — 15 files: tests/ci-contract.test.ts (4 line-anchored pins) + the NEW scripts/capture-screenshots-s45.sh + scripts/s45-probe-cleanup.ts + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.43.0/session_79.md/remediation-plan-session45.md/worklog tasks 132-134) + 3 benign screenshot re-renders (09: the S45 fixture title; 04/05: the fresh-seed relative timestamps — VLM-diffed BENIGN, the other seven byte-identical to the s44 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ 50a79ca, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the badge read `passing` on 3 fresh cache-buster reads past the ~4-minute run duration (+2 min margin), re-confirmed with the workflow page rendering "completed successfully"; the API returned no data (the documented s39–s44 fallback pattern — the badge is the evidence)
+- The final status commit: the plan's execution status + this worklog entry (the s41–s44 closeout pattern)
+
+Stage Summary:
+- Session 45 complete: the CI-contract closure (the workflow file's silent-failure surface pinned — the frozen-install ×2, the s18 hidden-files guard, the [main] triggers, the bun.lock tsx entry — all line-anchored after the mutation discipline live-rediscovered the s43 mutation-C class on the session's own pin), the 27th parity sweep ALL NON-GAP (the fifteenth /login wave measured to the byte — UserAppMain content-identical; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (50a79ca), CI green (badge-verified past the run duration)
