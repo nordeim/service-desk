@@ -1991,3 +1991,16 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s39, fresh boots), the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (VLM-diffed benign), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 114
+Agent: main (Super Z) — session 40
+Task: Session-40 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 181/181 unit ✓ build ✓ 198/198 E2E ✓ (2.9m) smoke 121 ✓
+- The SSH infrastructure re-established (the workspace had been RESET: paramiko 5.0.0 reinstalled into the venv; the paramiko shim recreated at /home/z/my-project/bin/ssh, chmod +x, on PATH); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s39 records
+- Commit 6219241 (the s40 remediation — 29 files: the api-methods seam + the 11-route stub matrices with the honest OPTIONS pairing + the 3-pin unit test + the s40 smoke block (13 pins, 121 steps) + the NEW scripts/s40-live-verify.mjs (33 checks) + the NEW scripts/capture-screenshots-s40.sh + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.38.0/DEPLOYMENT/session_69.md/plan) + the worklog + 4 benign screenshot re-renders (02/04/05: the time-relative seed dates; 09: the S40 fixture title — VLM-diffed BENIGN)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the explicit --remote git@github.com:nordeim/service-desk.git — the s28 lesson held: the wrapper's default is task-management.git; the real push verified: remote == local HEAD @ 6219241, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the run on the push (run 38337613112, run_number 102, head_sha 6219241) registered and polled — COMPLETED, conclusion SUCCESS (~4 min) — verified directly via the GitHub API (not rate-limited this session) + the live badge cache-buster-read: build: passing on main
+
+Stage Summary:
+- Session 40 complete: the 405 JSON-boundary closure (the method-level completion of the s33 path-level doctrine — the honest red-green cycle + the three-mutation check), the twenty-second sweep (the twelfth /login wave as a pure re-rename — non-gap; their s4/desktop/mobile defects persist — ours the working superset, re-verified via real clicks), production-ready superset maintained, pushed to main (6219241), CI green (run 102, success)
