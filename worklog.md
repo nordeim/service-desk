@@ -2319,3 +2319,17 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the mobile matrix, the desktop overflow axis, the VLM parity check, the UI round-trip, the screenshot set (seven byte-identical + three BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 139
+Agent: main (Super Z) — session 46
+Task: Session-46 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after the full docs + scripts landing): lint ✓ typecheck ✓ 238/238 unit ✓ build ✓ (4.5s — the CSS warning absent on rebuild, the s44 class) 198/198 E2E ✓ (2.7m) smoke 121 ✓ — the s46 files (the 5 scripts + the 3 align scripts + the plan + the log + the test) all inside the gate, per the after-EVERY-file doctrine
+- The SSH infrastructure rebuilt for the reset workspace: paramiko 5.0.0 installed + the shim extracted from the skill doc's Appendix A to /home/z/my-project/bin/ssh (outside the repo, per the wrapper skill's rule 5), on PATH; the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s45 records
+- Commit ba45b5a (the s46 remediation — 21 files: tests/env-contract.test.ts (3 line-anchored pins) + the NEW scripts/capture-screenshots-s46.sh + scripts/s46-probe-cleanup.ts + scripts/s46-vlm-check.mjs + scripts/s46-vlm-check-post.mjs + scripts/s46-vlm-shotdiff.mjs + scripts/s46-vlm-spotcheck.mjs + scripts/s46-docs-align.py + s46-docs-align2.py + s46-docs-align3.py + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.44.0/session_81.md/remediation-plan-session46.md/worklog tasks 136-138) + 3 benign screenshot re-renders (09: the S46 fixture title; 04/05: the fresh-seed relative timestamps — VLM-diffed BENIGN, the other seven byte-identical to the s45 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ ba45b5a, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the badge read passing on 6 fresh cache-buster reads past the run duration (+2 min margin), the workflow runs page rendering "completed successfully" with zero failure strings; the API rate-limited (the documented s39–s45 fallback pattern — the badge is the evidence)
+- The final status commit: the plan's execution status + this worklog entry (the s41–s45 closeout pattern)
+
+Stage Summary:
+- Session 46 complete: the environment-contract closure (the .env.example surface pinned bidirectionally — every code-read var documented, every documented var live, the canonical DATABASE_URL literal line-anchored; the session's manual closeout step automated into the 3 pins), the 28th parity sweep ALL NON-GAP (no sixteenth /login wave — all chunks byte-identical to s45; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (ba45b5a), CI green (badge-verified past the run duration, 6 reads + the runs page)
