@@ -2212,3 +2212,17 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s40, fresh boots, seed canonical throughout), the UI round-trip (the 201 + listing + navigation, response-interceptor-diagnosed), the mobile matrix, the VLM parity check, the screenshot set (seven byte-identical + three BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 131
+Agent: main (Super Z) — session 44
+Task: Session-44 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after the full docs + scripts landing): lint ✓ typecheck ✓ 231/231 unit ✓ build ✓ 198/198 E2E ✓ (2.8m) smoke 121 ✓ — the s44 files (the 3 scripts + the plan + the log) all inside the gate, per the after-EVERY-file doctrine
+- The SSH infrastructure rebuilt for the reset workspace: paramiko 5.0.0 installed (--break-system-packages was needed on pip; pip3 worked) + the shim at /home/z/my-project/bin/ssh (outside the repo, per the wrapper skill's rule 5); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s43 records
+- Commit d8497d6 (the s44 remediation — 20 files: tsx in devDependencies + bun.lock + tests/e2e-provisioning.test.ts (4 pins) + the NEW scripts/capture-screenshots-s44.sh + scripts/s44-standing-rerun.sh + scripts/s44-vlm-check.mjs + scripts/s44-shot-diff.mjs + scripts/s44-vlm-spotcheck.mjs + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.42.0/session_77.md/plan/worklog tasks 128-130) + 3 benign screenshot re-renders (09: the S44 fixture title; 04/05: the fresh-seed relative timestamps — VLM-diffed BENIGN, the other seven byte-identical to the s43 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ d8497d6, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the GitHub API rate-limited (the documented s39–s43 pattern, both from the primary and a secondary egress IP); the documented badge fallback — `passing` on 3 fresh cache-buster reads past the ~4-minute run duration, re-confirmed with 3 more reads + the workflow runs page rendering Success; the badge reflects the latest completed run on main (a failure on d8497d6 would have flipped it to failing)
+- The final status commit: the plan's execution status + this worklog entry (the s41–s43 closeout pattern)
+
+Stage Summary:
+- Session 44 complete: the provisioning-fallback closure (the documented npx tsx contract now executes a lockfile-pinned devDependency — offline-safe, reproducible, 4 chain pins freezing the AGENTS.md fallback line in its code shape), the 26th parity sweep ALL NON-GAP (the fourteenth /login wave measured to the byte — the login-contract carrier byte-size-identical; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (d8497d6), CI green (badge-verified past the run duration)
