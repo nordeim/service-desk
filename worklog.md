@@ -2102,3 +2102,57 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s40, fresh boots, seed canonical throughout), the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (VLM-diffed benign), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 123
+Agent: main (Super Z) — session 42 (post-interruption closure, recorded by session 43)
+Task: Session-42 push + CI verification + final status (the session-74 interruption casualty — recorded retroactively from the session_73/74 evidence + this session's post-hoc verification)
+
+Work Log:
+- The session-42 push entry was lost to the session-74 tool-level interruption (the worklog ended at task 122; the push itself SUCCEEDED before the interruption — commit 731731d landed on origin/main, verified by this session's git pull)
+- The pending CI confirmation completed post-hoc by the session-43 agent: the badge read `passing` on 3 fresh cache-buster reads (the GitHub API rate-limited — the documented s39–s42 fallback pattern, the s18 doctrine); the plan's execution status had already recorded the run COMPLETED SUCCESS
+- The final status commit (the s41-pattern closeout recording the CI evidence) was never made — the operator's own `1b1c58e` (session_74.md transcript) closed the session on the remote instead
+
+Stage Summary:
+- Session 42's push verified landed (731731d on origin/main, CI green via the badge); the worklog gap closed by this retroactive entry; no code state was affected
+---
+Task ID: 124-gap-s43
+Agent: main (Super Z) — session 43
+Task: Session-43 gap analysis: the parity sweep (the 25th — the THIRTEENTH /login wave, a pure re-hash) + the own-side audit (the s73 shortlist executed clean + the next-level candidates)
+
+Work Log:
+- The workspace refreshed via git pull (fast-forward to 1b1c58e — the operator's session_74.md transcript; NOT reset this session); .env verified (DATABASE_URL="file:../db/custom.db", .env == .env.example byte-identical); the baseline gates ALL GREEN (lint ✓ typecheck ✓ 212/212 unit ✓ build ✓ 198/198 E2E 2.9m ✓ smoke 121 ✓ — the s42 closeout state reproduced exactly)
+- The parity sweep (the 25th): F1 — the THIRTEENTH /login wave ARRIVED, measured a pure dependency-graph re-hash: index-DV3Dmjzy.js → index-BFXNaE6A.js (103851 bytes, byte-size-identical; 3553 differing bytes ALL dep-map hash substitutions — mixpanelUtils/i18n/~200 static/* chunks re-hashed); UserAppMain-icZpSP83.js → UserAppMain-sbI2Sg7Z.js (58756 bytes byte-size-identical; 99 differing bytes all import specifiers; from_url ×14 + "Forgot password" ×1 + "Need an account" ×1 + "Password" ×39 all identical); logoutReturnPath hash-STABLE; the app-route pair + the login CSS hash-STABLE. NON-GAP (the s40 pure-re-rename precedent at platform-graph scale)
+- F2 NON-GAP — the chrome ledger exact both routes (login: viewport-fit=cover + the PWA trio; dashboard: plain viewport, no trio; both re-measured live). F3 — their 1328-vs-1280 desktop overflow persists (25th; ours 1280=1280 live-verified). F4 — their 468-vs-375 mobile overflow + the s4 toast-viewport blocking persist (25th; agent-browser's coverage check REFUSED the real toggle click; their dialogs: 0); ours: 375=375, the REAL click opens the sheet (dialog rect 0,0,288,667), Escape closes, the My-Tickets nav-tap auto-closes + navigates. F5 — the paired desktop VLM check LAYOUT-OK (the z-ai vision CLI, both dashboards at 1280×800)
+- The UI round-trip on the pre-remediation build: real login → submitticket → the category dropdown (the Radix option click) → typed title/description → submit → /mytickets → the S43 probe listed → cleaned via Prisma → the seed canonical (4/11/3)
+- The s73 next-session shortlist executed, ALL CLEAN: the new-site sweep (exactly 4 console.* sites, all pinned — no drift since s42); the README/AGENTS/PAD cross-counts (all five docs claim 212, no drift); nothing new grew (the 731731d..1b1c58e diff is docs-only). The s18 display-layer artifact's FIFTH firing (grep + awk rendered "[health]" as "ealth]" — hex-dumped, bytes correct)
+- The own-side audit at the next level: P1 CONFIRMED — the package.json script-pin invariant (AGENTS.md #3, "Keep the pin when editing scripts") held by convention alone: 7 scripts (dev/build/start/db:push/db:seed/db:migrate/db:reset) + the smoke's 3 throwaway pins + the E2E pair's 3 literals, none guarded anywhere; a dropped pin fails only in ambient-DATABASE_URL sandboxes as a silently redirected database. P2 CONFIRMED — the canonical seed corpus (4/11/3) claimed in five docs + the fixture under 198 E2E tests + the screenshot lineage, asserted nowhere automated (the seed logs without asserting; the E2E global-setup seeds without asserting; no spec pins the totals; the structural blocker: seed.ts executes main() at module scope)
+
+Stage Summary:
+- The 25th sweep: ALL NON-GAP (the thirteenth wave = a pure re-hash, measured to the byte; ours the working superset — the mobile matrix re-verified via real clicks, the VLM check LAYOUT-OK); the s73 shortlist clean; the next-level audit: P1 (the script-pin invariant) + P2 (the seed corpus) → remediation plan → docs/remediation-plan-session43.md
+---
+Task ID: 125
+Agent: main (Super Z) — session 43
+Task: Session-43 remediation: the db-script pins + the seed-data extraction + the corpus pins
+
+Work Log:
+- The TDD RED observed: tests/seed-corpus.test.ts failed at the import against the missing prisma/seed-data module (the s41 module-scope RED pattern). tests/db-script-pins.test.ts — TWO honest test-authoring defects fixed en route: db:generate is schema-to-client codegen (no database touch — the db:* RULE needed the exception) + playwright.config.ts carries the e2e literal ONCE (the webServer wires the CONST — the pin needed the definition AND the wiring, not a literal count)
+- The GREEN: the NEW prisma/seed-data.ts (pure data — no PrismaClient, no main(), no crypto; the corpus importable without executing the seed) + the prisma/seed.ts import switch (hashPassword + the upsert/create logic byte-identical, a relative import within prisma/ — the no-@/-alias constraint untouched) + the two test files (tests/db-script-pins.test.ts: 6 pins — the runtime trio rule + the db:* rule with the codegen exception + the exact-value pin + the smoke code-shaped ×3 + the playwright const-and-wiring + the global-setup wiring; tests/seed-corpus.test.ts: 9 pins — the canonical 4/11/3 counts + the unique natural keys + the referential integrity + the vocabulary cross-check against constants.ts + the four-status QUICK STATS coverage + the demo login + the module-shape precondition) → 227/227 unit (212 + 15)
+- The mutation check (7 observations, each observed + reverted + re-verified): A (drop the db:seed pin) bit the rule + value pins; B (corrupt the start pin to custom2.db) bit the runtime + value pins; C (corrupt the global-setup E2E literal) — THE FIRST ATTEMPT EXPOSED THE PIN'S OWN FALSE-GREEN: the bare toContain("file:../db/e2e.db") stayed GREEN off the file's doc-comment occurrence while the executable literal drifted; hardened to the code-shaped occurrence (DATABASE_URL: "file:../db/e2e.db"), the smoke pin hardened to the code-shaped env-assignment form alongside, the retry bit exactly the wiring pin; D (the sed artifact — a ticket emptied of its fields, still array-length 11) bit the 3 integrity pins (referential/vocabulary/module-shape); D2 (the clean full-block drop) bit exactly the canonical-counts pin; E (corrupt a category to "hardware2") bit exactly the vocabulary pin; F (break the demo password to Demo1235!) bit exactly the demo-login pin
+- The full gate in the CLEAN environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 227/227 unit ✓ build ✓ 198/198 E2E ✓ (2.9m — unchanged; the E2E global-setup seeds through the SAME seed.ts entry point, the extraction invisible) smoke 121 ✓ (unchanged — the behavior-preservation proof); the seed re-run behavior-preserving (the canonical 4/11/3 log)
+
+Stage Summary:
+- The s43 remediation shipped: the db-script-pin rule (the AGENTS.md invariant #3 automated — RULE-based, code-shaped, all three config layers) + the seed-corpus pins (the canonical fixture frozen via the side-effect-free extraction); all gates green (227 unit / 198 E2E / 121 smoke); the mutation-C lesson recorded (pin literals by their CODE SHAPE — a comment can satisfy a bare substring forever)
+---
+Task ID: 126
+Agent: main (Super Z) — session 43
+Task: Session-43 live re-verification + screenshots + docs alignment
+
+Work Log:
+- The s40 live-verify re-run on the REMEDIATED production standalone: 33/33 GREEN (the 11-route wrong-method matrix + the OPTIONS advertisement table + the rate-budget non-interference + the s33 set-cookie + the s19/s37 bounces + the seed canonical)
+- The standing re-runs s24–s40 ALL GREEN (16 scripts — the persisted scripts/s43-standing-rerun.sh, the s42 lineage with a FRESH BOOT before every script; the seed canonical 4/11/3 after every script, NO output pipes)
+- The UI round-trip on the remediated build: real login → submitticket → the category dropdown (the Radix option click) → typed title/description → submit → /mytickets → the S43 probe listed → cleaned via Prisma (scripts/s43-cleanup.mjs — one honest defect fixed en route: the first title-prefix match missed the second probe's different title; broadened to the S43 prefix) → the seed canonical (4/11/3); the mobile matrix on the remediated build: 375=375, the REAL click opens the sheet (dialog rect 0,0,288,667), Escape closes, the Dashboard nav-tap auto-closes + navigates; the paired desktop VLM check on the remediated build: LAYOUT-OK
+- Screenshots: the 10-shot set via scripts/capture-screenshots-s43.sh (the s42 lineage verbatim + the header + the fixture title S43; all FATAL guards passed); VLM spot-checks 02 + 05 LAYOUT-OK; the ONE changed shot (09: the S43 fixture title) VLM-diffed BENIGN against the s42 git baseline — the other NINE byte-identical to the s42 baseline (the seed corpus stable through the extraction, the honest extraction proof); the seed re-verified canonical after (4/11/3)
+- Docs aligned: README (the counts 227 + the s43 pin description + seed-data.ts in the file hierarchy), AGENTS.md (the commands-table test description + the NEW Session-43 contracts section + the reference list through s43 + the screenshots lineage s42→s43), CLAUDE.md (the counts + TWO s43 anti-patterns: the documented-invariant-without-a-pin doctrine + the bare-substring-pin-on-comment-occurrence doctrine), PAD (§7.1 the two new test rows + the checklist 227 + the RESOLVED session-43 known-issues row), service-desk_SKILL.md v2.41.0 (lesson 97 + the project_state), docs/session_75.md (the s43 agent log), the plan's execution status, the worklog (incl. the retroactive task-123 entry closing the session-74 interruption's missing s42 push record); .env.example re-verified against the codebase (unchanged, matches)
+
+Stage Summary:
+- Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s40, fresh boots, seed canonical throughout), the UI round-trip, the mobile matrix, the VLM parity check (both builds), the screenshot set (nine byte-identical + one BENIGN title change), and all documentation surfaces aligned; ready for the commit + push phase

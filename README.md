@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?logo=prisma&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-212%20unit%20%2B%20198%20E2E-brightgreen)
+![Tests](https://img.shields.io/badge/tests-227%20unit%20%2B%20198%20E2E-brightgreen)
 ![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 
 A production-ready IT support ticketing portal — a feature-parity **superset** clone of the [base44 ServiceDesk reference app](https://service-desk-332a5ae4.base44.app/), rebuilt on Next.js 16 + React 19 + Prisma/SQLite. Users sign in, submit tickets across six issue categories, track status/priority, converse in comment threads, and manage their own ticket lifecycle.
@@ -14,7 +14,7 @@ A production-ready IT support ticketing portal — a feature-parity **superset**
 
 The portal solves a everyday enterprise problem: employees need a single place to report IT issues (hardware, software, network, access, email) and follow them to resolution, while the sidebar keeps live global stats visible. The clone reproduces the reference app's visual design (measured from its live DOM and computed styles — not guessed) and extends it with a working signup flow, password-reset request, file attachments, owner-side status control, search/filter/sort, and a full test pyramid.
 
-**Verification status:** `lint` ✓ · `typecheck` ✓ · 212 Vitest unit tests ✓ · production build ✓ · 198 Playwright E2E tests ✓ · API smoke script (121 steps) ✓ · CI (GitHub Actions, on push/PR to main) ✓
+**Verification status:** `lint` ✓ · `typecheck` ✓ · 227 Vitest unit tests ✓ · production build ✓ · 198 Playwright E2E tests ✓ · API smoke script (121 steps) ✓ · CI (GitHub Actions, on push/PR to main) ✓
 
 ## Key Features
 
@@ -33,7 +33,7 @@ The portal solves a everyday enterprise problem: employees need a single place t
 | 📱 **Responsive chrome** | shadcn/ui off-canvas mobile sidebar with overlay, Escape, and auto-close on navigate |
 | 🎨 **Parity-pinned design** | 163 E2E parity tests pin the reference's measured contracts (adjacent nav icon/label layout, gradient quick stats, flat recent rows with FileText tiles, detail grid, login card, lowercase badges, entrance animations — per-surface timing + stagger + the x-axis row slide, badge shadow + per-surface padding, the measured focus-state matrix, reference-computed icon-button padding/shadows/spacings, the system font stack, the v3 radius scale, select dropdown structure + priority colors, the accent-token pair, the auth-error alert contract, the 80% sheet overlay, the button-cursor preflight, the stock shadcn token block, the old-gen Badge base, the translucent sidebar edge, the in-card auth views, the ticket-not-found Alert, the id-less detail route, the PWA manifest/theme-color/apple-icon, the per-route JSON-LD breadcrumbs, the per-route social URL set, the login-view computed margins, the submit-form attachment rows + detail-page attachment display + the no-comments empty state, the attachment inline-disposition + the ticketdetails full-URL canonicalization, the attachment cache window + the timezone-stable UTC date rendering, the 5s sidebar-stats polling, the viewport-fit=cover meta + the truth-telling og:image asset) |
 | 🏃 **Entrance animations** | Per-surface, re-measured session 16 from the reference's framer-motion parameters (bundle) + live rAF timelines: stat cards + the submit/detail wrappers rise 20px over 0.5s with a gentle ease-out tween (no overshoot); mytickets cards rise as a ~300ms spring with a 50ms/index stagger; dashboard recent rows slide in from the LEFT (x-axis) as the same spring with a 100ms/index stagger; the opacity on the spring surfaces rides a separate piecewise curve (the framer-motion spring's slower opacity settle). All disabled under `prefers-reduced-motion` |
-| 🧪 **Test pyramid** | 212 unit + 198 E2E tests + API smoke (121 steps) + GitHub Actions CI, pinned to the UI contract |
+| 🧪 **Test pyramid** | 227 unit + 198 E2E tests + API smoke (121 steps) + GitHub Actions CI, pinned to the UI contract |
 
 ## Architecture
 
@@ -80,7 +80,7 @@ flowchart LR
 │   │   └── toast.tsx                  ← Radix toast + useToast context
 │   ├── 📂 hooks/use-mobile.ts         ← useSyncExternalStore media query
 │   └── 📂 lib/                        ← auth, db, db-path, validation, constants, utils (+ tests)
-├── 📂 prisma/schema.prisma · seed.ts
+├── 📂 prisma/schema.prisma · seed-data.ts · seed.ts
 ├── 📂 db/                             ← SQLite file lives here (gitignored *.db)
 ├── 📂 tests/e2e/                      ← Playwright specs (incl. visual-parity.spec.ts) + setup + global setup
 ├── 📂 scripts/                        ← smoke-test.sh + gradient probes
@@ -133,7 +133,7 @@ bun run lint && bun run typecheck && bun run test
 ## Testing
 
 ```bash
-bun run test               # Vitest unit: 212 tests (auth HMAC/scrypt/rate-limit + the clientIp + the 405 seam + the s41 routeAllow (the s42 fail-fast input validation: unknown method names THROW at module scope) + the s42 log-layer pins (the AUTH_SECRET production warning + the forgot-password audit-trail lines — every console.* site in src/ now pinned)
+bun run test               # Vitest unit: 227 tests (auth HMAC/scrypt/rate-limit + the clientIp + the 405 seam + the s41 routeAllow (the s42 fail-fast input validation: unknown method names THROW at module scope) + the s42 log-layer pins (the AUTH_SECRET production warning + the forgot-password audit-trail lines — every console.* site in src/ now pinned) + the s43 db-script pins (every package.json script that touches a database carries the inline DATABASE_URL pin — the smoke + E2E layers alongside) + the s43 seed-corpus pins (the canonical 4/11/3 fixture shape, vocabulary, and demo login — via the side-effect-free prisma/seed-data.ts)
                            # XFF seam (s38: the rightmost-element trust — the proxy-appended
                            # value, the trim, the single-element/x-real-ip/unknown fallbacks),
                            # validation incl. the
