@@ -2059,3 +2059,46 @@ Work Log:
 
 Stage Summary:
 - Session 41 complete: the allow-list single-source remediation shipped (the s69 drift candidate closed — behavior-preserving and PROVEN so by the untouched live pins), the health degraded-path closure (the unpinned 503 + the log layer), the s18 display-layer lesson's third firing documented as the session's process lesson (the false-finding root-caused by hex-dump before a phantom fix shipped), the 23rd parity sweep ALL NON-GAP (ours the working superset), all gates green (200 unit / 198 E2E / 121 smoke), pushed to main (ac7601d), CI green (run 105 success)
+---
+Task ID: 120-gap-s42
+Agent: main (Super Z) — session 42
+Task: Session-42 gap analysis: the parity sweep (the 24th — NO thirteenth wave) + the own-side audit (the log-layer generalization + the routeAllow input-validation candidates)
+
+Work Log:
+- The workspace RESET this session (fresh clone): bun install (482 packages), .env restored from .env.example (DATABASE_URL="file:../db/custom.db"), db:push + db:seed (canonical 4/11/3), .env.example verified matching the codebase
+- The baseline gates ALL GREEN in the restored environment: lint ✓ typecheck ✓ 200/200 unit ✓ build ✓ 198/198 E2E (2.8m) ✓ smoke 121 ✓ — the s41 closeout state reproduced exactly
+- The parity sweep (the 24th): F1 NON-GAP — NO THIRTEENTH /login wave (the entry pair UNCHANGED: index-DV3Dmjzy.js 103851 bytes byte-identical + index-RwB3lDG6.css; UserAppMain-icZpSP83.js hash-stable 58756 with from_url ×14; logoutReturnPath-HjtsxsFd.js hash-stable; the app-route pair index-DhFaB31Z.js + index-DFdILd41.css UNCHANGED). F2 NON-GAP — the chrome ledger exact both routes (login: viewport-fit=cover + the PWA trio; dashboard: plain viewport, no trio). F3 — their 1328-vs-1280 desktop overflow persists (24th; ours 1280=1280 live-verified). F4 — their 468-vs-375 mobile overflow + the s4 toast-viewport blocking persist (24th; elementFromPoint(38,30) returns the fixed top-0 z-[100] toast div; agent-browser's coverage check REFUSED the real toggle click; their dialogs: 0); ours: 375=375, the REAL click opens the sheet (dialog rect 0,0,288,667), Escape closes, the My-Tickets nav-tap auto-closes + navigates. F5 — the paired desktop VLM check LAYOUT-OK (the z-ai vision CLI, both dashboards at 1280×800)
+- The UI round-trip on the current build: real login → submitticket → the category dropdown (the Radix option click) → typed title/description → submit → /mytickets → the S42 probe listed → cleaned via Prisma → the seed canonical (4/11/3)
+- The own-side audit (the s71 shortlist): P1 CONFIRMED — the log-layer generalization: 4 console.* sites in src/, only 1 pinned (the health route, s41); the auth.ts AUTH_SECRET production warning + the forgot-password known/unknown log lines are unpinned stderr surfaces. P2 CONFIRMED — the routeAllow input validation: a typo'd method name in the implemented array is dropped SILENTLY by the canonical filter (routeAllow(["GET","POTS"]) → "GET, HEAD, OPTIONS" with no signal); the export-key pin catches it only indirectly at the per-route layer
+- The s18 display-layer artifact fired a FOURTH time this session (grep + the Read tool both rendered "[health]" as "ealth]"): hex-dumped the health route + the s41 test file — the bytes correct in both; the doctrine re-validated (hex-dump before declaring a string defect)
+
+Stage Summary:
+- The 24th sweep: ALL NON-GAP (ours the working superset — the mobile matrix re-verified via real clicks, the VLM check LAYOUT-OK); the own-side audit: P1 (the log-layer generalization — the s71 leading candidate) + P2 (the routeAllow fail-fast seam — the s71 candidate #2) → remediation plan → docs/remediation-plan-session42.md
+---
+Task ID: 121
+Agent: main (Super Z) — session 42
+Task: Session-42 remediation: the routeAllow fail-fast seam + the log-layer closure (the s71 shortlist closed)
+
+Work Log:
+- The TDD RED observed: tests/route-allow-validation.test.ts — 3/4 failed against the silently-dropping seam (the throw pins: routeAllow(["GET","POTS"]) returned the clean string with the typo gone — the exact defect); tests/auth-secret-warning.test.ts (5 pins) + tests/forgot-password-logs.test.ts (3 pins) landed GREEN (the s31 clean-but-unpinned doctrine). Two test-authoring defects fixed en route: the process.env.X=undefined Node quirk (stores the STRING "undefined" — restore deletions with delete) + the @types/node read-only NODE_ENV (the record-view cast)
+- The GREEN: the input-validation loop in routeAllow (unknown method names THROW at module scope — the route files evaluate the derivation at import time; the canonical set case-sensitive: "get" throws; the self-documenting message carries the offending name + the canonical set) + the s41 comment-block contract update in src/lib/api-methods.ts → 212/212 unit (200 + 12: 4 fail-fast + 5 config-safety + 3 audit-trail)
+- The mutation check (6 total, each observed + reverted + re-verified): A (corrupt the auth warning prefix) bit the two prefix pins; B (invert the NODE_ENV condition) bit the dev-silent + prod pins; C (drop the user id from the known-user log) bit exactly the known-email pin; D (leak exists into the forgot-password response) bit exactly the enumeration-safety pin; E (remove the validation loop) bit all 3 throw pins; F (reject the valid canonical member PUT as input) bit exactly the boundary pin (the api-allow-source import stayed green — no current route declares PUT; the honest outcome recorded in the plan)
+- The full gate in the CLEAN environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 212/212 unit ✓ build ✓ 198/198 E2E ✓ (unchanged — the s21 zero-fixture doctrine held) smoke 121 ✓ (unchanged — the behavior-preservation proof: the untouched s40 block pins the exact live allow strings, and the validated seam answers identically)
+
+Stage Summary:
+- The s42 remediation shipped: the routeAllow fail-fast seam (the s71 candidate #2 — input errors now crash the import instead of becoming output lies) + the log-layer closure (the s71 leading candidate — every console.* site in src/ now pinned: the AUTH_SECRET config-safety tripwire + the forgot-password audit trail); all gates green (212 unit / 198 E2E / 121 smoke)
+---
+Task ID: 122
+Agent: main (Super Z) — session 42
+Task: Session-42 live re-verification + screenshots + docs alignment
+
+Work Log:
+- The s40 live-verify re-run on the REMEDIATED production standalone: 33/33 GREEN (the 11-route wrong-method matrix + the OPTIONS advertisement table + the rate-budget non-interference + the s33 set-cookie + the s19/s37 bounces + the seed canonical)
+- The standing re-runs s24–s40 ALL GREEN (16 scripts — the persisted scripts/s42-standing-rerun.sh with a FRESH BOOT before every script; the first attempt with one long-lived server failed s33+ by the login rate-limiter exhaustion (the in-memory 10/15min bucket accumulates across scripts — the fresh-boot doctrine's exact reason, rediscovered); the seed canonical 4/11/3 after every script, NO output pipes)
+- The UI round-trip on the remediated build: real login → submitticket → the category dropdown (the Radix option click) → typed title/description → submit → /mytickets → the S42 probe listed → cleaned via Prisma → the seed canonical (4/11/3); the mobile matrix on the remediated build: 375=375, the REAL click opens the sheet (dialog rect 0,0,288,667), Escape closes, the My-Tickets nav-tap auto-closes + navigates; the paired desktop VLM check on the remediated build: LAYOUT-OK
+- Screenshots: the 10-shot set via scripts/capture-screenshots-s42.sh (the s41 lineage verbatim + the header + the fixture title S42; all FATAL guards passed); VLM spot-checks 02 + 05 LAYOUT-OK; the three changed shots (04/05: the time-relative seed dates; 09: the S42 fixture title) VLM-diffed BENIGN; the seed re-verified canonical after (4/11/3)
+- Docs aligned: README (the counts 212 + the quickstart line + the s42 seam description), AGENTS.md (the commands-table test description + the NEW Session-42 contracts section + the reference list through s42 + the screenshots lineage s41→s42), CLAUDE.md (the counts + TWO s42 anti-patterns: the fail-fast-input-validation doctrine + the log-layer-is-an-operator-API doctrine), PAD (§7.1 the three new test rows + the checklist 212 + the RESOLVED session-42 known-issues row), service-desk_SKILL.md v2.40.0 (lesson 96 + the project_state + the description line), docs/session_73.md (the s42 agent log), the plan's execution status, the worklog; .env.example re-verified against the codebase (unchanged, matches)
+- The process lesson recorded: the s18 display-layer artifact's FOURTH firing (grep + the Read tool rendered "[health]" as "ealth]" — hex-dumped, bytes correct) — and the trap bit my OWN doc-patch (an assert-less string replace using the artifact reading silently failed; the doctrine now extends to EDITING bracket-prefixed strings, not just reading them)
+
+Stage Summary:
+- Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s40, fresh boots, seed canonical throughout), the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (VLM-diffed benign), and all documentation surfaces aligned; ready for the commit + push phase

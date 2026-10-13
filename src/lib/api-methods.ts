@@ -69,10 +69,17 @@ export function optionsNoContent(allow: string): NextResponse {
 // - The order is the canonical HTTP method order (the order the s40
 //   measurements recorded on the framework's own auto-OPTIONS, OPTIONS
 //   last) — input order is ignored, so the string is deterministic.
-// - Unknown method names in the input are dropped by the filter; the
-//   consistency pins (tests/api-allow-source.test.ts) catch a typo'd
-//   declaration via the export-surface mismatch (a declared-but-not-
-//   exported method fails the key-set assertion).
+// - Unknown method names THROW (s42 — the fail-fast seam). The s41
+//   contract was silent-drop ("unknown names are dropped by the filter"),
+//   measured at the s42 audit as the drift hazard: routeAllow(["GET",
+//   "POTS"]) returned "GET, HEAD, OPTIONS" with the typo silently gone —
+//   and a typo'd IMPLEMENTED-method declaration (POTS for POST) produced
+//   a silently-wrong advertisement with no alarm anywhere. Every route
+//   file evaluates this at MODULE SCOPE, so a typo'd declaration now
+//   crashes the module import — the dev server, the build, and the test
+//   layer all surface it immediately. The canonical set is
+//   case-sensitive uppercase ("get" throws — a case bug surfaces, never
+//   hides). The pins: tests/route-allow-validation.test.ts.
 const CANONICAL_METHOD_ORDER = [
   "GET",
   "HEAD",
@@ -88,6 +95,13 @@ const CANONICAL_METHOD_ORDER = [
  * the single source every stub and the OPTIONS advertisement consume.
  */
 export function routeAllow(implemented: readonly string[]): string {
+  for (const m of implemented) {
+    if (!(CANONICAL_METHOD_ORDER as readonly string[]).includes(m)) {
+      throw new Error(
+        `routeAllow: unknown method "${m}" — the canonical set is ${CANONICAL_METHOD_ORDER.join(", ")}`,
+      );
+    }
+  }
   const advertised = new Set(implemented);
   if (advertised.has("GET")) advertised.add("HEAD");
   advertised.add("OPTIONS");
