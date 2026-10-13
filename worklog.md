@@ -2004,3 +2004,45 @@ Work Log:
 
 Stage Summary:
 - Session 40 complete: the 405 JSON-boundary closure (the method-level completion of the s33 path-level doctrine — the honest red-green cycle + the three-mutation check), the twenty-second sweep (the twelfth /login wave as a pure re-rename — non-gap; their s4/desktop/mobile defects persist — ours the working superset, re-verified via real clicks), production-ready superset maintained, pushed to main (6219241), CI green (run 102, success)
+---
+Task ID: 116-gap-s41
+Agent: main (Super Z) — session 41
+Task: Session-41 gap analysis: the parity sweep (the 23rd — NO thirteenth wave) + the own-side audit (the allow-list single-source candidate + the health log-layer closure)
+
+Work Log:
+- The parity sweep (the 23rd): F1 NON-GAP — NO THIRTEENTH /login wave (the entry pair UNCHANGED from s40: index-DV3Dmjzy.js 103851 bytes + index-RwB3lDG6.css; UserAppMain-icZpSP83.js hash-stable 58756 with from_url x14 + all six login-card strings; logoutReturnPath hash-stable; the app-route pair index-DhFaB31Z.js UNCHANGED, live-DOM-verified; the live logout carries /login?from_url=<encoded dashboard> — the s37 contract intact)
+- F2 NON-GAP — the chrome ledger exact both routes (login: viewport-fit=cover + the PWA trio; dashboard: plain viewport, no trio). F3: their 1328-vs-1280 desktop overflow persists (23rd; ours 1280=1280, live-verified). F4: their 468-vs-375 mobile overflow + the s4 toast-viewport blocking persist (23rd; agent-browser's coverage check REFUSED the real toggle click — "covered by div.fixed.top-0"; their dialogs: 0); ours: 375=375, the REAL click opens the sheet (dialog 0,0,288,667), Escape closes, the My-Tickets nav-tap auto-closes + navigates. F5: the paired desktop VLM check LAYOUT-OK (after correcting the first capture to OUR dashboard — the initial pairing was invalid)
+- The UI round-trip on the pre-refactor build: real login → submitticket → the category dropdown (the Radix option click) → typed title/description → submit → /mytickets → the S41 probe listed → cleaned via Prisma → the seed canonical (4/11/3)
+- The own-side audit (the s69 shortlist): P1 CONFIRMED — the OPTIONS allow-list is ~56 hard-coded duplicated literals across the 11 routes (the s69 drift-risk candidate: a future method addition must update every copy); the catch-all's OPTIONS-404-on-unknown-paths verified deliberate-and-pinned (the s33 smoke block — non-defect); P2 FOUND — the health route's degraded-path log line carries a FIRST-COMMIT-VINTAGE typo ("ealth]" for "[health]", git-verified at 02d8fd8, 41 sessions old) AND the 503 degraded path is unpinned everywhere (every gate runs with the DB up — the log layer is the unaudited stderr axis)
+- The remediation plan written + saved: docs/remediation-plan-session41.md (the routeAllow derivation seam + the 11-route single-source refactor + the consistency pins + the health degraded-path closure via vi.mock — validated against every current allow string and the route-module import pattern)
+
+Stage Summary:
+- The 23rd sweep: ALL NON-GAP (ours the working superset — the mobile matrix re-verified via real clicks, the VLM check LAYOUT-OK, the s37 logout contract intact); the own-side audit: P1 (the allow-list single source — the s69 candidate) + P2 (the health log-layer closure) → remediation plan → docs/remediation-plan-session41.md
+---
+Task ID: 117
+Agent: main (Super Z) — session 41
+Task: Session-41 remediation: the routeAllow single-source refactor + the health degraded-path pins (the false-finding correction)
+
+Work Log:
+- The TDD RED observed: tests/api-allow-source.test.ts 17/17 failed at the import against the missing routeAllow seam (the s40 RED pattern); tests/health-degraded.test.ts BOTH pins PASSED — the prefix pin's unexpected GREEN triggered the root-cause: the hex dump (od -c on the working tree AND the first commit's blob 02d8fd8) showed the bytes were always "[health] database check failed:" — THE TYPOTHAT-WAS-NOT: the display layer (grep/git show/stderr trace) eats "[h" as a CSI-style escape, the s18 lesson's class, THIRD firing. The plan corrected mid-session (the P2 section + Component 2 rewritten as the false-finding resolution); the test comments rewritten to carry the lesson; NO code change to the health route
+- The GREEN: the routeAllow(implemented) seam in src/lib/api-methods.ts (the canonical HTTP method order filtered to the implemented set, HEAD iff GET, OPTIONS appended) + the 11-route refactor (56 duplicated literals → 11 one-line declarations via the persisted scripts/s41-apply-single-source.py; every derived string byte-identical to the literal it replaced) + the 2 health-degraded pins (the s31 unpinned-closure: the 503 + the exact body + the [health] prefix, via the vi.mock db seam) → 200/200 unit (181 + 19)
+- The mutation check (5 total, each observed + reverted + re-verified): A (drop POST from the tickets declaration) bit the /api/tickets consistency pin; B (remove the health PUT stub) bit the /api/health consistency pin; C (reorder the canonical array) bit all 6 derivation pins; D (corrupt the 503→500) bit the degraded-body pin; E (corrupt the log prefix) bit the prefix pin
+- The full gate in the clean environment (ports free): lint ✓ typecheck ✓ 200/200 unit ✓ build ✓ 198/198 E2E ✓ (unchanged) smoke 121 ✓ (unchanged — the behavior-preservation proof: the untouched s40 block pins the exact live allow strings, and the refactored routes answer identically)
+
+Stage Summary:
+- The s41 remediation shipped: the allow-list single source (the s69 drift candidate closed, behavior-preserving and PROVEN so by the untouched live pins) + the health degraded-path closure (the unpinned 503 + log layer) + the s18 display-layer lesson's third firing documented as the session's process lesson; all gates green (200 unit / 198 E2E / 121 smoke)
+---
+Task ID: 118
+Agent: main (Super Z) — session 41
+Task: Session-41 live re-verification + screenshots + docs alignment
+
+Work Log:
+- The s40 live-verify re-run on the REFACTORED production standalone: 33/33 GREEN (the 11-route wrong-method matrix + the OPTIONS advertisement table + the rate-budget non-interference + the s33 set-cookie + the s19/s37 bounces + the seed canonical)
+- The standing re-runs s24–s40 ALL GREEN (16 scripts — the s40 entry added to the lineage via scripts/s41-standing-rerun.sh; fresh boots between batches, NO output pipes, the seed canonical 4/11/3 after every script)
+- The UI round-trip on the refactored build: real login → submitticket → the category dropdown (the Radix option click) → typed title/description → submit → /mytickets → the S41 probe listed → cleaned via Prisma → the seed canonical (4/11/3)
+- The mobile matrix on the refactored build: 375=375, the REAL click opens the sheet (dialog 0,0,288,667), Escape closes, the My-Tickets nav-tap auto-closes + navigates; the paired desktop VLM check: LAYOUT-OK
+- Screenshots: the 10-shot set via scripts/capture-screenshots-s41.sh (the s40 lineage + the header + the fixture title S41; all FATAL guards passed); VLM spot-checks 02 + 05 LAYOUT-OK; the ONE changed shot (09: the S41 fixture title) VLM-diffed BENIGN; the seed re-verified canonical after
+- Docs aligned: README (the counts 200 + the quickstart line), AGENTS.md (the commands table + the Session-41 contracts section + the reference list through s41 + the screenshots lineage), CLAUDE.md (the counts + the unit-strategy line + TWO s41 anti-patterns: the terminal-rendered-string doctrine + the contract-string single-source doctrine), PAD (§7.1 two new test rows + the checklist 200 + the RESOLVED session-41 known-issues row), service-desk_SKILL.md v2.39.0 (lesson 95 + the description line), docs/session_71.md (the s41 agent log), the plan's execution status, the worklog; .env.example re-verified (unchanged, matches)
+
+Stage Summary:
+- Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s40, fresh boots), the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (VLM-diffed benign), and all documentation surfaces aligned; ready for the commit + push phase

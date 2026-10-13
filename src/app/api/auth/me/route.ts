@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { parseNoQuery } from "@/lib/validation";
-import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
+import { methodNotAllowed, optionsNoContent, routeAllow } from "@/lib/api-methods";
 
 export const runtime = "nodejs";
 
@@ -27,22 +27,29 @@ export async function GET(req: Request) {
 
 // Session 40: the 405 JSON-boundary stubs + the honest OPTIONS (the s40
 // seam — see src/lib/api-methods.ts). HEAD stays auto-derived from GET.
+// Session 41: the single source — this route's implemented methods.
+// The stubs and the OPTIONS advertisement below all derive from it
+// (never edit the allow string by hand; the consistency pins in
+// tests/api-allow-source.test.ts freeze the equivalence, and the s40
+// smoke block pins the live surface).
+const ALLOW = routeAllow(["GET"]);
+
 export function POST() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function PUT() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function PATCH() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function DELETE() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function OPTIONS() {
-  return optionsNoContent("GET, HEAD, OPTIONS");
+  return optionsNoContent(ALLOW);
 }

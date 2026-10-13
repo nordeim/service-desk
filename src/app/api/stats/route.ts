@@ -2,7 +2,7 @@
 // and globally (the sidebar's QUICK STATS block), plus the average
 // resolution-time metric over the user's resolved/closed tickets.
 import { NextResponse } from "next/server";
-import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
+import { methodNotAllowed, optionsNoContent, routeAllow } from "@/lib/api-methods";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { parseStatsQuery } from "@/lib/validation";
@@ -73,22 +73,29 @@ export async function GET(req: Request) {
 // src/lib/api-methods.ts for the full rationale: a stub export alone makes
 // the auto-OPTIONS advertise the stubbed methods as ALLOWED — the explicit
 // OPTIONS below re-asserts the honest list.
+// Session 41: the single source — this route's implemented methods.
+// The stubs and the OPTIONS advertisement below all derive from it
+// (never edit the allow string by hand; the consistency pins in
+// tests/api-allow-source.test.ts freeze the equivalence, and the s40
+// smoke block pins the live surface).
+const ALLOW = routeAllow(["GET"]);
+
 export function POST() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function PUT() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function PATCH() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function DELETE() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function OPTIONS() {
-  return optionsNoContent("GET, HEAD, OPTIONS");
+  return optionsNoContent(ALLOW);
 }

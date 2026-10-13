@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseNoQuery } from "@/lib/validation";
-import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
+import { methodNotAllowed, optionsNoContent, routeAllow } from "@/lib/api-methods";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,22 +37,29 @@ export async function GET(req: Request) {
 // 405). The explicit OPTIONS keeps the advertisement honest — a stub export
 // alone makes the auto-OPTIONS advertise the stubbed methods as ALLOWED
 // (measured; see src/lib/api-methods.ts for the full rationale).
+// Session 41: the single source — this route's implemented methods.
+// The stubs and the OPTIONS advertisement below all derive from it
+// (never edit the allow string by hand; the consistency pins in
+// tests/api-allow-source.test.ts freeze the equivalence, and the s40
+// smoke block pins the live surface).
+const ALLOW = routeAllow(["GET"]);
+
 export function POST() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function PUT() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function PATCH() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function DELETE() {
-  return methodNotAllowed("GET, HEAD, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function OPTIONS() {
-  return optionsNoContent("GET, HEAD, OPTIONS");
+  return optionsNoContent(ALLOW);
 }

@@ -50,3 +50,46 @@ export function methodNotAllowed(allow: string): NextResponse {
 export function optionsNoContent(allow: string): NextResponse {
   return new NextResponse(null, { status: 204, headers: { Allow: allow } });
 }
+
+// Session 41: the allow-list single source. The s40 matrix shipped the
+// honest allow lists as ~56 duplicated string literals across the 11
+// route files (each route's string appears 5-6x: every stub + the
+// explicit OPTIONS) — a future method addition must update every copy or
+// the advertisement becomes exactly the lie the s40 experiment measured.
+// The single-source doctrine (the LIST_QUERY_PARAMS lesson, s27) applied
+// to the method axis: each route declares its implemented methods ONCE
+// (the routeAllow argument) and every string flows from the derivation.
+//
+// The rules (validated against every s40-measured string):
+// - HEAD joins the advertisement iff GET is implemented (the framework's
+//   auto-HEAD derivation — never advertised on GET-less routes, never
+//   stubbed on GET routes: the s32/s40 contract).
+// - OPTIONS is always advertised (the explicit honest export exists on
+//   every stubbed route).
+// - The order is the canonical HTTP method order (the order the s40
+//   measurements recorded on the framework's own auto-OPTIONS, OPTIONS
+//   last) — input order is ignored, so the string is deterministic.
+// - Unknown method names in the input are dropped by the filter; the
+//   consistency pins (tests/api-allow-source.test.ts) catch a typo'd
+//   declaration via the export-surface mismatch (a declared-but-not-
+//   exported method fails the key-set assertion).
+const CANONICAL_METHOD_ORDER = [
+  "GET",
+  "HEAD",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+  "OPTIONS",
+] as const;
+
+/**
+ * Derives a route's honest Allow string from its implemented methods —
+ * the single source every stub and the OPTIONS advertisement consume.
+ */
+export function routeAllow(implemented: readonly string[]): string {
+  const advertised = new Set(implemented);
+  if (advertised.has("GET")) advertised.add("HEAD");
+  advertised.add("OPTIONS");
+  return CANONICAL_METHOD_ORDER.filter((m) => advertised.has(m)).join(", ");
+}

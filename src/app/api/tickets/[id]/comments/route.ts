@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
+import { methodNotAllowed, optionsNoContent, routeAllow } from "@/lib/api-methods";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { COMMENT_CREATE_BODY_FIELDS } from "@/lib/constants";
@@ -79,26 +79,33 @@ export async function POST(req: Request, { params }: Params) {
 // src/lib/api-methods.ts for the full rationale: a stub export alone makes
 // the auto-OPTIONS advertise the stubbed methods as ALLOWED — the explicit
 // OPTIONS below re-asserts the honest list.
+// Session 41: the single source — this route's implemented methods.
+// The stubs and the OPTIONS advertisement below all derive from it
+// (never edit the allow string by hand; the consistency pins in
+// tests/api-allow-source.test.ts freeze the equivalence, and the s40
+// smoke block pins the live surface).
+const ALLOW = routeAllow(["POST"]);
+
 export function GET() {
-  return methodNotAllowed("POST, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function HEAD() {
-  return methodNotAllowed("POST, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function PUT() {
-  return methodNotAllowed("POST, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function PATCH() {
-  return methodNotAllowed("POST, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function DELETE() {
-  return methodNotAllowed("POST, OPTIONS");
+  return methodNotAllowed(ALLOW);
 }
 
 export function OPTIONS() {
-  return optionsNoContent("POST, OPTIONS");
+  return optionsNoContent(ALLOW);
 }
