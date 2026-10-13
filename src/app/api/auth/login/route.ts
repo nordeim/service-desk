@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
 import { db } from "@/lib/db";
 import {
   SESSION_COOKIE,
@@ -99,4 +100,29 @@ export async function DELETE(req: Request) {
   const res = NextResponse.json({ ok: true });
   res.cookies.set(SESSION_COOKIE, "", clearCookieOptions());
   return res;
+}
+
+// Session 40: the 405 JSON-boundary stubs + the honest OPTIONS (the s40 seam —
+// HEAD has no GET to derive from on this route, so it stubs too. See
+// src/lib/api-methods.ts for the full rationale: a stub export alone makes
+// the auto-OPTIONS advertise the stubbed methods as ALLOWED — the explicit
+// OPTIONS below re-asserts the honest list.
+export function GET() {
+  return methodNotAllowed("POST, DELETE, OPTIONS");
+}
+
+export function HEAD() {
+  return methodNotAllowed("POST, DELETE, OPTIONS");
+}
+
+export function PUT() {
+  return methodNotAllowed("POST, DELETE, OPTIONS");
+}
+
+export function PATCH() {
+  return methodNotAllowed("POST, DELETE, OPTIONS");
+}
+
+export function OPTIONS() {
+  return optionsNoContent("POST, DELETE, OPTIONS");
 }

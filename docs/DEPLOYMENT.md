@@ -74,6 +74,17 @@ narrative. The only no-proxy bypass left is deliberate XFF forging (send
 API (no socket address), closed by putting the appending proxy in front
 per the guidance above.
 
+**The 405 method surface (the s40 JSON-boundary contract).** Every known
+`/api/**` route answers its unimplemented HTTP methods with
+`405 + application/json + {"error":"Method not allowed"}` + the RFC 9110
+§15.5.6 `Allow` header (the framework default ships an empty body with no
+content-type and no Allow — closed at the `src/lib/api-methods.ts` seam,
+stubbed onto every route and PAIRED with the explicit honest `OPTIONS`
+advertisement, because a stub export alone makes the framework's
+auto-OPTIONS advertise the stubbed methods as allowed). The dispatch
+precedes auth and rate limiting, so a wrong-method request never consumes
+a rate-bucket slot. Unknown paths remain the s33 JSON 404 catch-all.
+
 **The limiter's memory posture (the s39 eviction contract).** The in-memory
 `buckets` Map evicts fully-expired entries once it crosses 1,000 live keys
 (at most one sweep per minute; a bucket with any live hit is never touched).

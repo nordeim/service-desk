@@ -6,6 +6,7 @@
 // log. A production deployment wires SENDGRID/RESEND here.
 
 import { NextResponse } from "next/server";
+import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
 import { db } from "@/lib/db";
 import { clientIp, rateLimit } from "@/lib/auth";
 import { parseBodyKeys, parseBodySize, parseNoQuery } from "@/lib/validation";
@@ -79,4 +80,33 @@ export async function POST(req: Request) {
     ok: true,
     message: "If an account exists for that email, a reset link has been sent.",
   });
+}
+
+// Session 40: the 405 JSON-boundary stubs + the honest OPTIONS (the s40 seam —
+// HEAD has no GET to derive from on this route, so it stubs too. See
+// src/lib/api-methods.ts for the full rationale: a stub export alone makes
+// the auto-OPTIONS advertise the stubbed methods as ALLOWED — the explicit
+// OPTIONS below re-asserts the honest list.
+export function GET() {
+  return methodNotAllowed("POST, OPTIONS");
+}
+
+export function HEAD() {
+  return methodNotAllowed("POST, OPTIONS");
+}
+
+export function PUT() {
+  return methodNotAllowed("POST, OPTIONS");
+}
+
+export function PATCH() {
+  return methodNotAllowed("POST, OPTIONS");
+}
+
+export function DELETE() {
+  return methodNotAllowed("POST, OPTIONS");
+}
+
+export function OPTIONS() {
+  return optionsNoContent("POST, OPTIONS");
 }

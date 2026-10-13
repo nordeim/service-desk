@@ -2,6 +2,7 @@
 // and globally (the sidebar's QUICK STATS block), plus the average
 // resolution-time metric over the user's resolved/closed tickets.
 import { NextResponse } from "next/server";
+import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { parseStatsQuery } from "@/lib/validation";
@@ -66,4 +67,28 @@ export async function GET(req: Request) {
     global: globalCounts,
     avgResolutionMs,
   });
+}
+
+// Session 40: the 405 JSON-boundary stubs + the honest OPTIONS (the s40 seam —
+// src/lib/api-methods.ts for the full rationale: a stub export alone makes
+// the auto-OPTIONS advertise the stubbed methods as ALLOWED — the explicit
+// OPTIONS below re-asserts the honest list.
+export function POST() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function PUT() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function PATCH() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function DELETE() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function OPTIONS() {
+  return optionsNoContent("GET, HEAD, OPTIONS");
 }

@@ -1950,3 +1950,44 @@ Work Log:
 
 Stage Summary:
 - Session 39 fully closed: the bucket-eviction remediation (the +111 MB measured leak closed, the honest red-green cycle + the strengthened mutation check), the signup XFF pin (the s65 shortlist closed), the s33/s34 cleanup hardening (the root-caused mid-batch corruption), the twenty-first sweep (the eleventh /login wave — non-gap), all gates green (178 unit / 198 E2E / 108 smoke), pushed to main (3f67029 + this status commit), CI green (badge-verified)
+---
+Task ID: 111-gap-s40
+Agent: main (Super Z) — session 40
+Task: Session-40 gap analysis: the parity sweep (the twelfth /login wave) + the own-side audit (the 405 JSON-boundary hole)
+
+Work Log:
+- The parity sweep (the twenty-second): the TWELFTH /login wave measured — a PURE RE-RENAME (the entry pair rotated to index-DV3Dmjzy.js + index-RwB3lDG6.css; the eleventh-wave chunks STILL on the CDN and byte-size-IDENTICAL — index 103851=103851, UserAppMain 58756=58756; the only diff is the dependency-chunk hashes in the import statements); the login contract verified (from_url x14/1/2/2 + the six login-card strings); the app-route pair UNCHANGED (index-DhFaB31Z.js + index-DFdILd41.css, live-DOM-verified); logoutReturnPath hash-stable; the live logout carries from_url. NON-GAP.
+- F2 chrome ledger exact both routes (viewport-fit=cover + the PWA trio on /login; plain viewport + no trio on the dashboard). F3: their 1328-vs-1280 persists (ours 1280=1280). F4: their 468-vs-375 + the s4 toast-viewport blocking persist — agent-browser's own coverage check REFUSED the real toggle click (the fixed top-0 z-[100] toast div named as the blocker); ours: 375=375, the real click opens (dialog 0,0,288,667), Escape closes, the nav-tap auto-closes + navigates. F5: the paired desktop VLM check LAYOUT-OK.
+- The own-side audit (the s67 shortlist): the multi-window sweep assumption verified documented-and-holding (all three callers pass no custom windowMs); the __rateLimitBucketCountForTests seam verified test-only (no app use). The NEW-level probe: the 405 surface on known routes — 16/16 wrong-method probes across every known route answer the framework's EMPTY-BODY, NO-content-type 405 (the JSON boundary's remaining hole: a JSON client PUT'ing /api/tickets gets an unparseable response); the framework 405 carries NO Allow header (RFC 9110 §15.5.6 requires one); the reference's platform measured live: 405 + content-type application/json + a JSON body. The design hazard experiment-measured: a 405 stub flips the auto-OPTIONS to advertise the stub as allowed (the lie) — the fix MUST pair stubs with an explicit honest OPTIONS.
+- The remediation plan written + saved: docs/remediation-plan-session40.md (the methodNotAllowed/optionsNoContent seam + the 11-route stub matrix + the honest allow lists measured on the clean build + the TDD/mutation/full-gate/live-verification plan)
+
+Stage Summary:
+- The twenty-second sweep: the twelfth /login wave = a pure re-rename (non-gap), the chrome ledger exact, their three standing defects persist (ours the working superset — the mobile matrix re-verified via real clicks), VLM LAYOUT-OK; the own-side audit: P1 CONFIRMED (the 405 JSON-boundary hole — the method-level completion of the s33 path-level doctrine) → remediation plan → docs/remediation-plan-session40.md
+---
+Task ID: 112
+Agent: main (Super Z) — session 40
+Task: Session-40 remediation: the 405 JSON-boundary closure (the seam + the 11-route stub matrix)
+
+Work Log:
+- The TDD RED observed: the unit import failed against the missing seam (tests/api-methods.test.ts — 3 pins: the 405 shape, the honest-allow variant, the 204 shape); the smoke s40 block failed at the first pin (PUT /api/health must carry content-type: application/json — the framework's empty 405, 16/16 probes measured pre-change)
+- The GREEN: the NEW src/lib/api-methods.ts seam (methodNotAllowed — 405 + {error} + the RFC 9110 §15.5.6 Allow header; optionsNoContent — 204 + Allow, empty body) + the 11-route stub matrix (the per-route unimplemented-method stubs PAIRED with the explicit honest OPTIONS — the auto-advertisement lie prevention) applied via scripts/s40-apply-stubs.py (the persisted generation script)
+- The mutation check: A (the PUT stub removed from health) bit exactly the 405-shape pin; B (the explicit OPTIONS removed) bit the s32/s40 allow pin — the auto-advertisement grew the stub methods exactly as the design predicted; C (the seam envelope corrupted) bit exactly the body pin; each observed, reverted, the tree re-verified clean (181/181)
+- The full gate in the clean environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 181/181 unit ✓ (178 + 3) build ✓ 198/198 E2E ✓ (unchanged — the s21 zero-fixture doctrine held) smoke 121 ✓ (108 + 13: the 11-route 405+OPTIONS matrix + the HEAD-on-POST-only pin + the non-shadow re-affirmation; zero FAILs)
+
+Stage Summary:
+- The s40 remediation shipped: the 405 JSON-boundary closure (the method-level completion of the s33 path-level doctrine) with the honest RED→GREEN cycle + the three-mutation check; the wrong-method dispatch precedes auth/rate-limiting/DB (the s21 429 arithmetic verified untouched by the smoke's rate pins); all gates green (181 unit / 198 E2E / 121 smoke)
+---
+Task ID: 113
+Agent: main (Super Z) — session 40
+Task: Session-40 live re-verification + screenshots + docs alignment
+
+Work Log:
+- The s40 live-verify on the properly-managed fresh server: 33/33 GREEN (the 11-route wrong-method matrix — 405 + application/json + {error} + the exact Allow; the 11-route OPTIONS advertisement table — 204 + the exact honest allow + empty body; the HEAD-on-POST-only contract; the non-shadow happy paths incl. the s33 catch-all's continued ownership; the rate-budget non-interference — 15 wrong-method requests then a POST answers 401 never 429; the s33 login set-cookie; the s19/s37 bounce contracts; the seed canonical)
+- The standing re-runs s24–s39 ALL GREEN with fresh boots between batches (the runner honors the no-pipe doctrine — each script's full output to its own log, exit codes checked, the seed canonical re-checked after every script): s24 ✓ s25 13 ✓ s26 15 ✓ s27 14 ✓ s28 12 ✓ s29 22 ✓ s31 14 ✓ s32 18 ✓ s33 24/24 ✓ s34 17/17 ✓ s35 13 ✓ s36 13 ✓ s37 11 ✓ s38 10 ✓ s39 11 ✓ — the seed canonical 4/11/3 throughout
+- The UI round-trip on the fixed build: real login → dashboard → submitticket → the category dropdown (the Radix option click) → typed title/description → submit → the navigation to /mytickets → the probe listed → the probe cleaned via Prisma → the seed canonical (4/11/3)
+- The mobile matrix on the new build: 375=375, the REAL click opens the sheet (dialog 0,0,288,667), Escape closes it, the My-Tickets nav-tap auto-closes + navigates; the desktop paired VLM check: LAYOUT-OK (the fixed build, via the z-ai vision CLI)
+- Screenshots: the 10-shot set via scripts/capture-screenshots-s40.sh (the s39 lineage + the header + the fixture title S40; all FATAL guards passed); VLM spot-checks 02 + 05 LAYOUT-OK; the four changed shots (02/04/05 the time-relative seed dates, 09 the S40 fixture title) VLM-diffed BENIGN; the seed re-verified canonical after (4/11/3)
+- Docs aligned: README (181/121 counts + the s40 pins), AGENTS.md (the commands table + the Session-40 contracts section + the reference list + the screenshots lineage), CLAUDE.md (the counts + the unit-strategy line + the s40 anti-pattern), PAD (§7.1 the api-methods row + the smoke row + the checklist + the RESOLVED session-40 row), service-desk_SKILL.md v2.38.0 (lesson 94), docs/DEPLOYMENT.md (the 405 method-surface note), docs/session_69.md (the s40 agent log), the plan's execution status, the worklog; .env.example re-verified against the codebase (unchanged, matches)
+
+Stage Summary:
+- Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s39, fresh boots), the UI round-trip, the mobile matrix, the VLM parity check, the screenshot set (VLM-diffed benign), and all documentation surfaces aligned; ready for the commit + push phase

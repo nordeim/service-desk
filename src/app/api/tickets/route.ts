@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { TICKET_CREATE_BODY_FIELDS } from "@/lib/constants";
@@ -223,4 +224,24 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json({ ticket }, { status: 201 });
+}
+
+// Session 40: the 405 JSON-boundary stubs + the honest OPTIONS (the s40 seam —
+// src/lib/api-methods.ts for the full rationale: a stub export alone makes
+// the auto-OPTIONS advertise the stubbed methods as ALLOWED — the explicit
+// OPTIONS below re-asserts the honest list.
+export function PUT() {
+  return methodNotAllowed("GET, HEAD, POST, OPTIONS");
+}
+
+export function PATCH() {
+  return methodNotAllowed("GET, HEAD, POST, OPTIONS");
+}
+
+export function DELETE() {
+  return methodNotAllowed("GET, HEAD, POST, OPTIONS");
+}
+
+export function OPTIONS() {
+  return optionsNoContent("GET, HEAD, POST, OPTIONS");
 }

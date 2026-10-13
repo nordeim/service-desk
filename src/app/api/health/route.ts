@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseNoQuery } from "@/lib/validation";
+import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,4 +29,30 @@ export async function GET(req: Request) {
       { status: 503 },
     );
   }
+}
+
+// Session 40: the 405 JSON-boundary stubs (the s40 seam — the method-level
+// completion of the s33 path-level doctrine: a wrong method answers the house
+// {error} envelope + the RFC-mandated Allow header, not the framework's empty
+// 405). The explicit OPTIONS keeps the advertisement honest — a stub export
+// alone makes the auto-OPTIONS advertise the stubbed methods as ALLOWED
+// (measured; see src/lib/api-methods.ts for the full rationale).
+export function POST() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function PUT() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function PATCH() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function DELETE() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function OPTIONS() {
+  return optionsNoContent("GET, HEAD, OPTIONS");
 }

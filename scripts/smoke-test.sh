@@ -32,11 +32,13 @@ S35_HDRS="$(mktemp)"
 S35_BODY="$(mktemp)"
 S36_HDRS="$(mktemp)"      # the s36 proxy-surface header captures
 S36_BODY="$(mktemp)"      # the s36 login-page reflection body
-S37_HDRS="$(mktemp)"      # the s37 auth-cookie lifecycle header captures
+S37_HDRS="$(mktemp)"     # the s37 auth-cookie lifecycle header captures
+S40_HDRS=""              # the s40 405/OPTIONS surface captures (per-loop mktemp)
+S40_BODY=""              # the s40 405 body captures (per-loop mktemp)
 
 cleanup() {
   [ -n "${SERVER_PID:-}" ] && kill "$SERVER_PID" 2>/dev/null
-  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"} ${S35_BIG:+"$S35_BIG"} ${S35_BIG_C:+"$S35_BIG_C"} ${S35_MAXLEGIT:+"$S35_MAXLEGIT"} ${S35_PROBE:+"$S35_PROBE"} ${S35_HDRS:+"$S35_HDRS"} ${S35_BODY:+"$S35_BODY"} ${S36_HDRS:+"$S36_HDRS"} ${S36_BODY:+"$S36_BODY"} ${S37_HDRS:+"$S37_HDRS"}
+  rm -f "$DB" "$DB-journal" "$COOKIE_JAR" "${COOKIE_JAR_B:-}" "$SERVER_LOG" ${RL_HEADERS:+"$RL_HEADERS"} ${RL_BODY:+"$RL_BODY"} ${RL_BODY_X:+"$RL_BODY_X"} ${S33_HEADERS:+"$S33_HEADERS"} ${S33_CATCHALL_HDRS:+"$S33_CATCHALL_HDRS"} ${S33_SIGNUP_HDRS:+"$S33_SIGNUP_HDRS"} ${S33_LOGOUT_HDRS:+"$S33_LOGOUT_HDRS"} ${S33_BODY:+"$S33_BODY"} ${S33_JAR_C:+"$S33_JAR_C"} ${S33_CONCURRENCY_CODE:+"$S33_CONCURRENCY_CODE"} ${S34_HDRS:+"$S34_HDRS"} ${S35_BIG:+"$S35_BIG"} ${S35_BIG_C:+"$S35_BIG_C"} ${S35_MAXLEGIT:+"$S35_MAXLEGIT"} ${S35_PROBE:+"$S35_PROBE"} ${S35_HDRS:+"$S35_HDRS"} ${S35_BODY:+"$S35_BODY"} ${S36_HDRS:+"$S36_HDRS"} ${S36_BODY:+"$S36_BODY"} ${S37_HDRS:+"$S37_HDRS"} ${S40_HDRS:+"$S40_HDRS"} ${S40_BODY:+"$S40_BODY"}
   # Session 33 hardening: a FAILED mid-run exit used to leave db/smoke.db
   # behind (the removal lived only on the success path), and the leftover
   # mutated rows (probe tickets, PATCHed statuses) poisoned the NEXT run's
@@ -1186,6 +1188,79 @@ S39_FCODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE/api/auth/login
   -d '{"email":"nobody@servicedesk.app","password":"wrong"}')
 [ "$S39_FCODE" = "401" ] || fail "s39-evict: a fresh unique-XFF key must answer 401 (its own bucket's first slot — the limiter exact after the flood; got $S39_FCODE)"
 step "PASS" "s39-evict: the flood crosses the sweep threshold and the limiter stays exact (the eviction integration guard)"
+
+# --- s40: the 405 JSON boundary + the honest OPTIONS advertisement -----------
+# Session 40's P1: every unimplemented method on every known /api route
+# answered the framework's EMPTY-BODY, no-content-type 405 — the JSON
+# boundary the s33 catch-all closed for unknown PATHS was still open at
+# the METHOD level (16/16 probes measured live; the reference's platform
+# answers a JSON 405, measured live). The fix: a per-route 405 stub
+# ({error} + Allow, per RFC 9110 §15.5.6 — the framework shipped no Allow)
+# PAIRED with an explicit honest OPTIONS — because exporting a stub makes
+# Next's AUTO-OPTIONS advertise it as ALLOWED (experiment-measured: the
+# health route's allow flipped to "GET, HEAD, OPTIONS, PUT" under a PUT
+# stub — a lie). These pins hold both halves: the 405 shape AND the
+# advertisement. The wrong-method dispatch precedes auth, rate limiting
+# and the body grammar (no bucket slot burns — the s21 429 arithmetic
+# below is untouched), and precedes the DB lookup (the dynamic-route
+# probes need no fixture: any id 405s before the query runs).
+S40_HDRS="$(mktemp)"
+S40_BODY="$(mktemp)"
+while IFS='|' read -r S40_PATH S40_WRONG S40_ALLOW; do
+  # (1) the wrong method: 405 + application/json + the {error} envelope + Allow.
+  S40_CODE=$(curl -s -o "$S40_BODY" -w "%{http_code}" -D "$S40_HDRS" \
+    -X "$S40_WRONG" "$BASE$S40_PATH")
+  [ "$S40_CODE" = "405" ] || fail "s40-405: $S40_WRONG $S40_PATH should 405 (got $S40_CODE)"
+  grep -qi '^content-type: application/json' "$S40_HDRS" \
+    || fail "s40-405: $S40_WRONG $S40_PATH must carry content-type: application/json (the JSON boundary)"
+  grep -qi '^allow:' "$S40_HDRS" \
+    || fail "s40-405: $S40_WRONG $S40_PATH must carry Allow (RFC 9110 §15.5.6)"
+  python3 -c '
+import json,sys
+e = json.load(open(sys.argv[1]))
+assert sorted(e) == ["error"], "405 envelope got %s" % sorted(e)
+assert e["error"] == "Method not allowed", "405 message got %r" % e["error"]
+' "$S40_BODY" || fail "s40-405: $S40_WRONG $S40_PATH body must be exactly {error: Method not allowed}"
+  # (2) the honest advertisement: OPTIONS 204 + the exact allow list + an
+  # empty body (the anti-lie pin: dropping the explicit OPTIONS lets the
+  # auto-advertisement grow the stub methods — this fails first).
+  S40_OPT=$(curl -s -o "$S40_BODY" -w "%{http_code}" -D "$S40_HDRS" \
+    -X OPTIONS "$BASE$S40_PATH")
+  [ "$S40_OPT" = "204" ] || fail "s40-opt: OPTIONS $S40_PATH should 204 (got $S40_OPT)"
+  grep -qi "^allow: $S40_ALLOW" "$S40_HDRS" \
+    || fail "s40-opt: OPTIONS $S40_PATH must advertise $S40_ALLOW (the honest list — no stub methods)"
+  [ ! -s "$S40_BODY" ] || fail "s40-opt: OPTIONS $S40_PATH body must be empty"
+  step "PASS" "s40: $S40_WRONG $S40_PATH 405+JSON+Allow; OPTIONS advertises $S40_ALLOW"
+done <<'S40_ROUTES'
+/api/health|PUT|GET, HEAD, OPTIONS
+/api/auth/me|POST|GET, HEAD, OPTIONS
+/api/auth/login|GET|POST, DELETE, OPTIONS
+/api/auth/logout|PUT|POST, OPTIONS
+/api/auth/signup|DELETE|POST, OPTIONS
+/api/auth/forgot-password|PATCH|POST, OPTIONS
+/api/stats|DELETE|GET, HEAD, OPTIONS
+/api/tickets|PATCH|GET, HEAD, POST, OPTIONS
+/api/tickets/s40-probe-id|POST|GET, HEAD, PATCH, OPTIONS
+/api/tickets/s40-probe-id/comments|GET|POST, OPTIONS
+/api/tickets/s40-probe-id/attachments/s40-probe-aid|DELETE|GET, HEAD, OPTIONS
+S40_ROUTES
+
+# The HEAD-on-POST-only pin: HEAD is auto-derived (200-empty) only from GET;
+# on a POST-only route it must answer the 405 stub (status + Allow; the HTTP
+# layer strips the body — the s33 catch-all's HEAD contract).
+S40_HEAD_CODE=$(curl -s -o /dev/null -w "%{http_code}" -D "$S40_HDRS" -I \
+  "$BASE/api/auth/login")
+[ "$S40_HEAD_CODE" = "405" ] || fail "s40-head: HEAD /api/auth/login should 405 (got $S40_HEAD_CODE)"
+grep -qi '^allow: POST, DELETE, OPTIONS' "$S40_HDRS" \
+  || fail "s40-head: HEAD /api/auth/login must carry the honest Allow list"
+step "PASS" "s40-head: HEAD on a POST-only route answers 405 + Allow (no auto-HEAD derivation)"
+
+# The non-shadow re-affirmation: the stubs must never shadow the implemented
+# methods (the s33 doctrine — the known routes stay in front).
+S40_OK_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/api/health")
+[ "$S40_OK_CODE" = "200" ] || fail "s40-shadow: GET /api/health must stay 200 after the stubs (got $S40_OK_CODE)"
+step "PASS" "s40-shadow: the implemented methods stay unshadowed (GET /api/health 200)"
+rm -f "$S40_HDRS" "$S40_BODY"
 
 # --- Rate limiter (the 429 surface — the security superset, s21 pin) ---------
 # The reference's auth endpoints show no visible throttle (20 reset requests +

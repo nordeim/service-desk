@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { parseNoQuery } from "@/lib/validation";
+import { methodNotAllowed, optionsNoContent } from "@/lib/api-methods";
 
 export const runtime = "nodejs";
 
@@ -22,4 +23,26 @@ export async function GET(req: Request) {
   }
 
   return NextResponse.json({ user });
+}
+
+// Session 40: the 405 JSON-boundary stubs + the honest OPTIONS (the s40
+// seam — see src/lib/api-methods.ts). HEAD stays auto-derived from GET.
+export function POST() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function PUT() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function PATCH() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function DELETE() {
+  return methodNotAllowed("GET, HEAD, OPTIONS");
+}
+
+export function OPTIONS() {
+  return optionsNoContent("GET, HEAD, OPTIONS");
 }
