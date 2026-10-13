@@ -2156,3 +2156,17 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the s40 matrix (33/33), the sixteen-session standing contract set (s24–s40, fresh boots, seed canonical throughout), the UI round-trip, the mobile matrix, the VLM parity check (both builds), the screenshot set (nine byte-identical + one BENIGN title change), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 127
+Agent: main (Super Z) — session 43
+Task: Session-43 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 227/227 unit ✓ build ✓ 198/198 E2E ✓ (2.9m) smoke 121 ✓
+- The SSH infrastructure intact from s42 (the paramiko shim at /home/z/my-project/bin/ssh on PATH — the explicit pkey-loading path from the s42 fix); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s42 records
+- Commit 7510152 (the s43 remediation — 16 files: prisma/seed-data.ts + the seed.ts import switch + the 2 new test files (15 pins) + the NEW scripts/capture-screenshots-s43.sh + scripts/s43-cleanup.mjs + scripts/s43-standing-rerun.sh + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.41.0/session_75.md/plan/worklog incl. the retroactive task-123 entry) + 1 benign screenshot re-render (09: the S43 fixture title — VLM-diffed BENIGN, the other nine byte-identical to the s42 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ 7510152, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the run on the push (run_number 111, head_sha 7510152) polled — COMPLETED, conclusion SUCCESS (~4 min) — verified directly via the GitHub API (not rate-limited this session); runs 109/110 also verified success — the RETROACTIVE CONFIRMATION of the s42 push's CI evidence (731731d), closing the session-74 interruption's pending CI-API-confirmation item
+- The final status commit: the plan's execution status + this worklog entry (the s41/s42 closeout pattern)
+
+Stage Summary:
+- Session 43 complete: the config-safety closure (the AGENTS.md script-pin invariant automated — 6 RULE-based code-shaped pins) + the fixture-corpus closure (the canonical 4/11/3 frozen via the side-effect-free seed-data extraction — 9 pins), the mutation-C false-green lesson recorded (pin literals by their CODE SHAPE), the 25th parity sweep ALL NON-GAP (the thirteenth /login wave measured a pure dependency-graph re-hash; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (7510152), CI green (run 111 success)
