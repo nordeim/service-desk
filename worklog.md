@@ -2374,3 +2374,17 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the mobile matrix, the desktop overflow axis, the VLM parity check (first attempt), the UI round-trip, the screenshot set (nine byte-identical + one BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 143
+Agent: main (Super Z) — session 47
+Task: Session-47 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after the full docs + scripts landing): lint ✓ typecheck ✓ 245/245 unit ✓ build ✓ 198/198 E2E ✓ (2.8m) smoke 121 ✓ — the s47 files (the 2 test files + the 11 scripts + the plan + the log) all inside the gate, per the after-EVERY-file doctrine
+- The SSH infrastructure verified intact (the workspace NOT reset — the first carried-over session in five): paramiko 5.0.0 + the shim at /home/z/my-project/bin/ssh on PATH (outside the repo, per the wrapper skill's rule 5); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s46 records
+- The PAD §7.4 hygiene check clean (git ls-files carries no secret-shaped path — now ALSO enforced by the session's own pin 4); commit ca22fef (the s47 remediation — 23 files: tests/gitignore-contract.test.ts (5 EXECUTABLE pins) + tests/docs-contract.test.ts (2 pins) + the 11 NEW scripts (capture-screenshots-s47.sh, s47-check-state.ts, s47-probe-cleanup.ts, s47-vlm-check.mjs, s47-vlm-check-post.mjs, s47-vlm-shotdiff.mjs, s47-vlm-spotcheck.mjs, s47-docs-align.py ×4) + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.45.0/session_83.md/remediation-plan-session47.md/worklog tasks 140-142) + 1 benign screenshot re-render (09: the S47 fixture title — VLM-diffed BENIGN, the other nine byte-identical to the s46 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ ca22fef, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the badge read passing on 7 fresh cache-buster reads past the run duration (+60s margin), the workflow runs page rendering "completed successfully" ×4; the API rate-limited (the documented s39–s46 fallback pattern — the badge is the evidence)
+- The final status commit: the worklog entry (the s41–s46 closeout pattern)
+
+Stage Summary:
+- Session 47 complete: the .gitignore hygiene closure (the secret-guard surface pinned EXECUTABLY at both layers — the rule engine AND the tracked surface, plus the inverse quickstart pin) + the DEPLOYMENT.md claims closure (the fs-counted ground truth and the doc's line-anchored claim, both sides of each figure — the stale '16'/'30' closed), the 29th parity sweep ALL NON-GAP (no seventeenth /login wave — all chunks byte-identical to s46; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (ca22fef), CI green (badge-verified past the run duration, 7 reads + the runs page)
