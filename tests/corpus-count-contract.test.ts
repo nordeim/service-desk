@@ -117,11 +117,11 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "SKILL", re: /Vitest — (\d{2,4}) unit tests/g }, // Appendix A
     ]);
     const n = expectConsistent("the unit count", values, 9);
-    // The current canonical (runtime-verified every session's gate): 251
-    // after this session's 6 pins. A suite change without the doc move
-    // fails the consistency check above; a doc move without the suite
-    // change fails the gate itself.
-    expect(Number(n)).toBe(251);
+    // The current canonical (runtime-verified every session's gate): 254
+    // after the s48 6 pins + the s49 3 pad-testcount pins. A suite change
+    // without the doc move fails the consistency check above; a doc move
+    // without the suite change fails the gate itself.
+    expect(Number(n)).toBe(254);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {
