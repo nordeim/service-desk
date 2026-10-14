@@ -2597,3 +2597,18 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the mobile matrix, the desktop overflow axis, the VLM parity check (first attempt both runs), the UI round-trip, the screenshot set (seven byte-identical + three BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
+
+---
+Task ID: 159-push-s51
+Agent: main (Super Z) — session 51
+Task: Session-51 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after the full docs + scripts landing): lint ✓ typecheck ✓ 257/257 unit ✓ build ✓ 198/198 E2E (2.8m) ✓ smoke 121 ✓ — the s51 files (the 1 NEW test file (the 2 prereq pins) + the 13 s51 scripts (the battery: plan-validate, doc-fixes, mutations, mutation-runner, ourside-verify, roundtrip, probe-cleanup, vlm-check, vlm-check-post, vlm-shotdiff, capture-screenshots-s51, docs-align1, docs-align2) + the plan + the session log + the worklog tasks 156-158) all inside the gate, per the after-EVERY-file doctrine; no narrative-shape collision (the corpus + distribution + bridge + prereq pins green inside the final gate)
+- The SSH infrastructure rebuilt for the reset workspace: paramiko 5.0.0 in the system python 3.13 (the venv python carries no pip), the shim deployed at /home/z/my-project/bin/ssh (docs/ssh.sh copied, outside the repo, per the wrapper skill's rule 5, its shebang pinned to the paramiko-capable /usr/bin/python3, exported onto the session PATH); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s50 records
+- The PAD §7.4 hygiene check clean (git ls-files carries no secret-shaped path — enforced by the s47 pin 4 inside the 257 suite); commit f9de02b (the s51 remediation — 26 files: tests/prereq-contract.test.ts (the NEW 2-pin file) + the 5 modified docs (README/AGENTS/CLAUDE/PAD/SKILL v2.49.0) + tests/corpus-count-contract.test.ts (the toBe literal + the lineage comment + the BRIDGE ternary) + docs/session_91.md + docs/remediation-plan-session51.md + worklog.md tasks 156-158 + the 13 NEW scripts + the 3 BENIGN screenshot re-renders (04/05 the timestamp class + 09 the S51 fixture title — VLM-diffed BENIGN, the other seven byte-identical to the s50 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ f9de02b, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the workflow badge read passing on fresh cache-buster reads spanning past the run duration; the runs page payload shows CI run #135 (id 38654955458) for commit f9de02b ("feat: session-51 remediation — the prerequisites-claim closure (the R…") with state WORKFLOW_RUN_STATUS_COMPLETED / WORKFLOW_RUN_CONCLUSION_SUCCESS, duration 3m 51s
+- The final status commit: this worklog entry (the s41–s50 closeout pattern)
+
+Stage Summary:
+- Session 51 complete: the prerequisites-claim closure (the requirements-enumeration class — the README Quick Start's Requires line held two-sided to the codebase: the seed's node:crypto ground truth + the enumeration guard, the false 'Python ≥ 3.9' claim that was born wrong in session 1 and survived 50 sessions closed), the corpus moved to 257, the 33rd parity sweep (NO twenty-first /login wave — the rolldown bundle byte-identical; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (f9de02b), CI green (run #135 COMPLETED/SUCCESS, 3m 51s, badge-verified past the duration)
