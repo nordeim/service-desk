@@ -2538,3 +2538,18 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the mobile matrix, the desktop overflow axis, the VLM parity check (first attempt both runs), the UI round-trip, the screenshot set (seven byte-identical + three BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
+
+---
+Task ID: 155-push-s50
+Agent: main (Super Z) — session 50
+Task: Session-50 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after the full docs + scripts landing): lint ✓ typecheck ✓ 255/255 unit ✓ build ✓ 198/198 E2E (2.8m) ✓ smoke 121 ✓ — the s50 files (the 1 modified test file (the BRIDGE pin + the family-shape extraction) + the 15 scripts (the s50 battery: plan-validate, doc-fixes, mutations, mutation-runner, ourside-verify, roundtrip, probe-cleanup, vlm-check, vlm-check-post, vlm-shotdiff, capture-screenshots-s50, docs-align1, docs-align2 + the 2 task-instruction conveniences) + the plan + the session log + the worklog tasks 152-154) all inside the gate, per the after-EVERY-file doctrine; no narrative-shape collision (the corpus + distribution + bridge pins green inside the final gate)
+- The SSH infrastructure rebuilt for the reset workspace: paramiko 5.0.0 installed into the system python 3.13 (--break-system-packages; the venv python carries no pip), the shim deployed at /home/z/my-project/bin/ssh (docs/ssh.sh copied, outside the repo, per the wrapper skill's rule 5, its shebang pinned to the paramiko-capable /usr/bin/python3, exported onto the session PATH); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s49 records
+- The PAD §7.4 hygiene check clean (git ls-files carries no secret-shaped path — enforced by the s47 pin 4 inside the 255 suite); commit f5f3868 (the s50 remediation — 28 files: tests/corpus-count-contract.test.ts (the BRIDGE pin + the shared UNIT_FAMILY_SHAPES + the toBe literal + the lineage comment) + the 5 modified docs (README/AGENTS/CLAUDE/PAD/SKILL v2.48.0) + docs/session_89.md + docs/remediation-plan-session50.md + worklog.md tasks 152-154 + the 15 NEW scripts + the 3 BENIGN screenshot re-renders (04/05 the timestamp class + 09 the S50 fixture title — VLM-diffed BENIGN, the other seven byte-identical to the s49 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ f5f3868, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the workflow badge read passing on fresh cache-buster reads + the runs page shows the run for commit f5f3868 ("feat: session-50 remediation — the quickstart output-line closure (th…") with Status: completed successfully
+- The final status commit: this worklog entry (the s41–s49 closeout pattern)
+
+Stage Summary:
+- Session 50 complete: the quickstart output-line closure (the quoted-output claim class — the README Quick Start's verify-setup figures held to the fs listing + the runtime-pinned §7.1 sum; the family-canonical BRIDGE closed the s48 whole-family-drift blind spot), the corpus moved to 255, the 32nd parity sweep (the TWENTIETH /login wave — bundle-internal onto ROLLDOWN, the rendered DOM unchanged on every surface; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (f5f3868), CI green (the run for f5f3868 completed successfully, badge-verified + the runs page)
