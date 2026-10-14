@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 // ---------------------------------------------------------------------------
@@ -80,6 +80,72 @@ function collectFamily(shapes: { doc: string; re: RegExp; group?: number }[]): s
   return out;
 }
 
+/**
+ * The s48 unit family's shapes, shared by pin 1 (the family consistency)
+ * and the s50 pin (the BRIDGE: the family canonical == the runtime-derived
+ * §7.1 sum). Extracted in s50 so the two pins can never drift apart.
+ */
+const UNIT_FAMILY_SHAPES: { doc: string; re: RegExp }[] = [
+  { doc: "README", re: /tests-(\d{2,4})%20unit/g }, // the badge
+  { doc: "README", re: /(\d{2,4}) Vitest unit tests/g }, // verification
+  { doc: "README", re: /(\d{2,4}) unit \+ \d{2,4} E2E tests/g }, // pyramid row
+  { doc: "README", re: /Vitest unit: (\d{2,4}) tests/g }, // commands
+  { doc: "AGENTS", re: /unit suite \((\d{2,4}) tests/g }, // commands
+  { doc: "CLAUDE", re: /(\d{2,4}) unit \/ \d{2,4} E2E \(needs/g }, // commands
+  { doc: "PAD", re: /`bun run test` — (\d{2,4})\//g }, // §7.4 checklist
+  { doc: "SKILL", re: /project_state: (\d{2,4}) unit/g }, // project_state
+  { doc: "SKILL", re: /Vitest — (\d{2,4}) unit tests/g }, // Appendix A
+];
+
+/**
+ * The fs listing of the vitest include patterns: every .test.ts file under
+ * src/ and tests/ (recursive). A DIRECTORY LISTING is always exact — the
+ * s48 false-claim doctrine applies to counting each-generated TESTS, never
+ * to counting FILES. The include patterns never pick up tests/e2e: those
+ * are .spec.ts / .setup.ts files, excluded by the suffix.
+ */
+function unitTestFileListing(): string[] {
+  const out: string[] = [];
+  const walk = (dir: string) => {
+    for (const e of readdirSync(path.join(repoRoot, dir), { withFileTypes: true })) {
+      if (e.isDirectory()) walk(`${dir}/${e.name}`);
+      else if (e.name.endsWith(".test.ts")) out.push(`${dir}/${e.name}`);
+    }
+  };
+  walk("src");
+  walk("tests");
+  return out.sort();
+}
+
+/**
+ * The PAD §7.1 Vitest rows' Tests-figure sum. Every row is runtime-pinned
+ * per-file by the s49 pad pins (bidirectionally: every row names its file's
+ * runtime count, every runtime file has a row), so the SUM is the runtime
+ * total — the s50 BRIDGE's ground truth.
+ */
+function pad71VitestSum(): number {
+  const pad = readFileSync(DOC_PATHS.PAD, "utf8");
+  const start = pad.indexOf("### 7.1 Test Distribution");
+  if (start < 0) throw new Error("the PAD must carry the §7.1 Test Distribution heading");
+  const rest = pad.slice(start);
+  const end = rest.indexOf("\n### ", 1);
+  const section = end === -1 ? rest : rest.slice(0, end);
+  let sum = 0;
+  let rows = 0;
+  for (const line of section.split("\n")) {
+    if (!line.startsWith("| ")) continue;
+    const cells = line.split("|").map((c) => c.trim());
+    if (cells.length < 7) continue;
+    if (cells[5] !== "Vitest") continue;
+    const num = /(\d+)/.exec(cells[3] ?? "");
+    if (!num) continue;
+    sum += Number(num[1]);
+    rows += 1;
+  }
+  if (rows < 21) throw new Error(`the §7.1 table must carry at least 21 Vitest rows — found ${rows}`);
+  return sum;
+}
+
 /** Assert a family names exactly one number and has at least `floor` sites. */
 function expectConsistent(
   label: string,
@@ -100,28 +166,15 @@ function expectConsistent(
 
 describe("the corpus-count consistency contract (session 48)", () => {
   it("the unit-test count: every live claim site names ONE number (9 sites across the five docs — the stale '54' in the SKILL appendix can never return)", () => {
-    // The family shapes, per doc: the README badge (URL-encoded), the
-    // verification line, the feature-table row, the commands-table comment;
-    // the AGENTS commands table; the CLAUDE commands table; the PAD §7.4
-    // checklist; the SKILL project_state + the Appendix quick-reference
-    // (the s48 fix of the session-4-era '54').
-    const values = collectFamily([
-      { doc: "README", re: /tests-(\d{2,4})%20unit/g }, // the badge
-      { doc: "README", re: /(\d{2,4}) Vitest unit tests/g }, // verification
-      { doc: "README", re: /(\d{2,4}) unit \+ \d{2,4} E2E tests/g }, // pyramid row
-      { doc: "README", re: /Vitest unit: (\d{2,4}) tests/g }, // commands
-      { doc: "AGENTS", re: /unit suite \((\d{2,4}) tests/g }, // commands
-      { doc: "CLAUDE", re: /(\d{2,4}) unit \/ \d{2,4} E2E \(needs/g }, // commands
-      { doc: "PAD", re: /`bun run test` — (\d{2,4})\//g }, // §7.4 checklist
-      { doc: "SKILL", re: /project_state: (\d{2,4}) unit/g }, // project_state
-      { doc: "SKILL", re: /Vitest — (\d{2,4}) unit tests/g }, // Appendix A
-    ]);
+    // The family shapes live in UNIT_FAMILY_SHAPES (shared with the s50
+    // BRIDGE pin — extracted so the two pins can never drift apart).
+    const values = collectFamily(UNIT_FAMILY_SHAPES);
     const n = expectConsistent("the unit count", values, 9);
-    // The current canonical (runtime-verified every session's gate): 254
-    // after the s48 6 pins + the s49 3 pad-testcount pins. A suite change
-    // without the doc move fails the consistency check above; a doc move
-    // without the suite change fails the gate itself.
-    expect(Number(n)).toBe(254);
+    // The current canonical (runtime-verified every session's gate): 255
+    // after the s48 6 pins + the s49 3 pad-testcount pins + the s50 quickstart
+    // BRIDGE pin. A suite change without the doc move fails the consistency
+    // check above; a doc move without the suite change fails the gate itself.
+    expect(Number(n)).toBe(255);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {
@@ -168,5 +221,48 @@ describe("the corpus-count consistency contract (session 48)", () => {
     ]);
     const n = expectConsistent("the smoke count", values, 4);
     expect(Number(n)).toBe(121);
+  });
+
+  it("the README Quick Start's verify-setup output line: the quoted file/test figures name the suite's truth — the s50 BRIDGE (the family canonical is held to the runtime-pinned §7.1 sum; the '4 files / 55 tests' session-1-era drift can never return)", () => {
+    // The Quick Start's Verify Setup block quotes what the three-command
+    // gate prints on its last line: "ESLint clean · tsc clean · N files /
+    // M tests passed". It carried the session-1-era figures ("4 files /
+    // 55 tests") for 49 sessions — a claim shape no s48 family sweeps (the
+    // family shapes are corpus-count forms; this line is a QUOTED-OUTPUT
+    // form) — the s48 audit's own failure class at a new site: the figure
+    // drifted at the session-1 era and every corpus move since (199→254)
+    // skipped it because no pin named it.
+    //
+    // The s50 BRIDGE also closes the s48 design's blind spot: the family
+    // pins hold all sites to ONE number — but if every site drifts TOGETHER
+    // the family pin still passes. The s49 pads pin §7.1's rows to the
+    // runtime per-file (so the §7.1 SUM is the runtime total); this pin
+    // holds the quickstart line AND the family canonical to that sum —
+    // a whole-family drift now fails loudly.
+    const m = /(\d+) files \/ (\d+) tests passed/.exec(liveDoc("README"));
+    expect(
+      m,
+      "the README Quick Start must carry the verify-setup output line (a dropped claim site fails loudly — the s48 floor doctrine)",
+    ).toBeTruthy();
+    const files = Number((m as RegExpExecArray)[1]);
+    const tests = Number((m as RegExpExecArray)[2]);
+    // 1. the files figure == the fs listing of the vitest include patterns.
+    const listing = unitTestFileListing();
+    expect(
+      files,
+      `the quoted file count must name the vitest include listing — the listing carries ${listing.length} files (${listing.length === 25 ? "src 4 + tests 21" : "walk src/ + tests/ for *.test.ts"})`,
+    ).toBe(listing.length);
+    // 2. the tests figure == the §7.1 Vitest sum (runtime-pinned per-file).
+    const sum = pad71VitestSum();
+    expect(
+      tests,
+      `the quoted test count must name the §7.1 Vitest rows' sum — the sum is ${sum} (every row runtime-pinned by the s49 pads)`,
+    ).toBe(sum);
+    // 3. THE BRIDGE: the family canonical == the same sum.
+    const canonical = expectConsistent("the unit count (the s50 bridge)", collectFamily(UNIT_FAMILY_SHAPES), 9);
+    expect(
+      Number(canonical),
+      "the family canonical must equal the runtime-pinned §7.1 sum — the s48 blind spot closed (a whole-family drift now fails loudly)",
+    ).toBe(sum);
   });
 });
