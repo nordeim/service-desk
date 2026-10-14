@@ -2428,3 +2428,17 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the mobile matrix, the desktop overflow axis, the VLM parity check (first attempt both runs), the UI round-trip, the screenshot set (nine byte-identical + one BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
+---
+Task ID: 147-push-s48
+Agent: main (Super Z) — session 48
+Task: Session-48 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after the full docs + scripts landing): lint ✓ typecheck ✓ 251/251 unit ✓ build ✓ 198/198 E2E ✓ (2.9m) smoke 121 ✓ — the s48 files (the 2 test files + the 17 scripts + the plan + the log) all inside the gate, per the after-EVERY-file doctrine; one post-alignment re-fire caught by the pins themselves (the session's own narrative quoted the stale figure in a live-claim SHAPE inside lesson 102 — the s18 bracket-free-anchor class extended to pin prose; shape-safed, green again)
+- The SSH infrastructure verified intact (the workspace carried over): paramiko 5.0.0 + the shim at /home/z/my-project/bin/ssh (outside the repo, per the wrapper skill's rule 5, exported onto the session PATH); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s47 records
+- The PAD §7.4 hygiene check clean (git ls-files carries no secret-shaped path — now ALSO enforced by the s47 pin 4 + the s47 pins inside the 251 suite); commit 3f945bc (the s48 remediation — 27 files: tests/corpus-count-contract.test.ts (4 family-consistency pins) + tests/version-contract.test.ts (2 bidirectional pins) + the 17 NEW scripts (capture-screenshots-s48.sh + the s48 audit/verify/mutation/docs set) + 8 docs (README/AGENTS/CLAUDE/PAD/SKILL v2.46.0/session_85.md/remediation-plan-session48.md/worklog tasks 144-146) + 1 benign screenshot re-render (09: the S48 fixture title — VLM-diffed BENIGN, the other nine byte-identical to the s47 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote — the s28 lesson held; the real push verified: remote == local HEAD @ 3f945bc, tracking synced, main only, tree clean; the operator key + the wrapper's temp key both shredded — no residue)
+- CI verification: the badge read passing on 6 fresh cache-buster reads (3 past the run duration, +4 min margin), the workflow runs page showing the session-48 run "completed successfully" bracketing the 3f945bc commit, zero failure strings
+- The final status commit: the plan's execution status + this worklog entry (the s41–s47 closeout pattern)
+
+Stage Summary:
+- Session 48 complete: the corpus-count closure (the drift-watch automation — family-shaped consistency pins that sweep the claim SHAPES, never just the current value's sites; six stale figures closed: the SKILL appendices' session-4-era 54/57/11-step/107 figures + README's 163-parity) + the stack-version closure (the README badge row + the PAD §2 tech table pinned bidirectionally to the node_modules installed versions + the bun.lock resolved entries — the repo's face claims the stack it runs on), the 30th parity sweep ALL NON-GAP (no eighteenth /login wave — all chunks byte-identical to s47; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (3f945bc), CI green (badge-verified past the run duration + the runs page)
