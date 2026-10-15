@@ -2891,3 +2891,38 @@ Work Log:
 
 Stage Summary:
 - Session 57 complete: the operator-transcript class documented + the enumeration-completeness class closed three-sided (born-green — the exact-set form, the contiguity + one-session-lag floor, the 2N−11 pairing correspondence; the indexed families are sequences, not bags), the standing duties executed (CURRENT_SESSION 57 + the floor 56, the constant now PAIRED across two pin files), the corpus at 279, the 39th parity sweep all user-facing non-gap (the 23rd wave a pure re-hash: same byte size, no topology change; theirs the persisting defects; ours the working superset), production-ready superset maintained, main pushed (ef1b9b2) + CI GREEN (run #154, the un-reding run)
+
+---
+Task ID: 183-gap-s58
+Agent: main (Super Z) — session 58
+Task: Session-58 gap analysis: the parity sweep (the 40th — the TWENTY-FOURTH /login wave ARRIVED, the third consecutive same-shape wave, user-facing NON-GAP) + the baseline gates (the SECOND consecutive operator-transcript event — CI run #156 on 2914125 FAILED 41s)
+
+Work Log:
+- The workspace was RESET (the first since s52): fresh git clone; environment rebuilt (bun install 485 packages, .env from .env.example with a fresh AUTH_SECRET, db push+seed, the Playwright browser cache reinstalled — environment, not code)
+- THE BASELINE NOT GREEN — the SECOND consecutive operator-transcript event: the operator's 2914125 transcript commit (docs/session_104.md) quotes the s56 fabricated-token narrative backticked at lines 10+12; the s56 artifact-existence pin 3 caught it at the baseline gate (278/279); CI run #156 on 2914125 FAILED in 41s (the second red main-branch run after #153); fixed pre-plan by the de-grammar edit (the third operator-side doc edit, the second consecutive session requiring one)
+- Parity sweep #40: THE TWENTY-FOURTH /login WAVE — a PURE RE-HASH, user-facing NON-GAP (the entry rotated index-BQ2gMrp1.js 105258 → index-Da5vh3Iz.js 200/105258 the SAME byte size; the chunk-ref comparison vs the s57 baseline re-fetched BY NAME — the workspace reset wiped /tmp/s57-results: 766→766 basenames, 455 re-hashed, 311 hash-stable, 0 added, 0 removed; the login CSS hash-stable 904487, logoutReturnPath hash-stable the 41st)
+- F2 NON-GAP (the chrome ledger exact both routes). F3 — their 1328-vs-1280 desktop overflow persists (40th; ours 1280=1280 live-verified). F4 — their 468-vs-375 mobile overflow + the s4 toast-viewport blocking persist (40th — the real click REFUSED by the guarded form, byte-identical to the s4–s57 records); ours: 375=375, the real click opens 0,0,288,667, Escape closes, the My-Tickets nav-tap auto-closes + navigates
+- F5 — the paired VLM check LAYOUT-OK on the FIRST attempt
+- The UI round-trip single-pass clean: the probe listed TRUE on the first pass — the s57 "render-timing artifact" run to ground as a LINEAGE BUG (the s57-roundtrip.sh listing check greped the S56 title while the fill used the S57 title — the one-session-lag form; the s58 battery carries the fill AND check both S58); Prisma-verified (cmv96d1y60001q0lk8dcqq4pq, open, hardware) + cleaned + the canonical seed 4/11/3
+- Own-side audit: the s95 shortlist CLEAN the 11th consecutive session → one level deeper: P1 CONFIRMED — the DOC-PATH REACHABILITY class (the s56 existence-claim closure extended from the scripts/ grammar to the whole-path class): 529 path-shaped matches across the five core docs, 13 excluded by the four-entry measured set (db/custom.db, db/e2e.db, db/smoke.db, public/robots.txt — each genuinely cited), 516 checked ALL RESOLVING — CLEAN, born-green closure (the s56 pin-3 precedent)
+- The remediation plan (docs/remediation-plan-session58.md) pre-registered with the live-event RED + the born-green design; the s58 battery generated from the s57 lineage (scripts/s58-make-battery.py: 11 scripts, the roundtrip title fix + the mapDeps re-fetch-by-name adaptation + the self-contained baselines capture)
+
+Stage Summary:
+- The 40th sweep: ONE headline wave (the 24th — a pure re-hash: same byte size, no topology change; theirs the persisting defects 40th; ours the working superset); the baseline gates re-green at the s57 closeout figures after the de-grammar repair; the doc-path reachability class measured CLEAN — closed born-green next
+
+---
+Task ID: 184-session-s58
+Agent: main (Super Z) — session 58
+Task: The full session-58 cycle on nordeim/service-desk (the 40th parity sweep + the doc-path-reachability remediation + the push)
+
+Work Log:
+- The remediation plan (docs/remediation-plan-session58.md) pre-registered with the live-event RED + the born-green design; the s58 battery generated from the s57 lineage (scripts/s58-make-battery.py: 11 scripts — the roundtrip title fix, the baseline re-fetch-by-name, the self-contained baselines capture)
+- The pins (tests/doc-path-reachability-contract.test.ts, 3): the core-docs path reachability (529 matches, the four-entry measured exclusion set, 516 checked all resolving) + the needed-ness guard + the floor 500 — born-green; ONE mid-flight self-catch: the lesson-112 grammar description de-grammared (the persisted-scripts collocation never reproduced)
+- The corpus move 279→282 (scripts/s58-doc-fixes.py: 16 count-verified edits — the 9 family sites + the quickstart 34/282 + the pin literal + the BRIDGE ternary 34/'src 5 + tests 29' + the §7.1 new row) + the PAIRED standing duties (CURRENT_SESSION 58 in BOTH pin files + PLAN_CORPUS_FLOOR 57) + the docs alignment (scripts/s58-docs-align.py: 8 edits — the AGENTS Session-58 section + the SKILL v2.56.0 lesson 112 + the CLAUDE anti-pattern + the PAD RESOLVED row) — GREEN 282/282 in 34 files
+- The mutation battery (7: A–G) CLEAN END-TO-END: A→pin 1 (AGENTS.md:27 db-pathz.ts); B REDESIGNED in flight to the 4-site group form (the includes()-based needed-ness needs EVERY citation gone — the s57 mutation-C lesson re-encountered) →pin 2; C→pin 3 the floor ("expected >= 500, found 3 — a vacuous pass is a silent green"); D→the s56 pin 3 (worklog.md:2896, the live event re-demonstrated); E→the s48 family + the BRIDGE; F→the s49 pad pin both directions; G→plan-status 1+3 + doc-enumeration 1+2+3 (the next-session-catch on the live plan's mid-flight boxes)
+- The full gate in the clean environment: lint ✓ typecheck ✓ 282/282 unit (34 files) ✓ build ✓ 198/198 E2E (2.8m) ✓ smoke 121 ✓ + the canonical seed 4/11/3
+- Live re-verification on the remediated build: the mobile matrix byte-identical + the paired VLM LAYOUT-OK first attempt + the UI round-trip single-pass (the s57 "render-timing artifact" run to ground as a lineage bug — the s57 roundtrip greped the S56 title while filling the S57 title) + the 10-shot set (SIX byte-identical + FOUR changed, all VLM-diffed BENIGN) + the seed canonical after the capture
+- The session log (docs/session_105.md) + this worklog entry
+
+Stage Summary:
+- Session 58 complete: the doc-path-reachability class closed three-sided (born-green), the corpus at 282, the 40th sweep all non-gap (the 24th wave a pure re-hash), the operator-transcript recurrence confirmed as standing; the push entry follows

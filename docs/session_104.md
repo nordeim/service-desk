@@ -7,9 +7,9 @@ Environment standing verified (.env ✓, db/ ✓, bun 1.3.14 ✓, 356 packages �
 State confirmed at the s56 closeout: `CURRENT_SESSION = 56` (this session bumps to 57), SKILL v2.54.0/lesson 110, corpus at 276, all docs aligned. Setting up the session-57 task list.
 Canonical seed verified: **4/11/3/4-open** ✓. Now the baseline gates — lint, typecheck, unit first.
 One unit test failed — unexpected at the s56 closeout state. Investigating.
-**The baseline is NOT green — a real finding at pull time.** The operator's fresh `session_102.md` transcript (commit `dfc1f7d`) quotes the fabricated `` `deadbeef` `` token **backticked** at lines 40 and 73 — tripping the s56 artifact-existence pin 3 (bare-citation reachability). This is the **first pull-introduced pin failure** — the operator's verbatim transcript archive reintroducing a grammar-matching citation that the pin catches.
+**The baseline is NOT green — a real finding at pull time.** The operator's fresh `session_102.md` transcript (commit `dfc1f7d`) quotes the fabricated deadbeef token (backticked, the grammar-matching form) at lines 40 and 73 — tripping the s56 artifact-existence pin 3 (bare-citation reachability). This is the **first pull-introduced pin failure** — the operator's verbatim transcript archive reintroducing a grammar-matching citation that the pin catches.
 
-The fix follows the s56 immediate-catch doctrine exactly (de-grammar, don't exclude — `deadbeef` is a fabricated mutation token, not a never-a-commit constant like `ed25519`, so the exclusion set must NOT grow):
+The fix follows the s56 immediate-catch doctrine exactly (de-grammar, don't exclude — the deadbeef token is a fabricated mutation token, not a never-a-commit constant like `ed25519`, so the exclusion set must NOT grow):
 Unit suite re-green: **276/276 in 32 files** ✓. Now build, then E2E + smoke.
 **Baseline gates effectively ALL GREEN** (with one honest repair record): lint ✓ tsc ✓ 276/276 (32 files) ✓ build ✓ 198/198 E2E (3.0m) ✓ smoke 121 ✓ + canonical seed 4/11/3 ✓ — the ONLY repair: the de-grammar fix on the operator's transcript (the first pull-introduced pin failure in the history).
 
