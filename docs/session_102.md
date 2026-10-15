@@ -37,7 +37,7 @@ All ground truths confirmed. Now writing the session-56 remediation plan:
 Plan written. Before writing the pin file, one critical verification — does backticked `ed25519` actually exist in the corpus (my measure script excluded it unconditionally — if it's never backticked, it's not in the grammar):
 **CRITICAL SELF-CATCH (the s55 immediate-catch pattern firing again)**: my own plan quotes the dangling claims verbatim — pin 1's grammar would match my plan's own §2/§3.1 quotes and never go green. I must de-grammar the plan's quotes (describe the collocation without reproducing it), exactly as the s55 plan fixed its own fresh gap-analysis line mid-flight. Also: backticked `ed25519` exists only in my plan (the exclusion's needed-ness holds via it), and the pre-import marker must be case-insensitive (`/pre-import/i`) to cover my plan's "the PRE-IMPORT history" phrasing. Editing the plan now:
 One inaccuracy remains in the G3 bullet — the ×5 ed25519 occurrences are NOT backticked (only this plan's exclusion documentation backticks it). Fixing for accuracy, then verifying the plan carries no grammar matches:
-**Self-catch #2**: my plan's §4 mutation-C description quotes `` `deadbeef` `` backticked — pin 3's grammar would match my own plan and never go green. De-backticking it (the mutation runner itself will insert the backticked form when C runs — that's the intended bite):
+**Self-catch #2**: my plan's §4 mutation-C description quotes the deadbeef token backticked — pin 3's grammar would match my own plan and never go green. De-backticking it (the mutation runner itself will insert the backticked form when C runs — that's the intended bite):
 Plan is grammar-clean. Now TDD Phase 1 — writing the pin file in its final form:
 Cleaning up pin 3's double-iteration smell (single pass, no dead code):
 Pin file written. Now copying the audit scripts into the repo (battery evidence) + the standing-duty constant bumps, then observing the honest RED:
@@ -70,7 +70,7 @@ Now the session log (`docs/session_101.md`, the odd-doc convention):
 Now the repo worklog entries (tasks 176–177; the push entry 178 lands at the closeout, per the s52–s55 convention):
 Final pre-commit gate (after ALL files landed — the s55 lesson-109 doctrine):
 A failure after the doc edits — the lesson-109 pattern firing. Let me see what pin 3 caught:
-The pin caught my own session_101.md quoting the `deadbeef` token backticked — the third self-catch this session (the immediate-catch mechanism now proven on the session log). Fixing:
+The pin caught my own session_101.md quoting the deadbeef token backticked — the third self-catch this session (the immediate-catch mechanism now proven on the session log). Fixing:
 **FINAL GATE GREEN — 276/276 in 32 files.** Tree: 12 modified + 18 new. Now the SSH push infrastructure:
 The shim exists but isn't on this shell's PATH. Let me check the how-to doc's exact usage pattern:
 Procedure confirmed. Materializing the operator key + verifying the fingerprint before anything:

@@ -175,10 +175,11 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // BRIDGE pin + the s51 prerequisites pins 2 + the s52 docdate pins 3 +
     // the s53 keyfiles pins 3 + the s54 route-head seam pins 4 + the s54
     // coverage pins 3 + the s55 plan-status pins 3 + the s56
-    // artifact-existence pins 3. A suite change without the doc move fails
+    // artifact-existence pins 3 + the s57 doc-enumeration pins 3. A suite
+    // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(276);
+    expect(Number(n)).toBe(279);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {
@@ -254,7 +255,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     const listing = unitTestFileListing();
     expect(
       files,
-      `the quoted file count must name the vitest include listing — the listing carries ${listing.length} files (${listing.length === 32 ? "src 5 + tests 27" : "walk src/ + tests/ for *.test.ts"})`,
+      `the quoted file count must name the vitest include listing — the listing carries ${listing.length} files (${listing.length === 33 ? "src 5 + tests 28" : "walk src/ + tests/ for *.test.ts"})`,
     ).toBe(listing.length);
     // 2. the tests figure == the §7.1 Vitest sum (runtime-pinned per-file).
     const sum = pad71VitestSum();
