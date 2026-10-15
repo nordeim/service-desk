@@ -176,11 +176,11 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // the s53 keyfiles pins 3 + the s54 route-head seam pins 4 + the s54
     // coverage pins 3 + the s55 plan-status pins 3 + the s56
     // artifact-existence pins 3 + the s57 doc-enumeration pins 3 + the s58
-    // doc-path-reachability pins 3. A suite
+    // doc-path-reachability pins 3 + the s59 co-location pins 1. A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(282);
+    expect(Number(n)).toBe(283);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {

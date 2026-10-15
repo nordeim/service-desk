@@ -66,7 +66,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 // plan-status file's own constant (the paired bump is a visible edit; a
 // mismatch between the two files fails this suite's expectations on the
 // next boundary).
-const CURRENT_SESSION = 58;
+const CURRENT_SESSION = 59;
 
 // The agent-log correspondence boundary: the 2N-11 formula + the header
 // identification hold for every session N >= 12 (measured: the s12 doc

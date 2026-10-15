@@ -130,6 +130,40 @@ const isKnownNonCommit = (h: string) =>
   h === "ffd8ffe000104a46" || // the JPEG magic signature (the s18 asset-truth pins)
   /^\d+$/.test(h); // pure digits — backticked numbers are ids/counts, never hashes
 
+// The shared bare-hex classifier (the s59 co-location fix): a MATCH-scoped
+// exclusion — `continue` in the match loop, NEVER `return` in the line
+// callback. The s56–s58 form used `return`, a LINE-level escape that
+// silently dropped every token after the first excluded one on the same
+// line (the s59 live event: an operator-transcript line carrying a pure-digit
+// commit id BEFORE a fabricated token shielded the fabricated token from
+// the sweep — 33 corpus tokens mis-classified, measured by
+// scripts/s59-audit-colocation.py). Both pin 3 (reachability) and pin 4
+// (the no-silent-skip parity) source their classification from this helper,
+// so a regression here bites pin 4's raw-vs-classified count parity.
+function classifyBareHexCorpus(): {
+  claims: { file: string; line: number; h: string }[];
+  excluded: { file: string; line: number; h: string }[];
+  citedAll: Set<string>;
+} {
+  const claims: { file: string; line: number; h: string }[] = [];
+  const excluded: { file: string; line: number; h: string }[] = [];
+  const citedAll = new Set<string>();
+  for (const file of DOC_FILES) {
+    linesOf(file).forEach((line, i) => {
+      for (const m of line.matchAll(BARE_HEX)) {
+        const h = m[1];
+        citedAll.add(h);
+        if (isKnownNonCommit(h)) {
+          excluded.push({ file, line: i + 1, h });
+          continue; // the match-scoped skip — the s59 fix (never `return`)
+        }
+        claims.push({ file, line: i + 1, h });
+      }
+    });
+  }
+  return { claims, excluded, citedAll };
+}
+
 describe("session 56: the artifact-existence pins (the durable-artifact existence-claim contract)", () => {
   it("pin 1: every persistence claim names a script on the fs (persisted + a backticked scripts/ path)", () => {
     const claims: Claim[] = [];
@@ -198,18 +232,11 @@ describe("session 56: the artifact-existence pins (the durable-artifact existenc
 
   it("pin 3: every backticked bare-hex commit citation resolves in git (the exact known-non-commit exclusions, each still cited)", () => {
     const offenders: string[] = [];
-    const citedAll = new Set<string>();
-    const claims: { file: string; line: number; h: string }[] = [];
-    for (const file of DOC_FILES) {
-      linesOf(file).forEach((line, i) => {
-        for (const m of line.matchAll(BARE_HEX)) {
-          const h = m[1];
-          citedAll.add(h);
-          if (isKnownNonCommit(h)) return;
-          claims.push({ file, line: i + 1, h });
-        }
-      });
-    }
+    // The s59 co-location fix: the classification sourced from the shared
+    // helper (the match-scoped `continue` semantics) — a token co-located on
+    // a line with an earlier excluded token is CLAIMED, not silently dropped
+    // (the s56–s58 `return` form shielded it — the live line-13 event).
+    const { claims, citedAll } = classifyBareHexCorpus();
     // The grammar floor: the corpus carried ~630 non-excluded bare-hex
     // citations at s56. A grammar regression fails loudly.
     expect(
@@ -241,5 +268,91 @@ describe("session 56: the artifact-existence pins (the durable-artifact existenc
       );
     }
     expect(offenders.length).toBe(0);
+  });
+
+  it("pin 4 (s59): the no-silent-skip invariant — every backticked bare-hex token in the corpus is either an excluded known-non-commit or a claimed citation (a token silently dropped by a line-level escape is a third state that fails, naming the token)", () => {
+    // The s59 co-location closure: the s56-s58 pin 3 implemented its
+    // MATCH-scoped exclusion (isKnownNonCommit) as a LINE-scoped escape
+    // (`return` inside the forEach line callback), silently dropping every
+    // token after the first excluded one on the same line. The live event:
+    // the operator's transcript carried a pure-digit commit id BEFORE a
+    // fabricated token on one line — the pin caught the token on its own
+    // line but MISSED the co-located one (33 corpus tokens mis-classified,
+    // measured; the one real dangling citation escaped the sweep).
+    //
+    // This pin re-derives the RAW token stream with its own matchAll (a
+    // shape with no early exit possible) and asserts the parity against the
+    // shared classifier: raw === claims + excluded. A `return` regression in
+    // classifyBareHexCorpus() drops tokens from the classified sets while
+    // the raw stream still sees them — the parity fails HERE naming the
+    // dropped token's file + line + hash.
+    const { claims, excluded } = classifyBareHexCorpus();
+
+    // The raw stream: every backticked bare-hex token on every line, no
+    // classification, no early exit.
+    let rawCount = 0;
+    const rawByFileLine = new Map<string, number>();
+    for (const file of DOC_FILES) {
+      linesOf(file).forEach((line, i) => {
+        for (const _m of line.matchAll(BARE_HEX)) {
+          rawCount += 1;
+          const k = `${file}:${i + 1}`;
+          rawByFileLine.set(k, (rawByFileLine.get(k) ?? 0) + 1);
+        }
+      });
+    }
+
+    // The parity: every raw token is accounted for (claimed or excluded),
+    // and the classified counts match the raw count exactly.
+    const classifiedByFileLine = new Map<string, number>();
+    for (const c of [...claims, ...excluded]) {
+      const k = `${c.file}:${c.line}`;
+      classifiedByFileLine.set(k, (classifiedByFileLine.get(k) ?? 0) + 1);
+    }
+    const dropped: string[] = [];
+    for (const [k, raw] of rawByFileLine) {
+      const classified = classifiedByFileLine.get(k) ?? 0;
+      if (classified < raw) {
+        dropped.push(`${k}: ${raw - classified} token(s) silently dropped (raw ${raw}, classified ${classified})`);
+      }
+    }
+    if (dropped.length > 0) {
+      throw new Error(
+        `the no-silent-skip parity failed: ${dropped.join("; ")}. ` +
+          `A backticked bare-hex token must be either an excluded known-non-commit or a claimed citation — a third state (silently dropped by a line-level escape) means the classifier's match-scoped exclusion regressed to a line-level return (the s59 co-location bug — fix the classifier to the per-match continue).`,
+      );
+    }
+    expect(claims.length + excluded.length).toBe(rawCount);
+
+    // The class purity: isKnownNonCommit is a pure function of the token, so
+    // no hash may appear in BOTH sets (a token classified both ways is a
+    // classifier inconsistency, not a corpus property).
+    const claimedHashes = new Set(claims.map((c) => c.h));
+    for (const e of excluded) {
+      if (claimedHashes.has(e.h)) {
+        throw new Error(
+          `the class purity failed: \`${e.h}\` appears in both the claims and the exclusions — the classifier is inconsistent (isKnownNonCommit is a pure function of the token).`,
+        );
+      }
+    }
+
+    // The shape floor: the corpus carries 29 lines with 2+ backticked hex
+    // tokens where at least one is excluded (the co-location shape — the
+    // live event's class, measured by scripts/s59-audit-colocation.py). A
+    // grammar or corpus change that empties the shape fails loudly instead
+    // of vacuous-passing (the s56 mapDeps lesson, the s58 pin-3 precedent).
+    let shapeLines = 0;
+    for (const file of DOC_FILES) {
+      linesOf(file).forEach((line) => {
+        const tokens = [...line.matchAll(BARE_HEX)].map((m) => m[1]);
+        if (tokens.length >= 2 && tokens.some((h) => isKnownNonCommit(h))) {
+          shapeLines += 1;
+        }
+      });
+    }
+    expect(
+      shapeLines,
+      `the co-location shape floor: expected >= 20 lines with 2+ hex tokens and >= 1 excluded (the s59 live-event class), found ${shapeLines} — the grammar or the corpus changed`,
+    ).toBeGreaterThanOrEqual(20);
   });
 });

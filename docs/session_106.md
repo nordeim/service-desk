@@ -10,7 +10,7 @@ I now have full context. This is **session 58** (the 40th parity sweep). The wor
 Now let me set up the environment — .env, bun install, db push+seed, and the SSH shim infrastructure.
 State confirmed. Now running the baseline gates — lint, typecheck, unit tests first.
 **THE BASELINE IS NOT GREEN** — the repeating pattern: the operator's fresh transcript (commit `2914125`, session_104.md) reintroduced backticked grammar-matching tokens. Let me verify the exact failure.
-Confirmed — the operator's session_104.md transcript (commit `2914125`) reintroduces the backticked `deadbeef` token at lines 10 and 12 — the second occurrence of the operator-transcript class. Per the lesson-109/110 de-grammar doctrine: drop the backticks, keep the narrative legible. Let me repair the baseline.
+Confirmed — the operator's session_104.md transcript (commit `2914125`) reintroduces the backticked deadbeef token at lines 10 and 12 — the second occurrence of the operator-transcript class. Per the lesson-109/110 de-grammar doctrine: drop the backticks, keep the narrative legible. Let me repair the baseline.
 Baseline repaired — 279/279. Now let me check the CI state on the operator's commit `2914125` (it would have run CI with the failing quotes).
 **CONFIRMED: CI run #156 on `2914125` FAILED in 41s** — the second red main run (the deadbeef quotes in session_104.md tripping the pin, exactly as designed). My session's push will un-red main. Baseline repair done; now the remaining baseline gates: build, E2E, smoke.
 Environment issue — the workspace reset wiped the Playwright browser cache. Installing Chromium.
@@ -49,7 +49,7 @@ B and D show no bite in my grep — need full output inspection. Re-applying ind
 Mutation B does not bite — the docs-alignment ADDED new backticked `db/smoke.db` citations (the Session-58 section, lesson 112, the PAD row). The includes()-check needs ALL gone. Redesigning B in flight (the s57 C-redesign precedent). First revert, then count all sites.
 Redesigning B as a multi-site group mutation (B1-B4), mirroring the G structure.
 **B (redesigned) bites pin 2** — the stale-exclusion catch with the honest multi-reference sensitivity. Reverting, then D with full output.
-**D bites the s56 pin 3** (worklog.md:2896 `deadbeef` — the live event re-demonstrated). Reverting, then E, F, G.
+**D bites the s56 pin 3** (worklog.md:2896 deadbeef — the live event re-demonstrated). Reverting, then E, F, G.
 E and F bite exactly as designed. G shows the first bite — let me get the full list.
 **G bites five pins** — the full next-session-catch. Reverting, then writing the hardened runner.
 **BATTERY CLEAN END-TO-END (7/7).** Flipping the mutation box, then the full gate in the clean environment.
