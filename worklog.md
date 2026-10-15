@@ -2747,3 +2747,18 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build; ready for the final pre-commit gate + the push phase
+
+---
+Task ID: 172-push-s54
+Agent: main (Super Z) — session 54
+Task: Session-54 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after ALL docs + scripts + the session log landing): lint ✓ typecheck ✓ 270/270 unit (30 files) ✓ build ✓ 198/198 E2E (3.0m) ✓ smoke 121 ✓ + the canonical seed 4/11/3 — the s54 files (the 2 NEW test files (the 4 seam pins + the 3 coverage pins) + the 12 s54 scripts (the battery: plan-validate, doc-fixes, docs-align, mutations, mutation-runner, ourside-verify, roundtrip, probe-cleanup, vlm-check, vlm-shotdiff, ref-sweep, ref-surfaces, capture-screenshots-s54) + the plan + the session log + the worklog tasks 169-170 + the §7.3 doctrine note + the SKILL v2.52.0 + the 1 BENIGN screenshot re-render (09 the S54 fixture title)) all inside the gate, per the after-EVERY-file doctrine
+- The SSH infrastructure verified standing (the shim at /home/z/my-project/bin/ssh on PATH for the wrapper invocation + paramiko 5.0.0); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s53 records
+- The PAD §7.4 hygiene check clean (git ls-files carries no secret-shaped path — enforced by the s47 pin 4 inside the 270 suite); commit 115431e (the s54 remediation — 25 files: tests/pad-coverage-contract.test.ts + src/lib/__tests__/route-head.test.ts (the 2 NEW files, 7 pins) + the 5 modified docs (README/AGENTS/CLAUDE/PAD/SKILL v2.52.0) + tests/corpus-count-contract.test.ts (the toBe literal + the lineage + the BRIDGE ternary) + docs/session_97.md + docs/remediation-plan-session54.md + worklog.md tasks 169-170 + the 12 NEW s54 scripts + the 1 BENIGN screenshot re-render) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote + --key-file, the s28 lesson held; the real push verified: remote == local HEAD @ 115431e, tracking synced, main only, tree clean; the wrapper's temp key shredded)
+- CI verification: the run for 115431e (run id 38671683024) COMPLETED / SUCCESS — the coverage pins ran in CI for the first time and passed (the fs-boundary + the map-verification + the exclusion-exactness/claim-presence), the docdate pins held through this session's four-doc edits (the claimed 2026-10-15 >= the commit's +0800 date), and the corpus move 270 verified by the run itself (the badge cache-busted passing, the run paired to the headSha via the actions-page payload — the API rate-limited, the badge+page route per the s18+ doctrine)
+- The final status: this worklog entry (the s41–s53 closeout pattern)
+
+Stage Summary:
+- Session 54 complete: the coverage-completeness closure (the source-side map + the fs boundary + the named-exclusion list + the claim-presence guard), the seam's unit layer landed at last (42 sessions late), the corpus at 270, the 36th sweep all non-gap, ours the working superset, main pushed (115431e), CI green (COMPLETED/SUCCESS)
