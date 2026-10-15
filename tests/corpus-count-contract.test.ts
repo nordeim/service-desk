@@ -170,12 +170,13 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // BRIDGE pin — extracted so the two pins can never drift apart).
     const values = collectFamily(UNIT_FAMILY_SHAPES);
     const n = expectConsistent("the unit count", values, 9);
-    // The current canonical (runtime-verified every session's gate): 260
+    // The current canonical (runtime-verified every session's gate): 263
     // after the s48 6 pins + the s49 3 pad-testcount pins + the s50 quickstart
-    // BRIDGE pin + the s51 prerequisites pins 2 + the s52 docdate pins 3. A
-    // suite change without the doc move fails the consistency check above; a
-    // doc move without the suite change fails the gate itself.
-    expect(Number(n)).toBe(260);
+    // BRIDGE pin + the s51 prerequisites pins 2 + the s52 docdate pins 3 +
+    // the s53 keyfiles pins 3. A suite change without the doc move fails the
+    // consistency check above; a doc move without the suite change fails the
+    // gate itself.
+    expect(Number(n)).toBe(263);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {
@@ -251,7 +252,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     const listing = unitTestFileListing();
     expect(
       files,
-      `the quoted file count must name the vitest include listing — the listing carries ${listing.length} files (${listing.length === 27 ? "src 4 + tests 23" : "walk src/ + tests/ for *.test.ts"})`,
+      `the quoted file count must name the vitest include listing — the listing carries ${listing.length} files (${listing.length === 28 ? "src 4 + tests 24" : "walk src/ + tests/ for *.test.ts"})`,
     ).toBe(listing.length);
     // 2. the tests figure == the §7.1 Vitest sum (runtime-pinned per-file).
     const sum = pad71VitestSum();

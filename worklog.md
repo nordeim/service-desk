@@ -2673,3 +2673,32 @@ Work Log:
 
 Stage Summary:
 - Session 52 complete: the doc-freshness date-claim closure (the four dated docs held to their git content history + the SKILL-internal ledger coherence + the no-future-dating guard; the shallow-clone measurement doctrine closed with fetch-depth: 0), the corpus moved to 260, the 34th parity sweep (NO twenty-first /login wave — the rolldown bundle byte-identical; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (f1a5b33), CI green (run #138 COMPLETED/SUCCESS)
+
+---
+Task ID: 165-remediation-s53
+Agent: main (Super Z) — session 53
+Task: Session-53 remediation: the size-claim closure (the PAD §11 exact conversion + the seed-data row + the SKILL compound fix + the 3-sided keyfiles pins + the corpus move 260→263)
+
+Work Log:
+- The TDD: the pins landed RED first on exactly the audited drift (pin 1: "PAD L650: the Lines cell for src/lib/auth.ts is \"~170\" — EXACT figures only" — the grammar guard firing on the first malformed row; pin 2: "the §11 table carries 17 rows — the floor is 18"; pin 3: the SKILL compound-claim form not found)
+- The three-sided pin design: pin 1 the exact-count pin (every §11 row: file exists + figure == fs line count, wc -l semantics; EXACT figures not a tolerance band — a ±20% band would have passed auth.ts's +36% drift today; the grammar rejects the ~ hedge as a malformed row — the hedge is the mask); pin 2 the row-floor + key-coverage pin (>= 18 rows + prisma/seed-data.ts named); pin 3 the SKILL size-figure family pin (every backticked-path size claim held to the fs + the auth compound claim's test figure chained to the §7.1 runtime-pinned row — the s50 BRIDGE chaining pattern)
+- The GREEN (scripts/s53-doc-fixes.py — 32 replacements, each count-verified exactly-once; the §11 doctrine note restructured in flight to a blockquote above the table): the 17 exact figures + the tilde dropped + the seed-data row (174) + the SKILL compound fix (232/20) + the §7.1 new row (3 tests) + the corpus move 260→263 ×9 sites + the quickstart line 28/263 + the corpus pin literal + lineage + the BRIDGE ternary (28 = src 4 + tests 24) → GREEN 263/263 = 260 + 3
+- The mutation checks (8: A–H, each observed + reverted + re-verified — reverse-replace, never checkout): A (validation 437→120) bit pin 1's staleness; B (db-path 107→106) bit pin 1's exactness; C (auth 232→~232) bit pin 1's form grammar; D (the playwright row deleted) bit pin 2's floor; E (the seed-data path mutated) bit pin 2's key-coverage DISTINCTLY (redesigned in flight: a row deletion only ever bites the floor); F (the SKILL test figure 20→11) bit pin 3's chained claim; G (the badge 263→260) bit the s48 family pin; H (the §7.1 row 3→2) bit the s49 pad pin AND the s50 BRIDGE (the sum 262). The battery ran TWICE: the first FATALed at E + H (the deletion-form bite pattern + the guessed-message pattern — the s52 lesson-at-C repeating), the hardened runner held both times, the full battery re-ran clean
+- The full gate in the CLEAN environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 263/263 unit ✓ build ✓ 198/198 E2E (2.9m) ✓ smoke 121 ✓ (+ the canonical seed 4/11/3 — the ambient DATABASE_URL sandbox gotcha re-met live on a bare bun -e probe, the inline-pin doctrine held)
+
+Stage Summary:
+- The s53 remediation shipped: the size-claim class closed (the §11 figures held EXACT to the fs with the tilde-rejecting grammar + the row floor + the seed-data key-coverage + the SKILL size-figure family with the §7.1 chaining); the corpus moved to 263; all gates green (263 unit / 198 E2E / 121 smoke)
+
+---
+Task ID: 166-verify-s53
+Agent: main (Super Z) — session 53
+Task: Session-53 live re-verification + screenshots + docs alignment
+
+Work Log:
+- The live re-verification on the REMEDIATED production standalone (:3000, booted INSIDE each script's process lifetime): the mobile matrix 375=375, the REAL click opens the sheet (dialog rect 0,0,288,667 — byte-identical to the s41–s52 records), Escape closes, the nav-tap auto-closes + navigates; the desktop 1280=1280; the paired VLM check on the remediated build LAYOUT-OK (first attempt; pre-remediation too)
+- The UI round-trip: real login → submitticket → the Radix category dropdown via fresh refs → submit → /mytickets → the S53 probe listed → Prisma-verified (cmv8v946a0001tkv4idpigjqc, open, hardware) → cleaned → the canonical 4/11/3. ONE in-flight fix: the round-trip's cleanup leg initially called the s52 probe-cleanup script (querying the S52 title, leaving the S53 probe stranded at 12 tickets); scripts/s53-probe-cleanup.ts created + wired, the stranded probe cleaned, the full round-trip re-run single-pass clean
+- Screenshots: the 10-shot set via scripts/capture-screenshots-s53.sh (the s52 lineage verbatim + the in-script server boot + the S53 fixture title; all FATAL guards passed); NINE byte-identical to the s52 baselines (01–08 + 10); the ONE changed shot (09 the S53 fixture title) VLM-diffed BENIGN (scripts/s53-vlm-shotdiff.mjs); the seed re-verified canonical after (4/11/3)
+- Docs aligned (scripts/s53-docs-align.py — every replacement count-verified exactly-once): README (the counts 263 ×4 + the quickstart line 28/263), AGENTS.md (the commands-table count + the NEW Session-53 contracts section + the reference list through s53 + the screenshots lineage s52→s53), CLAUDE.md (the commands count + the s53 anti-pattern: the size-claim doctrine), PAD (§7.1 the keyfiles row + the §7.4 checklist 263/260 + the RESOLVED session-53 known-issues row + §11 the exact conversion + the seed-data row + the blockquote doctrine note), service-desk_SKILL.md v2.51.0 (lesson 107 + the project_state + the description line session-53 + the L56 compound-claim fix), docs/session_95.md (the s53 agent log), the plan's execution status, the worklog (tasks 164+); .env.example re-verified against the codebase by the s46 pins themselves (still passing inside the 263 suite)
+
+Stage Summary:
+- Everything verified live on the remediated build: the mobile matrix, the desktop overflow axis, the VLM parity check (first attempt both runs), the UI round-trip, the screenshot set (nine byte-identical + one BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
