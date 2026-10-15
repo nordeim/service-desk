@@ -2926,3 +2926,20 @@ Work Log:
 
 Stage Summary:
 - Session 58 complete: the doc-path-reachability class closed three-sided (born-green), the corpus at 282, the 40th sweep all non-gap (the 24th wave a pure re-hash), the operator-transcript recurrence confirmed as standing; the push entry follows
+
+---
+Task ID: 185-push-s58
+Agent: main (Super Z) — session 58
+Task: Session-58 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): the suite green 282/282 in 34 files after ALL doc edits (the session log + the worklog task-184 entry included)
+- The SSH infrastructure rebuilt after the workspace reset: the paramiko ssh shim re-extracted from the how-to doc's Appendix A to /home/z/my-project/bin/ssh (outside the repo — the convention; the shebang pointed at the system python 3.13 where paramiko 5.0.0 installed); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s57 records (the asbytes() formula — the s57 relearn held)
+- The PAD §7.4 hygiene check clean (no .env / *.key / *.pem / ssh-key tracked; .env.example tracked; the shim outside the tree; the operator key never inside the repo)
+- ONE in-flight wrapper lesson (the s28 lesson re-encountered): the first dry-run FAILED — the wrapper defaulted to the how-to doc's ORIGINAL remote (git@github.com:nordeim/task-management.git, its hash ce62836) — the explicit --remote git@github.com:nordeim/service-desk.git required (recorded in the plan, honored on the retry)
+- Push: 391aa3d (the s58 remediation, 35 files: the NEW pin file tests/doc-path-reachability-contract.test.ts (3 pins) + the 21 NEW s58 scripts (the battery + the audit + the doc-fixes/docs-align + the mutations) + the plan + the session log session_105.md + the worklog tasks 183-184 + the 2 de-grammar edits on the operator transcript + the corpus pin updates + the 4 BENIGN screenshot re-renders) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first, the EXPLICIT --remote + --key-file; the real push verified: remote == local HEAD @ 391aa3d, tracking synced, main only, tree clean; the wrapper temp key + the operator key both shredded — no residue)
+- CI verification: run #157 (commit 391aa3d) COMPLETED/SUCCESS (3m 0s) — THE PUSH THAT UN-REDS MAIN after run #156's 41s failure (the doc-path-reachability pins' first CI run: the core-docs reachability + the needed-ness guard + the floor 500 all passing), the corpus 282 + the plan-status boundary 58 + the doc-enumeration boundary 58 verified by the run itself
+- The closeout: this worklog entry + the plan's final box checked at the closeout commit (the s52–s57 convention — the deferral form at the remediation commit verified here)
+
+Stage Summary:
+- Session 58 complete: the doc-path-reachability class closed three-sided (born-green — the whole-path extension of the s56 existence-claim closure), the corpus at 282 (34 files), the 40th sweep all non-gap (the 24th wave a pure re-hash — the third consecutive same-shape wave), the operator-transcript recurrence confirmed as standing (the second consecutive occurrence; the next session's baseline gate should EXPECT it); the closeout commit + push follows
