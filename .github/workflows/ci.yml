@@ -36,6 +36,11 @@ jobs:
       AUTH_SECRET: ci-only-session-secret-not-for-production
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Session 52: the docdate pins read the dated docs' git last-commit
+          # dates — the default depth-1 clone answers HEAD's date for EVERY
+          # file (measured live), so the verify job needs real history.
+          fetch-depth: 0
 
       - uses: oven-sh/setup-bun@v2
         with:
