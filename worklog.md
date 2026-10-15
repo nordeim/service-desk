@@ -2658,3 +2658,18 @@ Work Log:
 
 Stage Summary:
 - Everything verified live on the remediated build: the mobile matrix, the desktop overflow axis, the VLM parity check (first attempt both runs), the UI round-trip, the screenshot set (nine byte-identical + one BENIGN), and all documentation surfaces aligned; ready for the commit + push phase
+
+---
+Task ID: 163-push-s52
+Agent: main (Super Z) — session 52
+Task: Session-52 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after ALL docs + scripts + the in-flight correction landing): lint ✓ typecheck ✓ 260/260 unit ✓ build ✓ 198/198 E2E (2.9m) ✓ smoke 121 ✓ — the s52 files (the 1 NEW test file (the 3 docdate pins) + the 14 s52 scripts (the battery: plan-validate, doc-fixes, mutations, mutation-runner, ourside-verify, roundtrip, probe-cleanup, vlm-check, vlm-shotdiff, ref-sweep, ref-surfaces, capture-screenshots-s52, docs-align1, docs-align2) + the plan + the session log + the worklog tasks 160-162 + the ci.yml fetch-depth + the 4 date fixes + the corpus move + the 1 BENIGN screenshot re-render (09 the S52 fixture title)) all inside the gate, per the after-EVERY-file doctrine; no narrative-shape collision (the corpus + distribution + bridge + docdate pins green inside the final gate)
+- The SSH infrastructure standing from s51 (the paramiko 5.0.0 shim at /home/z/my-project/bin/ssh, outside the repo, per the wrapper skill's rule 5); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s51 records
+- The PAD §7.4 hygiene check clean (git ls-files carries no secret-shaped path — enforced by the s47 pin 4 inside the 260 suite); commit f1a5b33 (the s52 remediation — 26 files: tests/docdate-contract.test.ts (the NEW 3-pin file) + the 6 modified docs (README/AGENTS/CLAUDE/PAD/SKILL v2.50.0/corpus-count-contract) + the ci.yml fetch-depth + docs/session_93.md + docs/remediation-plan-session52.md + worklog.md tasks 160-162 + the 14 NEW scripts + the 1 BENIGN screenshot re-render (09 the S52 fixture title — VLM-diffed BENIGN, the other nine byte-identical to the s51 baseline)) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote + --key-file, the s28 lesson held; the real push verified: remote == local HEAD @ f1a5b33, tracking synced, main only, tree clean; the wrapper's temp key shredded)
+- CI verification: run #138 (id 38660739763) for commit f1a5b33 COMPLETED / SUCCESS — the run itself verifies the ci.yml fetch-depth: 0 change (the docdate pins ran with full history in CI for the first time and passed: the four docs' claimed 2026-10-15 >= their git last-commit 2026-10-15 (+0800 reading of the 00:33Z commit))
+- The final status: this worklog entry (the s41–s51 closeout pattern)
+
+Stage Summary:
+- Session 52 complete: the doc-freshness date-claim closure (the four dated docs held to their git content history + the SKILL-internal ledger coherence + the no-future-dating guard; the shallow-clone measurement doctrine closed with fetch-depth: 0), the corpus moved to 260, the 34th parity sweep (NO twenty-first /login wave — the rolldown bundle byte-identical; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (f1a5b33), CI green (run #138 COMPLETED/SUCCESS)
