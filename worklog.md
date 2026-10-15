@@ -2717,3 +2717,33 @@ Work Log:
 
 Stage Summary:
 - Session 53 complete: the size-claim closure (the PAD §11 held EXACT to the fs with the tilde-rejecting grammar + the row floor + the seed-data key-coverage + the SKILL size-figure family with the §7.1 chaining), the corpus moved to 263, the 35th parity sweep (NO twenty-first /login wave — the rolldown bundle byte-identical third session running; theirs the persisting defects; ours the working superset), production-ready superset maintained, pushed to main (f439c59), CI green (run #141 COMPLETED/SUCCESS)
+
+---
+Task ID: 169-remediation-s54
+Agent: main (Super Z) — session 54
+Task: Session-54 remediation — the coverage-completeness closure (the TDD cycle)
+
+Work Log:
+- The audit's P1: the PAD §7.3 universal "every pure seam in src/lib/ is unit-tested" found FALSE for exactly one file — src/lib/route-head.ts (the s12 social URL seam, landed dcfc542 with E2E mechanism pins only); born TRUE at cf8e4f0 (git ls-tree verified: every then-existing seam covered), went FALSE at session 12 — 42 sessions of drift, invisible to every pin family (the s49 pads map the RUNTIME to §7.1's rows; a source file with no test never enters the runtime, so no pin ever asks about it)
+- The remediation plan (docs/remediation-plan-session54.md) validated 50/50 anchors (scripts/s54-plan-validate.mjs; one in-flight validator fix — the fs-listing arithmetic)
+- The honest RED: 4 failures observed (the coverage pin 2 — "the mapped test src/lib/__tests__/route-head.test.ts does not exist (fs) — src/lib/route-head.ts has no unit test" — + pin 3 (the §7.3 claim-site reference) + the corpus BRIDGE + the s49 pad pin)
+- The GREEN (scripts/s54-doc-fixes.py — 14 replacements, each count-verified exactly-once): the seam's missing unit layer src/lib/__tests__/route-head.test.ts (4 pins: the s12 trio agreement, the s17 wholesale-REPLACES og-set completeness, the asset-truth pair, the s8 DESCRIPTION freeze) + the coverage pin file tests/pad-coverage-contract.test.ts (3 pins: the fs-boundary, the map-verification via import-specifier resolution, the exclusion-exactness + claim-presence) + the §7.3 doctrine note + the §7.1 two rows + the §7.4 checklist + the corpus move 263→270 (×9 family sites + the quickstart 30/270 + the pin literal + lineage + the BRIDGE ternary 30/"src 5 + tests 25") — GREEN 270/270 in 30 files. Two in-flight harness fixes: the import specifier corrected to the @/lib alias (the sibling convention); the Next 16 metadata UNION types narrowed (the bare OpenGraphMetadata/TwitterMetadata members carry no type/card — two typecheck errors caught by the gate)
+- The mutation checks (7: A–G, each observed + reverted + re-verified; the battery CLEAN END-TO-END on the FIRST full pass — the bite patterns observed against the pins BEFORE the runner was written, the s53 lesson-at-H applied from the start; A redesigned in flight to the comment-out form — the s49 empty-needle doctrine re-met live; G a SOURCE mutation (the url field dropped from route-head.ts) reverse-replaced after the bite; E bit the s49 pad pin AND the s50 BRIDGE; F bit the s48 family + the bridge)
+- The full gate in the clean environment (ports 3000/3100/3999 free): lint ✓ typecheck ✓ 270/270 unit (30 files) ✓ build ✓ 198/198 E2E (2.9m) ✓ smoke 121 ✓ + the canonical seed 4/11/3
+
+Stage Summary:
+- The coverage-completeness class closed three-sided (the fs-boundary + the map-verification + the exclusion-exactness/claim-presence); the seam's unit layer landed; the corpus moved to 270; all gates green
+
+---
+Task ID: 170-verify-s54
+Agent: main (Super Z) — session 54
+Task: Session-54 live re-verification + screenshots + docs alignment
+
+Work Log:
+- The live re-verification on the REMEDIATED production standalone (:3000, booted INSIDE each script's process lifetime): the mobile matrix 375=375, the REAL click opens the sheet (dialog rect 0,0,288,667 — byte-identical to the s41–s53 records), Escape closes, the nav-tap auto-closes + navigates; the desktop 1280=1280; the paired VLM check on the remediated build LAYOUT-OK (first attempt; pre-remediation too)
+- The UI round-trip single-pass clean: real login → submitticket → the Radix category dropdown → submit → /mytickets → the S54 probe listed → Prisma-verified (cmv8x3hnt0001tka68lg5iuv7, open, hardware) → cleaned → the canonical 4/11/3
+- Screenshots: the 10-shot set via scripts/capture-screenshots-s54.sh (the s53 lineage + the in-script server boot + the S54 fixture title; all FATAL guards passed); NINE byte-identical to the s53 baselines; the ONE changed shot (09 the S54 fixture title) VLM-diffed BENIGN; the seed re-verified canonical after the capture (4/11/3, zero fixtures)
+- Docs aligned (scripts/s54-docs-align.py — 9 replacements, each count-verified exactly-once): README (the counts 270 ×4 + the quickstart 30/270), AGENTS.md (the NEW Session-54 contracts section + the reference list through s53 + the screenshots lineage s53→s54), CLAUDE.md (the pure-seams enumeration + route-head + the s54 anti-pattern), PAD (the RESOLVED session-54 known-issues row), service-desk_SKILL.md v2.52.0 (lesson 108 + the project_state + the description session-54), docs/session_97.md (the s54 agent log), the plan's execution status, the worklog (tasks 169+); .env.example re-verified by the s46 pins inside the 270 suite
+
+Stage Summary:
+- Everything verified live on the remediated build; ready for the final pre-commit gate + the push phase
