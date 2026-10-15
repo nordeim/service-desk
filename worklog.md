@@ -2790,3 +2790,18 @@ Work Log:
 
 Stage Summary:
 - Session 55 complete: the plan-status class closed three-sided (the closed-plans completeness + the self-contradiction guard + the enumeration honesty), the corpus at 273, the 37th sweep all non-gap, ours the working superset; pending: the final gate + push + CI
+
+---
+Task ID: 175-push-s55
+Agent: main (Super Z) — session 55
+Task: Session-55 push + CI verification + final status
+
+Work Log:
+- The final pre-commit gate in the clean environment (ports 3000/3100/3999 free, after ALL files landed): lint ✓ typecheck ✓ 273/273 unit (31 files) ✓ build ✓ 198/198 E2E (3.0m) ✓ smoke 121 ✓ + the canonical seed 4/11/3 — the s55 files (the NEW test file (3 pins) + the 13 NEW scripts (the s55 battery: doc-fixes, docs-align, mutations, mutation-runner, ourside-verify, roundtrip, probe-cleanup, vlm-check, vlm-shotdiff, ref-sweep, ref-surfaces, capture-screenshots-s55) + the plan + the session log + the worklog tasks 173-174 + the 2 plan-box fixes + the corpus pin + the 1 BENIGN screenshot re-render (09 the S55 fixture title)) all inside the gate, per the after-EVERY-file doctrine
+- The SSH infrastructure verified standing (the shim at /home/z/my-project/bin/ssh on PATH + paramiko 5.0.0); the operator key materialized to a 0600 /tmp file; the fingerprint verified BEFORE the push — SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU, byte-identical to the s30–s54 records
+- The PAD §7.4 hygiene check clean (git ls-files carries no secret-shaped path — enforced by the s47 pin inside the 273 suite); .env.example tracked + verified by the s46 pins inside the suite (the bidirectional coverage); commit cacccd8 (the s55 remediation — 25 files) pushed to git@github.com:nordeim/service-desk.git main via docs/ssh_git_wrapper_v3.py (the dry-run green first with the EXPLICIT --remote + --key-file, the s28 lesson held; the real push verified: remote == local HEAD @ cacccd8, tracking synced, main only, tree clean; the wrapper's temp key + the materialized key both shredded — no residue)
+- CI verification: the run for cacccd8 (run #147, id 38678007674) COMPLETED/SUCCESS (4m 5s) — the plan-status pins' first CI run passed (the closed-plans completeness + the self-contradiction guard + the enumeration honesty — the corpus 273 verified by the run itself, the docdate pins held through the four-doc edits with the claimed 2026-10-15 >= the commit's +0800 date)
+- The closeout: this worklog entry + the plan's final box checked (the s52 closeout convention — the box was left unchecked in the remediation commit, an in-flight slip of exactly the s54 shape this session closes; the pin's current-session exemption covered the interim, and the honest record documents the slip)
+
+Stage Summary:
+- Session 55 complete: the plan-status class closed three-sided (the closed-plans completeness + the self-contradiction guard + the enumeration honesty — a status claim is a claim, an execution-status section is a ledger not a scratchpad), the corpus at 273, the 37th parity sweep all non-gap (the rolldown bundle byte-stable five sessions running; theirs the persisting defects; ours the working superset), production-ready superset maintained, main pushed (cacccd8 + the closeout), CI green (run #147 COMPLETED/SUCCESS)
