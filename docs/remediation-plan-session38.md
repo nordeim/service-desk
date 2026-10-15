@@ -133,7 +133,7 @@ README (the counts 172 unit + 106 smoke + the s38 lines), AGENTS.md (the session
 
 ## 5. Execution status
 
-- [ ] Gap analysis (F1–F5 + P1/P2/P3) — complete, recorded in worklog task 100-gap-s38
+- [x] Gap analysis (F1–F5 + P1/P2/P3) — complete, recorded in worklog task 100-gap-s38 (the box flipped at session 55 — the s38 closeout 7fa3c8f checked only the push box three lines below; the text asserted completion from the start, the checkbox never agreed until the s55 plan-status pins swept the corpus)
 - [x] The TDD RED (the unit pins + the smoke s38 block, each observed failing against the pre-fix tree — 3 unit pins RED on the first-element return; the smoke 429 assertion RED on the rotating-prefix bypass)
 - [x] The GREEN (the clientIp rightmost-element fix) — the full gate re-verified: lint ✓ typecheck ✓ 175/175 unit ✓ build ✓ 198/198 E2E ✓ smoke 106 ✓
 - [x] The mutation check (A/B observed, reverted, re-verified — A bit exactly the 3 rightmost pins; B bit the rightmost/trim/single-element set)
