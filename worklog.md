@@ -3306,3 +3306,19 @@ Work Log:
 
 Stage Summary:
 - Session 65 complete: the compiler-guarantee class closed three-sided (the tsconfig noImplicitAny override removed + the eslint no-explicit-any rule turned on — both born-green, the blast radius measured zero before the fix; the new 3-pin tests/gate-config-contract.test.ts; the 8-mutation battery), the corpus at 294 (37 files), the 47th sweep all user-facing non-gap (the 31st wave: a small-topology wave, the login CSS rotated -110 bytes; ours the working superset)
+---
+Task ID: 206-push-s65
+Agent: main (Super Z) — session 65
+Task: Session-65 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 294/294 in 37 files after ALL doc edits; the PAD §7.4 hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked; .env + db/custom.db git-ignored); the doc-alignment pins all green (the docdate + doc-enumeration + plan-status + pad-keyfiles + doc-path-reachability + artifact-existence + scripts-integrity families — 24/24)
+- The SSH infrastructure rebuilt after the workspace RESET: paramiko 5.0.0 into the venv (the system python PEP-668-locked, /home/z/.venv/bin/python3 -m pip), the shim redeployed at /home/z/my-project/bin/ssh (the Appendix A form, the venv shebang); no ssh binary in this sandbox (the standing reality)
+- The wrapper invocation form held: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git (the remote-override flag REQUIRED — the default is the legacy task-management repo, the s62 lesson)
+- The fingerprint VERIFIED byte-identical to the s30–s64 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU (computed via paramiko's Ed25519Key — the raw-file SHA256 form is NOT the key fingerprint, the s63 lesson)
+- Push: 19596b9 (the s65 remediation, 29 files: the 2 config fixes + the NEW gate-config-contract pins + the corpus move 291->294 + the standing duties + the docs alignment + the 13 NEW s65 scripts + the 3 BENIGN screenshot re-renders + session_119.md + the worklog 204-205) — dry-run GREEN (3d8a835..19596b9 fast-forward), remote == local @ 19596b9, main only, tree clean, keys shredded (the wrapper's temp copy + the session's key file, overwrite-then-unlink)
+- CI run #38947171544 on 19596b9 COMPLETED SUCCESSFULLY — verified via the CALIBRATED anonymous run-page read (the known-green control #177 38875997857 through the same classifier FIRST — the poll script scripts/s65-ci-poll.py carries the control as step 1 and refuses the live verdict if the control mis-reads; the lesson-118 doctrine at its third live use); the run landed ~3m after the push — THE PUSH KEPT MAIN GREEN, the second consecutive keep-green push
+- The closeout: this worklog entry + the plan's final boxes (§3.6 + §6 with the push figures) checked at this closeout commit (the s53–s64 convention — the deferral form held at the remediation commit, the push + CI figures recorded here)
+
+Stage Summary:
+- Session 65 complete: the compiler-guarantee class closed three-sided (the tsconfig noImplicitAny override removed + the eslint no-explicit-any rule turned on — both born-green, the blast radius measured zero before the fix; the NEW 3-pin tests/gate-config-contract.test.ts; the 8-mutation battery), the corpus at 294 (37 files), the 47th sweep all user-facing non-gap (the 31st wave: a small-topology wave; ours the working superset — no TailwindCSS v4 bug), the SECOND consecutive clean operator cycle (no fabricated token, CI green at pull time via the calibrated read), and CI GREEN on the push (run #38947171544 — the second consecutive keep-green push; main green continuously through the session)
