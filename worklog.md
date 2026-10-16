@@ -3251,3 +3251,19 @@ Work Log:
 
 Stage Summary:
 - Session 64 complete: the commands-surface class closed three-sided (the standing helper scripts/check-commands.py + the 3-pin tests/commands-contract.test.ts + the 8-mutation battery with the backup-form deletion revert + the pure docs-citation neuter — born-green; the three missing table rows landed), the corpus at 291 (36 files), the 46th sweep all user-facing non-gap (the 30th wave: a pure re-hash, the login CSS rotated +114 bytes; ours the working superset)
+---
+Task ID: 203-push-s64
+Agent: main (Super Z) — session 64
+Task: Session-64 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 291/291 in 36 files after ALL doc edits (the docdate pin caught the SKILL description still naming session-63 while the ledger's last lesson moved to 118 — the exact s52 shape, fixed in place, the pin doing its job at the session boundary); the PAD §7.4 hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked)
+- The SSH infrastructure rebuilt after the workspace RESET: paramiko 5.0.0 into the venv (the system python PEP-668-locked), the shim redeployed at /home/z/my-project/bin/ssh (the Appendix A form, the venv shebang); no ssh binary in this sandbox (the standing reality)
+- The wrapper invocation form held: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git (the remote-override flag REQUIRED — the default is the legacy task-management repo, the s62 lesson)
+- The fingerprint VERIFIED byte-identical to the s30–s63 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU (computed via paramiko's Ed25519Key — the raw-file SHA256 form is NOT the key fingerprint, the s63 lesson)
+- Push: 5a6f80b (the s64 remediation, 34 files: the 3 AGENTS-table rows + the helper + the new commands-contract pins + the corpus move 288->291 + the standing duties + the docs alignment + the 20 NEW s64 scripts + the 3 BENIGN screenshot re-renders + session_117.md + the worklog 201-202) — dry-run GREEN (03250de..5a6f80b fast-forward), remote == local @ 5a6f80b, main only, tree clean, keys shredded (the wrapper's temp copy + the session's key file, overwrite-then-unlink)
+- CI run #177 (38875997857) on 5a6f80b COMPLETED SUCCESSFULLY — verified via the CALIBRATED anonymous run-page read (5x completed-successfully + 0x cancelled, the signature byte-identical to the known-green #173/#174 controls — the lesson-118 doctrine applied at its own first live use: the poll script carried the controls' signature as the verdict predicate); the run landed ~3.5m after the push — THE PUSH KEPT MAIN GREEN, the first keep-green push since the alternating-red pattern began at #153 (the push landed on green, not on red)
+- The closeout: this worklog entry + the plan's final boxes checked at the closeout commit (the s53–s63 convention — the deferral form held at the remediation commit, the push + CI figures recorded here)
+
+Stage Summary:
+- Session 64 complete: the commands-surface class closed three-sided (the standing helper scripts/check-commands.py + the 3-pin tests/commands-contract.test.ts + the 8-mutation battery with the backup-form deletion revert + the pure docs-citation neuter — born-green; the three missing table rows landed, the table's completeness contract documented repo-side in the AGENTS Session-64 section), the corpus at 291 (36 files), the 46th sweep all user-facing non-gap (the 30th wave: a pure re-hash, the login CSS rotated +114 bytes; ours the working superset — no TailwindCSS v4 bug), the FIRST CLEAN OPERATOR CYCLE since #153 (no fabricated token, CI green at pull time), and CI GREEN on the push (run #177 — the first keep-green push; main green continuously through the session)
