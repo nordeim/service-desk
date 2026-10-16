@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 
 // ---------------------------------------------------------------------------
 // Session 57 — the doc-enumeration pins (P1: the OPERATOR-SIDE TRANSCRIPT
@@ -60,13 +61,24 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 //           convention to check). A renumbered or mislabeled log, a
 //           shifted mapping, or a missing transcript fails naming the
 //           session + the expected doc number.
+//   pin 4 (s63) — the WORKLOG task-number family (the fourth numbered
+//           family): worklog.md's protocol — the --- separator structure,
+//           the Task ID:/Agent:/Task:/Work Log:/Stage Summary: field set,
+//           and the task-number coverage {1..max} minus the NINE frozen
+//           historical holes — held via the standing helper
+//           scripts/check-worklog.py (the --check/--json CLI contract).
+//           The coordination surface: the FIRST file every session reads
+//           and the LAST every session writes, its task numbers cited by
+//           every commit message and session log, pinned nowhere before
+//           s63. A future session-boundary numbering slip (the exact class
+//           that created the nine frozen holes) fails naming the new hole.
 // ---------------------------------------------------------------------------
 
 // The current session's number — bumped each session alongside the
 // plan-status file's own constant (the paired bump is a visible edit; a
 // mismatch between the two files fails this suite's expectations on the
 // next boundary).
-const CURRENT_SESSION = 62;
+const CURRENT_SESSION = 63;
 
 // The agent-log correspondence boundary: the 2N-11 formula + the header
 // identification hold for every session N >= 12 (measured: the s12 doc
@@ -178,5 +190,107 @@ describe("session 57: the doc-enumeration pins (the numbered families held to th
     }
     // The sweep ran over CURRENT_SESSION − PAIRING_BOUNDARY sessions.
     expect(CURRENT_SESSION - PAIRING_BOUNDARY).toBeGreaterThan(0);
+  });
+
+  it("pin 4 (s63): the worklog task-number family — the coverage {1..max} minus the nine frozen historical holes, the protocol fields complete, the separator structure 1:1, no exact-duplicate IDs", { timeout: 60000 }, () => {
+    // The s63 closure: the COORDINATION surface. worklog.md is the corpus'
+    // backbone — the FIRST file every session reads, the LAST every session
+    // writes — yet its protocol (the --- separator, the field set, the
+    // task-number sequence) was defined only in the operator's prompt,
+    // documented in neither AGENTS nor the PAD, and measured ad-hoc: every
+    // other family is pinned (the plans + logs here, the path claims s58,
+    // the commit citations s56, the scripts s60/s61, the screenshots s62,
+    // the corpus counts, the PAD distribution, the plan status boxes) —
+    // the worklog was the last unpinned major artifact. The measured
+    // structure carries NINE frozen historical holes (the session-boundary
+    // numbering slips of the early/s40/s52–s57 eras): the exact class that
+    // would pass silently if it recurred.
+    //
+    // Ground truth: the file itself, via the standing helper
+    // scripts/check-worklog.py (the --check/--json CLI contract, the
+    // s60–s62 helper convention). The spawnSync + JSON-either-way form is
+    // the s60 execFileSync-throw lesson (the helper exits 1 when offenders
+    // exist — the pin reads the JSON either way and NAMES the offenders
+    // itself); the 60s timeout is the lesson-115 doctrine.
+    const r = spawnSync(
+      "python3",
+      ["scripts/check-worklog.py", "--check", "--json"],
+      { encoding: "utf8", maxBuffer: 8 * 1024 * 1024, cwd: process.cwd() },
+    );
+    if (r.error) {
+      throw new Error(`the worklog checker could not run: ${r.error.message}`);
+    }
+    if (r.status !== 0 && r.status !== 1) {
+      throw new Error(
+        `the worklog checker exited with an unexpected status ${r.status} (0 = clean, 1 = offenders found — anything else is a checker defect): ${r.stderr}`,
+      );
+    }
+    let report: {
+      ok: boolean;
+      entries: number;
+      separators: number;
+      distinct_numbers: number;
+      max: number;
+      holes_expected: number[];
+      holes_found: number[];
+      new_holes: number[];
+      holes_filled: number[];
+      missing_fields: { task_id: string; field: string }[];
+      dup_ids: string[];
+      structure_errors: string[];
+      entry_floor: number;
+      floor_ok: boolean;
+    };
+    try {
+      report = JSON.parse(r.stdout);
+    } catch {
+      throw new Error(
+        `the worklog checker's --json output did not parse (the machine-readable contract): ${r.stdout.slice(0, 300)}`,
+      );
+    }
+
+    // The paired frozen-hole set: this pin carries its OWN copy of the nine
+    // (the paired-constant form) — a neutered helper that grows its
+    // exclusion list to hide a new hole fails HERE, both directions.
+    const PIN_FROZEN_HOLES = [50, 54, 110, 115, 164, 168, 171, 179, 181];
+    expect(
+      report.holes_expected,
+      `the paired frozen-hole set: the helper reports [${report.holes_expected?.join(", ")}] but the pin holds [${PIN_FROZEN_HOLES.join(", ")}] — the two copies must agree (a helper-side exclusion grown to hide a new hole fails here)`,
+    ).toEqual(PIN_FROZEN_HOLES);
+
+    // The coverage contract: zero NEW holes beyond the frozen nine.
+    if ((report.new_holes ?? []).length > 0) {
+      throw new Error(
+        `NEW worklog task-number holes [${report.new_holes.join(", ")}] — not in the frozen historical set [${PIN_FROZEN_HOLES.join(", ")}]. ` +
+          `A session-boundary numbering slip (the class that created the nine frozen holes) — the task numbers are cited by every commit message and session log; a hole is a dangling-reference factory.`,
+      );
+    }
+
+    // The protocol fields: every entry carries Agent/Task/Work Log/Stage Summary.
+    if ((report.missing_fields ?? []).length > 0) {
+      throw new Error(
+        `worklog entries missing protocol fields: ${report.missing_fields.map((m) => `${m.task_id} lacks ${m.field}`).join("; ")}. ` +
+          `The field set is the multi-session coordination contract (documented repo-side in the AGENTS Session-63 section) — an entry without it is unreadable by the next agent.`,
+      );
+    }
+
+    // The exact-duplicate + structure invariants + the ok rollup.
+    if ((report.dup_ids ?? []).length > 0) {
+      throw new Error(`exact-duplicate worklog Task IDs: ${report.dup_ids.join("; ")}`);
+    }
+    if ((report.structure_errors ?? []).length > 0) {
+      throw new Error(`worklog structure errors: ${report.structure_errors.join("; ")}`);
+    }
+
+    // The vacuous-pass guard: the measured corpus at s63 is 203 entries.
+    expect(
+      report.entries,
+      `the worklog entry floor: expected >= ${report.entry_floor}, found ${report.entries} — a neutered parse or a mass deletion (the s56 mapDeps lesson, the s61 pin-3 floors precedent)`,
+    ).toBeGreaterThanOrEqual(report.entry_floor);
+
+    // The helper's own ok rollup — the single source of truth for future
+    // checker extensions (a new offender family fails here without this
+    // pin growing a bespoke assertion).
+    expect(report.ok, `the worklog checker reported offenders: ${JSON.stringify(report).slice(0, 400)}`).toBe(true);
   });
 });

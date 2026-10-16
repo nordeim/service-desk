@@ -6,14 +6,14 @@ The docs are dense (245KB AGENTS.md). Let me read them strategically in chunks.
 The lines are extremely long. Let me extract document structure first, then read key sections via bash.
 Now let me read the session documents specified by the user.
 I have the session-61 picture. Now let me check the worklog tail and scan session_112.md (the operator's s61 transcript) for the standing fabricated-token pattern that has broken CI in 5 consecutive sessions.
-session_112.md (the operator's s61 transcript) contains backticked `deadbeef` at lines 5, 17, 21 — the standing pattern predicts the SIXTH operator-transcript event will break the baseline gate. Let me verify the classifier pin and check environment state.
+session_112.md (the operator's s61 transcript) contains backticked deadbeef at lines 5, 17, 21 — the standing pattern predicts the SIXTH operator-transcript event will break the baseline gate. Let me verify the classifier pin and check environment state.
 The environment needs setup: `.env` missing, `db/` empty. Let me check .env.example, package.json, and read the remaining core docs.
 Environment is ready for setup. Let me create `.env`, start dependency installation in the background, and read the remaining core docs in parallel.
 Let me read key PAD sections and SKILL lessons tail while install runs.
 Let me check install progress and read the SKILL lessons tail plus the standing-duty test constants.
 Install complete. Now let me set up the database and Playwright browsers, then run the baseline gate.
 Canonical seed 4/11/3 confirmed. Now installing Playwright browsers in background and running the unit baseline gate.
-**BASELINE NOT GREEN — the SIXTH consecutive operator-transcript event, exactly as session-61's closeout predicted.** Pin 3 caught three backticked `deadbeef` sites in `docs/session_112.md` (lines 5, 17, 21). Applying the de-grammar doctrine fix:
+**BASELINE NOT GREEN — the SIXTH consecutive operator-transcript event, exactly as session-61's closeout predicted.** Pin 3 caught three backticked deadbeef sites in `docs/session_112.md` (lines 5, 17, 21). Applying the de-grammar doctrine fix:
 De-grammar fix applied. Now re-running the full unit suite + checking CI status of the operator's transcript commit.
 Unit suite GREEN 286/286. CI API returned empty — checking rate limit status:
 Rate-limited (resets in ~8 min). Using the anonymous run-page payload convention:
