@@ -3195,3 +3195,19 @@ Work Log:
 
 Stage Summary:
 - Session 63 complete: the worklog-protocol class closed three-sided (the standing helper scripts/check-worklog.py + pin 4 + the 8-mutation battery with the two pure forms — born-green; the protocol documented repo-side in the AGENTS Session-63 section), the corpus at 288 (35 files), the 45th sweep all user-facing non-gap (the 29th wave: a pure re-hash; ours the working superset)
+
+---
+Task ID: 200-push-s63
+Agent: main (Super Z) — session 63
+Task: Session-63 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 288/288 in 35 files after ALL doc edits; the PAD §7.4 hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked — the ssh-shaped grep matches only the documented wrapper infrastructure, standing since s30)
+- The SSH infrastructure intact from s62 (the workspace NOT reset): the paramiko 5.0.0 + the shim at /home/z/my-project/bin/ssh (the venv shebang); the fingerprint VERIFIED byte-identical to the s30–s62 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU (computed via paramiko's Ed25519Key — the raw-file SHA256 form is NOT the key fingerprint, measured this session)
+- The wrapper invocation form held: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git (the remote-override flag REQUIRED — the default is the legacy task-management repo, the s62 lesson)
+- Push: 44b7878 (the s63 remediation, 26 files: the de-grammar fix + the helper + pin 4 + the corpus move 287->288 + the standing duties + the docs alignment + the 12 NEW s63 scripts + the 1 BENIGN screenshot re-render + session_115.md + the worklog 198-199) — dry-run GREEN (920c3ff..44b7878 fast-forward), remote == local @ 44b7878, main only, tree clean, keys shredded (the wrapper's temp copy + the session's key file, overwrite-then-unlink)
+- CI run #173 38860202409 on 44b7878 COMPLETED/SUCCESS (verified via the anonymous actions-page payload — the api.github.com rate limit 0/60 the standing per-session reality; the run page's completed-successfully state + the green check icon) — THE PUSH THAT UN-REDS MAIN after the operator's 920c3ff failure (the SEVENTH consecutive operator-transcript event, the alternating-red pattern #153/#156/#159/#162/#165/#4d72410/920c3ff seven cycles deep)
+- The closeout: this worklog entry + the plan's final boxes checked at the closeout commit (the s53–s62 convention — the deferral form held at the remediation commit, the push + CI figures recorded here)
+
+Stage Summary:
+- Session 63 complete: the worklog-protocol class closed three-sided (the standing helper scripts/check-worklog.py + pin 4 in the doc-enumeration contract + the 8-mutation battery with the two pure forms — born-green; the protocol documented repo-side in the AGENTS Session-63 section), the corpus at 288 (35 files), the 45th sweep all user-facing non-gap (the 29th wave: a pure re-hash; ours the working superset — no TailwindCSS v4 bug), and CI GREEN on the push (main un-reded after the seventh operator event)
