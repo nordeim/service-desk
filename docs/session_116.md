@@ -1,4 +1,66 @@
-I'll continue the session-63 work from where it was interrupted. Let me first check the current workspace state.
+I'll continue the task by first checking the current state of the workspace and then proceeding through the workflow. Let me start by examining what's been done so far.
+The service-desk repo exists. Let me check its current state and the worklog inside it.
+The repo is at the session-62 closeout state (a084f9c). Now let me check what happened in the previous (interrupted) session — the file timestamps suggest work was in progress. Let me investigate.
+Now the picture is clear: the previous conversation portion completed **session 62** (cloned at 4d72410, remediation f9a097d, closeout a084f9c, pushed — CI green). The remote now has **one new commit 920c3ff** — the operator's session_114.md transcript for the current session 63. Let me pull and review all the required documents.
+Pulled successfully — docs/session_114.md is the operator's transcript for the current session 63. Now let me read the four required documents.
+Now I have the session-62 picture. The current session is **session 63** (agent log will be `session_115.md` per the 2N−11 convention). Let me read the s62 remediation plan and the worklog tail to internalize the conventions.
+Now let me check the worklog tail (tasks 195–197) and scan session_114.md for the standing fabricated-token pattern that has broken CI in six consecutive sessions.
+I now have the complete picture. **Session 114.md lines 9 and 16 contain the backticked fabricated token — the SEVENTH operator-transcript event is confirmed present**, exactly as the s62 closeout predicted. The environment is intact from the s62 work (no reset this time). Let me set up the session-63 plan.
+**Task 1 — Baseline gate.** Running the unit suite, expecting the seventh operator-transcript event:
+**BASELINE NOT GREEN — the SEVENTH consecutive operator-transcript event, exactly as the s62 closeout predicted.** Pin 3 caught TWO backticked fabricated-token sites (session_114.md:9+16) — 286/287. Let me check the CI status of the operator's 920c3ff commit, then apply the de-grammar fix.
+Rate-limited as usual. Using the anonymous actions-page embeddedData payload convention:
+The operator's commit has CI run 38851089670. Let me fetch its run page for the conclusion:
+**CONFIRMED: CI run 38851089670 on `920c3ff` FAILED** (the failure favicon on the run page) — the seventh red main-branch run, the alternating-red pattern now **seven cycles deep** (#153/#156/#159/#162/#165/#4d72410/920c3ff). My session-63 push will un-red main.
+
+Applying the de-grammar doctrine fix (the backticks dropped at both sites, the narrative stays legible):
+De-grammar fix applied at both sites. Re-running the unit suite:
+**Unit suite GREEN 287/287** — the seventh operator-transcript event fixed. Now the full baseline gate (lint, typecheck, build):
+Lint ✓ typecheck ✓ build ✓. Now the E2E suite (198 tests, ~2.7m):
+**FULL BASELINE GREEN: lint ✓ typecheck ✓ 287/287 unit ✓ build ✓ 198/198 E2E (2.8m) ✓ smoke ✓ + canonical seed 4/11/3 ✓** — the seventh operator-transcript event is fixed. Now Task 3: the own-side audit — first the s95 shortlist (17th consecutive check), then hunting the new P1 axis.
+Shortlist checks 1–5 CLEAN (17th consecutive session). Now hunting the new P1 axis — measuring the candidate surfaces one level deeper:
+The worklog has suffixed task-ID forms — let me measure properly (numeric prefix coverage), find the real README commands-table format, and check the scripts family:
+Axis B (the worklog protocol) shows structure worth investigating — 9 missing numbers, 14 multi-entry numbers. Let me understand the numbering convention and check the neighborhoods of the holes, plus read the AGENTS worklog protocol section:
+The worklog structure is now clear: 9 historical numbering holes clustered at session boundaries, 14 intentional suffixed duplicates. Let me map the full pin landscape in tests/ to determine which major surfaces remain unpinned:
+The pin landscape is comprehensive — and **the worklog.md is the last major repo artifact with NO standing pin** (the s62 log's own words: "the worklog protocol is only measured ad-hoc"). Let me examine the doc-enumeration contract (the natural home for a worklog pin) and check how AGENTS documents the worklog protocol:
+The doc-enumeration contract is the natural home — the worklog task-numbers are the fourth numbered family. Let me check the AGENTS commands table (axis A) for comparison, and verify the worklog's separator structure precisely:
+The audit conclusion is forming. **Axis B — the worklog protocol — is the strongest P1**: the last major repo artifact with no standing pin (measured precisely: 202 entries, 202 separators 1:1, 9 historical holes, 14 intentional suffixed forms, all fields present — born-green). Axis A (3 undocumented commands in the AGENTS table) stays the noted minor, per the s62 treatment.
+
+Now Task 4 — the 45th parity sweep. Let me study the s62 sweep scripts to derive the s63 versions:
+Let me study the s62 wave-analysis and ourside-verify scripts, then derive the s63 versions:
+All forms internalized. Now writing the s63 sweep scripts (deriving from the s62 lineage — watching the case-sensitivity lesson: both uppercase S62 titles AND lowercase s62 paths):
+All s63 sweep scripts written (the case-sensitivity lesson applied: the cleanup path `s63-probe-cleanup.ts` matches the actual lowercase filename, the fixture title `S63` matches the Prisma query). Now running the F1 bundle sweep:
+**THE TWENTY-NINTH /login WAVE ARRIVED** — the entry rotated `index-Caa1O9wE.js` → **`index-Cx5Yjs59.js`**, and the login CSS `index-e12PSDbU.css` appears still referenced (unrotated). Let me get the entry's live figure and run the wave analysis:
+**29th-wave shape: a PURE RE-HASH wave** — the entry rotated at the SAME byte size (101558 → 101558), the login CSS `index-e12PSDbU.css` survived unrotated (899517), 697→697 basenames, 0 added/0 removed, 401 re-hashed/296 hash-stable, `logoutReturnPath` hash-stable the 46th. User-facing NON-GAP.
+
+Now F2–F4 — the reference-side surface probes:
+F2 exact ✓, F3 their 1328-vs-1280 desktop overflow persists (45th), F4 their 468-vs-375 mobile overflow + toast-viewport blocking persist (the toggle at 24,16,28,28 covered by the `fixed top-0 z-[100]` toast div). The synthetic click opened their sheet (dialogs: 1) — per the convention, now Escape to close, then the REAL-click refusal test on their toggle:
+**F4c REAL-CLICK REFUSAL CONFIRMED (45th)** — their mobile menu cannot be opened by a real click (the toggle covered by the toast div, the sheet stays closed). Their three standing defects persist. Now our-side verification battery:
+**OUR-SIDE MATRIX ALL GREEN** — 1280=1280, 375=375, real click opens the sheet (0,0,288,667, byte-identical to the s41–s62 records), Escape closes, nav-tap navigates. **No TailwindCSS v4 bug — ours the working superset.** Now F5 (paired VLM) and the UI round-trip:
+**F5: LAYOUT-OK on the FIRST attempt** + **UI round-trip single-pass clean** (probe listed TRUE first pass, Prisma-verified open/hardware, cleaned, canonical 4/11/3). The 45th sweep is complete — all user-facing NON-GAP.
+
+Now running the standing scans over the new s63 scripts (the convention: both scans before they're considered landed), and gathering the corpus-count sites for the plan:
+Both standing scans CLEAN (91 .py zero offenders; sh=143 mjs=128 ts=20 zero offenders). Now gathering the remaining corpus-move sites (SKILL:12, §7.1 rows, the paired constants):
+All corpus-move sites mapped. Let me check how AGENTS.md documents the worklog protocol (the pin's contract source), then write the remediation plan:
+Neither AGENTS nor the PAD documents the worklog protocol — it lives only in the operator's prompt, followed by convention, pinned nowhere. This strengthens the P1. Now writing the pre-registered remediation plan:
+Plan pre-registered. Recording the worklog gap entry (task 198-gap-s63), then implementing §3.2 — the standing helper:
+Now §3.2 — the standing helper. Let me check the s62 helper's CLI contract form first:
+Writing the standing helper `scripts/check-worklog.py`:
+**Helper born-green** — 203 entries / 203 separators, the frozen nine intact, zero new holes, fields complete. Now §3.3 — pin 4. Let me check the s62 spawnSync pin form first:
+Writing pin 4 into the doc-enumeration contract (with the CURRENT_SESSION bump and the spawnSync import):
+Fixing a cosmetic double-brace in the pin title, then running the file born-green:
+**Pin 4 born-green** — doc-enumeration now 4 tests. Now §3.4 — the corpus move 287→288 across all family sites + §3.5 — the standing duties:
+All 10 family sites moved. Now the §7.1 in-place row (3→4) with the s63 pin-4 text:
+Now §3.5 — the standing duties in plan-status-contract.test.ts:
+Running the full unit suite for the 288/288 checkpoint:
+Three failures of the expected catch-classes. Let me see the details:
+The pins caught three things: a missed 287 site, and the s62 plan's §3.6 box left unchecked by the s62 closeout (the plan-status pin doing its job at the boundary bump — the s55 shape-B class). Let me find the missed site and fix the box:
+**288/288 in 35 files — the corpus move complete.** The pins caught the s62 closeout's own §3.6 box omission (fixed) and the badge site. Now §4 — the mutation battery. Let me study the s62 forms:
+Writing the s63 mutation battery. First verifying the exact strings for the D and G mutations:
+All targets verified. Writing the mutation definitions and runner:
+Now the observation pass — each bite observed live before the runner ships. Observing A–E against pin 4:
+The observation pass caught two design issues (the convention working): D's revert broke (the renumber form creates 2 identical strings — needs the backup form) and D's bite named the hole class, not the dup invariant. First, restoring the worklog's mutated state, then redesigning D as the pure block-append dup form:
+Worklog restored (203 entries, zero new holes). Now redesigning D (the pure block-append exact-dup) and E (the empty-corpus neuter — the observed E was contaminated by D's crashed revert, and the entries=0 form would hit the structure check first):
+
 The workspace is intact with session-63 work in progress. Let me read the current state of the remediation plan, the mutation script, and the worklog to pinpoint where work stopped.
 The plan is clear. Work stopped mid-§4: mutations D and E need redesign (D → pure block-append exact-dup with backup-form revert; E → empty-corpus neuter). Let me examine the helper, pin 4, the worklog tail, and the s62 mutation conventions to design the fix correctly.
 The helper is solid. Now let me read pin 4, the s62 mutation-script conventions (for the backup form), and the worklog tail.
