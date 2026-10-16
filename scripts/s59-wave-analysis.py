@@ -21,7 +21,7 @@ def refs(path):
 cur_b, cur_p = refs('/tmp/s59-results/cur-chunkrefs.txt')
 s58_b, s58_p = refs('/tmp/s59-results/s58-baseline-entry.js.chunkrefs.txt')
 print(f"basenames: now={len(cur_b)} s58={len(s58_b)}")
-added = cur_b - s56_b
+added = cur_b - s58_b
 removed = s58_b - cur_b
 print(f"ADDED basenames ({len(added)}):")
 for b in sorted(added):

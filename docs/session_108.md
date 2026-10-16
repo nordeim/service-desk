@@ -6,9 +6,9 @@ worklog 已完整掌握 s56–s58 的脉络。现在这是 **session 59**。先�
 核心文档已研读完毕。现在查看 skills 目录并搭建环境。
 环境就绪（4/11/3 canonical seed）。现在执行**第一职责：baseline gate**——lint、typecheck、单元测试。
 **BASELINE NOT GREEN**——s56 artifact-existence pin 3 失败（第三次连续 operator-transcript 事件，完全符合 s58 预测）。查看确切失败点：
-确认：`docs/session_106.md:52` 携带回勾的 `deadbeef` 伪造 token——operator 新 transcript（commit `49c6865`）第三次连续引入语法匹配形式。按 lesson-109/110 de-grammar 原则修复：
-注意到 line 13 也有回勾 `deadbeef`，但 pin 只报了 line 52。查看 pin 的具体匹配逻辑：
-奇怪——line 13 也有回勾 `deadbeef` 但 pin 只报 line 52。让我模拟 pin 的 regex 逻辑验证：
+确认：`docs/session_106.md:52` 携带回勾的 deadbeef 伪造 token（去语法化描述，不再复现回勾形式）——operator 新 transcript（commit `49c6865`）第三次连续引入语法匹配形式。按 lesson-109/110 de-grammar 原则修复：
+注意到 line 13 也有回勾的 deadbeef 伪造 token，但 pin 只报了 line 52。查看 pin 的具体匹配逻辑：
+奇怪——line 13 也有回勾的 deadbeef 伪造 token 但 pin 只报 line 52。让我模拟 pin 的 regex 逻辑验证：
 我的模拟发现两处 deadbeef，但 pin 只报了一处。查看 gitReachable 实现：
 让我运行单个测试文件捕获完整错误信息：
 Pin 确实只报 line 52。让我读 gitReachable 的完整实现找出差异：
@@ -42,7 +42,7 @@ Now implement the pin fix — the shared classifier with `continue` semantics + 
 Now add pin 4 at the end of the describe block:
 模板字符串里的 `\\`` 转义错误。修复（同时遵循 lesson-109 原则——不复现语法匹配形式）：
 Pin 4 born-green。Pin 3 失败——预期的过渡状态（修正后的语法现在声称先前被屏蔽的 token）。查看：
-**Immediate-catch 机制捕获了我自己的计划**——plan 引用了回勾的 `deadbeef`（s55/s56 模式第三次重演）。按 doctrine 去语法化：
+**Immediate-catch 机制捕获了我自己的计划**——plan 引用了回勾的 deadbeef 伪造 token（s55/s56 模式第三次重演）。按 doctrine 去语法化：
 全部 4 pin 绿。现在编写 corpus move 脚本（282→283 + standing duties）：
 第一次运行已部分执行。检查当前状态并补齐剩余编辑：
 9 个 family sites + quickstart + pin literal 已落地。补齐剩余两项（PAD §7.1 行 + standing duties）：
