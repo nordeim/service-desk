@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 
 // ---------------------------------------------------------------------------
@@ -354,5 +354,91 @@ describe("session 56: the artifact-existence pins (the durable-artifact existenc
       shapeLines,
       `the co-location shape floor: expected >= 20 lines with 2+ hex tokens and >= 1 excluded (the s59 live-event class), found ${shapeLines} — the grammar or the corpus changed`,
     ).toBeGreaterThanOrEqual(20);
+  });
+
+  it("pin 5 (s62): the screenshots family integrity — every docs/screenshots/*.png is structurally valid (magic + IHDR + IEND + size floor), the ten-name lineage set is complete, and the desktop/mobile split matches the capture viewports", { timeout: 60000 }, () => {
+    // The s62 closure: the parity-EVIDENCE surface. Every session plan's
+    // verification section cites "the 10-shot set" as the visual-parity
+    // evidence, yet the family carried NO standing check at any level:
+    //   1. the s17/s18 asset-truth doctrine (an asset's declared format
+    //      must be true — the favicon + og:image magic-byte pins) was never
+    //      extended here: a corrupted/truncated/text-substituted PNG passed
+    //      every standing gate;
+    //   2. the family COUNTS drifted live (the s48 stale-'54'/'57' class on
+    //      a new surface): the PAD §3.2 claimed "7 dev-server captures"
+    //      (stale by three), the AGENTS reference list claimed "desktop x 7"
+    //      (stale by one) — the fs carries 10 = 8 desktop + 2 mobile;
+    //   3. no named-set enumeration — a renamed/deleted member failed only
+    //      at the next session's shotdiff, if then.
+    //
+    // Ground truth: the bytes themselves, via the standing helper
+    // scripts/check-screenshots.py (the --check/--json CLI contract, the
+    // s60/s61 helper convention). The spawnSync + JSON-either-way form is
+    // the s60 execFileSync-throw lesson (the helper exits 1 when offenders
+    // exist — the pin must read the JSON either way and NAME the offenders
+    // itself); the 60s timeout is the lesson-115 doctrine (every pin that
+    // spawns subprocesses gets a timeout matching its own worst-case
+    // envelope, never the runner's 5s default).
+    const r = spawnSync(
+      "python3",
+      ["scripts/check-screenshots.py", "--check", "--json"],
+      { encoding: "utf8", maxBuffer: 8 * 1024 * 1024, cwd: process.cwd() },
+    );
+    if (r.error) {
+      throw new Error(`the screenshots checker could not run: ${r.error.message}`);
+    }
+    if (r.status !== 0 && r.status !== 1) {
+      throw new Error(
+        `the screenshots checker exited with an unexpected status ${r.status} (0 = clean, 1 = offenders found — anything else is a checker defect): ${r.stderr}`,
+      );
+    }
+    let report: {
+      ok: boolean;
+      scanned: number;
+      counts: { desktop: number; mobile: number; unknown: number };
+      named_set_missing: string[];
+      unexpected: string[];
+      offenders: { name: string; errors: string[] }[];
+    };
+    try {
+      report = JSON.parse(r.stdout);
+    } catch {
+      throw new Error(
+        `the screenshots checker's --json output did not parse (the machine-readable contract): ${r.stdout.slice(0, 300)}`,
+      );
+    }
+
+    // The vacuous-pass guard: an emptied docs/screenshots/ folder scans zero
+    // files and reports zero per-file offenders — the floor fails loudly
+    // instead (the s56 mapDeps lesson, the s61 pin-3 floors precedent).
+    expect(
+      report.scanned,
+      `the screenshots family floor: expected >= 10 members, found ${report.scanned} — the capture lineage (the s10 base five + the s13 attachment pair + the s14 inline view + the mobile pair) is the parity-evidence surface`,
+    ).toBeGreaterThanOrEqual(10);
+
+    // The named-set completeness: the ten canonical names, each cited by the
+    // capture script and the corpus' "10-shot" claims.
+    if (report.named_set_missing.length > 0 || report.unexpected.length > 0) {
+      throw new Error(
+        `the screenshots named-set enumeration failed — missing: [${report.named_set_missing.join(", ")}]; unexpected: [${report.unexpected.join(", ")}]. ` +
+          `The ten-name lineage (01-login … 10-attachment-inline-view) is the corpus' cited evidence set; a rename or deletion is a visible family change, never a silent drift.`,
+      );
+    }
+
+    // The split agreement: 8 desktop (1280x800) + 2 mobile (375x812) — the
+    // capture-script viewports. A dimension change is a lineage change.
+    expect(report.counts.desktop).toBe(8);
+    expect(report.counts.mobile).toBe(2);
+    expect(report.counts.unknown).toBe(0);
+
+    // The asset truth itself: name every offender (file + error).
+    if (!report.ok && report.offenders.length > 0) {
+      const lines = report.offenders.flatMap((o) => o.errors.map((e) => `${o.name}: ${e}`));
+      throw new Error(
+        `the screenshots asset-truth check failed: ${lines.join("; ")}. ` +
+          `Every docs/screenshots/*.png must be structurally valid (the PNG magic, a parseable IHDR, the IEND trailer, the 4 KiB floor) at the recorded lineage dimensions — the s17/s18 doctrine extended to the parity-evidence surface.`,
+      );
+    }
+    expect(report.ok).toBe(true);
   });
 });

@@ -182,7 +182,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(286);
+    expect(Number(n)).toBe(287);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {

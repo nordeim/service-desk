@@ -2,7 +2,7 @@ The workspace exists with a service-desk repo. Let me check the git status and p
 The repo is at session-60 state. Let me pull the latest and check the docs structure.
 `docs/session_110.md` was just pulled in — a new operator document. Let me see the complete docs list and read the key session documents.
 `session_110.md` is the operator's transcript of session 60 (the just-pulled file) — this session's input. Let me check the new commit and grep it for the standing fabricated-token pattern.
-The pattern is emerging: `session_110.md` (the operator's transcript, committed after the s60 push) contains backticked `deadbeef` at 5 sites — the expected **fifth consecutive operator-transcript event**. Let me set up a plan and start with the document review.
+The pattern is emerging: `session_110.md` (the operator's transcript, committed after the s60 push) contains backticked deadbeef at 5 sites — the expected **fifth consecutive operator-transcript event**. Let me set up a plan and start with the document review.
 Now reading the remediation plan and worklog tail:
 现在让我阅读工作日志的结尾和核心测试 pin 文件：
 I have the full session-60 picture. Now let me check the environment state and read the key pin test files:
@@ -14,11 +14,11 @@ The reference-list convention confirmed (endpoint = N−1 at session N; currentl
 Now let me review README.md and the PAD/SKILL key sections while the baseline runs:
 Lint still running. Let me review the SKILL frontmatter and lessons ledger tail:
 Core docs review complete. Let me examine the pin test file that catches the operator-transcript events, and check baseline progress:
-The classifier is clear: `deadbeef` backticked (lines 5/7/8/10 of session_110.md) will be caught by pin 3 as dangling citations. Let me check the PAD §7.1 and the baseline progress:
+The classifier is clear: deadbeef backticked (lines 5/7/8/10 of session_110.md) will be caught by pin 3 as dangling citations. Let me check the PAD §7.1 and the baseline progress:
 The baseline chain is still on lint. Let me check the process and CI status on the operator's commit in the meantime:
 **CONFIRMED: CI run #165 on `5e3b305` FAILED — the FIFTH red main-branch run** (the alternating-red pattern #153/#156/#159/#162/#165, right on cue). Let me check the baseline gate status:
 The background chain died. Let me run the baseline gate in the foreground:
-**BASELINE NOT GREEN — the FIFTH consecutive operator-transcript event, on cue.** Pin 3 caught all FOUR backticked `deadbeef` sites in session_110.md (lines 5, 7, 8, 10) — 284/285. CI run #165 had already FAILED on it. Applying the de-grammar fix (backticks dropped, narrative kept legible):
+**BASELINE NOT GREEN — the FIFTH consecutive operator-transcript event, on cue.** Pin 3 caught all FOUR backticked deadbeef sites in session_110.md (lines 5, 7, 8, 10) — 284/285. CI run #165 had already FAILED on it. Applying the de-grammar fix (backticks dropped, narrative kept legible):
 Three landed; line 8 needs the exact text fix:
 Line 10 still needs the fix (the MultiEdit was atomic — only my line-8 single edit landed; but lines 5/7 show fixed... let me verify state and fix line 10):
 All four sites de-backticked. Verifying the pin is green and the full unit suite:
