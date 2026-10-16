@@ -38,7 +38,7 @@ def main() -> int:
         return 4
 
     # Step 2: find the run citing my push commit 19596b9.
-    target = "19596b9"
+    target = sys.argv[1] if len(sys.argv) > 1 else "19596b9"
     actions_html = fetch("https://github.com/nordeim/service-desk/actions?query=branch%3Amain")
     blocks = re.split(r"actions/runs/", actions_html)[1:]
     found = None
