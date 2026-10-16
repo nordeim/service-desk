@@ -3143,3 +3143,20 @@ Work Log:
 
 Stage Summary:
 - Session 62 complete: the screenshots family-integrity class closed three-sided (the standing helper scripts/check-screenshots.py + pin 5 + the 8-mutation battery with the binary form — born-green; the live count drift closed at both doc sites), the corpus at 287 (35 files), the 44th sweep all user-facing non-gap (the 28th wave: the entry + login CSS both rotated, +1 basename; theirs the persisting defects 44th; ours the working superset)
+
+---
+Task ID: 197-push-s62
+Agent: main (Super Z) — session 62
+Task: Session-62 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 287/287 in 35 files after ALL doc edits; the PAD §7.4 hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked)
+- The SSH infrastructure: the workspace RESET wiped both paramiko and the shim — paramiko 5.0.0 reinstalled into the venv (the system python is PEP-668-locked), the shim redeployed at /home/z/my-project/bin/ssh (the Appendix A form, the venv shebang); no ssh binary in this sandbox (the standing reality)
+- The wrapper invocation form: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git — the DEFAULT remote is the how-to doc's legacy task-management repo (the first dry-run rejected against it — the remote-override flag is required for this repo; recorded here for the next session)
+- The fingerprint VERIFIED byte-identical to the s30–s61 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU
+- Push 1: f9a097d (the s62 remediation, 28 files: the de-grammar fix + the helper + pin 5 + the corpus move + the doc fixes + the standing duties + the 13 s62 scripts + the 3 BENIGN screenshot re-renders + session_113.md + the worklog 195-196) — dry-run GREEN (4d72410..f9a097d fast-forward), remote == local @ f9a097d, main only, tree clean, keys shredded
+- CI run 38849462622 on f9a097d COMPLETED/SUCCESS (verified via the actions-page embeddedData payload — the api.github.com rate limit the standing per-session reality) — THE PUSH THAT UN-REDS MAIN after the operator's 4d72410 failure (the SIXTH consecutive operator-transcript event, the alternating-red pattern six cycles deep)
+- The closeout: this worklog entry + the plan's final boxes checked at the closeout commit (the s53–s61 convention — the deferral form held at the remediation commit, the push + CI figures recorded here)
+
+Stage Summary:
+- Session 62 complete: the screenshots family-integrity class closed three-sided (the standing helper scripts/check-screenshots.py + pin 5 + the 8-mutation battery with the binary form — born-green; the live count drift closed at both doc sites), the standing duties executed (the PAIRED CURRENT_SESSION 62 + PLAN_CORPUS_FLOOR 61), the corpus at 287 (35 files), the 44th sweep all user-facing non-gap (the 28th wave: the entry + login CSS both rotated, +1 basename; ours the working superset — no TailwindCSS v4 bug), and CI GREEN on the push (main un-reded after the sixth operator event)
