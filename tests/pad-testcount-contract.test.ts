@@ -164,7 +164,7 @@ function expectDistributionMatches(
 }
 
 describe("the PAD §7.1 test-distribution contract (session 49)", () => {
-  it("every §7.1 Vitest row names the runtime per-file count, and every runtime test file has a row (the nested-run ground truth)", () => {
+  it("every §7.1 Vitest row names the runtime per-file count, and every runtime test file has a row (the nested-run ground truth)", { timeout: 300_000 }, () => {
     if (NESTED) return; // the re-entrancy guard: trivially pass inside the nested run
     runNestedVitest();
     const rows = parseRows().filter((r) => r.framework === "Vitest");

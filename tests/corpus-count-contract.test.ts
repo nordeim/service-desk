@@ -170,18 +170,19 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // BRIDGE pin — extracted so the two pins can never drift apart).
     const values = collectFamily(UNIT_FAMILY_SHAPES);
     const n = expectConsistent("the unit count", values, 9);
-    // The current canonical (runtime-verified every session's gate): 285
+    // The current canonical (runtime-verified every session's gate): 286
     // after the s48 6 pins + the s49 3 pad-testcount pins + the s50 quickstart
     // BRIDGE pin + the s51 prerequisites pins 2 + the s52 docdate pins 3 +
     // the s53 keyfiles pins 3 + the s54 route-head seam pins 4 + the s54
     // coverage pins 3 + the s55 plan-status pins 3 + the s56
     // artifact-existence pins 3 + the s57 doc-enumeration pins 3 + the s58
     // doc-path-reachability pins 3 + the s59 co-location pins 1 + the s60
-    // scripts-integrity pins 2. A suite
+    // scripts-integrity pins 2 + the s61 scripts-integrity pin 3 (the
+    // language-symmetry closure). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(285);
+    expect(Number(n)).toBe(286);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {

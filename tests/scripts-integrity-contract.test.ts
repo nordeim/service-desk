@@ -42,14 +42,29 @@ import { readdirSync } from "node:fs";
 
 // The scanned-files floor: the family carried 75 scripts at s60 (76 with
 // the helper itself). An emptied scripts/ folder must fail loudly instead
-// of vacuous-passing (the s56 mapDeps lesson).
-const SCANNED_FLOOR = 70;
+// of vacuous-passing (the s56 mapDeps lesson). Recalibrated at s61:
+// 83 .py measured (the s61 battery + the new .py helper).
+const SCANNED_FLOOR = 75;
 
 // The wave-analysis family floor: the battery convention regenerates one
-// wave-analysis script per session (s57/s58/s59/s60 measured at s60). The
+// wave-analysis script per session (s57..s61 measured at s61). The
 // live bug lived exactly here for two generations — the family's shape is
 // the pin's own subject.
-const WAVE_FAMILY_FLOOR = 4;
+const WAVE_FAMILY_FLOOR = 5;
+
+// The per-language syntax floors (pin 3, the s61 language-symmetry closure):
+// the vacuous-pass guards — an emptied language family fails loudly instead
+// of vacuous-passing (the s56 mapDeps lesson). Calibrated at s61: 132 .sh /
+// 125 .mjs / 18 .ts measured.
+const SH_FLOOR = 120;
+const MJS_FLOOR = 115;
+const TS_FLOOR = 15;
+
+interface SyntaxReport {
+  ok: boolean;
+  scanned: { sh: number; mjs: number; ts: number };
+  offenders: { file: string; tool: string; message: string }[];
+}
 
 interface CheckerReport {
   scanned: number;
@@ -86,7 +101,33 @@ function runChecker(): CheckerReport {
   }
 }
 
-describe("session 60: the scripts-integrity pins (the committed scripts' own-name contract)", () => {
+function runSyntaxChecker(): SyntaxReport {
+  // The same spawnSync + JSON-either-way contract as runChecker (the s60
+  // execFileSync-throw lesson: the helper exits 1 when offenders exist — the
+  // pin must read the JSON either way and NAME the offenders itself).
+  const r = spawnSync(
+    "python3",
+    ["scripts/check-syntax.py", "--check", "--json"],
+    { encoding: "utf8", maxBuffer: 8 * 1024 * 1024, cwd: process.cwd() },
+  );
+  if (r.error) {
+    throw new Error(`the syntax checker could not run: ${r.error.message}`);
+  }
+  if (r.status !== 0 && r.status !== 1) {
+    throw new Error(
+      `the syntax checker exited with an unexpected status ${r.status} (0 = clean, 1 = offenders found — anything else is a checker defect): ${r.stderr}`,
+    );
+  }
+  try {
+    return JSON.parse(r.stdout) as SyntaxReport;
+  } catch {
+    throw new Error(
+      `the syntax checker's --json output did not parse (the machine-readable contract): ${r.stdout.slice(0, 300)}`,
+    );
+  }
+}
+
+describe("session 60+61: the scripts-integrity pins (the committed scripts' own-name + own-syntax contracts)", () => {
   it("pin 1: every committed scripts/*.py passes the static undefined-name check (a loaded name is defined in its file, imported, a param, a builtin, or a dunder)", () => {
     const report = runChecker();
 
@@ -117,7 +158,7 @@ describe("session 60: the scripts-integrity pins (the committed scripts' own-nam
       `the wave-analysis family floor: expected >= ${WAVE_FAMILY_FLOOR} scripts/s*-wave-analysis.py files, found ${family.length} (${family.join(", ") || "none"}) — ` +
         `the battery convention regenerates one wave-analysis script per session (the s57 origin); the family is a sequence, and the live s56_b bug lived exactly here for two generations`,
     ).toBeGreaterThanOrEqual(WAVE_FAMILY_FLOOR);
-    // The sequence shape: the family carries the s57..s60 quadruple at s60
+    // The sequence shape: the family carries the s57..s61 quintuple at s61
     // (numbered, no gaps inside its own span — the doc-enumeration
     // doctrine applied to the scripts family).
     const nums = family.map((f) => Number(/^s(\d+)-/.exec(f)?.[1])).sort((a, b) => a - b);
@@ -127,5 +168,37 @@ describe("session 60: the scripts-integrity pins (the committed scripts' own-nam
         `the wave-analysis family has an interior gap: ${nums[i - 1]} -> ${nums[i]} (the per-session sequence must be contiguous inside its span)`,
       ).toBe(1);
     }
+  });
+
+  it("pin 3: every committed scripts/*.sh + *.mjs + *.ts passes its language's standard static check (the s61 language-symmetry closure)", () => {
+    const report = runSyntaxChecker();
+
+    // The per-language vacuous-pass guards: an emptied language family scans
+    // zero files and reports zero offenders — the floors fail it loudly.
+    expect(
+      report.scanned.sh,
+      `the .sh floor: expected >= ${SH_FLOOR} scripts/*.sh scanned, found ${report.scanned.sh} — the scripts/ corpus changed shape`,
+    ).toBeGreaterThanOrEqual(SH_FLOOR);
+    expect(
+      report.scanned.mjs,
+      `the .mjs floor: expected >= ${MJS_FLOOR} scripts/*.mjs scanned, found ${report.scanned.mjs} — the scripts/ corpus changed shape`,
+    ).toBeGreaterThanOrEqual(MJS_FLOOR);
+    expect(
+      report.scanned.ts,
+      `the .ts floor: expected >= ${TS_FLOOR} scripts/*.ts scanned, found ${report.scanned.ts} — the scripts/ corpus changed shape`,
+    ).toBeGreaterThanOrEqual(TS_FLOOR);
+
+    const offenderLines = report.offenders.map(
+      (o) => `${o.file}: [${o.tool}] ${o.message}`,
+    );
+    if (offenderLines.length > 0) {
+      throw new Error(
+        `committed scripts failing their language's static check: ${offenderLines.join("; ")}. ` +
+          `The s61 language-symmetry class: the s60 closure protected the .py family only — a syntax-broken .sh/.mjs, or a type-broken .ts, fails only at invocation (the s12 inert-guard lesson + the s58 durability-gap class at the language level). ` +
+          `Fix the script, or commit the copy that really ran.`,
+      );
+    }
+    expect(report.ok).toBe(true);
+    expect(report.offenders.length).toBe(0);
   });
 });
