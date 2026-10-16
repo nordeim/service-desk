@@ -170,11 +170,15 @@ describe("session 60+61: the scripts-integrity pins (the committed scripts' own-
     }
   });
 
-  it("pin 3: every committed scripts/*.sh + *.mjs + *.ts passes its language's standard static check (the s61 language-symmetry closure)", () => {
+  it("pin 3: every committed scripts/*.sh + *.mjs + *.ts passes its language's standard static check (the s61 language-symmetry closure)", { timeout: 60_000 }, () => {
     const report = runSyntaxChecker();
 
     // The per-language vacuous-pass guards: an emptied language family scans
     // zero files and reports zero offenders — the floors fail it loudly.
+    // The timeout bound (60s, not the runner's 5s default): the helper's
+    // 275 subprocess spawns run ~3.4s in a fast sandbox but exceed the 5s
+    // default on a slower CI runner — run #166 bit exactly there on this
+    // pin's FIRST CI run (the pad-testcount lesson applied to its own pin).
     expect(
       report.scanned.sh,
       `the .sh floor: expected >= ${SH_FLOOR} scripts/*.sh scanned, found ${report.scanned.sh} — the scripts/ corpus changed shape`,
