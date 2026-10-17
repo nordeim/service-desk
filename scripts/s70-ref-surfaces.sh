@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# S70: the reference-side F2–F4 live probes (the 51st sweep)
+# S70: the reference-side F2–F4 live probes (the 52nd sweep)
 #   F2  chrome ledger: /login viewport-fit=cover + PWA trio; /dashboard plain viewport
 #   F3  their desktop overflow (the s4–s69 records: scrollWidth 1328 vs clientWidth 1280)
 #   F4  their mobile overflow (468 vs 375) + the toast-viewport blocking at the toggle rect
