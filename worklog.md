@@ -3374,3 +3374,20 @@ Work Log:
 
 Stage Summary:
 - Session 66 complete: the CI-infra class closed three-sided (both jobs pinned ubuntu-24.04 + both setup-bun steps pinned bun 1.3.14, born-green; the ci-contract pins 5+6; the 8-mutation battery), the corpus at 296 (37 files), the 48th sweep all user-facing non-gap (the 32nd wave: a pure re-hash; ours the working superset), the THIRD consecutive clean operator cycle
+
+---
+Task ID: 210-push-s66
+Agent: main (Super Z) — session 66
+Task: Session-66 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 296/296 in 37 files after ALL doc edits; the PAD §7.4 hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked; .env + db/custom.db git-ignored); the pin-3 catch on my own doc fixed pre-ship (the hex illustration as a backticked bare-hex token — the dangling-citation grammar working on the session's own output, the honest-records doctrine live)
+- The SSH infrastructure rebuilt after the workspace RESET: paramiko 5.0.0 into the venv (the system python PEP-668-locked, /home/z/.venv/bin/python3 -m pip), the shim redeployed at /home/z/my-project/bin/ssh (the Appendix A form, the venv shebang, extracted verbatim from the skill doc); no ssh binary in this sandbox (the standing reality)
+- The wrapper invocation form held: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git (the remote-override flag REQUIRED — the default is the legacy task-management repo, the s62 lesson)
+- The fingerprint VERIFIED byte-identical to the s30–s65 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU (computed via paramiko's Ed25519Key — the raw-file SHA256 form is NOT the key fingerprint, the s63 lesson)
+- Push: 646d95a (the s66 remediation, 29 files: the 2 workflow fixes + the 2 new ci-contract pins + the corpus move 294->296 + the standing duties + the docs alignment + the 13 NEW s66 scripts + the 3 BENIGN screenshot re-renders + session_121.md + the worklog 208-209) — dry-run GREEN (18d05d0..646d95a fast-forward), remote == local @ 646d95a, main only, tree clean, keys shredded (the wrapper's temp copy + the session's key file, overwrite-then-unlink)
+- CI run #38984716935 on 646d95a: the poll's first pass read UNCLASSIFIED (cs=1, canc=0) mid-run — INVESTIGATED BEFORE ANY CONCLUSION (the lesson-118 doctrine at its fourth live use): the page's real icons showed failed=0/success=0/cancelled=0/inprog=1 — the verify job completed, the e2e still in flight, a PAGE-SHAPE RACE not a failure; the re-poll after the run settled: COMPLETED SUCCESSFULLY (the calibrated green signature, the control #177 through the same classifier first) — THE PUSH KEPT MAIN GREEN, the THIRD consecutive keep-green push, and the pinned runner (ubuntu-24.04) + pinned bun (1.3.14) installed green on their FIRST CI execution — the 2026-10-19 Ubuntu-26 flip survived by construction
+- The closeout: the plan's final box checked with the push figures (the s53–s65 convention — the deferral form held at the remediation commit) + this worklog entry at the closeout commit
+
+Stage Summary:
+- Session 66 complete: the CI-infra class closed three-sided (both jobs pinned ubuntu-24.04 + both setup-bun steps pinned bun 1.3.14, born-green; the ci-contract pins 5+6; the 8-mutation battery), the corpus at 296 (37 files), the 48th sweep all user-facing non-gap (the 32nd wave: a pure re-hash; ours the working superset), the THIRD consecutive clean operator cycle, and CI GREEN on the push (run #38984716935, the calibrated read, the pinned runner/bun green on first execution)
