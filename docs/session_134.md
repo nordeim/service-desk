@@ -10,7 +10,7 @@ skills/ 已被 tsconfig 和 vitest 排除（符合要求）。现在开始环境
 数据库种子完成（规范的 4/11/3）。现在安装 Playwright chromium 并验证现有安装。
 chromium-1200 已安装。现在运行第一项常规职责 —— 单元测试门禁（检查操作员的 session_132.md 是否包含不安全的 token 形式）。
 **pin-3 变红了** —— 295/296，正是 s67/s68 记录的 operator-transcript 类。让我看失败详情。
-与 s67/s68/s71 记录的类完全一致：operator 的 `session_132.md:65` 引用了 `d4789c3`（scandihaven 仓库的 HEAD —— 跨仓库哈希，本仓库不可达）。这正是 s71 会话在自己 session_131.md 上修过的同一 token，如今通过 operator 的逐字转录再次进入语料。按既定分类法处理：查看上下文，应用安全改写（绝不扩展 isKnownNonCommit）。
+与 s67/s68/s71 记录的类完全一致：operator 的 `session_132.md:65` 引用了 scandihaven 仓库的 HEAD 哈希（跨仓库哈希，本仓库不可达，此处以描述形式引用，不引字面值）。这正是 s71 会话在自己 session_131.md 上修过的同一 token，如今通过 operator 的逐字转录再次进入语料。按既定分类法处理：查看上下文，应用安全改写（绝不扩展 isKnownNonCommit）。
 Pin 3 只捕获反引号包裹的 bare-hex token。Line 14 的（无反引号）不触发；line 65 的（反引号）触发。让我先看 pin 的判定逻辑，再应用 s71 先例的安全改写。
 类已确认：这是 pin-3 家族的第三次 operator 端捕获（s67、s68 之后），也是跨仓库哈希形式在 operator 端的首次复发 —— s71 智能体在自己的日志（session_131.md:5）中修复的完全相同的 token，现在通过操作员的逐字转录重新进入。正在应用标准的单行安全重格式化（哈希不承载载荷；事实才是核心）：
 **Born-green 296/296（37 文件）** —— pin-3 红变绿关闭，pin 未动。现在做 CI 校准读数（先双控制组，再实测 operator 提交 87165c2 的 CI 状态）。

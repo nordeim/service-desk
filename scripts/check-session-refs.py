@@ -78,6 +78,38 @@ classification so the invariant surfaces in the kind:
                            previous session; the named kind makes the
                            review miss harder)
 
+The UNDERSCORE-DOC grammar (the s73 extension — the FOURTH token vocabulary,
+the lesson-126 limit one grammar further out): the derivation's substitution
+vocabulary carries a fourth grammar the checker could not see — the
+transcript-doc number in the underscore form (`session_{M}`). The RED proofs
+(measured live at s73): the correct `session_134` token in the derived
+s73-ci-status.py produced ZERO checker reports, and a reintroduced stale
+`session_132` mutation produced ZERO flags — the class is structurally
+blind because the underscore breaks both the [sS]-before-digits adjacency
+(the TOKEN grammar) and the hyphenated `session-{N}` form. The form carries
+a DERIVABLE invariant — the operator-transcript convention M = 2N-12 (the
+seven-file lineage measured holding: s67->session_122, s68->session_124,
+s69->session_126, s70->session_128, s71->session_130, s72->session_132,
+s73->session_134). The assistant now enumerates the fourth vocabulary:
+  OWN(transcript-doc)      a session_{M} token with M == 2N-12       — fine
+  OTHER(transcript-doc-review)  any other session_{M} token       — REPORT
+                           (the doc-align scripts' historical tokens
+                           and any stale derivation carry — reviewer-
+                           classified, the never-gates shape)
+
+The CONTEXT-TOKEN remainder (the s73 honest record — no grammar, a standing
+manual checklist): the derivation's substitution vocabulary ALSO carries
+three context tokens with NO derivable invariant — the operator-commit
+hash, the CI-run number, and the pin-3 line number (each an opaque
+per-session value; the s73 derivation's own substitution list enumerated
+all of them to keep the derived context correct). No classification can
+check them; the closure documents them HERE as the standing manual
+derivation checklist — every future scripts/{TAG}-* derivation MUST
+enumerate: the operator-commit hash, the transcript-doc number, the
+CI-run number, and the pin-3 line number. (The standing CI control-run
+constants #177/38948165037 are never bumped — they are the calibration
+anchors, not per-session context.)
+
 SWEEP_OFFSET = 18 is the four-session verified lineage (s68->50th,
 s69->51st, s70->52nd, s71->53rd). If the sweep convention ever shifts, the
 flags fire and the reviewer adjusts the constant — the checker narrows the
@@ -120,6 +152,14 @@ SESSIONS_AT = re.compile(r"\b(\d{1,3}) sessions at s(\d{1,3})\b")
 
 # --- the hyphenated grammar (the s72 extension — the third vocabulary) ---
 HYPHENATED = re.compile(r"\bsession-(\d{1,3})\b")
+
+# --- the underscore-doc grammar (the s73 extension — the fourth
+# vocabulary: the transcript-doc number in the session_{M} form) ----------
+UNDERSCORE = re.compile(r"\bsession_(\d{1,3})\b")
+TRANSCRIPT_OFFSET = 12  # transcript_doc = 2N - 12 (the seven-file lineage
+                        # session_122 at s67 measured through session_134
+                        # at s73; adjust only with reviewer evidence —
+                        # see the docstring)
 
 
 def newest_tag() -> str:
@@ -210,6 +250,16 @@ def scan_file(path: Path, own: int):
             num = int(m.group(1))
             kind = ("OWN(session-hyphen)" if num == own
                     else "OTHER(session-hyphen-review)")
+            reports.append((i, m.group(0), kind))
+        # pass 5: the underscore-doc grammar (the s73 extension — the
+        # FOURTH vocabulary; no span overlap with TOKEN or HYPHENATED: the
+        # underscore breaks both the [sS]-adjacency and the session- form,
+        # so the three grammars are disjoint)
+        for m in UNDERSCORE.finditer(line):
+            num = int(m.group(1))
+            kind = ("OWN(transcript-doc)"
+                    if num == 2 * own - TRANSCRIPT_OFFSET
+                    else "OTHER(transcript-doc-review)")
             reports.append((i, m.group(0), kind))
     return reports
 
