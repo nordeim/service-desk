@@ -78,7 +78,7 @@ agent-browser screenshot "$OUT/05-ticket-detail.png" > /dev/null
 B64="$(printf 'session-13 detail screenshot fixture' | base64 -w0)"
 COOKIE="$(mktemp)"
 curl -s -c "$COOKIE" -X POST "$CLONE/api/auth/login" -H 'Content-Type: application/json' -d '{"email":"demo@servicedesk.app","password":"Demo1234!"}' > /dev/null
-CREATED="$(curl -s -b "$COOKIE" -X POST "$CLONE/api/tickets" -H 'Content-Type: application/json' -d "{\"title\":\"S71 screenshot fixture (removed after capture)\",\"category\":\"other\",\"priority\":\"medium\",\"description\":\"Temporary two-attachment fixture for the session-69 screenshot. Deleted after the shots.\",\"attachments\":[{\"fileName\":\"first.txt\",\"mimeType\":\"text/plain\",\"sizeBytes\":36,\"data\":\"$B64\"},{\"fileName\":\"second.pdf\",\"mimeType\":\"application/pdf\",\"sizeBytes\":36,\"data\":\"$B64\"}]}" | python3 -c 'import json,sys; d = json.load(sys.stdin); print(d.get("ticket", {}).get("id", ""))')"
+CREATED="$(curl -s -b "$COOKIE" -X POST "$CLONE/api/tickets" -H 'Content-Type: application/json' -d "{\"title\":\"S71 screenshot fixture (removed after capture)\",\"category\":\"other\",\"priority\":\"medium\",\"description\":\"Temporary two-attachment fixture for the session-71 screenshot. Deleted after the shots.\",\"attachments\":[{\"fileName\":\"first.txt\",\"mimeType\":\"text/plain\",\"sizeBytes\":36,\"data\":\"$B64\"},{\"fileName\":\"second.pdf\",\"mimeType\":\"application/pdf\",\"sizeBytes\":36,\"data\":\"$B64\"}]}" | python3 -c 'import json,sys; d = json.load(sys.stdin); print(d.get("ticket", {}).get("id", ""))')"
 if [ -z "$CREATED" ]; then
   echo "FATAL: attachment fixture ticket could not be created" >&2
   rm -f "$COOKIE"; exit 1

@@ -62,7 +62,7 @@ Now the worklog entries (tasks 223–224; the push entry 225 lands at closeout):
 Worklog helper green (zero new holes). Now ticking the plan's §3/§4/§5 boxes per the remediation-commit convention:
 §6 left unticked (the deferral form). Now the final gate after ALL doc edits — the full chain:
 A unit failure after the doc edits — the gate doing its job. Let me see it:
-**Pin-3 caught my own session doc** — `session_131.md:5` cites `d4789c3` (the scandihaven repo's HEAD), unreachable in THIS repository. The recursive catch working as designed. Let me check the pin's grammar and apply the doctrine fix:
+**Pin-3 caught my own session doc** — `session_131.md:5` cites the scandihaven repo's tip as a backticked bare-hex token (a cross-repo commit), unreachable in THIS repository. The recursive catch working as designed. Let me check the pin's grammar and apply the doctrine fix:
 The pin scans backticked bare-hex tokens. The doctrine fix (never extend the predicate): re-form the cross-repo reference — the hash isn't load-bearing, the "unchanged since s70's review" fact is:
 **296/296 re-greened** — the recursive catch closed with the pin untouched. Now build + E2E + smoke + seed to complete the final gate:
 **FINAL GATE FULLY GREEN**: lint ✓ typecheck ✓ 296/296 ✓ build ✓ 198/198 E2E ✓ smoke 121 ✓ seed 4/11/3 ✓. Now the hygiene check:

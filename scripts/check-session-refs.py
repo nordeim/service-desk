@@ -48,6 +48,36 @@ both:
                           (the wave-history ordinals and the watch
                           target) — REPORT for review
 
+The HYPHENATED grammar (the s72 extension — the third token vocabulary,
+the lesson-125 limit one grammar further out): the s70/s71 derivations both
+missed the hyphenated form — the capture script's fixture description
+shipped committed reading "the session-69 screenshot" through the s70 AND
+s71 derivations (the per-session label should have read session-70 at s70,
+session-71 at s71), invisible to the s{M}/S{M} grammar because the hyphen
+breaks the \b[sS]\d match (the letter never directly precedes the digits).
+The assistant now enumerates the third vocabulary:
+  OWN(session-hyphen)      a session-{N} token with N == the tag    — fine
+  OTHER(session-hyphen-review)  any other session-{N} token      — REPORT
+                           (the known intentional historical forms — the
+                           "session-13 detail screenshot fixture" payload
+                           pair, self-consistent across the base64 payload
+                           and the INLINE_CHECK match — are reviewer-
+                           classified, the never-gates shape)
+
+The BASELINE-ENTRY shape (the s72 companion — the review-missed stale
+label): `s71-ref-sweep.sh:20` shipped committed reading "vs the s68 entry"
+while its own body reconstructed the s70 baseline — the checker DID flag
+the token (plain OTHER) at s70 and s71, and the review classified it
+intentional both times (the label reads plausible: the s68-era entry file
+IS the same index-DCDf2KCA.js). The shape now carries its own
+classification so the invariant surfaces in the kind:
+  BASELINE                 an s{N-1} token in the "entry" shape     — fine
+  OTHER(stale-baseline-entry)  an entry-shaped token at any other
+                           value                            — REPORT
+                           (the baseline-entry context demands the
+                           previous session; the named kind makes the
+                           review miss harder)
+
 SWEEP_OFFSET = 18 is the four-session verified lineage (s68->50th,
 s69->51st, s70->52nd, s71->53rd). If the sweep convention ever shifts, the
 flags fire and the reviewer adjusts the constant — the checker narrows the
@@ -75,6 +105,8 @@ BASELINE_SHAPES = (
     "records",    # "vs the s{M} records"
     "lineage",    # "the s{M} lineage"
     "pattern",    # "the s{M} pattern"
+    "entry",      # "vs the s{M} entry" / "{M} entry fetch" (the s72
+                  # baseline-entry shape — the context demands M == N-1)
 )
 
 # --- the ordinal grammar (the s71 extension) -----------------------------
@@ -85,6 +117,9 @@ SWEEP_CONTEXT = 24       # chars after an ordinal to find the word "sweep"
 ORDINAL = re.compile(r"\b(\d{1,3})(st|nd|rd|th)\b")
 SPELLED_ORDINAL = re.compile(r"\bthirty-[a-z]+\b", re.IGNORECASE)
 SESSIONS_AT = re.compile(r"\b(\d{1,3}) sessions at s(\d{1,3})\b")
+
+# --- the hyphenated grammar (the s72 extension — the third vocabulary) ---
+HYPHENATED = re.compile(r"\bsession-(\d{1,3})\b")
 
 
 def newest_tag() -> str:
@@ -135,6 +170,15 @@ def scan_file(path: Path, own: int):
                        for w in BASELINE_SHAPES):
                     reports.append((i, m.group(0), "BASELINE"))
                     continue
+            else:
+                # the baseline-entry shape (the s72 companion): an
+                # entry-shaped token at a value BELOW own-1 is the stale
+                # baseline label — the named kind surfaces the invariant
+                # (the context demands the previous session's entry)
+                rest = line[e:]
+                if rest.lstrip(" ").startswith("entry") or rest.startswith("-entry"):
+                    reports.append((i, m.group(0), "OTHER(stale-baseline-entry)"))
+                    continue
             reports.append((i, m.group(0), "OTHER"))
         # pass 3: the ordinal grammar (the s71 extension)
         sessions_at_spans = [(m.start(), m.end()) for m in SESSIONS_AT.finditer(line)]
@@ -159,6 +203,14 @@ def scan_file(path: Path, own: int):
             reports.append((i, m.group(0), kind))
         for m in SPELLED_ORDINAL.finditer(line):
             reports.append((i, m.group(0), "OTHER(ordinal-review)"))
+        # pass 4: the hyphenated grammar (the s72 extension — the third
+        # vocabulary; no span overlap with TOKEN: the hyphen breaks the
+        # [sS]-before-digits adjacency, so the two grammars are disjoint)
+        for m in HYPHENATED.finditer(line):
+            num = int(m.group(1))
+            kind = ("OWN(session-hyphen)" if num == own
+                    else "OTHER(session-hyphen-review)")
+            reports.append((i, m.group(0), kind))
     return reports
 
 

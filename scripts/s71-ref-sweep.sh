@@ -17,7 +17,7 @@
 #              index-e12PSDbU.css 899517 (the 29th) / index-DPOrvWRk.css 899411 (the 28th) /
 #              index-BCfnIRWB.css 901951 (the 26th) / index-BIWjBcok.css 904487 (the 25th) /
 #              index-D0Q6-tUz.css (s50 404 -> s51 200 edge-cache artifact, 900665)
-#   + the chunk-ref baseline comparison vs the s68 entry (re-fetched BY NAME —
+#   + the chunk-ref baseline comparison vs the s70 entry (re-fetched BY NAME —
 #     the re-fetch-by-name form is the standing convention: /tmp baselines do
 #     not survive workspace resets)
 set -o pipefail
