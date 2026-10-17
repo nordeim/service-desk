@@ -72,7 +72,7 @@ Now writing my agent log `docs/session_121.md` (the 2N−11 convention).
 Now the worklog session entry (task 209) and the s66 CI poll script.
 Now the final pre-commit gate after ALL doc edits (the lesson-109 doctrine) + hygiene check.
 Pin 3 (dangling-citation check) failed — one of my new docs cites a backticked hex token that doesn't resolve. Let me see the exact failure.
-The hex illustration `5b6d61696e5d` in session_121.md matches the commit-citation grammar. Let me find all occurrences of the backticked form in my new text and fix them (the pin is doing its job — a bare backticked hex token should be a commit).
+The hex illustration `5b 6d 61 69 6e 5d` in session_121.md matches the commit-citation grammar. Let me find all occurrences of the backticked form in my new text and fix them (the pin is doing its job — a bare backticked hex token should be a commit).
 **Final gate GREEN: 296/296.** (The pin-3 catch was the dangling-citation grammar validating my own doc pre-ship — the honest-records doctrine live.) Now the hygiene check + SSH push infrastructure.
 SSH infrastructure needs rebuilding (workspace reset). Let me check the wrapper skill doc for the exact shim form.
 Shim deployed. Now saving the operator key (0600, /tmp, never in the repo) and verifying the fingerprint.
