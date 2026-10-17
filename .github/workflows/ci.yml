@@ -31,7 +31,10 @@ concurrency:
 jobs:
   verify:
     name: lint + typecheck + unit + build
-    runs-on: ubuntu-latest
+    # Session 66: pinned — ubuntu-latest flips to Ubuntu-26 on 2026-10-19
+    # (the runner-image flux behind the s65 closeout Install-dependencies
+    # flake); this holds the known-green image the corpus verified.
+    runs-on: ubuntu-24.04
     env:
       AUTH_SECRET: ci-only-session-secret-not-for-production
     steps:
@@ -44,7 +47,9 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          # Session 66: pinned — the local gate runs bun 1.3.14 (the
+          # documented runtime); `latest` drifts CI away from it silently.
+          bun-version: 1.3.14
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -84,7 +89,8 @@ jobs:
 
   e2e:
     name: playwright e2e (standalone server)
-    runs-on: ubuntu-latest
+    # Session 66: pinned — same rationale as the verify job.
+    runs-on: ubuntu-24.04
     needs: verify
     env:
       AUTH_SECRET: ci-only-session-secret-not-for-production
@@ -93,7 +99,8 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          # Session 66: pinned — same rationale as the verify job.
+          bun-version: 1.3.14
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
