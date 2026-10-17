@@ -3634,3 +3634,19 @@ Work Log:
 
 Stage Summary:
 - Session 71 closeout ready: the full gate green post-edits, the plan boxes per convention, the hygiene clean — the grammar-extension fix + the third consecutive green-at-pull + the 53rd sweep all non-gap, the corpus unchanged at 296/37
+
+---
+Task ID: 225-push-s71
+Agent: main (Super Z) — session 71
+Task: Session-71 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 296/296 in 37 files + build + 198/198 E2E (2.8m) + smoke 121 + the canonical seed 4/11/3 after ALL doc edits; the hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked); the worklog helper green at 229 entries zero new holes; the stream discipline held (no unsafe token form quoted anywhere in the s71 narrative — the pin-3 recursive catch on the session's own session_131.md (a cross-repo scandihaven hash citation) fixed with the safe re-form, the pin's strength untouched)
+- The SSH infrastructure (the workspace survived from s70): paramiko 5.0.0 + the shim at /home/z/my-project/bin/ssh on PATH (the Appendix-A form); the wrapper invocation: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git --branch main (the remote-override flag held)
+- The fingerprint VERIFIED byte-identical to the s30–s70 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU
+- Push: 33e10bb (the s71 remediation, 23 files: the check-session-refs.py ordinal-grammar extension (the sweep-ordinal invariant + the sessions-at cardinal invariant + the review-listed ordinal remainder) + the committed s70-ref-surfaces.sh:2 correction ("the 51st sweep" -> "the 52nd sweep", the historical-record fix) + the paired CURRENT_SESSION 71/floor 70 + the docs alignment (AGENTS Session-71 + reference range s70 + screenshots lineage s71; CLAUDE anti-pattern; SKILL v2.69.0 lesson 125; PAD Session-71 RESOLVED row) + session_131.md + the worklog 223-224 + the 11 NEW s71 scripts + the 1 BENIGN screenshot re-render) — dry-run GREEN (3149a66..33e10bb fast-forward), remote == local @ 33e10bb, main only, tree clean, keys shredded (the wrapper's temp copy + the session's key file, overwrite-then-unlink)
+- CI run #39014621558 on 33e10bb: BOTH controls read correctly first (the green #177 38875997857 COMPLETED_SUCCESSFULLY + the known-red 38948165037 FAILED through the same classifier), the live read IN_PROGRESS through 8 attempts, the green signature on the 9th: COMPLETED_SUCCESSFULLY — THE PUSH KEPT MAIN GREEN (the fifth keep-green push of the era — s64/s65/s66/s69/s70 the prior; the third consecutive green-at-pull and the push preserved it — the first fully-green three-cycle run of the era)
+- The closeout: the plan's final box checked with the push figures (the s53–s70 convention — the deferral form held at the remediation commit) + this worklog entry at the closeout commit
+
+Stage Summary:
+- Session 71 complete: the ordinal-drift class closed at the GRAMMAR EXTENSION (lesson 125: a mechanism closure is scoped to the class its grammar names — when the drift walks to the adjacent vocabulary, the next mechanism is the grammar extension; the committed s70 defect caught + fixed, the extension battery-verified incl. its own spelled-ordinal case bug), zero new pins (the never-inflate doctrine held the fifth consecutive session; the corpus unchanged at 296/37), the 53rd sweep all user-facing non-gap (NO wave — the fourth consecutive fully-stable /login measurement; the backend-axis re-verification holding on the app-scoped paths; theirs the persisting defects; ours the working superset — no TailwindCSS v4 bug, the mobile menu byte-identical), the third consecutive green-at-pull, and CI GREEN on the push (run #39014621558, the calibrated read with BOTH controls) — MAIN KEPT GREEN
