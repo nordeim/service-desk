@@ -3840,3 +3840,19 @@ Work Log:
 
 Stage Summary:
 - Session 75 closeout ready: the full gate green post-edits, the plan boxes per convention, the hygiene clean — the honest-minor fix + the sixth red-at-pull closed + the 57th sweep all non-gap (the THIRTY-SIXTH wave verified NON-GAP through the live flows), the corpus unchanged at 296/37
+
+---
+Task ID: 237-push-s75
+Agent: main (Super Z) — session 75
+Task: Session-75 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 296/296 in 37 files + build + 198/198 E2E (2.8m) + smoke 121 + the canonical seed 4/11/3 after ALL doc edits; the hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked; check-ignore confirms .env + db/custom.db + db/e2e.db ignored — the db/.gitkeep placeholder is the documented convention)
+- The SSH infrastructure rebuilt for the fresh-clone workspace: paramiko 5.1.0 + the shim at /home/z/my-project/bin/ssh on PATH (the Appendix-A form, extracted from the how-to skill); the wrapper invocation: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git --branch main (the remote-override flag held)
+- The fingerprint VERIFIED byte-identical to the s30-s74 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU
+- Push: 041e868 (the s75 remediation, 27 files: the session_138.md pin-3 safe re-form at BOTH points (lines 7 + 8) + the session_137.md next-watch ordinal correction (the historical-record form, THIRTY-SEVENTH -> THIRTY-SIXTH with the honest annotation) + the checker docstring's checklist addition (the next-watch ordinal pair, the derivable form: found-wave -> +1, no-wave -> same) + the AGENTS reference-list range correction (to -session75, the s74 omission) + the paired CURRENT_SESSION 75 / floor 74 + the 11 NEW s75 scripts (the simulation-verified derivation: every rule's expected count matched at application time before any file was written) + the docs alignment (AGENTS Session-75 + the CLAUDE anti-pattern (the next-watch entry, newest-LAST) + the SKILL v2.73.0 lesson 129 (the tag-form error caught live by the docdate pin, fixed pre-commit) + the PAD Session-75 RESOLVED row + session_139.md + the 4 refreshed screenshots (02/04/05/09 — SIX byte-identical + FOUR BENIGN, the fresh-clone shape) + the worklog tasks 235-236)
+- CI run #39098737051 on 041e868: BOTH controls read correctly first (the green #177 38875997857 COMPLETED_SUCCESSFULLY + the known-red 38948165037 FAILED through the same classifier), the live read IN_PROGRESS through 8 attempts, the green signature on the 9th: COMPLETED_SUCCESSFULLY — THE PUSH RESTORED MAIN TO GREEN (the s67/s68/s72/s73/s74 pattern — the session opened at pin-3 red on the operator's 4cfdf7f (CI run #39095414639 FAILED), the re-form + remediation commit closed the red-main window)
+- The closeout: the plan's final box checked with the push figures (the s53-s74 convention — the deferral form held at the remediation commit) + this worklog entry at the closeout commit
+
+Stage Summary:
+- Session 75 complete: the next-watch class closed at the honest-minor form (lesson 129: the forward-looking narrative lines derive from the doc's own backward-looking records — a found-wave closeout implies M+1, a no-wave closeout implies M; the correction is the one-line historical-record form; the doc-scope grammar extension waits for a second occurrence), zero new pins (the never-inflate doctrine held the NINTH consecutive session), the corpus at 296/37, the 57th sweep all user-facing non-gap (the THIRTY-SIXTH wave — a pure re-hash verified NON-GAP through the live flows), and main restored to green
