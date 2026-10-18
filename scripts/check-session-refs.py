@@ -118,7 +118,7 @@ vocabulary:
                            never-gates shape held; the named kind makes
                            the review miss harder, the s72 form)
 
-The CONTEXT-TOKEN remainder (the s73/s74 honest record — no grammar, a
+The CONTEXT-TOKEN remainder (the s73/s74/s75 honest record — no grammar, a
 standing manual checklist): the derivation's substitution vocabulary
 ALSO carries invariant-less tokens NO classification can check — the
 s73 set (the operator-commit hash, the transcript-doc number, the
@@ -127,7 +127,17 @@ value) PLUS the s74 additions (the WAVE-FIGURE pairs — the entry +
 login-CSS hash/byte figures, opaque measured values labeled by the
 figure attribution; the ERA ORDINAL — "the FIFTH of the era", the
 red-at-pull count, event-driven not derivable; and the red-at-pull
-PATTERN LIST — s67/s68/s72/s73, the event history). No classification
+PATTERN LIST — s67/s68/s72/s73, the event history) PLUS the s75
+addition (the SESSION-DOC NEXT-WATCH ordinal — the closing line's
+"watch for a THIRTY-{N}th /login wave" is DERIVABLE from the doc's own
+closeout ledger: a found-wave closeout ("THE THIRTY-{M}th wave — a
+REAL rotation") implies N == M+1, a no-wave closeout ("NO THIRTY-{M}th
+wave") implies N == M; the s74 doc shipped THIRTY-SEVENTH against its
+own "NO THIRTY-SIXTH" closeout — the off-by-one slip, corrected at
+s75 (session_137.md line 30, the s75 remediation P1); every future
+session-doc closeout derives its next-watch line from its own closeout
+ledger, and if the slip class recurs the doc-scope extension of this
+checker is the documented next step). No classification
 can check them; the closure documents them HERE as the standing manual
 derivation checklist — every future scripts/{TAG}-* derivation MUST
 enumerate ALL of them to keep the derived context correct. (The
