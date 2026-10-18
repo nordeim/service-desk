@@ -12,7 +12,7 @@ This is now clear: I'm executing **session 73** of an established 72+ session go
 Now I have a complete understanding of the governance model. Let me check the skills catalog and CLAUDE.md anti-patterns:
 我现在已经完全理解了治理模型。在环境设置之前，让我先手动扫描 `operator` 的 `session_134.md` 记录，以检查 `pin-3` `unsafe-token` 类（最关键的初步检查）：
 **Pin-3 red-at-pull detected** — the 4th of the era (s67/s68/s72 prior). Line 13 of `session_134.md` carries the cross-repo scandihaven hash as a backticked bare-hex token. Let me verify the reachability of each token:
-Confirmed: `d4789c3` is the cross-repo scandihaven hash — the pin-3 violation class. `cfb88cb`/`437dd55` are reachable. Let me examine the pin's mechanics before applying the standing triage:
+Confirmed: the cross-repo scandihaven hash (that repository's HEAD, unreachable in this repo — the pin-3 violation class, described here without quoting the literal) is the offender. `cfb88cb`/`437dd55` are reachable. Let me examine the pin's mechanics before applying the standing triage:
 Let me check how the s72 session re-formed the same class on `session_132.md` (the precedent form):
 The precedent form is clear: the hash described, never quoted. Following the TDD discipline, I must first reproduce the RED state — which requires the environment. Let me rebuild it:
 Canonical seed 4/11/3 restored. Now the **unit gate first** — expecting pin-3 RED on the operator's transcript (the RED proof):
@@ -25,7 +25,7 @@ Build green. Now check Playwright browsers and run E2E:
 **Full baseline gate reproduced green end-to-end** (lint ✓ typecheck ✓ 296/296 ✓ build ✓ 198/198 ✓ smoke 121 ✓ seed 4/11/3 ✓). Now the standing helpers:
 All standing helpers green. Now the s95 shortlist check (27th consecutive session):
 s95 shortlist CLEAN (27th consecutive). Now the scandihaven reference repo check:
-scandihaven tip unchanged (`d4789c3` = the same commit s70–s72 reviewed — the very token class that caused the pin-3 red; described, never quoted). Nothing new to adopt. Cleaning up:
+scandihaven tip unchanged (the same commit s70–s72 reviewed — the very token class that caused the pin-3 red; described, never quoted). Nothing new to adopt. Cleaning up:
 Now deriving the s73 script set from the s72 lineage. Let me study the substitution vocabulary precisely:
 现在让我检查 `agent-browser` 的可用性，并读取其余的脚本：
 All 11 scripts understood. Now writing the derivation script (the standing sed workflow — OWN bump first, BASELINE second, the s70 lesson):

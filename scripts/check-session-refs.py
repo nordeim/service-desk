@@ -97,18 +97,42 @@ s73->session_134). The assistant now enumerates the fourth vocabulary:
                            and any stale derivation carry — reviewer-
                            classified, the never-gates shape)
 
-The CONTEXT-TOKEN remainder (the s73 honest record — no grammar, a standing
-manual checklist): the derivation's substitution vocabulary ALSO carries
-three context tokens with NO derivable invariant — the operator-commit
-hash, the CI-run number, and the pin-3 line number (each an opaque
-per-session value; the s73 derivation's own substitution list enumerated
-all of them to keep the derived context correct). No classification can
-check them; the closure documents them HERE as the standing manual
+The FIGURE-SHAPE grammar (the s74 extension — the FIFTH token vocabulary,
+the BASELINE_SHAPES completion, the s72 closure's own measured limit one
+shape further out): the ref-sweep header's wave-entry figure labels —
+"the s{M} figure" — were invisible to every named classification (plain
+OTHER, the exact pool the s72 closure drained for the "entry" sibling
+shape in the SAME header family; measured live at s74: the correct label
+and a stale-label mutation reported IDENTICALLY). The label semantics is
+an ATTRIBUTION: it names the session that MEASURED the current figure —
+a FRESH figure (rotated at the previous session) carries M == N-1, a
+hash-stable figure keeps its original measuring session (M < N-1, the
+intentional historical form). The assistant now enumerates the fifth
+vocabulary:
+  BASELINE                 a figure-shaped token at M == N-1      — fine
+  OTHER(baseline-figure-review)  a figure-shaped token at any
+                           other value                        — REPORT
+                           (the attribution case — reviewer-classified
+                           against the wave ledger (the ref-sweep
+                           header's retired-chunks history), the
+                           never-gates shape held; the named kind makes
+                           the review miss harder, the s72 form)
+
+The CONTEXT-TOKEN remainder (the s73/s74 honest record — no grammar, a
+standing manual checklist): the derivation's substitution vocabulary
+ALSO carries invariant-less tokens NO classification can check — the
+s73 set (the operator-commit hash, the transcript-doc number, the
+CI-run number, and the pin-3 line number: each an opaque per-session
+value) PLUS the s74 additions (the WAVE-FIGURE pairs — the entry +
+login-CSS hash/byte figures, opaque measured values labeled by the
+figure attribution; the ERA ORDINAL — "the FIFTH of the era", the
+red-at-pull count, event-driven not derivable; and the red-at-pull
+PATTERN LIST — s67/s68/s72/s73, the event history). No classification
+can check them; the closure documents them HERE as the standing manual
 derivation checklist — every future scripts/{TAG}-* derivation MUST
-enumerate: the operator-commit hash, the transcript-doc number, the
-CI-run number, and the pin-3 line number. (The standing CI control-run
-constants #177/38948165037 are never bumped — they are the calibration
-anchors, not per-session context.)
+enumerate ALL of them to keep the derived context correct. (The
+standing CI control-run constants #177/38948165037 are never bumped —
+they are the calibration anchors, not per-session context.)
 
 SWEEP_OFFSET = 18 is the four-session verified lineage (s68->50th,
 s69->51st, s70->52nd, s71->53rd). If the sweep convention ever shifts, the
@@ -139,6 +163,9 @@ BASELINE_SHAPES = (
     "pattern",    # "the s{M} pattern"
     "entry",      # "vs the s{M} entry" / "{M} entry fetch" (the s72
                   # baseline-entry shape — the context demands M == N-1)
+    "figure",     # "the s{M} figure" (the s74 BASELINE_SHAPES completion —
+                  # the wave-entry figure label; the FRESH figure carries
+                  # M == N-1, the attribution case joins the review list)
 )
 
 # --- the ordinal grammar (the s71 extension) -----------------------------
@@ -218,6 +245,17 @@ def scan_file(path: Path, own: int):
                 rest = line[e:]
                 if rest.lstrip(" ").startswith("entry") or rest.startswith("-entry"):
                     reports.append((i, m.group(0), "OTHER(stale-baseline-entry)"))
+                    continue
+                # the figure shape (the s74 extension — the FIFTH token
+                # vocabulary, the BASELINE_SHAPES completion): a
+                # figure-shaped token at any value OTHER than own-1 is the
+                # attribution case — the label names the session that
+                # MEASURED the current figure (a hash-stable figure keeps
+                # its original measuring session, a fresh figure carries
+                # own-1). Reviewer-classified against the wave ledger (the
+                # ref-sweep header's retired-chunks history), never gates.
+                if rest.lstrip(" ").startswith("figure") or rest.startswith("-figure"):
+                    reports.append((i, m.group(0), "OTHER(baseline-figure-review)"))
                     continue
             reports.append((i, m.group(0), "OTHER"))
         # pass 3: the ordinal grammar (the s71 extension)
