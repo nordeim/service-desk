@@ -137,7 +137,17 @@ own "NO THIRTY-SIXTH" closeout — the off-by-one slip, corrected at
 s75 (session_137.md line 30, the s75 remediation P1); every future
 session-doc closeout derives its next-watch line from its own closeout
 ledger, and if the slip class recurs the doc-scope extension of this
-checker is the documented next step). No classification
+checker is the documented next step) PLUS the s76
+addition (the LOGIN-PAIR sweep-coverage duty — the paired VLM check's
+capture set derives from the SURFACE the rotated asset styles: the
+s45–s75 battery compared post-login dashboards only, so the login
+page (the surface the rotating login CSS directly styles) had NO
+reference-side capture — the 37th-wave CSS rotation (the second in
+three waves after the 35th at s73) exposed the coverage gap; the
+s76-vlm-check.mjs login pair (the reference /login pre-auth capture +
+our /login pre-auth capture, the same LAYOUT-OK form) is the closure,
+and every future derivation carries the pair forward verbatim — when
+the login CSS rotates, the login pair MUST run). No classification
 can check them; the closure documents them HERE as the standing manual
 derivation checklist — every future scripts/{TAG}-* derivation MUST
 enumerate ALL of them to keep the derived context correct. (The

@@ -4,12 +4,12 @@ I'll continue the multi-phase service-desk remediation task. Let me set up my ta
 Now reading the five core documents. Starting with AGENTS.md:
 AGENTS.md 是一个包含超长行的庞大文件。让我来提取它的结构：
 I have a solid picture of the project conventions. Now reading the four session docs:
-`session_138.md`（s75 的操作员转录）在第 7-8 行包含了 `d4789c3` 作为反引号包裹的纯十六进制 token —— pin-3 类再次出现。在运行 gate 之前，让我阅读剩余的文档：
+`session_138.md`（s75 的操作员转录）在第 7-8 行包含了一个反引号包裹的纯十六进制 token（跨仓库 scandihaven 哈希，该仓库的 HEAD，在本仓库不可达——此处以描述记录、不引用字面量）—— pin-3 类再次出现。在运行 gate 之前，让我阅读剩余的文档：
 Now let me examine the contract test files and the checker script:
 Now let me check the environment tooling and the skills catalog:
 Environment setup for the fresh clone. Installing dependencies:
 Environment ready (seed 4/11/3, chromium-1248). Now the critical unit gate check — expecting pin-3 RED from session_138.md:
-**PIN-3 RED CONFIRMED — the SIXTH red-at-pull of the era** (s67/s68/s72/s73/s74 prior): unit gate 295/296, `docs/session_138.md` lines 7+8 carry `d4789c3` as backticked bare-hex. Let me check the s74 precedent re-form before applying the standing triage:
+**PIN-3 RED CONFIRMED — the SIXTH red-at-pull of the era** (s67/s68/s72/s73/s74 prior): unit gate 295/296, `docs/session_138.md` lines 7+8 carry the bare-hex token (the same cross-repo scandihaven hash, described, never quoted). Let me check the s74 precedent re-form before applying the standing triage:
 Applying the standing transcript-first triage — the one-line safe re-form (hash described, never quoted; pin untouched):
 **BORN-GREEN 296/296 (37 files)** — pin-3 closed, pin untouched. Now checking CI status on the operator's commit using the calibrated read (both controls first):
 **CI calibrated read: run #39095414639 on `4cfdf7f` measured FAILED** — main is RED at pull (sixth red-at-pull window; both controls read correctly). The s75 push must restore main to green. Now the full baseline gate:
