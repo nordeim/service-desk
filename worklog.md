@@ -3890,3 +3890,19 @@ Work Log:
 
 Stage Summary:
 - Session 76 closeout ready: the full gate green post-edits, the plan boxes per convention, the hygiene clean — the honest-minor fix (the login-pair battery extension) + the seventh red-at-pull closed + the 58th sweep all non-gap (the THIRTY-SEVENTH wave verified NON-GAP through the live flows incl. the login pair), the corpus unchanged at 296/37
+
+---
+Task ID: 240-push-s76
+Agent: main (Super Z) — session 76
+Task: Session-76 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 296/296 in 37 files + build + 198/198 E2E (2.7m) + smoke 121 + the canonical seed 4/11/3 after ALL doc edits; the hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked; check-ignore confirms .env + db/custom.db + db/e2e.db ignored — the db/.gitkeep placeholder is the documented convention)
+- The SSH infrastructure rebuilt for the fresh-clone workspace: paramiko 5.1.0 + the shim at /home/z/my-project/bin/ssh on PATH (the Appendix-A form, extracted from the how-to skill); the wrapper invocation: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git --branch main (the remote-override flag held)
+- The fingerprint VERIFIED byte-identical to the s30-s75 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU
+- Push: a3e333e (the s76 remediation, 25 files: the session_140.md pin-3 safe re-form at BOTH points (lines 7 + 12) + the login-pair battery extension (the s76-vlm-check.mjs login pair + the capture points in the ref-surfaces/ourside scripts + the checker docstring's checklist addition) + the paired CURRENT_SESSION 76 / floor 75 + the 11 NEW s76 scripts (the simulation-verified derivation: every rule's expected count matched at application time before any file was written — the layer caught one context drift pre-derivation, the shotdiff line-boundary form) + the docs alignment (AGENTS Session-76 + the CLAUDE anti-pattern + the SKILL v2.74.0 lesson 130 + the PAD Session-76 RESOLVED row + session_141.md + the 3 refreshed screenshots (04/05/09 — SEVEN byte-identical + THREE BENIGN, the fresh-clone shape) + the worklog tasks 238-239)
+- CI run #39179859044 on a3e333e: BOTH controls read correctly first (the green #177 38875997857 COMPLETED_SUCCESSFULLY + the known-red 38948165037 FAILED through the same classifier), the live read IN_PROGRESS through 8 attempts, the green signature on the 9th: COMPLETED_SUCCESSFULLY — THE PUSH RESTORED MAIN TO GREEN (the s67/s68/s72/s73/s74/s75 pattern — the session opened at pin-3 red on the operator's 26e0945 (CI run #39176089227 FAILED), the re-form + remediation commit closed the red-main window)
+- The closeout: the plan's final box checked with the push figures (the s53-s75 convention — the deferral form held at the remediation commit) + this worklog entry at the closeout commit
+
+Stage Summary:
+- Session 76 complete: the login-surface class closed at the honest-minor form (lesson 130: the paired battery's coverage derives from what the rotation touches — when the login CSS rotates, the login pair MUST run), zero new pins (the never-inflate doctrine held the TENTH consecutive session), the corpus at 296/37, the 58th sweep all user-facing non-gap (the THIRTY-SEVENTH wave — the era's largest churn + the CSS rotation, verified NON-GAP through the live flows incl. the login pair), and main restored to green
