@@ -78,7 +78,7 @@ import { spawnSync } from "node:child_process";
 // plan-status file's own constant (the paired bump is a visible edit; a
 // mismatch between the two files fails this suite's expectations on the
 // next boundary).
-const CURRENT_SESSION = 76;
+const CURRENT_SESSION = 77;
 
 // The agent-log correspondence boundary: the 2N-11 formula + the header
 // identification hold for every session N >= 12 (measured: the s12 doc

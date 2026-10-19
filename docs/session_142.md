@@ -1,12 +1,12 @@
 The workspace has been reset. I'll clone the service-desk repo fresh.
 仓库已克隆。这是第 139/75 次迭代，拥有已建立的 75 次会话工作流。让我制定任务计划并开始审阅文档。
-I have the full picture of s75 and its closeout. Now session_140.md (the operator transcript for the current session) — I already see it carries `d4789c3` as backticked bare-hex tokens at lines 7 and 12, which suggests pin-3 red-at-pull will fire again this session. Let me review the core docs' structure, then verify.
+I have the full picture of s75 and its closeout. Now session_140.md (the operator transcript for the current session) — I already see it carries the found token (the cross-repo scandihaven hash, the repo's HEAD — unreachable in this repository, recorded here by description, the literal never quoted) as backticked bare-hex tokens at lines 7 and 12, which suggests pin-3 red-at-pull will fire again this session. Let me review the core docs' structure, then verify.
 现在让我检查 worklog 尾部和合约测试文件，以了解当前的状态。
 Now let me check the environment tooling and set up the workspace (bun install, .env, db) so I can run the unit gate.
 Environment ready (seed 4/11/3 canonical). Now the critical unit gate check at pull — expecting pin-3 RED from session_140.md:
-**PIN-3 RED CONFIRMED — the SEVENTH red-at-pull of the era**: unit gate 295/296, `docs/session_140.md` lines 7+12 carry `d4789c3` as backticked bare-hex (the agent-side narration form, fourth consecutive session). Let me check the s75 precedent re-form before applying the standing triage:
+**PIN-3 RED CONFIRMED — the SEVENTH red-at-pull of the era**: unit gate 295/296, `docs/session_140.md` lines 7+12 carry the found token — the cross-repo scandihaven hash (unreachable here, described never quoted) — as backticked bare-hex (the agent-side narration form, fourth consecutive session). Let me check the s75 precedent re-form before applying the standing triage:
 Let me check the authoritative s75 re-form of session_138.md from the remediation commit:
-The precedent is exact — `d4789c3` is the cross-repo scandihaven hash. Applying the standing transcript-first triage (one-line safe re-form, hash described never quoted, pin untouched) at both points:
+The precedent is exact — the found token is the cross-repo scandihaven hash (that repo's HEAD, unreachable in this repository, so the pin-3 class fires on the backticked form). Applying the standing transcript-first triage (one-line safe re-form, hash described never quoted, pin untouched) at both points:
 **BORN-GREEN 296/296 (37 files)** — pin-3 closed, pin untouched. Now checking CI status on the operator's commit `26e0945` with the calibrated read (both controls first):
 **CI 校准读取：运行 #39176089227（针对 `26e0945`）测量结果为 FAILED** — 在拉取（pull）时 main 分支状态为 RED（第七个 red-at-pull 时间窗口；两个对照组均读取正确）。s76 推送必须恢复 main 的 green 状态。现在开始完整的基准门禁（baseline gate）——先进行 lint 和 typecheck：
 The project needs chromium-1248 (1.64.0) but only 1200 is present. Reinstalling:

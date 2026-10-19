@@ -147,7 +147,20 @@ three waves after the 35th at s73) exposed the coverage gap; the
 s76-vlm-check.mjs login pair (the reference /login pre-auth capture +
 our /login pre-auth capture, the same LAYOUT-OK form) is the closure,
 and every future derivation carries the pair forward verbatim — when
-the login CSS rotates, the login pair MUST run). No classification
+the login CSS rotates, the login pair MUST run) PLUS the s77
+addition (the MOBILE-LOGIN-PAIR sweep-coverage duty — the paired
+battery's coverage derives from what the rotation touches at EVERY
+width the product serves: the s76 login-pair closure captured the
+login surface at DESKTOP only (@1280), so the mobile login surface
+(375 — the viewport the F4 battery itself uses) still had NO paired
+capture, and the F4 mobile probes measured their post-login dashboard
+only (the mobile LOGIN figures appeared nowhere in the battery); the
+s77-vlm-check.mjs mobile login pair (the reference /login @375
+pre-auth capture + our /login @375 pre-auth capture, the same
+LAYOUT-OK form — measured LAYOUT-OK both sides 375=375, no committed
+defect, the honest-minor form) is the closure, and every future
+derivation carries ALL THREE pairs forward verbatim — a desktop-only
+pair measures half the styled surface). No classification
 can check them; the closure documents them HERE as the standing manual
 derivation checklist — every future scripts/{TAG}-* derivation MUST
 enumerate ALL of them to keep the derived context correct. (The
