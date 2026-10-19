@@ -3940,3 +3940,19 @@ Work Log:
 
 Stage Summary:
 - Session 77 closeout ready: the full gate green post-edits, the plan boxes per convention, the hygiene clean — the honest-minor fix (the mobile-login battery extension) + the eighth red-at-pull closed + the 59th sweep all non-gap (the THIRTY-EIGHTH wave verified NON-GAP through the live flows incl. all three paired checks), the corpus unchanged at 296/37
+
+---
+Task ID: 243-push-s77
+Agent: main (Super Z) — session 77
+Task: Session-77 push + CI verification + final status (the completion record)
+
+Work Log:
+- The final pre-commit gate (the lesson-109 doctrine): lint + typecheck + 296/296 in 37 files + build + 198/198 E2E (2.8m) + smoke 121 + the canonical seed 4/11/3 after ALL doc edits; the hygiene clean (no .env/*.key/*.pem/ssh-key/db binary tracked; .env.example tracked; check-ignore confirms .env + db/custom.db + db/e2e.db ignored — the db/.gitkeep placeholder is the documented convention)
+- The SSH infrastructure rebuilt for the fresh-clone workspace: paramiko 5.1.0 + the shim at /home/z/my-project/bin/ssh on PATH (the Appendix-A form, extracted from the how-to skill); the wrapper invocation: docs/ssh_git_wrapper_v3.py --key-file <key> --remote git@github.com:nordeim/service-desk.git --branch main (the remote-override flag held)
+- The fingerprint VERIFIED byte-identical to the s30-s76 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU
+- Push: 6b9c149 (the s77 remediation, 26 files: the session_142.md pin-3 safe re-form at ALL THREE points (lines 3 + 7 + 9) + the mobile-login battery extension (the s77-vlm-check.mjs THIRD paired check + the F4-pre capture step in the ref-surfaces script + the mobile-step capture in the ourside script + the mobile-login figures in the F4 probe + the checker docstring's checklist addition) + the paired CURRENT_SESSION 77 / floor 76 + the 11 NEW s77 scripts (the simulation-verified derivation: every rule's expected count matched at application time before any file was written — the layer caught FOUR count drifts pre-derivation: the progressive-count form, the application-time session_140 count, the s75_p variable count, the quote-style split + the line-boundary "the" form) + the docs alignment (AGENTS Session-77 + the CLAUDE anti-pattern + the SKILL v2.75.0 lesson 131 + the PAD Session-77 RESOLVED row + session_143.md + the 4 refreshed screenshots (02/04/05/09 — SIX byte-identical + FOUR BENIGN, the clock-time fresh-clone shape) + the worklog tasks 241-242)
+- CI run #39214802942 on 6b9c149: BOTH controls read correctly first (the green #177 38875997857 COMPLETED_SUCCESSFULLY + the known-red 38948165037 FAILED through the same classifier), the live read IN_PROGRESS through 7 attempts, the green signature on the 8th: COMPLETED_SUCCESSFULLY — THE PUSH RESTORED MAIN TO GREEN (the s67/s68/s72/s73/s74/s75/s76 pattern — the session opened at pin-3 red on the operator's f709f85 (CI run #39210235685 FAILED), the re-form + remediation commit closed the red-main window)
+- The closeout: the plan's final box checked with the push figures (the s53-s76 convention — the deferral form held at the remediation commit) + this worklog entry at the closeout commit
+
+Stage Summary:
+- Session 77 complete: the mobile-surface class closed at the honest-minor form (lesson 131: a paired battery's coverage derives from what the rotation touches at EVERY width the product serves — a desktop-only pair measures half the styled surface; measure the uncovered surface FIRST, extend the battery only on the measured evidence), zero new pins (the never-inflate doctrine held the ELEVENTH consecutive session), the corpus at 296/37, the 59th sweep all user-facing non-gap (THE THIRTY-EIGHTH wave — a pure re-hash at the same byte size, the CSS hash-stable, verified NON-GAP through the live flows incl. all three paired checks), and main restored to green
