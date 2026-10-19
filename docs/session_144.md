@@ -1,12 +1,12 @@
 工作区已被重置 —— `service-desk` 目录为空。让我克隆该仓库并制定工作计划。
 克隆成功。这是一个非常成熟的项目，具有悠久的会话历史（s67–s76 时代，“red-at-pull”模式，296/296 单元门控，198/198 E2E）。让我探索一下仓库结构并阅读核心文档。
 该仓库结构清晰，且已高度优化——`vitest.config.ts`、`playwright.config.ts`、`.env.example` 和 `db/` 均已存在。核心文档非常庞大（仅 `AGENTS.md` 就有 304KB），因此我将采取策略性阅读：先阅读最新版本的文档。让我先确认一下这种模式。
-这是 s76 会话的旁白文稿（`session_142.md`，由操作员提交在 `f709f85`）。我已经看到它在**第 7 行和第 9 行**包含了作为 `backticked bare-hex` 的跨仓库 scandihaven 哈希值 `d4789c3` —— 这是 pin-3 red-at-pull 模式，现在预计会触发**该时代的第八次**。让我阅读剩余的会话文档。
+这是 s76 会话的旁白文稿（`session_142.md`，由操作员提交在 `f709f85`）。我已经看到它在**第 7 行和第 9 行**包含了作为 `backticked bare-hex` 的跨仓库 scandihaven 哈希值（该仓库的 HEAD —— 在本仓库中不可达，此处以描述记录，字面量从不引用） —— 这是 pin-3 red-at-pull 模式，现在预计会触发**该时代的第八次**。让我阅读剩余的会话文档。
 This is the s76 agent's log briefing me for session 77, with explicit next-watch instructions. Now the remediation plan and worklog tail.
 Now the worklog tail to understand the entry format and current state.
 The worklog format is confirmed. My session is **session 77** — tasks 241–243, agent log `docs/session_143.md` (2N−11 convention), remediation plan `docs/remediation-plan-session77.md`. Let me verify the pin-3 token locations in session_142.md and examine the contract test infrastructure.
 Confirmed — session_142.md carries the bare-hex token at **lines 3, 7, AND 9** (three points this time — one more than the s76 precedent's two). Let me find the pin-3 test that catches this class.
-Pin-3 mechanism understood: backticked bare-hex tokens in the docs corpus must resolve in git; `d4789c3` is a cross-repo (scandihaven) hash, unreachable here. Let me check the DOC_FILES corpus definition and the AGENTS.md structure, then set up the environment.
+Pin-3 mechanism understood: backticked bare-hex tokens in the docs corpus must resolve in git; the found token is a cross-repo (scandihaven) hash, unreachable here (recorded by description, the literal never quoted). Let me check the DOC_FILES corpus definition and the AGENTS.md structure, then set up the environment.
 我已获取 s76 合约内容。现在让我检查 package.json 的 gate 命令和 s76 脚本，然后设置环境。
 Gate commands identified. Now let me set up the environment — the fresh-clone rebuild per the s73/s75 precedent.
 Canonical seed 4/11/3 ✓. Now the critical unit gate check at pull — expecting pin-3 RED from session_142.md.

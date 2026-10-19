@@ -160,7 +160,23 @@ pre-auth capture + our /login @375 pre-auth capture, the same
 LAYOUT-OK form — measured LAYOUT-OK both sides 375=375, no committed
 defect, the honest-minor form) is the closure, and every future
 derivation carries ALL THREE pairs forward verbatim — a desktop-only
-pair measures half the styled surface). No classification
+pair measures half the styled surface) PLUS the s78 addition (the
+ROUTE-PAIR sweep-coverage duty — the paired battery's coverage derives
+from what the rotation touches at EVERY ROUTE the product serves: the
+s77 closure paired the surfaces at every width, but the reference-side
+capture set still covered the login page + the dashboard only, so the
+other nav-served routes (mytickets + submitticket — the surfaces the
+SAME rotating app CSS styles) had NO reference-side capture and NO
+paired check (our 03/04 screenshots self-diff our own baseline: OUR
+stability, not the PARITY); the s78-vlm-check.mjs route pairs (the
+reference mytickets + submitticket post-login captures vs ours, the
+same LAYOUT-OK form — the mytickets pair carries the SUPERSET-AWARE
+prompt: ours deliberately adds the documented sort/scope superset row
+below the parity filter grid, so the prompt names the expected row and
+judges the parity structure — measured LAYOUT-OK both pairs, no
+committed defect, the honest-minor form) is the closure, and every
+future derivation carries ALL FIVE pairs forward verbatim — a
+two-surface battery measures half the styled app). No classification
 can check them; the closure documents them HERE as the standing manual
 derivation checklist — every future scripts/{TAG}-* derivation MUST
 enumerate ALL of them to keep the derived context correct. (The
