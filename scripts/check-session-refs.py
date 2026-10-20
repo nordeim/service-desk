@@ -176,7 +176,31 @@ below the parity filter grid, so the prompt names the expected row and
 judges the parity structure — measured LAYOUT-OK both pairs, no
 committed defect, the honest-minor form) is the closure, and every
 future derivation carries ALL FIVE pairs forward verbatim — a
-two-surface battery measures half the styled app). No classification
+two-surface battery measures half the styled app) PLUS the s79
+addition (the DETAIL-PAIR sweep-coverage duty — the paired battery's
+coverage derives from the routes the rotation styles INCLUDING the
+click-through detail route, one level deeper than the nav-served
+list+form surfaces: the s78 closure paired the nav routes, but the
+ticket-DETAIL route (the destination of every ticket-card click, the
+deepest route the product serves — the surface the SAME rotating app
+CSS styles) had NO reference-side capture and NO paired check (our
+05 screenshot self-diffs our own baseline only: OUR stability, not
+the PARITY — the exact s76/s77/s78 find's shape, one route deeper);
+the s79-vlm-check.mjs detail pair (the reference detail capture —
+their FIRST card clicked, data-dependent, their rows churn, the
+derived prompt names ALL data-dependent sections so the pair
+survives the churn — vs our first canonical card, the
+SUPERSET-AWARE prompt form: ours deliberately adds the documented
+Update Status owner card in the right column, and the ticket CONTENT
+is data on two separate systems, so the prompt names the expected
+superset AND the data-dependent sections and judges the parity
+frame — measured LAYOUT-OK with the one nuance ground-truthed as a
+FOLD ARTIFACT: their comment form exists in their live DOM, their
+attachment data just consumed the 800px capture fold, no committed
+defect, the honest-minor form) is the closure, and every future
+derivation carries ALL SIX pairs forward verbatim — a list+form
+battery measures the nav surface only, the click-through detail is
+the styled app's deepest route). No classification
 can check them; the closure documents them HERE as the standing manual
 derivation checklist — every future scripts/{TAG}-* derivation MUST
 enumerate ALL of them to keep the derived context correct. (The
