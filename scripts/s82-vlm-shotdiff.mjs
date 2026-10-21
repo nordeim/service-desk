@@ -1,0 +1,115 @@
+// S82: VLM-diff the changed screenshot shots vs the s81 baselines (saved pre-capture as /tmp/s82-baselines) (the s49–s82
+// pattern — each changed shot must be BENIGN: only the expected class of
+// difference). This session's PREDICTED set (the pre-capture form — the
+// honest-record doctrine: the prediction is stated BEFORE the capture and
+// corrected post-capture if the byte-compare differs): NINE
+// byte-identical + ONE changed — the SURVIVED-DB shape (the new window
+// class: the workspace and its canonical 4/11/3 db SURVIVED the s82
+// open — no re-clone, no re-seed before the capture, the same seeded
+// rows carrying the same stored createdAt labels the s81 closeout
+// captured — so 02/04/05 the formatDateTime clock-time labels are
+// expected BYTE-IDENTICAL this window) + 09 the S81->S82 fixture title
+// (the per-session fixture — the certain change). The 02/04/05
+// POSSIBLE-CHANGE watch carried in the CHANGED array anyway (the
+// honest no-op check: both images identical if they measure identical,
+// and the byte-compare names any label that moved). The MEASURED set
+// (the byte-compare) corrects the CHANGED array post-capture if it
+// differs — the post-capture correction, the honest-record form held.
+//
+// THE S82 MEASURED SET (the post-capture honest-record form): NINE
+// byte-identical + ONE changed (09) — EXACTLY the predicted survived-db
+// set: the canonical db carried over from the s81 closeout (no re-seed
+// at the s82 open), so the 02/04/05 formatDateTime labels read
+// byte-IDENTICAL (the no-op watch verified: both images identical, the
+// VLM confirming no difference) and 09 carried the S81->S82 per-session
+// fixture title (the only change). No post-capture correction needed —
+// the measured set matched the predicted set exactly.
+// THE S81 MEASURED SET (the post-capture honest-record form): NINE
+// byte-identical + ONE changed (09) — the predicted core
+// {04, 05, 09} + the possible 02 CORRECTED POST-CAPTURE: the re-seed-to-capture
+// gap this window was minutes (the fresh seed immediately before the derived
+// battery), so the 04/05 clock-time labels held byte-identical within the
+// ~9-minute window and 09 carried the S80->S81 per-session fixture title;
+// 02/04/05 read identical (the no-op form).
+//
+// THE S80 MEASURED SET: SIX byte-identical + FOUR changed (02/04/05/09) —
+// the predicted core {04, 05, 09} all benign + the possible 02 MEASURED
+// CHANGED this time (the s78 window's form materialized: the
+// re-seed-to-capture gap spanned the session's THREE-WAVE battery runs,
+// well past the byte-identical window, so the dashboard's recent-tickets
+// labels moved on the clock-time digits); all changed shots BENIGN (02/04/05
+// the re-seed clock-time labels + 09 the S79->S80 fixture title + the
+// timestamps). The no-op form carried the 02 honestly; no post-capture
+// correction needed. (The PRIOR session's record: )
+// THE S79 MEASURED SET: SEVEN byte-identical + THREE changed (04/05/09) —
+// EXACTLY the predicted core; the possible 02 measured byte-IDENTICAL
+// again (the s78 precedent repeated: the dashboard's rendered
+// recent-tickets labels did not move across this window's
+// re-seed-to-capture gap), the no-op comparison run anyway (both
+// images identical), all changed shots BENIGN (04/05 the re-seed
+// clock-time labels 8:27 AM -> 10:36 PM + 09 the S78->S79 fixture
+// title). No post-capture correction needed — the measured set
+// matched the predicted set exactly.
+import fs from 'node:fs';
+import ZAI from 'z-ai-web-dev-sdk';
+
+const toB64 = (p) => fs.readFileSync(p).toString('base64');
+
+const CHANGED = [
+  // The s82 PREDICTED set (the pre-capture form): NINE byte-identical +
+  // ONE changed (09, the certain per-session fixture title) + the
+  // 02/04/05 no-op watch — the SURVIVED-DB shape: the canonical db
+  // carried over from the s81 closeout (no re-seed at the s82 open), so
+  // the formatDateTime labels on the dashboard's recent list, the ticket
+  // cards, and the detail page render the SAME stored createdAt values
+  // the s81 closeout captured — expected byte-identical, carried for
+  // the honest no-op check. The MEASURED byte-compare corrects this
+  // array post-capture if it differs (the honest-record form).
+  { shot: '02-dashboard', why: 'the possible clock-label no-op watch (the formatDateTime timestamps on the recent-tickets list — the fresh-clone shape, only the time text differs)' },
+  { shot: '04-my-tickets', why: 'the possible clock-label no-op watch (the formatDateTime timestamps on the ticket cards — the fresh-clone shape, only the time text differs)' },
+  { shot: '05-ticket-detail', why: 'the possible clock-label no-op watch (the formatDateTime timestamps on the detail page — the fresh-clone shape, only the time text differs)' },
+  { shot: '09-ticket-detail-attachments', why: 'the S81->S82 fixture title (the per-session fixture ticket) — the fixture title text on the detail page' },
+];
+
+async function main() {
+  const zai = await ZAI.create();
+  let allBenign = true;
+  for (const { shot, why } of CHANGED) {
+    // S80 resilience addition: the vision endpoint intermittently 400s a
+    // burst call (the generic parse-error signature; the same retry class as
+    // the s82-vlm-check.mjs wrapper) — retry with backoff before failing.
+    let completion;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        completion = await zai.chat.completions.createVision({
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Two screenshots of the same page from an IT support portal (Image 1 = the previous session's baseline, Image 2 = the new capture). The expected difference class is: ${why}. Answer with exactly one word on the first line: BENIGN if the only differences are within the expected class (timestamps, relative-time text, or the fixture ticket title), or REGRESSION if any structural/layout/styling difference exists. Then one short sentence naming what differs.`
+            },
+            { type: 'image_url', image_url: { url: `data:image/png;base64,${toB64(`/tmp/s82-baselines/${shot}.png`)}` } },
+            { type: 'image_url', image_url: { url: `data:image/png;base64,${toB64('/home/z/my-project/service-desk/docs/screenshots/' + shot + '.png')}` } }
+          ]
+        }
+      ]
+    });
+        break;
+      } catch (e) {
+        if (attempt === 3) throw e;
+        console.log(`(shotdiff retry ${attempt + 1}/3 for ${shot} after: ${String(e.message).slice(0, 60)})`);
+        await new Promise((r) => setTimeout(r, 15000));
+      }
+    }
+    const content = completion.choices[0]?.message?.content || 'NO RESPONSE';
+    const benign = /^BENIGN/.test(content);
+    if (!benign) allBenign = false;
+    console.log(`${shot}: ${content.split('\n')[0]} — ${content.split('\n').slice(1).join(' ').trim()}`);
+  }
+  if (!allBenign) { console.error('FATAL: a changed shot is NOT benign'); process.exit(1); }
+  console.log('ALL CHANGED SHOTS BENIGN');
+}
+
+main().catch(e => { console.error('VLM shotdiff failed:', e.message); process.exit(1); });
