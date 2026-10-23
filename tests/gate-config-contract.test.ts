@@ -70,6 +70,42 @@ const vitestConfig = readFileSync(
   "utf8",
 );
 
+// Session 85 — pin 4: the BUILD-TYPE-GATE surface (the s84-era gap the
+// s65 audit's own enumeration missed — the fourth gate-config surface).
+//
+// Contract under test: `next build` is itself a type gate. The scaffold's
+// first upload carried `typescript: { ignoreBuildErrors: true }` and it
+// stood through every session while the s65 pins held the tsconfig/eslint/
+// vitest surfaces — the next.config.ts typescript block was the ONE
+// gate-config file the s65 enumeration did not cover (the lesson-126
+// shape: a closure is scoped to the surfaces it enumerates, one file
+// further out). Under the flag, `next build` compiles the deployable
+// standalone artifact WITHOUT type checking: a planted type error
+// compiled GREEN into the artifact. The compensating control is real
+// (the gate chain runs `typecheck` before `build`, locally and in CI's
+// verify job) — so the defect is the ARTIFACT surface: any build-only
+// pipeline ships a type-broken artifact with zero signal.
+//
+// The s85 live measurements (the TDD form):
+//   - flip probe: the flag removed → `bun run build` GREEN (zero standing
+//     errors — the flag was dead weight, not a guard; the s65 blast-radius
+//     form exactly)
+//   - gate-proof: a planted type error under the hardened config → the
+//     build FAILED (error TS2322 observed live; the plant reverted)
+//
+// The posture is the family skill's §15 contract (skills/web-application/
+// SKILL.md: "the build IS the type gate — no ignoreBuildErrors") — the
+// sibling repo adopted it at its own session-174 within hours of the
+// skill's publication (the zero-balance graft named in its provenance).
+// Pin style: the config's own text, matched on its executable shape
+// (the s65 pin-2 form — absent-or-false is enforcement, `true` is the
+// weakening).
+
+const nextConfig = readFileSync(
+  path.join(repoRoot, "next.config.ts"),
+  "utf8",
+);
+
 describe("the gate-config contract (session 65)", () => {
   it("pin 1: the tsconfig strictness surface — strict on, no weakening override, noEmit, the skills exclusion", () => {
     const co = tsconfig.compilerOptions;
@@ -169,5 +205,18 @@ describe("the gate-config contract (session 65)", () => {
       /globals\s*:\s*true/.test(vitestConfig),
       "vitest.config.ts must not enable globals — the AGENTS convention is explicit imports of describe/it/expect",
     ).toBe(false);
+  });
+
+  it("pin 4: the next.config.ts build-type-gate surface — the production build IS a type gate (ignoreBuildErrors must never return)", () => {
+    // The executable shape: `ignoreBuildErrors` may be absent (the
+    // default-checked posture) or explicitly `false` — anything else is
+    // the scaffold's weakening. A bare substring would be satisfiable
+    // forever by the config's own comments (the s43 mutation-C doctrine);
+    // the match reads the flag's VALUE.
+    const m = nextConfig.match(/ignoreBuildErrors\s*:\s*(\w+)/);
+    expect(
+      m === null || m[1] === "false",
+      "next.config.ts must not carry ignoreBuildErrors: true — the build IS the type gate (the s85 class: the scaffold flag stood for 84 sessions while the gate chain's manual typecheck step was the only type gate; under it a planted type error compiled GREEN into the deployable artifact — measured live: the flip probe GREEN with the flag removed, the planted-error build FAILED with error TS2322; a build-only pipeline ships a type-broken artifact silently)",
+    ).toBe(true);
   });
 });

@@ -220,7 +220,7 @@ for c in "/static/index-BdweUDbT.js" \
 done > "$OUT/standing-chunks.txt"
 cat "$OUT/standing-chunks.txt"
 
-echo "=== the 49th-wave baseline reconstruction (the re-fetch-by-name form —"
+echo "=== the 50th-wave baseline reconstruction (the re-fetch-by-name form —"
 echo "    the per-wave baseline: the last recorded entry) ==="
 curl -sL --max-time 30 "$REF/static/index-BdweUDbT.js" -o "$OUT/s84-found-entry.js" || { echo "FATAL: 50th-wave entry fetch failed"; exit 1; }
 echo "50th-wave entry bytes: $(wc -c < "$OUT/s84-found-entry.js")"

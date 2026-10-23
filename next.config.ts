@@ -7,9 +7,6 @@ const nextConfig: NextConfig = {
   // at .next/standalone/server.js — even when the repo is cloned inside a
   // parent workspace that has its own lockfile.
   outputFileTracingRoot: path.join(import.meta.dirname, "."),
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   reactStrictMode: false,
   // Hide the dev-mode toast/indicator bubble: it renders as a fixed dark
   // circle at the bottom-left of the viewport, which overlaps the sidebar's
