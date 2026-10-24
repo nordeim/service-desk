@@ -173,11 +173,16 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // The current canonical (runtime-verified every session's gate): 288
     // after the s63 worklog pin 4; 291 after the s64 commands-surface pins
     // (the new tests/commands-contract.test.ts — 3 pins: the documented
-    // surface, the citation resolution, the helper agreement). A suite
+    // surface, the citation resolution, the helper agreement); 297 after
+    // the s85 gate-config pin 4 (the build-as-type-gate surface); 301
+    // after the s86 login timing-equalizer pins (the new
+    // tests/login-timing-equalizer.test.ts — 4 pins: the seam format +
+    // the lazy memoization + the never-authenticates + the route wiring
+    // + the miss-branch envelope through the real handler). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(297);
+    expect(Number(n)).toBe(301);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {

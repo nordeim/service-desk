@@ -9,6 +9,7 @@ import {
   rateLimit,
   sessionCookieOptions,
   signSession,
+  timingEqualizerHash,
   verifyPassword,
 } from "@/lib/auth";
 import { validateLoginInput, parseBodyKeys, parseBodySize, parseNoQuery } from "@/lib/validation";
@@ -78,6 +79,14 @@ export async function POST(req: Request) {
   const email = input.email!.trim().toLowerCase();
   const user = await db.user.findUnique({ where: { email } });
   if (!user || !verifyPassword(input.password!, user.passwordHash)) {
+    // Session 86: the timing equalizer (the family skill §16 contract —
+    // the miss branch burns the same scrypt). The short-circuit above
+    // skips the scrypt work for unknown emails, so response latency
+    // distinguished registered emails even through the uniform 401
+    // envelope. The burn below runs the SAME one-scryptSync cost against
+    // a precomputed throwaway-constant hash (the neo-crm session-163
+    // form), keeping the 401 envelope byte-identical.
+    if (!user) verifyPassword(input.password!, timingEqualizerHash());
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }
 

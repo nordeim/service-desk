@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """S85: robust basename-vs-hash comparison of the recorded-baseline entry
-(the closeout freeze: the 50th-wave entry BdweUDbT, the LAST RECORDED —
+(the closeout freeze: the 51st-wave entry DzlN4LV0, the LAST RECORDED —
 re-fetchable, no flaky edge observed; a no-wave re-run reads the 0/0
 no-wave form; the next wave's comparison reproduces the per-wave record) vs the
 current entry chunk refs — the honest-record form (the per-wave records:

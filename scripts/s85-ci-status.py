@@ -77,7 +77,7 @@ def main() -> int:
         print(f"NOTE: the known-red control reads {control_red!r} — the red signature may need the API decode; treat any live RED read with caution until reconciled.")
 
     # Step 2: the live read — find the run citing the operator's commit.
-    target = sys.argv[1] if len(sys.argv) > 1 else "1b2c586"
+    target = sys.argv[1] if len(sys.argv) > 1 else "50bf394"
     actions_html = fetch("https://github.com/nordeim/service-desk/actions?query=branch%3Amain")
     blocks = re.split(r"actions/runs/", actions_html)[1:]
     found = None

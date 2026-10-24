@@ -62,6 +62,27 @@ export function verifyPassword(password: string, stored: string): boolean {
   return timingSafeEqual(candidate, expected);
 }
 
+// Session 86: the login route's timing equalizer (the family skill §16
+// contract — the miss branch burns the same scrypt). The pre-fix
+// `!user || !verifyPassword(...)` short-circuit skipped the scrypt work
+// for unknown emails, so response latency distinguished registered emails
+// even through the uniform 401 envelope. The equalizer hash is a REAL
+// scrypt hash of a throwaway constant in the SAME scrypt$salt$hash format
+// the passwordHash column carries, so burning it costs exactly one
+// scryptSync — the format IS the structural burn guarantee (the seam's
+// unit pin). LAZY: computed once on the first miss, never a cold-start
+// scrypt at module import — the login route is the only consumer. (The
+// neo-crm session-163 form — the digma S72-C port — adapted to this
+// repo's scrypt$ separator.)
+let equalizerHash: string | null = null;
+
+export function timingEqualizerHash(): string {
+  if (equalizerHash === null) {
+    equalizerHash = hashPassword("servicedesk-timing-equalizer-constant");
+  }
+  return equalizerHash;
+}
+
 // ---------------------------------------------------------------------------
 // Session token sign/verify (pure — unit-tested)
 // ---------------------------------------------------------------------------

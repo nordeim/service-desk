@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # S85: the reference-side F1 bundle sweep (the 67th parity sweep — found the
-# FIFTIETH /login wave vs the s83 closeout records (a REAL delta wave:
-# 8 added / 10 removed, all platform-infrastructure + the ELEVENTH CSS
-# ROTATION at +727 bytes — the login-pair trigger FIRED, all TEN paired
+# FIFTY-FIRST /login wave vs the s84 closeout records (a ZERO-DELTA entry
+# re-hash: 0 added / 0 removed, 421 re-hashed / 302 hash-stable + the TWELFTH
+# CSS ROTATION at +786 bytes — the login-pair trigger FIRED, all TEN paired
 # checks mandatory. The wave history carries
 # the prior windows' per-wave records + this window's one). The
 # per-wave records: the 39th (measured vs the s77 entry Bt_cFPps by name)
