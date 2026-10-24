@@ -4358,3 +4358,33 @@ Work Log:
 
 Stage Summary:
 - Session 86 remediation ready: the login timing-equalizer closed at the honest code-surface form (the seam + the route call + the 4-pin battery; the corpus 301/38), the three lineage-label corrections in, the 68th-sweep no-wave record measured, the mutation battery observed live both directions, the 11 s86 scripts derived count-verified + born-verified, the docs aligned — the full gate to run post-edits before the commit
+
+---
+Task ID: 269-session-s86
+Agent: main (Super Z) — session 86
+Task: Session-86 closeout (the docs alignment verified + the final gate + the session log docs/session_161.md)
+
+Work Log:
+- The docs alignment verified end-to-end: the AGENTS Session-86 contracts section (the timing-equalizer record + the era's seventh green-at-pull + the 68th-sweep no-wave record + the corpus move 297->301 + the honest-minor three-label corrections) + the screenshots lineage s86 + the reference-list -session86; the CLAUDE anti-pattern entry (the timing-envelope class, newest-LAST); the SKILL v2.84.0 + lesson 140 at the ledger tail (the lesson-139 s85 body intact after the mid-edit split was caught and repaired) + the description's session-86; the PAD Session-86 RESOLVED row; the AGENTS/CLAUDE/README/PAD/SKILL count sites at 301/38 all held by the corpus-count family + the s50 BRIDGE + the s49 pads (the §7.1 new row runtime-pinned)
+- The final gate after ALL doc edits (the lesson-109 doctrine): lint + typecheck + 301/301 unit (38 files) + build (the type-gated artifact) + 198/198 E2E (2.8m) + smoke 121 + the canonical seed 4/11/3 — every step green
+- The hygiene check: no .env / *.key / *.pem / ssh-key / db binary tracked (check-ignore confirms .env + db/custom.db + db/e2e.db ignored); .env.example tracked; the scripts/__pycache__ scratch removed before the commit; the derivation driver lives outside the repo tree (/home/z/my-project/scripts), the repo tree clean of scratch files
+- The stream-discipline note (the lesson-121 through 140 doctrine, held this session): the whole s86 narrative written without quoting any unsafe token form — the find-moment tokens (the neo-crm tip + its commits) described, never quoted; the s86 log (session_161.md) carries the same safe forms
+
+Stage Summary:
+- Session 86 closeout ready: the full gate green post-edits (301/301 unit in 38 files), the plan §3/§4/§5 boxes ticked at the remediation commit (the §6 deferral held), the hygiene clean — the login timing-equalizer fix + the 68th-sweep no-wave record + the three lineage-label corrections + the 11 count-verified s86 scripts + the born-verified battery all landed
+
+---
+Task ID: 270-push-s86
+Agent: main (Super Z) — session 86
+Task: Session-86 push + CI verification + final status (the completion record)
+
+Work Log:
+- The remediation commit 4e708fc (29 files: the timingEqualizerHash seam + the login route miss-branch call + the NEW tests/login-timing-equalizer.test.ts (4 pins) + the corpus move 297->301 (the central pin + the 9 family sites + the quickstart 38/301 + the §7.1 row + the §11 auth.ts row 253) + the three committed-s85 lineage-label corrections + the paired CURRENT_SESSION 86/floor 85 + the 11 s86 scripts + the docs alignment + session_161.md + the worklog task 268) — the tree clean at the commit
+- The SSH infrastructure (the standing form): paramiko 5.1.0 via the venv-push + the shim at /home/z/my-project/bin/ssh prepended to PATH; the wrapper invoked with --key-file <temp> --remote git@github.com:nordeim/service-desk.git --branch main — the FIRST dry-run caught the wrapper's DEFAULT remote (the task-management template repo, its main an unrelated history — the non-fast-forward rejection the catch): re-run with the explicit --remote flag, the dry-run GREEN (80f573d..4e708fc negotiated, remote untouched)
+- The fingerprint VERIFIED byte-identical to the s30-s85 records: SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU (the public-blob computation via paramiko)
+- Push: 4e708fc -> git@github.com:nordeim/service-desk.git refs/heads/main — remote verified: refs/heads/main @ 4e708fc == local HEAD; the tracking ref synced; the temp key shredded and the operator key file removed
+- CI run #40048602914 on 4e708fc: BOTH controls read correctly first (the green #177 38875997857 + the known-red 38948165037 through the same classifier — the derived s86-ci-poll.py, the KEEP-GREEN form, born-verified on its first live use); the live read IN_PROGRESS through 3 poll attempts + ONE UNCLASSIFIED mid-run page state investigated per the s66 doctrine (the verify job completed + the e2e job in flight — 1 completed-successfully string + 1 In-progress, zero failed icons — the mid-run re-render class, NOT a failure), then the green signature
+- The closeout: the plan's §6 box ticked with the push figures at this closeout commit (the s53-s85 convention — the deferral form held at the remediation commit) + this worklog entry at the closeout commit
+
+Stage Summary:
+- Session 86 complete: the login timing-equalizer axis closed at the honest code-surface form (lesson 140: the 401 envelope is only half the enumeration channel — the miss branch must burn the same scrypt work, pinned on the comment-stripped source), the corpus at 301/38 (the never-inflate doctrine's honest exception — a REAL security-surface gap pins CAN guard), the 68th sweep the honest NO-WAVE form (the entry DzlN4LV0 + the CSS BD8HgQNX both IDENTICAL to the s85 closeout figures; theirs the persisting defects; ours the working superset — no TailwindCSS v4 bug, the mobile menu byte-identical, all ten pairs first-pass LAYOUT-OK both runs), the three committed-s85 lineage labels corrected, THE PUSH KEPT MAIN GREEN (CI run #40048602914 on 4e708fc COMPLETED_SUCCESSFULLY — the era's seventh green-at-pull session shape complete: opened green, pushed green, no red-main window ever opened)
