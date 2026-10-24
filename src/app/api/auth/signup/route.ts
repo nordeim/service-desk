@@ -10,7 +10,7 @@ import {
   sessionCookieOptions,
   signSession,
 } from "@/lib/auth";
-import { validateSignupInput, parseBodyKeys, parseBodySize, parseNoQuery } from "@/lib/validation";
+import { validateSignupInput, parseBodyKeys, parseBodyContentType, parseBodySize, parseNoQuery } from "@/lib/validation";
 import { SIGNUP_BODY_FIELDS } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -41,6 +41,15 @@ export async function POST(req: Request) {
   const parsedSize = parseBodySize(req.headers.get("content-length"));
   if (!parsedSize.ok) {
     return NextResponse.json({ error: parsedSize.error }, { status: 413 });
+  }
+
+  // Session 88: the Content-Type CSRF gate (the shared parseBodyContentType
+  // seam — the family skill §16 contract; the login route's comment carries
+  // the full doctrine). 415 on any non-JSON transport; the limiter still
+  // runs first (the s21 convention).
+  const parsedContentType = parseBodyContentType(req.headers.get("content-type"));
+  if (!parsedContentType.ok) {
+    return NextResponse.json({ error: parsedContentType.error }, { status: 415 });
   }
 
   let body: unknown;

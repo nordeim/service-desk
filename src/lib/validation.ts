@@ -435,3 +435,41 @@ export function parseBodySize(
   }
   return { ok: true };
 }
+
+// Session 88: the write-route Content-Type CSRF gate — the request-media
+// surface (the family skill §16 contract: "Content-Type CSRF gate + bounded
+// body reads on every JSON parse"; the bounded-body half closed at s35
+// above, the Content-Type half here). A JSON-parse seam blocks unparseable
+// bodies, never form-originated transports: an HTML
+// <form method="POST" enctype="text/plain"> (the classic name/value trick)
+// posts a body that parses as valid JSON, so req.json() alone never barred
+// the cross-site form POST — and the public auth family MINTS cookies on
+// POST (login/signup): the login-CSRF class, the attacker's session planted
+// in the victim's jar (SameSite=Lax gates cookie SENDING on cross-site
+// POSTs, never cookie SETTING). The neo-crm sibling carries the identical
+// gate in its src/lib/api.ts (the digma S148-A / B148-L1 port).
+//
+// The grammar: ok iff the value carries application/json case-insensitively
+// — the "; charset=" suffix tolerated (the sibling's exact grammar). Every
+// other transport — text/plain, application/x-www-form-urlencoded,
+// multipart/form-data, text/html, a missing header — is
+// unparseable-by-policy.
+//
+// The message is a CONSTANT (no reflection): deterministic for pins, zero
+// reflection surface (the s33 catch-all doctrine). The callers wire it
+// between parseBodySize and req.json() (both header reads at zero body
+// cost — the s35 ordering) and return 415 (Unsupported Media Type — the
+// semantic code; the envelope stays the family's {error}). The rate limiter
+// stays FIRST (the s21/s29/s32/s35 convention: every attempt burns a bucket
+// slot, even one rejected before its body is read).
+export function parseBodyContentType(
+  contentType: string | null,
+): { ok: true } | { ok: false; error: string } {
+  if (contentType === null || !contentType.toLowerCase().includes("application/json")) {
+    return {
+      ok: false,
+      error: "unsupported Content-Type (JSON API — send Content-Type: application/json)",
+    };
+  }
+  return { ok: true };
+}

@@ -182,11 +182,15 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // the s87 AUTH_SECRET fail-hard reshape (the existing
     // tests/auth-secret-warning.test.ts — the two warn-pins become
     // throw-pins + the NEW forged-cookie verify-path pin: the mint and
-    // the acceptance faces of the fail-hard posture). A suite
+    // the acceptance faces of the fail-hard posture); 307 after the s88
+    // Content-Type CSRF gate pins (the new tests/content-type-gate.test.ts
+    // — 5 pins: the seam accept family + the reject family + THE
+    // MINT-BLOCKED pin through the real handler + the no-false-rejection
+    // boundary + the six-route comment-stripped wiring pin). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(302);
+    expect(Number(n)).toBe(307);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {

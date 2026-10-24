@@ -12,7 +12,7 @@ import {
   timingEqualizerHash,
   verifyPassword,
 } from "@/lib/auth";
-import { validateLoginInput, parseBodyKeys, parseBodySize, parseNoQuery } from "@/lib/validation";
+import { validateLoginInput, parseBodyContentType, parseBodyKeys, parseBodySize, parseNoQuery } from "@/lib/validation";
 import { LOGIN_BODY_FIELDS } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -46,6 +46,20 @@ export async function POST(req: Request) {
   const parsedSize = parseBodySize(req.headers.get("content-length"));
   if (!parsedSize.ok) {
     return NextResponse.json({ error: parsedSize.error }, { status: 413 });
+  }
+
+  // Session 88: the Content-Type CSRF gate (the shared parseBodyContentType
+  // seam — the family skill §16 contract). A JSON-parse seam blocks
+  // unparseable bodies, never form-originated transports: the classic
+  // <form enctype="text/plain"> trick posts a body that parses as valid
+  // JSON, and the auth family MINTS cookies on POST (SameSite=Lax gates
+  // cookie SENDING on cross-site POSTs, never cookie SETTING — the
+  // login-CSRF class). 415 (Unsupported Media Type — the semantic code,
+  // the s35 413 form); the limiter still runs first (every attempt burns
+  // a bucket slot, the s21 convention).
+  const parsedContentType = parseBodyContentType(req.headers.get("content-type"));
+  if (!parsedContentType.ok) {
+    return NextResponse.json({ error: parsedContentType.error }, { status: 415 });
   }
 
   let body: unknown;

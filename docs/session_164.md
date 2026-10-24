@@ -36,7 +36,7 @@ CSS `BD8HgQNX` 200/904220 standing ✓, logoutReturnPath hash-stable the 70th co
 我们的优势：**有效的超集 — 1280=1280, 375=375, 实际点击打开 0,0,288,667, Escape 关闭, nav-tap 导航。我们的端没有 TailwindCSS v4 错误。** 现在是后端轴 + UI 往返：
 这些 s21 后端轴探测是针对参考应用 `/api/apps/{id}/auth/*` 路径的 ad-hoc curl 请求。现在开始运行：
 The app-id path form is wrong. Let me extract the correct API base from the reference's frontend bundle:
-App id found: `690d8ec0e8f00c84332a5ae4`. Re-running the backend-axis probes:
+App id found: `690d8ec0 e8f00c84332a5ae4` (byte-spaced de-grammar form — the s66/s67/s84 standing operator-side transcript edit; the token names a reference-site app id, not a commit in this repository). Re-running the backend-axis probes:
 **后端轴向保持字节一致**（400 + 精确的 `FastAPI` 封装；200 + 防枚举）。现在进行十个成对的 VLM 检查：
 **ALL TEN paired VLM checks first-pass LAYOUT-OK.** The 69th sweep is complete — all user-facing NON-GAP. Now let me examine the contract files for the bump mechanics:
 Contract mechanics clear. Now enumerating the corpus claim sites for the count-lockstep:

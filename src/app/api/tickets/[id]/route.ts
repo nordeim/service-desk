@@ -3,7 +3,7 @@ import { methodNotAllowed, optionsNoContent, routeAllow } from "@/lib/api-method
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { isTicketStatus, TICKET_PATCH_BODY_FIELDS } from "@/lib/constants";
-import { parseBodyKeys, parseBodySize, parseNoQuery } from "@/lib/validation";
+import { parseBodyKeys, parseBodyContentType, parseBodySize, parseNoQuery } from "@/lib/validation";
 
 export const runtime = "nodejs";
 
@@ -62,6 +62,15 @@ export async function PATCH(req: Request, { params }: Params) {
   const parsedSize = parseBodySize(req.headers.get("content-length"));
   if (!parsedSize.ok) {
     return NextResponse.json({ error: parsedSize.error }, { status: 413 });
+  }
+
+  // Session 88: the Content-Type CSRF gate (the shared parseBodyContentType
+  // seam — the family skill §16 contract; the login route's comment carries
+  // the full doctrine). 415 on any non-JSON transport; the limiter still
+  // runs first (the s21 convention).
+  const parsedContentType = parseBodyContentType(req.headers.get("content-type"));
+  if (!parsedContentType.ok) {
+    return NextResponse.json({ error: parsedContentType.error }, { status: 415 });
   }
 
   const { id } = await params;
