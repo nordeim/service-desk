@@ -3,9 +3,8 @@
 // difference). This session's PREDICTED set (the pre-capture form — the
 // honest-record doctrine: the prediction is stated BEFORE the capture and
 // corrected post-capture if the byte-compare differs): the
-// FRESH-CLONE shape (the workspace was RESET — git clone + a fresh
-// .env + db:push + the canonical seed STANDING from the s85 open (the
-// workspace NOT reset this session — no fresh clone, no re-seed), so the
+// WORKSPACE-STOOD shape (the workspace NOT reset this session — no fresh
+// clone, no re-seed; the canonical db standing from the s85 open, so the
 // seeded rows carry the SAME stored createdAt labels the s85 baselines
 // render — the 02/04/05 formatDateTime clock-time labels are expected
 // BYTE-IDENTICAL this window (the labels move only at a re-seed; if the

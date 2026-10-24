@@ -4,7 +4,8 @@
 // - No third-party auth dependency: the app needs email+password only, and a
 //   signed `servicedesk_session` cookie (HMAC-SHA256 over a JSON payload) is
 //   auditable with zero supply-chain surface. The signing secret comes from
-//   AUTH_SECRET (falls back to a dev-only constant with a loud warning).
+//   AUTH_SECRET (fails HARD in production when missing or under 16 chars;
+//   dev/test falls back to a dev-only constant — the s87 fail-hard posture).
 // - Passwords: Node crypto scrypt (N=16384 via defaults, 64-byte key) with a
 //   per-user random 16-byte salt, stored as `scrypt$<salt>$<hash>`.
 // - Rate limiting: in-memory sliding window per IP+route for the login,
@@ -34,9 +35,23 @@ export interface SessionPayload {
 function secret(): string {
   const s = process.env.AUTH_SECRET;
   if (s && s.length >= 16) return s;
+  // Session 87 (the family skill §16 contract: "AUTH_SECRET enforced
+  // >= 16 chars, fails hard in production" — the neo-crm sibling's
+  // committed precedent): the pre-fix form warned once and returned the
+  // module-level DEV_SECRET — a constant committed to this public repo —
+  // so a production boot without the secret stayed fully functional and
+  // SILENTLY forgeable (session payloads are base64url JSON, not
+  // encrypted, and user ids ride the comment-author API objects: anyone
+  // holding the public constant could mint a cookie for any user). A
+  // warn-and-continue on a forgeable-seam misconfiguration is a degraded
+  // mode, not an alarm — the throw is the honest server posture, and it
+  // rides secret(), the default key of BOTH signSession and
+  // verifySessionToken, so no token is ever minted OR accepted on a
+  // misconfigured boot. Dev/test keeps the documented silent DEV fallback
+  // (the quiet-in-dev contract, unchanged).
   if (process.env.NODE_ENV === "production") {
-    console.error(
-      "[auth] AUTH_SECRET is missing or too short in production — set it to `openssl rand -hex 32`.",
+    throw new Error(
+      "[auth] AUTH_SECRET is missing or shorter than 16 chars in production — sessions would be forgeable. Generate one with: openssl rand -hex 32",
     );
   }
   return DEV_SECRET;

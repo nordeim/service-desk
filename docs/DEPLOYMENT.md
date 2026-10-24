@@ -104,7 +104,7 @@ external store).
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | `DATABASE_URL` | Yes | SQLite connection string. See §4. |
-| `AUTH_SECRET` | **Yes in production** | HMAC secret for session cookies. Generate with `openssl rand -hex 32`. An insecure dev constant is used when unset — never ship that. |
+| `AUTH_SECRET` | **Yes in production** | HMAC secret for session cookies. Generate with `openssl rand -hex 32`. A missing or short (<16 chars) secret **fails hard in production** — the first session operation throws (`sessions would be forgeable`), never minting or accepting a cookie on the public dev constant; dev/test silently falls back. |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Canonical public origin, used for metadata URLs and `sitemap.xml` (e.g. `https://orbital.example.com`). |
 
 ## 4. Database location (§4 — the `.env.example` reference)
