@@ -165,9 +165,14 @@ export default function SignupPage() {
                 {/* Same whole-line pattern as the login signup line
                     (session 6) — the reference renders one control with the
                     hover on the line. */}
+                {/* S90 (the §13 touch-floor closure): inline-block gives the
+                    link the login family's 20px touch box (a bare inline
+                    link measures the 16px font box — the internal-
+                    inconsistency find of the s90 census; the visual
+                    rendering is unchanged). */}
                 <Link
                   href="/login"
-                  className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                  className="inline-block text-sm text-slate-500 hover:text-slate-700 transition-colors"
                 >
                   Already have an account?{" "}
                   <span className="font-medium text-slate-700">Sign in</span>

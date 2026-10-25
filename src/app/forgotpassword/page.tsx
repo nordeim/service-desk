@@ -117,8 +117,13 @@ export default function ForgotPasswordPage() {
                     {loading ? "Sending…" : "Send reset link"}
                   </Button>
 
+                  {/* S90 (the §13 touch-floor closure): inline-block gives the
+                      link the login family's 20px touch box (a bare inline
+                      link measures the 16px font box — the internal-
+                      inconsistency find of the s90 census; the success-state
+                      link above already carried the form). */}
                   <p className="text-center text-sm">
-                    <Link href="/login" className="text-slate-500 hover:text-slate-700 font-medium transition-colors">
+                    <Link href="/login" className="inline-block text-slate-500 hover:text-slate-700 font-medium transition-colors">
                       Back to sign in
                     </Link>
                   </p>

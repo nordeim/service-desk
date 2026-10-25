@@ -78,6 +78,23 @@ const SANCTIONED: Record<string, Array<{ any: string[]; cite: string }>> = {
       cite: "Radix Select's modal open state marks the page background aria-hidden without inert — the reference's own Radix Selects render the identical artifact when open (measured live on its DOM)",
     },
   ],
+  // S90 (the two-systems sanction, measured live this session): the QUICK
+  // STATS open badge — white on amber-500, 2.13:1 — is the reference's OWN
+  // identical rendering (measured live on its DOM: its open badge reads
+  // "120" on rgb(245,158,11) with white text and the byte-identical class
+  // list — the session-2 parity measurement). The flag is DATA-DEPENDENT
+  // through axe's own semantics: the color-contrast rule skips
+  // single-grapheme text units, so the canonical single-digit stats pass
+  // while any 2+ character count fires — the register entry carries the
+  // citation so the gate holds at every data state (the s90 e2e-reset fix
+  // keeps the canonical digits; this entry keeps the gate honest if a
+  // future data state renders multi-digit counts anyway).
+  "color-contrast": [
+    {
+      any: ["bg-amber-500"],
+      cite: "the QUICK STATS open badge is the reference's own identical rendering — its badge measures '120' on rgb(245,158,11) white (live on its DOM, the same class list), the parity lock demanding the identical palette",
+    },
+  ],
 };
 
 // The gate's rule families (named for the s89 unit battery — pin 6):

@@ -223,10 +223,17 @@ export default function LoginPage() {
 
                   <div className="w-full">
                     <div className="space-y-3">
+                      {/* S90 (the §13 touch-floor closure): h-auto RETIRES the
+                          shadcn Button default's h-9 for THIS button — the
+                          explicit height overrode the parity-correct py-3.5
+                          and pinned a 36px touch box where the reference's
+                          own computed box is 279x54 (measured live on its
+                          DOM at 375 this session: py-3.5 px-5 text-base, NO
+                          height class — the padding-driven form). */}
                       <Button
                         type="button"
                         variant="outline"
-                        className="w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-xs shadow-none transition-all duration-200 font-medium text-base"
+                        className="h-auto w-full flex items-center justify-center gap-3 bg-white text-slate-700 px-5 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-xs shadow-none transition-all duration-200 font-medium text-base"
                         onClick={() =>
                           setError("Google sign-in is not configured in this deployment. Use email and password.")
                         }

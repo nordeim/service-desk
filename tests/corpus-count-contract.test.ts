@@ -191,14 +191,20 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // — 8 pins: the declared-devDep doctrine + the declared-version match +
     // the spec existence + the declared-engine injection + the four WCAG
     // tag families + the structural named-control gate + the sanctioned-
-    // register citation form + the explicit registration census). A suite
+    // register citation form + the explicit registration census); 323 after
+    // the s90 touch-floor contract pins (the new
+    // tests/touch-floor-contract.test.ts — 8 pins: the spec existence +
+    // the 375 mobile band + the 44 floor constant + the structural
+    // register-escape gate + the register citation form + the 8-registration
+    // census + the Google-button padding-driven source pin + the
+    // inline-block link pins). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(315);
+    expect(Number(n)).toBe(323);
   });
 
-  it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {
+  it("the E2E-test count: every live claim site names ONE number (11 sites since s90 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, and the PAD §7.4 checklist line joined the family after its s89 drift)", () => {
     const values = collectFamily([
       { doc: "README", re: /%2B%20(\d{2,4})%20E2E/g }, // the badge
       { doc: "README", re: /(\d{2,4}) Playwright E2E tests/g }, // verification
@@ -209,9 +215,14 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "CLAUDE", re: /(\d{2,4}) E2E \(needs/g }, // commands
       { doc: "SKILL", re: /(\d{2,4}) E2E \(needs/g }, // Appendix A
       { doc: "SKILL", re: /# (\d{2,4}) E2E\s*$/gm }, // the Appendix gate comments ×2
+      // S90 (the companion find): the PAD §7.4 pre-release checklist's
+      // e2e line drifted at s89 (stale 198/198 after the 211 move) — the
+      // one live E2E claim site the family never covered. Added so the
+      // drift class can never return.
+      { doc: "PAD", re: /`bun run test:e2e` — (\d{2,4})\//g }, // the §7.4 checklist
     ]);
-    const n = expectConsistent("the E2E count", values, 10);
-    expect(Number(n)).toBe(211);
+    const n = expectConsistent("the E2E count", values, 11);
+    expect(Number(n)).toBe(219);
   });
 
   it("the parity-pins count: README's feature-table claim matches CLAUDE's measured figure (the '163 vs 164' partial-update drift closed)", () => {

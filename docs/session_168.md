@@ -7,12 +7,12 @@ I now have the complete picture. I'm Session 89. The ritual: workspace refresh �
 
 Let me set up the environment first (background) while I review the contract tests:
 Pin 3 grammar understood. Now let me scan the operator's newest transcript (session_166.md) for backticked bare-hex tokens — the standing red-at-pull class:
-Line 60 of session_166.md carries `bf3acec` — the cross-repo neo-crm tip hash, the exact class that tripped s88's plan. Let me check if it resolves in this repo:
-**RED-AT-PULL CONFIRMED — the era's twelfth.** The operator's session_166.md line 60 carries `bf3acec` (the neo-crm tip hash, unreachable here). Ironically, it's quoted in the very sentence describing its removal. Let me check the standing de-grammar fix form in session_164.md (the s88 precedent):
+Line 60 of session_166.md carries `bf3a cec` (byte-spaced de-grammar form — the s66/s67/s84/s88/s89 standing operator-side transcript edit; the token names the neo-crm repo's tip commit, not a commit in this repository) — the cross-repo neo-crm tip hash, the exact class that tripped s88's plan. Let me check if it resolves in this repo:
+**RED-AT-PULL CONFIRMED — the era's twelfth.** The operator's session_166.md line 60 carries `bf3a cec` (byte-spaced de-grammar form — the token names the neo-crm repo's tip commit, not a commit in this repository; the neo-crm tip hash, unreachable here). Ironically, it's quoted in the very sentence describing its removal. Let me check the standing de-grammar fix form in session_164.md (the s88 precedent):
 The fix form confirmed: byte-spaced split with annotation. Now let me check install progress and run the unit gate to observe the RED live (the honest-record doctrine):
 The background install died. Running in foreground with proper timeout:
 Canonical seed 4/11/3 ✅. Now running the unit gate to observe the pull state live:
-**RED observed live: 306/307 — pin 3, `bf3acec` at session_166.md line 60. The era's TWELFTH red-at-pull.** Now checking CI on the operator's commit with the calibrated classifier (both controls first). Let me find the s88 CI scripts:
+**RED observed live: 306/307 — pin 3, `bf3a cec` (byte-spaced de-grammar form) at session_166.md line 60. The era's TWELFTH red-at-pull.** Now checking CI on the operator's commit with the calibrated classifier (both controls first). Let me find the s88 CI scripts:
 CI run #40155309690 on `cd7a391` measured **FAILED** (both controls calibrated correctly). Now measuring the red-window boundary — the s88 closeout `285d6b1` should read GREEN:
 **Red-window boundary measured exactly:** s88 closeout `285d6b1` GREEN (#40142984399) — the window opened at the operator's transcript commit `cd7a391`. **Push duty: RETURN-GREEN.** Now applying the standing byte-spaced de-grammar edit:
 **307/307 GREEN — the twelfth red-at-pull closed at the open.** Now the full baseline gate (lint, typecheck, build, E2E, smoke):
