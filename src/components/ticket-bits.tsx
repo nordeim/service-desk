@@ -143,7 +143,7 @@ export function TicketCard({
               <CategoryBadge category={ticket.category as TicketCategory} />
               <span className="text-sm text-slate-500 font-medium ml-2">{formattedDate}</span>
               {ticket._count && ticket._count.comments > 0 ? (
-                <span className="text-xs text-slate-400 ml-auto inline-flex items-center gap-1">
+                <span className="text-xs text-slate-500 ml-auto inline-flex items-center gap-1">
                   💬 {ticket._count.comments}
                 </span>
               ) : null}

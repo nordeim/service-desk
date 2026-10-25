@@ -186,11 +186,16 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // Content-Type CSRF gate pins (the new tests/content-type-gate.test.ts
     // — 5 pins: the seam accept family + the reject family + THE
     // MINT-BLOCKED pin through the real handler + the no-false-rejection
-    // boundary + the six-route comment-stripped wiring pin). A suite
+    // boundary + the six-route comment-stripped wiring pin); 315 after the
+    // s89 a11y-gate contract pins (the new tests/a11y-gate-contract.test.ts
+    // — 8 pins: the declared-devDep doctrine + the declared-version match +
+    // the spec existence + the declared-engine injection + the four WCAG
+    // tag families + the structural named-control gate + the sanctioned-
+    // register citation form + the explicit registration census). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(307);
+    expect(Number(n)).toBe(315);
   });
 
   it("the E2E-test count: every live claim site names ONE number (10 sites — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return)", () => {
@@ -206,7 +211,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "SKILL", re: /# (\d{2,4}) E2E\s*$/gm }, // the Appendix gate comments ×2
     ]);
     const n = expectConsistent("the E2E count", values, 10);
-    expect(Number(n)).toBe(198);
+    expect(Number(n)).toBe(211);
   });
 
   it("the parity-pins count: README's feature-table claim matches CLAUDE's measured figure (the '163 vs 164' partial-update drift closed)", () => {

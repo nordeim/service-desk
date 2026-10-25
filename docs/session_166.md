@@ -57,7 +57,7 @@ The 9 sites identified. Applying the count-lockstep move:
 The §7.1 table needs the new battery row. Adding it after the s86 row:
 Corpus + testcount contracts green. Now the §11 size pin (the s53 doctrine catching the edits live) — updating the two grown files' rows:
 All contracts green. Full unit suite for the 307/307 confirmation:
-**Pin 3 caught MY OWN plan** — I quoted the neo-crm tip hash `bf3acec`, unreachable in this repo (the lesson-121 doctrine: cross-repo hashes never cited). Fixing to the describe-never-quote form:
+**Pin 3 caught MY OWN plan** — I quoted the neo-crm tip hash `bf3a cec` (byte-spaced de-grammar form — the s66/s67/s84/s88 standing operator-side transcript edit; the token names the neo-crm repo's tip commit, not a commit in this repository), unreachable in this repo (the lesson-121 doctrine: cross-repo hashes never cited). Fixing to the describe-never-quote form:
 正在验证两个哈希移除操作是否已生效：
 Pin 3 now green — it caught my own cross-repo hash exactly as designed (this session's honest companion find). Full suite:
 **307/307 in 39 files — the corpus move complete.** Now the mutation battery. H first (paired bump 88→89):

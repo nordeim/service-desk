@@ -59,7 +59,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 // sections must be fully checked. The current session's own plan may be
 // mid-flight (the final box's push chicken-and-egg) — the next session's
 // bump pulls it into the sweep.
-const CURRENT_SESSION = 88;
+const CURRENT_SESSION = 89;
 
 // The plan corpus floor: the fs carried 54 plan files at session 55
 // (session 2 … session 55 — not every session wrote a plan; the floor is
@@ -68,7 +68,7 @@ const CURRENT_SESSION = 88;
 // session's plan — a single-file deletion fails loudly (observed live at
 // s55 mutation D: the pre-s55 calibration let one deletion through; the
 // floor must be re-calibrated each session alongside CURRENT_SESSION).
-const PLAN_CORPUS_FLOOR = 87;
+const PLAN_CORPUS_FLOOR = 88;
 
 const DOCS_DIR = "docs";
 

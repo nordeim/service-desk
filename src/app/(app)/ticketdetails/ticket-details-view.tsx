@@ -357,7 +357,7 @@ export function TicketDetailsView() {
                 <div className="tracking-tight text-sm font-semibold text-slate-900">Update Status</div>
               </div>
               <div className="p-6 space-y-2">
-                <p className="text-xs text-slate-400">Owners can close or reopen their own tickets.</p>
+                <p className="text-xs text-slate-500">Owners can close or reopen their own tickets.</p>
                 <Select
                   value={ticket.status}
                   onValueChange={(v) => void handleStatusChange(v)}
