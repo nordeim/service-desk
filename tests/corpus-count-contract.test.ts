@@ -197,11 +197,20 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // the 375 mobile band + the 44 floor constant + the structural
     // register-escape gate + the register citation form + the 8-registration
     // census + the Google-button padding-driven source pin + the
-    // inline-block link pins). A suite
+    // inline-block link pins); 331 after
+    // the s91 visible-focus contract pins (the new
+    // tests/visible-focus-contract.test.ts — 8 pins: the spec existence
+    // + the both-bands pin (375x667 AND 1280x720 — the §13 line scopes
+    // focus to no band) + the tab-walk form (real keyboard Tab presses,
+    // the :focus-visible engagement) + the settle-poll pin (the
+    // transition-all false-NONE guard) + the ring-layer parser pin (the
+    // colored spread form, never a bare !== 'none') + the outline-counts
+    // clause + the registration census (13) + the register citation
+    // form (born empty — the census found no exceptions)). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(323);
+    expect(Number(n)).toBe(331);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s90 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, and the PAD §7.4 checklist line joined the family after its s89 drift)", () => {
@@ -222,7 +231,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "PAD", re: /`bun run test:e2e` — (\d{2,4})\//g }, // the §7.4 checklist
     ]);
     const n = expectConsistent("the E2E count", values, 11);
-    expect(Number(n)).toBe(219);
+    expect(Number(n)).toBe(232);
   });
 
   it("the parity-pins count: README's feature-table claim matches CLAUDE's measured figure (the '163 vs 164' partial-update drift closed)", () => {

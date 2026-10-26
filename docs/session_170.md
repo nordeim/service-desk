@@ -6,9 +6,9 @@ Now let me read session_168.md (the operator's transcript for this session) and 
 I have the full picture now — I'm Session 90. Let me review the worklog tail and the AGENTS.md contracts section, then check the key contract surfaces.
 Now let me review the core docs' key sections — AGENTS.md Session-89 contracts, CLAUDE.md anti-pattern ledger tail, and the SKILL version state.
 Docs review complete. Now let me verify the red-at-pull candidate in the operator's transcript (session_168.md) — scanning for backticked bare-hex tokens that don't resolve in this repo.
-**已确认 — `bf3acec`（neo-crm 顶端哈希）在第 10/11/15 行被反引号包裹且处于 DANGLING 状态 — 这是 pull 时红线（red-at-pull）类的第十三个实例。** 现在让我来搭建环境：安装依赖、配置 `.env`、初始化数据库 —— 然后观察红线情况。
+**已确认 — `bf3a cec`（neo-crm 顶端哈希）在第 10/11/15 行被反引号包裹且处于 DANGLING 状态 — 这是 pull 时红线（red-at-pull）类的第十三个实例。** 现在让我来搭建环境：安装依赖、配置 `.env`、初始化数据库 —— 然后观察红线情况。
 Environment ready — canonical seed 4/11/3 confirmed. Now the session-opening gate: running the unit gate at pull to observe the RED live (the honest-record doctrine).
-**RED-AT-PULL CONFIRMED — the era's THIRTEENTH (third consecutive).** Pin 3 caught `bf3acec` at session_168.md lines 10/11/15 — 314/315. Now checking CI on the operator's commit `29bc293` with the calibrated classifier. Let me find the s89 CI scripts.
+**RED-AT-PULL CONFIRMED — the era's THIRTEENTH (third consecutive).** Pin 3 caught `bf3a cec` at session_168.md lines 10/11/15 — 314/315. Now checking CI on the operator's commit `29bc293` with the calibrated classifier. Let me find the s89 CI scripts.
 The script is parameterized — running the calibrated CI check for the operator's commit `29bc293` (controls first).
 CI run #40192371465 on `29bc293` measured **FAILED** — both controls calibrated correctly. Now measuring the red-window boundary: the s89 closeout `a65bd9f` should read GREEN.
 **Red-window boundary measured exactly:** s89 closeout `a65bd9f` GREEN (#40160456347) → the window opened at the operator's `29bc293`, NOT at the s89 push. **Push duty: RETURN-GREEN.** Now applying the standing de-grammar edit — first checking the precedent form in session_166.md.
