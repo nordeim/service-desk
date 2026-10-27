@@ -226,13 +226,14 @@ describe("the corpus-count consistency contract (session 48)", () => {
     expect(Number(n)).toBe(343);
   });
 
-  it("the E2E-test count: every live claim site names ONE number (11 sites since s90 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, and the PAD §7.4 checklist line joined the family after its s89 drift)", () => {
+  it("the E2E-test count: every live claim site names ONE number (12 sites since s94 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, and the CLAUDE header-prose line joined after its s94 drift — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
     const values = collectFamily([
       { doc: "README", re: /%2B%20(\d{2,4})%20E2E/g }, // the badge
       { doc: "README", re: /(\d{2,4}) Playwright E2E tests/g }, // verification
       { doc: "README", re: /(\d{2,4}) E2E tests/g }, // pyramid row
       { doc: "README", re: /Playwright E2E \((\d{2,4}) tests\)/g }, // commands
       { doc: "AGENTS", re: /Playwright E2E \((\d{2,4}) tests\)/g }, // commands
+      { doc: "CLAUDE", re: /\((\d{2,4}) specs against the production standalone build\)/g }, // the header prose (the s94 extension — the verification-gate paragraph's figure, stale 198 through three family moves before the grammar joined)
       { doc: "CLAUDE", re: /\((\d{2,4}) tests, \d{2,4} of them the visual-parity/g }, // the E2E prose
       { doc: "CLAUDE", re: /(\d{2,4}) E2E \(needs/g }, // commands
       { doc: "SKILL", re: /(\d{2,4}) E2E \(needs/g }, // Appendix A
@@ -243,7 +244,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
       // drift class can never return.
       { doc: "PAD", re: /`bun run test:e2e` — (\d{2,4})\//g }, // the §7.4 checklist
     ]);
-    const n = expectConsistent("the E2E count", values, 11);
+    const n = expectConsistent("the E2E count", values, 12);
     expect(Number(n)).toBe(232);
   });
 

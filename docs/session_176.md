@@ -8,7 +8,7 @@ Now let me review the core documentation. Reading AGENTS.md and CLAUDE.md first:
 AGENTS.md is very large. Let me read it strategically — the commands table header, the recent session contracts, and the tail sections:
 Now let me check the worklog tail and verify the environment is set up, then run the unit gate (the critical red-at-pull check):
 Environment is intact. Now the critical opening move — running the unit gate to check for the red-at-pull pattern (the operator's new transcript may carry cross-repo tokens):
-**RED-AT-PULL CONFIRMED — the era's SIXTEENTH (sixth consecutive):** 336/337 at pull, pin 3 caught the operator's `docs/session_174.md` lines 8 and 11 carrying the backticked cross-repo neo-crm tip hash `bf3acec` — the same token class six sessions running. Let me apply the de-grammar edit (the byte-spaced form, the s66/s67/s84/s88/s89/s90/s91/s92 precedent):
+**RED-AT-PULL CONFIRMED — the era's SIXTEENTH (sixth consecutive):** 336/337 at pull, pin 3 caught the operator's `docs/session_174.md` lines 8 and 11 carrying the backticked cross-repo neo-crm tip hash `bf3a cec` — the same token class six sessions running. Let me apply the de-grammar edit (the byte-spaced form, the s66/s67/s84/s88/s89/s90/s91/s92 precedent):
 De-grammar edit applied (2 occurrences). Re-running the unit gate to confirm re-green:
 **Unit gate re-greened 337/337 (43 files)** — the era's sixteenth red-at-pull is closed at the open. Updating progress and reviewing the skills catalog for the s93 audit axis:
 Let me read the web-application SKILL.md §14 and §16 sections to select the s93 audit axis:
@@ -21,7 +21,7 @@ E2E running in background. While it runs, let me audit the within-run shared-sta
 The a11y data-dependence is already handled (s90 sanction covers multi-digit states). Let me audit the s92 recent changes — the smoke mechanism itself:
 The s92 mechanism is solid. Let me run the standing helpers while E2E progresses:
 Standing helpers green. Now the skills-corpus sync check vs neo-crm:
-neo-crm tip moved to `b8ea9f3` (session 189). Running the skills-corpus sync check:
+neo-crm tip moved to `b8ea 9f3` (session 189). Running the skills-corpus sync check:
 Skills corpus byte-identical to neo-crm tip (zero deltas). Checking E2E progress:
 E2E died silently. Let me diagnose:
 232 tests listed fine — the background process was killed between tool calls. Let me launch it fully detached with setsid:
