@@ -211,11 +211,19 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // transition-all false-NONE guard) + the ring-layer parser pin (the
     // colored spread form, never a bare !== 'none') + the outline-counts
     // clause + the registration census (13) + the register citation
-    // form (born empty — the census found no exceptions)). A suite
+    // form (born empty — the census found no exceptions)); 337 after
+    // the s92 smoke-count contract pins (the new
+    // tests/smoke-count-contract.test.ts — 6 pins: the counter + the
+    // fail-loud form + the RESULT line + the self-assertion + the
+    // expected literal + the bridge); 343 after the s93 e2e-isolation
+    // contract pins (the new tests/e2e-isolation-contract.test.ts —
+    // 6 pins: the reset-leg existence + the fallback pair + the ordering
+    // + the row-level children-first form + the no-file-deletion guard
+    // + the self-executing form). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(337);
+    expect(Number(n)).toBe(343);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s90 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, and the PAD §7.4 checklist line joined the family after its s89 drift)", () => {

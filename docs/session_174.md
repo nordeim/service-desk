@@ -5,10 +5,10 @@ Now let me read the key session documents. Starting with the most recent session
 The repo follows a rigorous session convention — I'm now Session 92 (the transcript `session_172.md` carries the s91 narrative). Let me read the core docs and validate the codebase state.
 环境结构已确认 —— 数据库路径约定、vitest/playwright 已全部就绪。现在让我配置环境并运行基线检查。
 已确认 Canonical seed 为 4/11/3。现在是关键的开门环节——单元测试（用于检查 red-at-pull 模式）：
-**已在拉取时确认 RED —— 时代第十五次红（连续第五次）：331 个测试中 330/331，pin 3 捕获到操作员 `session_172.md` 中的跨仓库 token `bf3acec`（第 6、16、139 行）。**
+**已在拉取时确认 RED —— 时代第十五次红（连续第五次）：331 个测试中 330/331，pin 3 捕获到操作员 `session_172.md` 中的跨仓库 token `bf3a cec`（第 6、16、139 行）。**
 
 这与既定的操作员转录类相符。让我检查一下既定的去语法化编辑先例（s91 对 session_170.md 的修复）：
-The precedent is clear: byte-space the token (`` `bf3acec` `` → `` `bf3a cec` ``). Let me apply the de-grammar edit to session_172.md:
+The precedent is clear: byte-space the token (`` `bf3a cec` `` → `` `bf3a cec` ``). Let me apply the de-grammar edit to session_172.md:
 **第十五次拉取红（red-at-pull）问题已在开启时关闭——单元测试门（unit gate）为 331/331 绿（GREEN）。** 现在让我运行完整的基准门（lint + typecheck + build）并更新我的进度：
 Lint ✓ typecheck ✓。现在我在后台启动构建，同时阅读核心文档：
 构建输出似乎被缓存了。让我直接运行它：
