@@ -69,13 +69,13 @@ def main() -> int:
         verdict = classify(fetch(f"https://github.com/nordeim/service-desk/actions/runs/{found}"))
         print(f"attempt {attempt}: {verdict}")
         if verdict == "COMPLETED_SUCCESSFULLY":
-            print(f"VERDICT: run #{found} on {target} COMPLETED SUCCESSFULLY (the calibrated green signature) — THE PUSH RETURNED MAIN TO GREEN (the s91 RETURN-GREEN form — the session opened red-at-pull, the era's FIFTEENTH (the operator's transcript commit, the s84 class, the fifth consecutive), and the push closes the red window)")
+            print(f"VERDICT: run #{found} on {target} COMPLETED SUCCESSFULLY (the calibrated green signature) — THE PUSH RETURNED MAIN TO GREEN (the s91 RETURN-GREEN form — the session opened red-at-pull, the era's SIXTEENTH (the operator's transcript commit, the s84 class, the sixth consecutive), and the push closes the red window)")
             return 0
         if verdict == "CANCELLED":
             print(f"VERDICT: run #{found} CANCELLED")
             return 1
         if verdict == "FAILED":
-            print(f"VERDICT: run #{found} on {target} FAILED — investigate (main was RED at pull — the era's FIFTEENTH red-at-pull (the operator's transcript commit, the s84 recurring class, the fifth consecutive); the push's duty: RETURN-GREEN — the red window EXISTS; a FAILED push FAILS to close it)")
+            print(f"VERDICT: run #{found} on {target} FAILED — investigate (main was RED at pull — the era's SIXTEENTH red-at-pull (the operator's transcript commit, the s84 recurring class, the sixth consecutive); the push's duty: RETURN-GREEN — the red window EXISTS; a FAILED push FAILS to close it)")
             return 2
         if verdict.startswith("UNCLASSIFIED"):
             print("VERDICT: completed with a non-success conclusion — investigate")
