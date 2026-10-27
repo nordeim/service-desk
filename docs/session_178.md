@@ -1,6 +1,99 @@
-我将从此前的会话中断处开始，评估工作区的当前状态，随后继续处理待办任务。
-The workspace has been reset — the parent `/home/z/my-project/` is now a fresh git repo (Initial commit `2dda656`), and `service-desk/` is no longer a git repository. Let me inspect the current state thoroughly.
-The workspace has been fully reset: `/home/z/my-project/service-desk/` is empty (the repo and all uncommitted s94 work are gone), but the Z.ai-level worklog and tool-results from the crashed session survived. Per the operator's standing instruction, I must re-clone the repo. First, let me mine the persisted tool-results to reconstruct exactly what the crashed session did.
+The workspace exists. Let me refresh it with `git pull` and check the current state.
+仓库已存在且状态良好（已完成 session-93，已推送）。我来拉取最新更改并查看所需文档。
+工作区已更新 — `docs/session_176.md` 是新增的（运营者已开启 session 94）。我来建立任务计划并查看所有必需的文档。
+上下文已明确：我现在是 **Session 94** —— 操作员提交的 `docs/session_176.md` 是 s94 开启记录（包含 s93 叙述，即 2N-12 惯例）。我的日志将是 `docs/session_177.md`（2N-11 惯例）。让我查看一下核心文档。
+现在我来战略性地阅读 `AGENTS.md`（指令、近期会话合约）以及 `CLAUDE.md`。
+现在，让我验证一下环境，并在新的 operator transcript 中检查是否存在经典的 red-at-pull token class。
+环境完好（`.env` 携带 `DATABASE_URL="file:../db/custom.db"`，`db/` 在根目录，bun 1.3.14）。operator 的转录内容包含带有反引号的跨仓库 token（`bf3acec` 第 11 行，`b8ea9f3` 第 24 行）——这是经典的 red-at-pull 候选情况。根据标准准则，让我先如实运行单元测试门控（unit gate）。
+**已确认拉取时报红 (RED-AT-PULL) — 第 17 次错误（连续第 7 次）：** 在拉取时 342/343，pin 3 捕获了 `docs/session_176.md` 的第 11/24 行，其中携带了反引号包裹的跨仓库哈希值 `bf3acec` 和 `b8ea9f3`。根据既定准则，在开放阶段应用去语法化编辑（byte-spaced 格式）。
+**Unit gate re-greened 343/343 (44 files)** —— 该时代第 17 次 `pull` 时出现的红色报错已在开始时关闭。现在开始运行完整的 baseline gate。
+Lint 和 typecheck 已通过。现在开始构建。
+**E2E 232/232 green (4.2m).** 现在开始执行 smoke suite 和 seed 检查。
+**冒烟测试 121 已通过**，带有自断言的 `RESULT` 行。现在开始进行 canonical seed 验证 (4/11/3)。
+Full baseline gate green. Now the standing helpers (worklog parser, screenshots check, script scans, commands check) and the skills-corpus sync check vs neo-crm.
+所有常设辅助检查均已通过。现在进行针对 neo-crm 的 skills-corpus 同步检查。
+兄弟仓库的尖端已更新（`b8ea9f3` → `968736a`，s190 已落地）。正在运行 `skills-corpus` 同步检查。
+**Skills corpus 字节完全一致**，与 neo-crm 的 tip `968736a` 一致（没有任何差异需要采用）。完整基线已通过验证。现在进入审计阶段——让我阅读系列技能以选择 s94 轴。
+让我审计一下 s94 轴的候选方案 —— 检查 fresh-clone 验证历史以及家族技能中命名的开放轴线。
+工作区再次持久化（仅 `git pull`），因此 `fresh-clone gate` 并非天然轴线。让我审计一下已确定的候选方案 —— `CLAUDE` 仅主要文本格式、`DEPLOYMENT` 速率限制，以及任何过时的数据。
+Found a candidate: CLAUDE.md line 12 carries "198 specs" while the actual E2E figure is 232. Let me investigate this axis — checking whether any pin holds it.
+**THE MEASURED FIND:** CLAUDE.md line 12 carries "(198 specs...)" — but the live E2E figure is 232. Let me measure the drift history and confirm no pin holds this grammar.
+**漂移已被精确测量：** "(198 specs ...)" 数据是在 `s37` (`afc3a25`) 时引入的，并在 5 次 corpus 变更中一直未更新（198→211→219→232）——目前已落后于实时数据 232 达 34 个，已有 57 个 session。无论是 commands-row 语法还是 E2E-prose 语法都无法匹配此 header-prose 形状 —— 这正是 `s95-shortlist` 中的 "CLAUDE major-only prose" 类。让我读取 `corpus-count-contract` 以设计 pin。
+家族结构现已清晰 —— CLAUDE 的 header-prose “(198 specs…)” 匹配不到 11 个 family shapes 中的任何语法。在确定审计轴心之前，让我对所有文档中的其他陈旧陈述内容进行一次全面扫描。
+扫描确认：CLAUDE.md 第 12 行的 "(198 specs…)" 是唯一过时的实时声明（所有其他 198 个命中项均为不可修改的历史记录）。**s94 轴已确认：CLAUDE 仅包含主要文本的类。** 让我阅读这两个契约文件以了解配对冲突的机制。
+成对的碰撞机制已理清。在确定方案之前，让我再审查一下另一个已确定的候选方案——DEPLOYMENT 速率限制（§16 “已知局限性文档化”行）。
+DEPLOYMENT rate-limits 轴已如实通过文档关闭。s94 轴已确认。我来核实一下 header-prose 语法在所有文档中的完整范围。
+审计轴线已锁定。目前仅剩下 `CLAUDE.md:12` 作为实时声明（`session_156.md` 中的命中属于不可变的历史记录）。现在让我开始第 76 次一致性扫描 —— 首先是 F1 wave watch。让我检查一下 s93 脚本谱系，以便得出 s94。
+让我运行 F1 wave-watch probe，以确定本次会话的形式，然后再推导 s94 lineage。
+**第 60 次 /login 波动已出现 —— 一次真实的波动：** 入口 `DmiZE53r` → `D__5Nn5J`（98071 字节，相同大小形式），登录 CSS `puMd6fDW` → `Dv2nVyxn` (901152, +141) —— **第 17 次 CSS 轮换**。登录对触发器已触发 —— 所有十组配对的 VLM 检查都是必须的。我来根据 count-verified 规范推导出 s94 脚本谱系。
+由于没有保留任何派生脚本，我将编写一个新的。首先，让我研究一下 s93 脚本的替换表面。
+让我再研究几个 s93 脚本，以便精确地构建替换表。
+我现在已经掌握了完整的情况。让我来编写 s94 推导脚本。
+121 substitutions applied. Now the hand-audit for over-substitution (the counts-not-scope class). Let me review the derived scripts.
+推导过度替换了历史行。让我来手动修正 s94-ref-sweep.sh 的头部——恢复 s93 的历史记录，并写入本次会话的 wave 记录。
+现在修复 `s94-wave-analysis.py` 的 docstring ——头部叙述和历史记录尾部。
+现在开始审计 CI pair docstrings 以及 shotdiff 的 PREDICTED set。
+现在将 S93 MEASURED SET 历史记录条目添加到 shotdiff 的 docstring 中。
+现在对所有衍生脚本执行那三项常驻扫描。
+All 11 derived scripts are ready and syntax-clean. Now executing the 76th parity sweep — F1 first.
+**波动分析测量出的第60次波动：纯重新哈希（相同大小形式）** —— 732=732 个 basenames，0 个新增 / 0 个移除，424 个重新哈希 / 308 个哈希稳定 —— 该条目以相同大小的形式（98071=98071）进行了轮换，外加第17次 CSS 轮换（+141 bytes）。登录对触发器已触发。现在进行 F2-F4 参考端探测。
+Reference-side probes complete — their persisting defects re-confirmed (desktop 1328, mobile 468 dashboard-scoped, toast blocking, real-click refusal at e12). Now our-side verification.
+我们的端已验证 —— 运行超集保持不变（实际点击在 0,0,288,667 处打开工作表，按下 Escape 键关闭，点击导航栏跳转，1280=1280，375=375）。现在开始重新验证后端轴向。
+**后端轴重置验证保持字节一致** —— 在 `s91-derived` 路径上，两个 `s21` 声明均已确认。现在进行 UI 往返测试。
+**UI 往返单次通过清理** —— 探针已创建、验证、删除，规范化 11 已恢复。现在进行 10 次截图刷新。
+**10-shot 刷新：9 个字节完全相同 + 1 个已更改 (09)** — 持久化工作区预测集测量完全一致。现在对已更改的截图进行 VLM-diff。
+已变更的镜头已完成 VLM-diff，结果为 BENIGN。现在进行十个配对的 VLM 检查（login-pair 触发器已触发）。
+**所有十个配对的 VLM 检查首次全部通过。** 正在验证捕获后的 canonical seed。
+第76次奇偶校验已完成。现在进入第4阶段 —— 整改计划。让我先检查一下文档对齐的锚点。
+Now writing the session-94 remediation plan.
+现在，在进行 paired bumps 之前，先实时观察 plan-ahead RED（TDD 格式）。
+**Plan-ahead RED observed live — double catch:** doc-enumeration pin 1 shows "extras [94]" (as designed), AND pin 3 caught my own plan quoting the cross-repo tokens in backticked form. Applying the de-grammar doctrine to my own doc.
+现在正在应用两个合同文件中的成对冲突。
+**Paired bumps born-green 343/343.** 现在开始 P1 修复 —— CLAUDE.md 头部数据 + E2E 家族扩展。
+现在进行 E2E 系列扩展 —— header-prose 语法加入了 pinned 系列。
+**P1 fix born-green 343/343.** 现在进行 mutation battery — H first（配对项 94→95 必须正好触发 5 个 pins）。
+**H bites exactly 5 pins** (plan-status 1+3 + doc-enumeration 1/2/3). 正在回滚并重新变绿。
+Shell 似乎出现了故障。在等待的同时，我先用文件工具验证一下 mutation-revert 的状态。
+The tool infrastructure has failed repeatedly (9+ consecutive failures on the shell session). Per my operating rules, I need to pause and inform you.
+
+---
+
+## ⚠️ Session Status — Shell Infrastructure Failure
+
+The persistent shell session has stopped responding (9+ consecutive tool failures). All work is safely persisted to disk — no data loss — but I cannot execute further commands until the session is restored.
+
+**Please click the restart button in the top right corner to restart the session and try again.** The next session can resume from the persisted state.
+
+---
+
+### 📋 Work Completed This Session (all safely on disk in `/home/z/my-project/service-desk/`)
+
+| Phase | Status | Result |
+|-------|--------|--------|
+| Workspace refresh | ✅ | `git pull` at operator's `b61056f` (persisted workspace) |
+| Core docs review | ✅ | AGENTS/CLAUDE/README/PAD/SKILL + session_175/176, remediation-plan-93, worklog |
+| Red-at-pull | ✅ | **Era's 17th** (342/343, pin 3 — cross-repo tokens in session_176 lines 11/24) → de-grammar edit applied → re-greened 343/343 |
+| Baseline gate | ✅ | lint + typecheck + 343/343 unit + build + **232/232 E2E (4.2m)** + smoke 121 + seed 4/11/3 |
+| Skills corpus | ✅ | Byte-identical to neo-crm tip `968736a` (sibling's s190 — zero deltas) |
+| Audit axis | ✅ | **CLAUDE major-only prose**: stale "(198 specs…)" figure — 57 sessions stale, 34 behind live 232, matches no family grammar |
+| 76th parity sweep | ✅ | **SIXTIETH wave** (pure re-hash: 732=732, 0/0, 424 re-hashed/308 stable) + **17th CSS rotation** (Dv2nVyxn +141) → trigger FIRED → **ALL TEN paired VLM checks LAYOUT-OK**; backend axis holding byte-identical; UI round-trip clean; 10-shot refresh (9 identical + 09 BENIGN) |
+| s94 script lineage | ✅ | 11 scripts derived (121 count-verified substitutions) + hand-audited + scans clean |
+| Remediation plan | ✅ | `docs/remediation-plan-session94.md` written + plan-ahead RED observed ("extras [94]") + self-catch de-grammar fix |
+| Paired bumps | ✅ | CURRENT_SESSION 94 + PLAN_CORPUS_FLOOR 93 — born-green verified |
+| P1 fix | ✅ | CLAUDE.md 198→232 + E2E family extension (floor 11→12) — born-green 343/343 verified |
+| H mutation | ✅ observed | Bites **exactly 5 pins** (plan-status 1+3 + doc-enumeration 1/2/3) |
+
+### ⏳ In-Flight (needs verification after restart)
+- **The H mutation revert** (`CURRENT_SESSION 95 → 94`) — the revert command was executing when the shell died; the two contract files' state needs a quick check (`rg "CURRENT_SESSION = " tests/*contract*.ts`) and possibly re-reverting + re-green.
+
+### 📌 Remaining Work
+1. Verify/revert H mutation → re-green 343/343
+2. P1/P2 mutation battery (doc-figure drift revert + family-shape removal)
+3. Docs alignment: AGENTS Session-94 section + reference-list `-session94`, CLAUDE anti-pattern entry (major-only-prose class, newest-LAST), SKILL v2.92.0 + lesson 148, PAD Session-94 RESOLVED row, four dated docs at 2026-10-27
+4. Full final gate (lint/typecheck/unit/build/E2E/smoke/seed)
+5. `docs/session_177.md` (2N−11) + worklog tasks 292–294
+6. Commit + **RETURN-GREEN push** via SSH wrapper (`docs/ssh_git_wrapper_v3.py`) + CI poll (both controls first) + closeout
+
 这些是来自崩溃会话的文档读取内容。让我先挖掘剩余的工具结果，以重建实际的命令和工作状态。
 The tool-results confirm the crashed session's context (s93 closeout state, conventions, lesson corpus). All uncommitted s94 work was lost in the reset — the remote repo still holds the s93 closeout + operator's s94 opener. Per the operator's standing instruction, I'll re-clone the workspace and redo the s94 arc with full verification.
 
