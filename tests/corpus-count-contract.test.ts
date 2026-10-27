@@ -53,6 +53,11 @@ const DOC_PATHS: Record<string, string> = {
   PAD: path.join(repoRoot, "Project_Architecture_Document.md"),
   SKILL: path.join(repoRoot, "service-desk_SKILL.md"),
   DEPLOYMENT: path.join(repoRoot, "docs", "DEPLOYMENT.md"),
+  // S92: the smoke script's own SMOKE_EXPECTED literal joins the doc set as
+  // a live claim site (the s50-bridge form extended to the smoke layer — the
+  // whole-family drift blind spot closed: the script literal, the doc sites,
+  // ONE number, held by the same family pin).
+  "SMOKE-SCRIPT": path.join(repoRoot, "scripts", "smoke-test.sh"),
 };
 
 /** The PAD's historical known-issues section starts here (immutable rows). */
@@ -210,7 +215,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(331);
+    expect(Number(n)).toBe(337);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s90 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, and the PAD §7.4 checklist line joined the family after its s89 drift)", () => {
@@ -249,18 +254,28 @@ describe("the corpus-count consistency contract (session 48)", () => {
     expect(Number(n)).toBe(164);
   });
 
-  it("the smoke-steps count: every live claim site names ONE number (4 sites — the stale '11-step' in the SKILL appendix can never return)", () => {
+  it("the smoke-steps count: every live claim site names ONE number (5 sites — the stale '11-step' in the SKILL appendix can never return; the s92 bridge: the script's own SMOKE_EXPECTED literal joined the family)", () => {
     // The smoke figure is a runtime property of the server-driven script
     // (the s47 non-goal doctrine, unchanged); the pin closes the DOC side.
     // The shapes: README's "(N steps)" paren forms (verification + pyramid
     // rows), DEPLOYMENT's "N steps (local)" (the s47 line-anchored claim,
     // joining the family), the SKILL appendix's "N-step API contract".
+    // S92: the script's SMOKE_EXPECTED literal — the self-asserted executed
+    // count the live run now carries (the §15 smoke-leg executed-count
+    // contract, scripts/smoke-test.sh's own RESULT line) — joins the family
+    // as the FIFTH site: the whole-family drift blind spot (every site
+    // moving together, the family pin still passing) closes at the smoke
+    // layer exactly the way the s50 quickstart bridge closed it at the unit
+    // layer. A step added or dropped without the lockstep bump now fails
+    // HERE (the family) AND at the script's own self-assertion (the live
+    // gate) — two independent instruments, the same ONE number.
     const values = collectFamily([
       { doc: "README", re: /\((\d{2,4}) steps\)/g },
       { doc: "DEPLOYMENT", re: /(\d{2,4}) steps \(local\)/g },
       { doc: "SKILL", re: /(\d{2,4})-step API contract/g },
+      { doc: "SMOKE-SCRIPT", re: /^SMOKE_EXPECTED=(\d+)$/gm },
     ]);
-    const n = expectConsistent("the smoke count", values, 4);
+    const n = expectConsistent("the smoke count", values, 5);
     expect(Number(n)).toBe(121);
   });
 

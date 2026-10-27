@@ -49,8 +49,24 @@ cleanup() {
 }
 trap cleanup EXIT
 
-step() { printf '%s %s\n' "$1" "$2"; }
-fail() { step "FAIL" "$1"; exit 1; }
+# S92: the §15 smoke-leg executed-count contract (the family skill §15 line —
+# "A smoke leg must count what it executed, not only what it passed.
+# project-management's conditional-skip guard silently dropped downstream
+# checks... and the RESULT line could never reach 30. Failure must be loud
+# and complete."): every step() call increments SMOKE_EXECUTED (a step is a
+# step, PASS or FAIL); fail() prints the partial RESULT (the executed count
+# + the incomplete-gate naming) before the exit — loud AND complete; the
+# script ends with the self-verifying RESULT line, the executed figure
+# asserted equal to SMOKE_EXPECTED (the corpus figure the docs' claim family
+# names — the count-lockstep doctrine; tests/smoke-count-contract.test.ts
+# pins this mechanism, and tests/corpus-count-contract.test.ts's smoke
+# family holds the SMOKE_EXPECTED literal to the same ONE number the docs
+# name): a dropped step (or an added one riding without the lockstep bump)
+# exits non-zero with the honest figures.
+SMOKE_EXECUTED=0
+SMOKE_EXPECTED=121
+step() { printf '%s %s\n' "$1" "$2"; SMOKE_EXECUTED=$((SMOKE_EXECUTED + 1)); }
+fail() { step "FAIL" "$1"; printf 'SMOKE RESULT: %d executed, FAILED early — the gate is incomplete (expected %d)\n' "$SMOKE_EXECUTED" "$SMOKE_EXPECTED"; exit 1; }
 
 # --- Boot -------------------------------------------------------------------
 rm -f "$DB"
@@ -1313,3 +1329,13 @@ rm -f "$RL_HEADERS" "$RL_BODY"
 
 rm -f db/smoke.db db/smoke.db-journal
 step "PASS" "smoke test complete"
+
+# S92: the self-verifying RESULT line (the §15 executed-count contract —
+# the executed figure must equal SMOKE_EXPECTED, the corpus figure the doc
+# claim family names; a drift in EITHER direction — a dropped step, or an
+# added one riding without the lockstep bump — exits non-zero loudly).
+if [ "$SMOKE_EXECUTED" -ne "$SMOKE_EXPECTED" ]; then
+  printf 'SMOKE RESULT: %d executed, expected %d — steps were dropped or added without the lockstep bump\n' "$SMOKE_EXECUTED" "$SMOKE_EXPECTED"
+  exit 1
+fi
+printf 'SMOKE RESULT: %d executed, %d passed, 0 failed\n' "$SMOKE_EXECUTED" "$SMOKE_EXECUTED"

@@ -3,7 +3,7 @@ The workspace doesn't have the service-desk repo yet. Let me clone it now.
 当前的工作区是一个沙箱。我来把 service-desk 仓库克隆到一个专用文件夹中。
 仓库在 main 分支，状态干净。`db/`、`vitest.config.ts`、`playwright.config.ts` 已经存在。现在让我来检查一下文件大小并阅读核心文档。
 Now let me read the operator's session_170.md transcript and recent worklog entries.
-Session 90 已完成；我是 Session 91 (s91)。operator 的 transcript `session_170.md` 中包含反引号包裹的 `bf3acec` token（第 9、11 行）——这是典型的红线候选。让我来制定任务计划。
+Session 90 已完成；我是 Session 91 (s91)。operator 的 transcript `session_170.md` 中包含反引号包裹的 `bf3a cec` token（第 9、11 行）——这是典型的红线候选。让我来制定任务计划。
 现在开始评审核心文档。正在阅读 `AGENTS.md`（重点关注 `session-90` 合约）：
 让我扫描一下 AGENTS.md 的结构，以理解所有的操作规范：
 现在正在读取 CLAUDE.md（反模式分类账）：
@@ -13,7 +13,7 @@ Core docs reviewed. Now checking the audit lens — the family skill `skills/web
 已确认 §13 的可见焦点部分作为指定的 s91 轴候选。现在检查技能目录和现有辅助工具：
 Docs review complete. Marking progress and setting up the environment:
 环境已准备好 — canonical seed 4/11/3。现在是会话开启关口：实时观察 RED：
-**RED-AT-PULL 已确认 — 该时代的第 14 次（连续第 4 次）：322/323，session_170.md 第 9/11 行的 pin 3 捕获到了 `bf3acec`。** 现在正在对操作员的提交进行经过校准的 CI 检查（优先进行两项控制）：
+**RED-AT-PULL 已确认 — 该时代的第 14 次（连续第 4 次）：322/323，session_170.md 第 9/11 行的 pin 3 捕获到了 `bf3a cec`。** 现在正在对操作员的提交进行经过校准的 CI 检查（优先进行两项控制）：
 操作员提交 `4f99c1a` 上的 CI 运行 #40241056687 测量结果为 **FAILED**（校准后，两个对照组）。现在显示红窗边界 — s90 结束时的 `d074f34` 应该为 GREEN：
 窗口在操作员的 `4f99c1a` 处打开，而非 s90 推送 —— s90 的收尾声明依然成立。s91 的推送必须**恢复绿色（RETURN-GREEN）**。现在执行去语法编辑（字节间隔形式，既定先例）：
 两个 token 现在都已进行字节间隔处理。正在重新运行 unit gate 以确认 re-green：
@@ -136,7 +136,7 @@ The wrapper's pre-flight uses its own temp key via `-i` — my shim ignored it. 
 
 **迭代交付的内容：**
 
-- **拉取时红（Red-at-pull）（第 14 次）**：在拉取时观察到 `session_170.md` 中未解析的 `bf3acec` token 导致测试变红（322/323）；操作员 `4f99c1a` 上的 CI 已确认失败（已校准，双控件控制）；红窗口边界已测量（s90 结束状态为 GREEN，测试通过）；应用了去语法化编辑 → 恢复变绿 323/323。
+- **拉取时红（Red-at-pull）（第 14 次）**：在拉取时观察到 `session_170.md` 中未解析的 `bf3a cec` token 导致测试变红（322/323）；操作员 `4f99c1a` 上的 CI 已确认失败（已校准，双控件控制）；红窗口边界已测量（s90 结束状态为 GREEN，测试通过）；应用了去语法化编辑 → 恢复变绿 323/323。
 - **P1 —— §13 可见焦点双门禁（新轴）**：首先进行了双系统普查（跨越两个域、两个频段、真实的 Tab 键导航 —— 每次遍历均无“无指示（NO-INDICATION）”），发现**无需修改代码 —— 差距在于门禁本身**。隔离了三个测量陷阱（`transition-all` 虚假 NONE、Radix 选择器陷阱、`shadow-xs` 虚假阳性），并内置到规范（spec）中。新增：`visible-focus.spec.ts`（13 个注册项，首次运行 13/13）+ 8 引脚单元测试集（红→绿）。语料库 **323→331 个单元测试（42 个文件） / 219→232 个 E2E 测试**。
 - **第 73 次扫描**：第 57 次 `/login` 波动 + 第 15 次 CSS 轮换（双重事件） —— 所有十个配对的 VLM 检查首次全部通过（LAYOUT-OK）。真实发现：这次波动**改变了参考项目的 auth API 路径结构** —— 后端声明已在新路径上通过其实时 XHR 传输重新验证，字节完全一致。
 - **真实的过程内发现**：P2 突变暴露了一个实际的引脚缺陷（测试用例数正则表达式统计了正则表达式的 `.test(` 调用） —— 已通过实际测量修复；shotdiff 的 02 判定结果为“相同对”VLM 伪影（字节比对真实结果：02 未改变，s88 格式）。
