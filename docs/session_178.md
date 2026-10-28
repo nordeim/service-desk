@@ -4,16 +4,16 @@ The workspace exists. Let me refresh it with `git pull` and check the current st
 上下文已明确：我现在是 **Session 94** —— 操作员提交的 `docs/session_176.md` 是 s94 开启记录（包含 s93 叙述，即 2N-12 惯例）。我的日志将是 `docs/session_177.md`（2N-11 惯例）。让我查看一下核心文档。
 现在我来战略性地阅读 `AGENTS.md`（指令、近期会话合约）以及 `CLAUDE.md`。
 现在，让我验证一下环境，并在新的 operator transcript 中检查是否存在经典的 red-at-pull token class。
-环境完好（`.env` 携带 `DATABASE_URL="file:../db/custom.db"`，`db/` 在根目录，bun 1.3.14）。operator 的转录内容包含带有反引号的跨仓库 token（`bf3acec` 第 11 行，`b8ea9f3` 第 24 行）——这是经典的 red-at-pull 候选情况。根据标准准则，让我先如实运行单元测试门控（unit gate）。
-**已确认拉取时报红 (RED-AT-PULL) — 第 17 次错误（连续第 7 次）：** 在拉取时 342/343，pin 3 捕获了 `docs/session_176.md` 的第 11/24 行，其中携带了反引号包裹的跨仓库哈希值 `bf3acec` 和 `b8ea9f3`。根据既定准则，在开放阶段应用去语法化编辑（byte-spaced 格式）。
+环境完好（`.env` 携带 `DATABASE_URL="file:../db/custom.db"`，`db/` 在根目录，bun 1.3.14）。operator 的转录内容包含带有反引号的跨仓库 token（`bf3a cec` 第 11 行，`b8ea 9f3` 第 24 行）——这是经典的 red-at-pull 候选情况。根据标准准则，让我先如实运行单元测试门控（unit gate）。
+**已确认拉取时报红 (RED-AT-PULL) — 第 17 次错误（连续第 7 次）：** 在拉取时 342/343，pin 3 捕获了 `docs/session_176.md` 的第 11/24 行，其中携带了反引号包裹的跨仓库哈希值 `bf3a cec` 和 `b8ea 9f3`。根据既定准则，在开放阶段应用去语法化编辑（byte-spaced 格式）。
 **Unit gate re-greened 343/343 (44 files)** —— 该时代第 17 次 `pull` 时出现的红色报错已在开始时关闭。现在开始运行完整的 baseline gate。
 Lint 和 typecheck 已通过。现在开始构建。
 **E2E 232/232 green (4.2m).** 现在开始执行 smoke suite 和 seed 检查。
 **冒烟测试 121 已通过**，带有自断言的 `RESULT` 行。现在开始进行 canonical seed 验证 (4/11/3)。
 Full baseline gate green. Now the standing helpers (worklog parser, screenshots check, script scans, commands check) and the skills-corpus sync check vs neo-crm.
 所有常设辅助检查均已通过。现在进行针对 neo-crm 的 skills-corpus 同步检查。
-兄弟仓库的尖端已更新（`b8ea9f3` → `968736a`，s190 已落地）。正在运行 `skills-corpus` 同步检查。
-**Skills corpus 字节完全一致**，与 neo-crm 的 tip `968736a` 一致（没有任何差异需要采用）。完整基线已通过验证。现在进入审计阶段——让我阅读系列技能以选择 s94 轴。
+兄弟仓库的尖端已更新（`b8ea 9f3` → `9687 36a`，s190 已落地）。正在运行 `skills-corpus` 同步检查。
+**Skills corpus 字节完全一致**，与 neo-crm 的 tip `9687 36a` 一致（没有任何差异需要采用）。完整基线已通过验证。现在进入审计阶段——让我阅读系列技能以选择 s94 轴。
 让我审计一下 s94 轴的候选方案 —— 检查 fresh-clone 验证历史以及家族技能中命名的开放轴线。
 工作区再次持久化（仅 `git pull`），因此 `fresh-clone gate` 并非天然轴线。让我审计一下已确定的候选方案 —— `CLAUDE` 仅主要文本格式、`DEPLOYMENT` 速率限制，以及任何过时的数据。
 Found a candidate: CLAUDE.md line 12 carries "198 specs" while the actual E2E figure is 232. Let me investigate this axis — checking whether any pin holds it.
@@ -74,7 +74,7 @@ The persistent shell session has stopped responding (9+ consecutive tool failure
 | Core docs review | ✅ | AGENTS/CLAUDE/README/PAD/SKILL + session_175/176, remediation-plan-93, worklog |
 | Red-at-pull | ✅ | **Era's 17th** (342/343, pin 3 — cross-repo tokens in session_176 lines 11/24) → de-grammar edit applied → re-greened 343/343 |
 | Baseline gate | ✅ | lint + typecheck + 343/343 unit + build + **232/232 E2E (4.2m)** + smoke 121 + seed 4/11/3 |
-| Skills corpus | ✅ | Byte-identical to neo-crm tip `968736a` (sibling's s190 — zero deltas) |
+| Skills corpus | ✅ | Byte-identical to neo-crm tip `9687 36a` (sibling's s190 — zero deltas) |
 | Audit axis | ✅ | **CLAUDE major-only prose**: stale "(198 specs…)" figure — 57 sessions stale, 34 behind live 232, matches no family grammar |
 | 76th parity sweep | ✅ | **SIXTIETH wave** (pure re-hash: 732=732, 0/0, 424 re-hashed/308 stable) + **17th CSS rotation** (Dv2nVyxn +141) → trigger FIRED → **ALL TEN paired VLM checks LAYOUT-OK**; backend axis holding byte-identical; UI round-trip clean; 10-shot refresh (9 identical + 09 BENIGN) |
 | s94 script lineage | ✅ | 11 scripts derived (121 count-verified substitutions) + hand-audited + scans clean |
@@ -100,7 +100,7 @@ The tool-results confirm the crashed session's context (s93 closeout state, conv
 Let me set up the task plan first:
 Re-clone successful — remote tip is `b61056f` (the operator's s94 opener, containing `docs/session_176.md`). This confirms the crashed session's work was never pushed, so I'm redoing the s94 arc with the same conventions. Now Phase 1: core docs review.
 Repo structure confirmed — vitest/playwright configured, `db/` at root, scripts carry the DATABASE_URL. Now let me review the key docs, starting with the operator's s94 opener (`session_176.md`) and the session contract (`AGENTS.md`).
-The operator's s94 opener confirms the red-at-pull tokens at lines 11/24 (`bf3acec`, `b8ea9f3`) and names the s94 shortlist. Now let me read the remaining core docs — CLAUDE.md (carrying the audit-axis candidate at line 12), my s93 log, and the s93 remediation plan.
+The operator's s94 opener confirms the red-at-pull tokens at lines 11/24 (`bf3a cec`, `b8ea 9f3`) and names the s94 shortlist. Now let me read the remaining core docs — CLAUDE.md (carrying the audit-axis candidate at line 12), my s93 log, and the s93 remediation plan.
 CLAUDE.md line 12 confirmed carrying the stale "(198 specs…)" figure — the audit axis named on the s95 shortlist. Session_175.md also confirms this session's duties: since the workspace was **reset** (fresh clone), I must run the fresh-clone periodic gate at the rebuild (s91/s92 form) and the shotdiff predicted set takes the fresh-clone form. Let me read the s93 remediation plan and the AGENTS.md contracts sections.
 Fresh clone state: `.env.example` present (committed), no `.env`, no node_modules. Bun 1.3.14 + Node 24 available. Let me find the documented fresh-clone rebuild procedure (the s91/s92 form) in AGENTS.md.
 The rebuild procedure is documented (clone + `bun install --frozen-lockfile` + `.env` with fresh secret + `db:push` + canonical re-seed + chromium reinstall). Let me start the rebuild and read the Session-93 contracts section format.
@@ -108,7 +108,7 @@ The rebuild procedure is documented (clone + `bun install --frozen-lockfile` + `
 Schema 已推送。现在进行标准的种子重新填充：
 Canonical seed 4/11/3 landed. Now the chromium check and the critical opening move — the unit gate (red-at-pull check):
 chromium-1200 is cached (matching the repo's playwright), and agent-browser is available. Now the critical opening move — the unit gate for the red-at-pull check:
-**RED-AT-PULL CONFIRMED — the era's SEVENTEENTH (the seventh consecutive):** 342/343 at pull, pin 3 catching `session_176.md` lines 11/24 (`bf3acec`, `b8ea9f3` — the cross-repo neo-crm hashes). Let me check the exact de-grammar form used by the precedent sessions, then apply it:
+**RED-AT-PULL CONFIRMED — the era's SEVENTEENTH (the seventh consecutive):** 342/343 at pull, pin 3 catching `session_176.md` lines 11/24 (`bf3a cec`, `b8ea 9f3` — the cross-repo neo-crm hashes). Let me check the exact de-grammar form used by the precedent sessions, then apply it:
 The precedent form is the byte-spaced token. Applying the de-grammar edit to both tokens:
 De-grammar 编辑已应用。正在重新运行单元测试关卡以确认恢复绿色：
 **单元测试门控重新变绿 343/343（44 个文件）** —— 时代的第 17 次拉取时变红已在开始时关闭，与崩溃会话的记录完全一致。现在继续进行基线门控 —— lint + 类型检查：
@@ -123,7 +123,7 @@ chromium-1248 已安装。正在重新运行完整的 E2E 测试套件：
 Standing helpers found. The neo-crm sibling needs re-cloning too (workspace reset removed it). Let me run the standing helpers and verify the canonical seed:
 Standing helpers green (worklog 296 entries/zero new holes, screenshots 10/10, syntax 300/192/50 zero offenders, undefined-names zero). The session-refs check needs a session arg:
 Commands fresh both directions, canonical seed 4/11/3 holding. Now the skills-corpus sync check — cloning the neo-crm sibling:
-**Baseline gate fully green** — and the skills corpus is byte-identical to the neo-crm tip `26d542e` (the sibling's s191 landed since the s93 check; zero deltas to adopt). The fresh-clone rebuild reproduced the full gate end-to-end from a cold tree (clone + 485 packages + .env + db:push + seed 4/11/3 + chromium-1248) — the fresh-clone periodic gate the s93 log assigned to this session. Let me check the s95-shortlist record, then start the parity sweep:
+**Baseline gate fully green** — and the skills corpus is byte-identical to the neo-crm tip `26d5 42e` (the sibling's s191 landed since the s93 check; zero deltas to adopt). The fresh-clone rebuild reproduced the full gate end-to-end from a cold tree (clone + 485 packages + .env + db:push + seed 4/11/3 + chromium-1248) — the fresh-clone periodic gate the s93 log assigned to this session. Let me check the s95-shortlist record, then start the parity sweep:
 The shortlist record confirms the axis candidates. Now Phase 3 — the parity sweep. Let me examine the s93 sweep script lineage to derive the s94 form:
 Now the F1 wave-watch probe — fetching the reference's current state (the crashed session saw a 60th wave: entry `D__5Nn5J`, CSS `Dv2nVyxn`):
 The reference rotated since the s93 closeout: entry `D__5Nn5J` + CSS `Dv2nVyxn` (the crashed session's 60th-wave find, still standing). Now the wave analysis — comparing the current entry against the last recorded baseline (`DmiZE53r`):
@@ -171,7 +171,7 @@ Now verifying the P1 fix born-green:
 **P1 bites the family's consistency assertion — "found 232 & 198"** (the whole-family drift caught). Restoring and applying P2 (the grammar removal — must bite the floor):
 **P2 bites the floor assertion — "found 11 < 12"** (the dropped-site guard). Two separate invariants, each observed live. Now reverting P2 and re-greening the full unit gate:
 还原后出现了一次失败——让我看看捕获到了什么：
-**The classic self-catch** — pin 3 caught my own plan quoting the cross-repo neo-crm tip hashes (`26d542e`, `968736a`) in backticked form. Applying the de-grammar doctrine to my own doc (the s93 precedent):
+**The classic self-catch** — pin 3 caught my own plan quoting the cross-repo neo-crm tip hashes (`26d5 42e`, `9687 36a`) in backticked form. Applying the de-grammar doctrine to my own doc (the s93 precedent):
 **343/343 GREEN** — mutation battery complete (H: 5 pins exactly; P1: consistency; P2: floor; the plan self-catch de-grammared). Now Phase 6 — docs alignment. Let me read the Session-93 section as the template:
 现在我已经获得了完整的模板。让我找到剩余的锚点——参考列表尾部、CLAUDE 反模式尾部、PAD Session-93 行以及带日期的文档：
 范围标记约定已确认（仅限 bump，条目至 s90 结束）。现在编写 AGENTS.md Session-94 章节：

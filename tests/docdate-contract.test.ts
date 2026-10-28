@@ -152,7 +152,7 @@ describe("the doc-freshness date-claim contract (session 52)", () => {
     }
   });
 
-  it("the SKILL's description agrees with its own ledger — the distillation session == the LAST lesson's (Session N.) tag, and the description's date == the frontmatter last_updated (the exact inconsistency s51 shipped: v2.49.0 + lesson 105 '(Session 51.)' + a description still naming session-50)", () => {
+  it("the SKILL's internal coherence — the description agrees with its own ledger (the distillation session == the LAST lesson's (Session N.) tag, the description's date == the frontmatter last_updated) + every ## heading appears exactly once (the s95 heading-uniqueness extension: the s14 duplicated-block class closed — the lesson-append edit's own shell-layer mangling had duplicated the sections 13-20+Appendices block for 81 sessions)", () => {
     const skill = readFileSync(path.join(repoRoot, "service-desk_SKILL.md"), "utf8");
     const desc =
       /Distilled through the session-(\d+) remediation \((\d{4}-\d{2}-\d{2})\)\./.exec(
@@ -182,6 +182,34 @@ describe("the doc-freshness date-claim contract (session 52)", () => {
       descDate,
       `the description's date ${descDate} must equal the frontmatter's last_updated ${(front as RegExpExecArray)[1]} (two surfaces of the same freshness claim, same file)`,
     ).toBe((front as RegExpExecArray)[1]);
+
+    // S95 (the companion find — the SKILL duplicated-block class): the s14
+    // lesson-append edit's own shell-layer mangling (the very class its own
+    // lesson 59 documents) duplicated the sections 13-20 + Appendices A/B
+    // block (260 lines at cd18869's hunk @@ -400,6 +400,266 @@) and severed
+    // the new lesson's tail into an orphaned fragment — standing 81 sessions
+    // because nothing checked the SKILL's STRUCTURAL coherence (the ToC
+    // indexes the sections once; the second copy was unindexed dead weight
+    // whose two copies could diverge silently — and the corpus-count E2E
+    // family had even counted the duplicated Appendix gate-comment site as
+    // two). The uniqueness assertion: every ## heading appears exactly
+    // once — the duplicated-block class can never return silently.
+    const headings = [...skill.matchAll(/^## (.+)$/gm)].map((m) =>
+      m[1].trim(),
+    );
+    expect(
+      headings.length,
+      "the SKILL must carry ## headings (the section body the ToC indexes)",
+    ).toBeGreaterThan(0);
+    const dupes = [
+      ...new Set(
+        headings.filter((h, i) => headings.indexOf(h) !== i),
+      ),
+    ];
+    expect(
+      dupes,
+      `service-desk_SKILL.md carries duplicated ## headings: ${dupes.join(" | ")} — a duplicated block is unindexed dead weight whose copies diverge silently (the s14 insertion class, closed s95)`,
+    ).toEqual([]);
   });
 
   it("no dated doc claims freshness from the future (every claimed date <= today, Asia/Singapore)", () => {

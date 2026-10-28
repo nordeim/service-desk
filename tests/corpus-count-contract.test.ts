@@ -226,7 +226,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     expect(Number(n)).toBe(343);
   });
 
-  it("the E2E-test count: every live claim site names ONE number (12 sites since s94 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, and the CLAUDE header-prose line joined after its s94 drift — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
+  it("the E2E-test count: every live claim site names ONE number (11 sites since s95 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
     const values = collectFamily([
       { doc: "README", re: /%2B%20(\d{2,4})%20E2E/g }, // the badge
       { doc: "README", re: /(\d{2,4}) Playwright E2E tests/g }, // verification
@@ -237,14 +237,14 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "CLAUDE", re: /\((\d{2,4}) tests, \d{2,4} of them the visual-parity/g }, // the E2E prose
       { doc: "CLAUDE", re: /(\d{2,4}) E2E \(needs/g }, // commands
       { doc: "SKILL", re: /(\d{2,4}) E2E \(needs/g }, // Appendix A
-      { doc: "SKILL", re: /# (\d{2,4}) E2E\s*$/gm }, // the Appendix gate comments ×2
+      { doc: "SKILL", re: /# (\d{2,4}) E2E\s*$/gm }, // the Appendix gate comment (the s14 duplicate removed at s95 — the family had counted the duplicated pair as two sites)
       // S90 (the companion find): the PAD §7.4 pre-release checklist's
       // e2e line drifted at s89 (stale 198/198 after the 211 move) — the
       // one live E2E claim site the family never covered. Added so the
       // drift class can never return.
       { doc: "PAD", re: /`bun run test:e2e` — (\d{2,4})\//g }, // the §7.4 checklist
     ]);
-    const n = expectConsistent("the E2E count", values, 12);
+    const n = expectConsistent("the E2E count", values, 11);
     expect(Number(n)).toBe(232);
   });
 
