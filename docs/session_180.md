@@ -5,7 +5,7 @@ Now let me assess the workspace state with parallel checks:
 注意：`../.venv-ssh/`（来自 s94 的 paramiko SSH 基础设施）和 `../worklog.md` 在重置中幸存下来。让我检查一下具体还保留了什么：
 工作区已完全重置 — `service-desk/` 为空，但 `worklog.md`、`scripts/`、`tool-results/` 和 `.venv-ssh/` 在上级目录中得以保留。根据工作日志，**s94 的重做已完全完成并已推送**（`e47d016`，CI 绿色）。这是 **s95**：全新克隆 + 标准的 7 阶段任务。让我按指示进行克隆：
 克隆完成 —— 远程 HEAD 为 `4b7a338`，在 s94 收尾 (`e47d016`) 之上有两个新的 "update session log" 提交。所有关键文件均已存在。让我检查一下这两个新的提交包含什么内容，并阅读操作员的 s95 开启记录：
-`session_178.md` 是操作员的 s95 开启记录（s94 重做事件的记录）。它以 s95 的职责结束：**观察第 61 次浪潮**（基准冻结在 `D__5Nn5J`/`Dv2nVyxn`）、**配对的 CURRENT_session 更新**，以及**剩余的候选清单**（DEPLOYMENT 速率限制、全新的 family-skill 轴）。它还包含用反引号包裹的跨仓库 token（`bf3acec`、`b8ea9f3`、`968736a`、`26d542e`）——这是经典的 pull 时变红（red-at-pull）的诱因。
+`session_178.md` 是操作员的 s95 开启记录（s94 重做事件的记录）。它以 s95 的职责结束：**观察第 61 次浪潮**（基准冻结在 `D__5Nn5J`/`Dv2nVyxn`）、**配对的 CURRENT_session 更新**，以及**剩余的候选清单**（DEPLOYMENT 速率限制、全新的 family-skill 轴）。它还包含用反引号包裹的跨仓库 token（`bf3a cec`、`b8ea 9f3`、`9687 36a`、`26d5 42e`）——这是经典的 pull 时变红（red-at-pull）的诱因。
 
 现在让我阅读我的 s94 日志（权威的 s95 职责）、AGENTS.md 以及已关闭的 s94 计划：
 我现在的 s95 职责已完全明确。根据 s94 记录：监控**第 61 次浪潮**（在 `D__5Nn5J`/`Dv2nVyxn` 处冻结的基准数据）、配对的 `CURRENT_SESSION` 94→95 和 floor 93→94 更新、带有已知 token 列表的 s95 脚本衍生，以及针对 **SKILL 摘要表面** / DEPLOYMENT 速率限制 / 开启 family-skill 行的审计轴心。现在让我开始耗时最长的任务（依赖安装），并行阅读核心文档：
@@ -13,7 +13,7 @@ Now let me assess the workspace state with parallel checks:
 Environment setup complete: `.env` with fresh secret ✓, canonical seed **4/11/3** ✓, chromium cache has 1200 (the repo needs 1248 — the documented fresh-clone reinstall step, needed before E2E). CLAUDE.md line 12 now reads **232 specs** (the s94 P1 fix holding ✓).
 
 Now the critical opening move — the honest unit gate run for the **red-at-pull check** (session_178.md carries backticked cross-repo tokens), while I read the family skill:
-**拉取时红（RED-AT-PULL）已确认 —— 本时代第十八次（连续第八次）：** 342/343，pin 3 捕获到 `session_178.md` 在 9 行中携带了 15 个用反引号包裹的跨仓库 token（`bf3acec`、`b8ea9f3`、`968736a`、`26d542e`）—— 这正是 s84–s94 运算符转录（operator-transcript）的形态。根据既定原则，我在开始时应用**去语法化（de-grammar）编辑**（字节间隔形式，4+3 位数字分割 —— 与 s94 自身日志中使用的约定相同）：
+**拉取时红（RED-AT-PULL）已确认 —— 本时代第十八次（连续第八次）：** 342/343，pin 3 捕获到 `session_178.md` 在 9 行中携带了 15 个用反引号包裹的跨仓库 token（`bf3a cec`、`b8ea 9f3`、`9687 36a`、`26d5 42e`）—— 这正是 s84–s94 运算符转录（operator-transcript）的形态。根据既定原则，我在开始时应用**去语法化（de-grammar）编辑**（字节间隔形式，4+3 位数字分割 —— 与 s94 自身日志中使用的约定相同）：
 De-grammar edit applied — all 15 token occurrences now carry the byte-spaced form (`bf3a cec`, `b8ea 9f3`, `9687 36a`, `26d5 42e`). Now let me re-run the unit gate for the re-green, install chromium-1248 (the documented fresh-clone E2E step), and read AGENTS.md conventions in parallel:
 **Unit gate re-greened 343/343 (44 files)** — the era's eighteenth red-at-pull closed at the open. Chromium-1248 installed. Now the baseline gate continues (lint → typecheck → build), while I read AGENTS.md's Session-94 contracts and the family skill's security/testing sections:
 Lint ✓, typecheck ✓, build ✓ — all green. Now the E2E suite (232 specs, foreground per the s93 lesson), while I locate the latest session contracts in AGENTS.md and read the family skill's §12–§20 sections (the audit-axis candidate lines):
@@ -30,7 +30,7 @@ sed 输出（长课程账目行）导致持久化有些臃肿。让我重新运�
 awk 匹配到了 ToC 行——让我优化一下测量，使其仅针对实际的经验教训条目（`N. **...`）：
 结构已完全映射：账本分为 1-69 课（§12 区域，第 346-415 行）和 70-148 课（末尾，第 929-1049 行），**两个**部分区块均位于它们之间——并且 `cd18869` 的 diff hunk `@@ -400,6 +400,266 @@` 证明了在 §12 的账本内插入了 260 行。关键在于，grep 查找 'display mangling' 的结果为**空**——断开的课程可能缺失了其完整形式。让我读取 57-59 课、实际的插入 diff 以及 docdate 合约（需要扩展的 pin）：
 经验 59 的完整修正形式存在于第 405 行 ✓（该片段是 s14 原始尾部的陈旧 severed 重复项）。docdate 合约的 pin 2 检查 description↔ledger 一致性，但没有检查章节唯一性 —— 确认存在盲点。该 diff 还显示了插入的精确区块（在经验 57-59 之后的章节副本）。现在让我运行基准测试的固定辅助检查 + 技能语料库同步，并测量区块内的 corpus-figure 声明站点（这对于修复设计至关重要）：
-All standing helpers green ✓ (worklog 9 known holes/zero new, screenshots 10/10, syntax 305/194/51 zero offenders, commands fresh) and **skills corpus byte-identical to neo-crm tip `a3ac674` — zero deltas** ✓.
+All standing helpers green ✓ (worklog 9 known holes/zero new, screenshots 10/10, syntax 305/194/51 zero offenders, commands fresh) and **skills corpus byte-identical to neo-crm tip `a3ac 674` — zero deltas** ✓.
 
 Critical fix-design measurement: the E2E family's "Appendix gate comments ×2" grammar matches lines 652 + 908 — **the duplicated pair** — meaning the family floor (12 since s94) counts a phantom site inflated by the s14 duplication. The fix must honestly drop the floor 12→11. Let me now read the corpus contract's family region and the s94 sweep script (to derive the s95 lineage):
 The corpus-contract structure is fully clear — the E2E family's SKILL gate-comment regex counts **both duplicated copies** (lines 652+908), so the fix honestly drops the floor 12→11. The s94 ref-sweep script encodes the full wave history with the frozen baselines (`D__5Nn5J` 98071 / `Dv2nVyxn` 901152). Now the **F1 wave watch** — running the live reference measurement to determine the 77th sweep's shape — while I read the s94 derivation script:
@@ -53,7 +53,7 @@ Scans green (sh=310 mjs=196 ts=52, zero offenders; the two flagged ordinals are 
 F2–F4 已完成 (exit 0)。让我提取关键的缺陷数据，并推导后端轴向 app-id：
 Toast-blocking defect re-confirmed (toggle rect 24,16,28,28 hit by the `fixed top-0 z-[100]` toast-container div, `isBtnOrInside:false`; real-click refusal at **e12** again). Now the overflow figures + the backend axis derivation:
 Their persisting defects re-measured exactly (desktop **1328**-vs-1280; mobile dashboard-scoped **468**-vs-375; routes clean at both widths). The backend axis needs the current AuthAPI chunk — let me find it and the frontend-config:
-**后端轴已完全派生**：来自参考站点自身登录 HTML 的 app-id `690d8ec0e8f00c84332a5ae4`，以及来自 AuthAPI chunk 的 `/auth` 基础路径和端点（`/login`, `/reset-password-request`）——即 `app.base44.com` 上的 s91 派生路径形状 `/api/apps/<id>/auth/*`。现在开始这两个 s21-claim 探针（无变异——无 cookie，不存在的探测地址）：
+**后端轴已完全派生**：来自参考站点自身登录 HTML 的 app-id 690d8ec0e8f00c84332a5ae4，以及来自 AuthAPI chunk 的 `/auth` 基础路径和端点（`/login`, `/reset-password-request`）——即 `app.base44.com` 上的 s91 派生路径形状 `/api/apps/<id>/auth/*`。现在开始这两个 s21-claim 探针（无变异——无 cookie，不存在的探测地址）：
 **Backend axis re-verified HOLDING byte-identical** — both s21 claims confirmed (400 + exact FastAPI envelope; 200 + anti-enumeration shape). Now the our-side verification battery (boots the standalone :3000, runs the matrix, captures our paired surfaces):
 **Our-side working superset holds** — REAL click opens the sheet at **0,0,288,667** (byte-identical to s41–s94), Escape closes, nav-tap auto-closes + navigates — **no TailwindCSS v4 bug**. All paired-surface captures landed. Now the viewport equality figures + the UI round-trip:
 **Round-trip single-pass clean** — probe created/verified/deleted, canonical 11 restored. Our side: 375=375, 1280=1280. Now the 10-shot refresh: save the s94 baselines, capture, byte-compare:
