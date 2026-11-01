@@ -4899,3 +4899,20 @@ Work Log:
 
 Stage Summary:
 - Session 97's P1 closed: the devDependencies axis (lesson 151 — a types package that reads plausible while resolving NOTHING is the hardest unused-dependency form; the census needs the traceResolution ground truth, the bin-alias bridge, and the documented auto-include allowlist), the corpus at 346 unit (45 files) / 232 E2E / 121 smoke, the era's twentieth red-at-pull resolved at the open (the de-grammar edit), the push duty: RETURN main to green (the single-push form, the date-bump doctrine applied at the source)
+
+---
+Task ID: 303-s97
+Agent: main (Super Z) — session 97
+Task: Session-97 closeout — the RETURN-GREEN push (the single-push form) + the plan fully checked
+
+Work Log:
+- The remediation commit 6f760db (31 files: the de-grammar edit on session_182.md + the P1 fix (the bun-types removal via bun remove — package.json devDependencies 13->12, bun.lock by the package manager + pin 3 in the EXISTING tests/dependency-surface-contract.test.ts with the TYPES_AUTO_INCLUDE allowlist + the BIN_ALIASES bridge + the quoted runtime-read surface + the inherited self-exclusion) + the corpus move 345->346 (45 files unchanged, the same-file extension form) + the claim-site lockstep + the mutation battery record + the 11 s97 scripts + the refreshed screenshots 02/04/05/09 + the docs alignment + docs/session_183.md + the worklog tasks 301-302)
+- The SSH infrastructure REBUILT this session (the workspace reset took the .venv-ssh paramiko venv + the /home/z/my-project/bin/ssh shim standing from the s94/s96 rebuilds — the third rebuild of the era, from the skill's Appendix A form; paramiko 5.1.0; the shim extracted verbatim from the how-to doc, shebang pointed at the venv); the wrapper: docs/ssh_git_wrapper_v3.py --key-file /tmp/s97-deploy.key --remote git@github.com:nordeim/service-desk.git --branch main
+- The fingerprint verified byte-identical to the s92-s96 rotation record: SHA256:4FSV1Prot+Fe4gAmr8dWn63nrKiPv2A+nJw30h7oo+8 (the operator's key unchanged this rotation window — the authentication itself the authoritative verification)
+- The calibrated CI read on the operator's b36183b BEFORE the push: run #41253807737 measured FAILED (both controls read correctly first — the known-green #177 38875997857 COMPLETED_SUCCESSFULLY + the known-red 38948165037 FAILED through the same classifier); the red window confirmed open
+- Push ONE (the remediation — and the ONLY push needed): the dry-run GREEN first (b36183b..6f760db negotiated), then the real push; remote verified: refs/heads/main @ 6f760db == local HEAD; the tracking ref synced; the temp key shredded by the wrapper; the operator key file shredded post-push
+- CI run #41260098378 on 6f760db: COMPLETED_SUCCESSFULLY — THE PUSH RETURNED MAIN TO GREEN IN ONE PUSH (the single-push form, the s89-s96 precedent: the date-bump doctrine applied at the source — all four dated docs carried 2026-11-01 at the remediation commit (the same-day form), so the CI docdate pin passed; the red window the operator's b36183b opened — the era's TWENTIETH red-at-pull, the tenth consecutive — is closed)
+- The closeout: the plan's section-6 ticked + this push entry + the closeout commit
+
+Stage Summary:
+- Session 97 complete: the devDependencies axis closed (lesson 151 — the implicit-consumption class: a types package that reads plausible while resolving NOTHING; the census needs the traceResolution ground truth + the bin-alias bridge + the documented auto-include allowlist), the corpus at 346 unit (45 files) / 232 E2E / 121 smoke, the 79th sweep the SIXTY-THIRD-wave dual event (the seventh of the era), the era's twentieth red-at-pull closed by the single RETURN-GREEN push, the SSH infrastructure rebuilt from the Appendix A form (the third rebuild of the era)
