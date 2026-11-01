@@ -48,11 +48,62 @@ import path from "node:path";
 // runtime) yet removing the package breaks the app — the OPPOSITE false
 // positive the allowlist exists to prevent.
 //
-// Deliberate scope: the `dependencies` block (where the six false claims
-// lived). The devDependencies surface (types packages implicitly consumed
-// by the type system, toolchain CLIs) is a weaker-signal census — noted
-// for a future shortlist, not pinned here.
+// Deliberate scope at s96: the `dependencies` block (where the six false
+// claims lived). The devDependencies surface (types packages implicitly
+// consumed by the type system, toolchain CLIs) is a weaker-signal census —
+// noted for a future shortlist, not pinned here. — CLOSED AT S97 by pin 3
+// below: the shortlist taken, the weaker-signal concern resolved through
+// the named-surface + allowlist design (the s96 session's own passed-
+// forward candidate, taken the very next session).
 // ---------------------------------------------------------------------------
+//
+// Session 97 — pin 3 (the devDependencies surface, the same genus extended
+// to the second block). The s96 census's one honest miss: `bun-types` stood
+// in devDependencies through 97 sessions while `tsc --noEmit
+// --traceResolution` resolved ZERO files from it — the prereq-contract
+// narrative that seemed to justify it mentions Bun in COMMENTS only, never
+// a `Bun.` global in typed code. Removed at s97 (`bun remove` —
+// devDependencies 13→12, the lockfile by the package manager) and the
+// block's honesty pinned here.
+//
+// The devDependencies reference surfaces (each measured live, each
+// load-bearing):
+//   1. import/require in src/tests/scripts — the app's import surface
+//      (@playwright/test across the spec files, vitest across the test
+//      files).
+//   2. import OR quoted bare-name in the CONFIG_FILES — the config files
+//      are themselves modules: eslint.config.mjs IMPORTS
+//      eslint-config-next/core-web-vitals; postcss.config.mjs quotes
+//      "@tailwindcss/postcss" in its plugins array; components.json
+//      carries "tsx": true; playwright.config.ts imports @playwright/test.
+//   3. a CSS @import/quoted reference in globals.css (tailwindcss,
+//      tw-animate-css — the live Tailwind v4 layer).
+//   4. a command word in package.json's own scripts block, WITH the
+//      documented BIN_ALIASES (typescript → tsc: the `typecheck` script's
+//      own `tsc --noEmit` — the package name and the binary name differ;
+//      eslint's name matches its own command).
+//   5. a quoted bare-name reference in src/tests/scripts — the
+//      runtime-read surface: axe-core is READ at runtime, not imported
+//      (the e2e a11y gate injects node_modules/axe-core/axe.min.js —
+//      tests/e2e/a11y.spec.ts's AXE_PATH — and the a11y-gate contract
+//      reads its installed package.json; remove the package and BOTH gates
+//      fail), and typescript carries the version-contract's documented
+//      row. Load-bearing by construction, not prose.
+//   6. the TYPES_AUTO_INCLUDE allowlist (below) — the tsc auto-include
+//      class: node_modules/@types/* is included by tsc WITHOUT any
+//      explicit reference (@types/react at 374 traceResolution hits,
+//      @types/react-dom at 152 — measured live; removing either breaks the
+//      typecheck gate, the OPPOSITE of the unused class).
+//
+// The same drift scenario as pin 1, one block down: a scaffold tool
+// appending its starter set, a types package that reads plausible while
+// resolving nothing (the bun-types form), a removed toolchain step's CLI
+// left behind — each lands silently green through every standing gate
+// (typecheck/build pass because nothing imports the entry). The
+// SELF-EXCLUSION doctrine is inherited: this file's own comments and
+// allowlist keys name packages as DOCUMENTATION, and counting them would
+// let a re-added dependency hide behind the pin's own text (the s96
+// mutation-battery observation).
 
 const repoRoot = path.resolve(import.meta.dirname, "..");
 
@@ -68,6 +119,29 @@ const allDeclared = new Set([...Object.keys(dependencies), ...Object.keys(pkg.de
  */
 const RUNTIME_REQUIRED: Record<string, string> = {
   "react-dom": "Next.js renderer runtime peer (react/next) — never directly imported in a Next app",
+};
+
+/**
+ * devDependencies entries consumed by tsc's AUTO-INCLUDE of
+ * node_modules/@types/* — never imported, never quoted, yet load-bearing
+ * (removal breaks the typecheck gate). Each entry carries its reason and
+ * its live traceResolution count (measured at s97; the s47 allowlist
+ * doctrine: every entry provably necessary — removing it from this list
+ * fails pin 3, the s96 P2 precedent).
+ */
+const TYPES_AUTO_INCLUDE: Record<string, string> = {
+  "@types/react": "tsc auto-include — 374 traceResolution hits at s97; removal breaks the typecheck gate",
+  "@types/react-dom": "tsc auto-include — 152 traceResolution hits at s97; removal breaks the typecheck gate",
+};
+
+/**
+ * Packages whose CONSUMED BINARY name differs from the package name (the
+ * command surface's honest bridge). Each entry's reason, in place:
+ *   - typescript: the `typecheck` script runs `tsc --noEmit` — the
+ *     compiler binary IS the package's consumption; the names differ.
+ */
+const BIN_ALIASES: Record<string, string[]> = {
+  typescript: ["tsc"],
 };
 
 /** Config files whose quoted/bare strings count as package references. */
@@ -133,10 +207,12 @@ function hasQuotedReference(text: string, name: string): boolean {
 /** The package.json scripts block, as text (the CLI-reference surface). */
 const scriptsText: string = Object.values(pkg.scripts ?? {}).join("\n");
 
-/** Does the scripts block invoke the package as a command word? */
+/** Does the scripts block invoke the package (or a documented bin alias) as a command word? */
 function hasCommandReference(name: string): boolean {
-  const esc = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`(^|[\\s;|&])${esc}(\\s|$)`).test(scriptsText);
+  const names = [name, ...(BIN_ALIASES[name] ?? [])].map((n) =>
+    n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  );
+  return names.some((esc) => new RegExp(`(^|[\\s;|&])${esc}(\\s|$)`).test(scriptsText));
 }
 
 // Pre-read the whole consumption surface once (small repo; the census is
@@ -163,7 +239,7 @@ const configTexts = CONFIG_FILES.map((f) => {
 });
 const cssText = readFileSync(GLOBALS_CSS, "utf8");
 
-describe("session 96: the dependency-surface pins (the package.json honesty contract)", () => {
+describe("session 96 + 97: the dependency-surface pins (the package.json honesty contract, BOTH blocks)", () => {
   it("pin 1: no unused dependencies — every dependencies entry is referenced by the consumption surface or documented-runtime-required (the initial-upload cargo class)", () => {
     const offenders: string[] = [];
     for (const name of Object.keys(dependencies)) {
@@ -212,5 +288,30 @@ describe("session 96: the dependency-surface pins (the package.json honesty cont
       );
     }
     expect(undeclared.length).toBe(0);
+  });
+
+  it("pin 3: no unused devDependencies — every devDependencies entry is referenced by the consumption surface, the runtime-read surface, or the TYPES_AUTO_INCLUDE allowlist (the s96 census's own passed-forward shortlist, closed at s97: bun-types removed after 97 sessions of zero resolutions)", () => {
+    const offenders: string[] = [];
+    for (const name of Object.keys(pkg.devDependencies ?? {})) {
+      if (name in TYPES_AUTO_INCLUDE) continue;
+      const used =
+        sourceTexts.some(
+          (s) => hasImportReference(s.text, name) || hasQuotedReference(s.text, name),
+        ) ||
+        configTexts.some(
+          (c) => hasImportReference(c.text, name) || hasQuotedReference(c.text, name),
+        ) ||
+        hasImportReference(cssText, name) ||
+        hasQuotedReference(cssText, name) ||
+        hasCommandReference(name);
+      if (!used) offenders.push(name);
+    }
+    if (offenders.length > 0) {
+      throw new Error(
+        `unused devDependencies (declared in package.json, referenced nowhere — the false-claim class, the bun-types form): ${offenders.join(", ")}. ` +
+          `Every devDependencies entry must be imported or quoted-read by src/tests/scripts, referenced by a config file or globals.css, invoked by a package.json script (bin aliases honored), or listed in TYPES_AUTO_INCLUDE with its reason.`,
+      );
+    }
+    expect(offenders.length).toBe(0);
   });
 });

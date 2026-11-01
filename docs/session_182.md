@@ -1,7 +1,7 @@
 Clone successful. HEAD is `2b98915 update session log` (post-s95 closeout). Now let me set up the task plan and review the key session docs:
 HEAD adds `docs/session_180.md` (operator's latest). Reading the four key session documents now:
 session_180.md 是 s95 会话记录（操作员提交）。现在正在读取 s95 修复日志和计划：
-Both s95 docs are clear. **This session = s96** (operator's opening transcript = `session_180.md` per the 2N−12 convention; my log will be `docs/session_181.md` per 2N−11). Critical note: session_180.md carries backticked cross-repo tokens (lines 8/33: `bf3acec`, `b8ea9f3`, `968736a`, `26d542e`, `a3ac674`) — the 19th red-at-pull is predicted. Starting the fresh-clone rebuild (dep install) while reading core docs:
+Both s95 docs are clear. **This session = s96** (operator's opening transcript = `session_180.md` per the 2N−12 convention; my log will be `docs/session_181.md` per 2N−11). Critical note: session_180.md carries backticked cross-repo tokens (lines 8/33: `bf3a cec`, `b8ea 9f3`, `9687 36a`, `26d5 42e`, `a3ac 674`) — the 19th red-at-pull is predicted. Starting the fresh-clone rebuild (dep install) while reading core docs:
 Worklog context confirmed through task 297 (s95 complete). Now reading the AGENTS.md Session-95 contracts and checking install status:
 Install complete (485 packages). Setting up `.env` and running the honest unit gate for the **red-at-pull check** (session_180.md carries backticked cross-repo tokens):
 **RED-AT-PULL CONFIRMED — the era's NINETEENTH (ninth consecutive): 342/343.** Getting the exact offender details:
@@ -16,7 +16,7 @@ Chromium-1248 installed ✓. Running the E2E suite (232 specs, foreground form):
 **SMOKE 121/121 ✓ — the full baseline gate is green.** Now the standing helpers + skills-corpus sync check:
 All standing helpers green (9 known holes unchanged, zero new). Checking the neo-crm sibling for the skills-corpus sync:
 neo-crm was reset too. Re-cloning for the corpus sync check:
-neo-crm tip is now `35b2c97` (sibling s201 landed since the s95 check at `a3ac 674`). Running the skills-corpus recursive diff:
+neo-crm tip is now `35b2 c97` (sibling s201 landed since the s95 check at `a3ac 674`). Running the skills-corpus recursive diff:
 **Skills corpus byte-identical to tip `35b2 c97`** — zero deltas. Baseline fully green. Moving to the audit phase:
 Reading the three open-axis candidate sections of the family skill (§17/§19/§20):
 Now measuring the candidate axes against the codebase. First the §20 known-issues register (PAD) — checking for stale "Open" rows:

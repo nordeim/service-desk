@@ -1,7 +1,7 @@
 {
   "name": "service-desk",
   "version": "1.0.0",
-  "description": "ServiceDesk \u2014 IT support portal (Next.js 16 + React 19 + Prisma/SQLite). Clone of the base44 ServiceDesk reference with superset features.",
+  "description": "ServiceDesk — IT support portal (Next.js 16 + React 19 + Prisma/SQLite). Clone of the base44 ServiceDesk reference with superset features.",
   "private": true,
   "scripts": {
     "dev": "DATABASE_URL='file:../db/custom.db' next dev -p 3000 2>&1 | tee dev.log",
@@ -44,7 +44,6 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "axe-core": "^4.14.0",
-    "bun-types": "^1.3.4",
     "eslint": "^9",
     "eslint-config-next": "^16.1.1",
     "tailwindcss": "^4",
