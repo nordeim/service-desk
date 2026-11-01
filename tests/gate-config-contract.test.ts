@@ -219,4 +219,78 @@ describe("the gate-config contract (session 65)", () => {
       "next.config.ts must not carry ignoreBuildErrors: true — the build IS the type gate (the s85 class: the scaffold flag stood for 84 sessions while the gate chain's manual typecheck step was the only type gate; under it a planted type error compiled GREEN into the deployable artifact — measured live: the flip probe GREEN with the flag removed, the planted-error build FAILED with error TS2322; a build-only pipeline ships a type-broken artifact silently)",
     ).toBe(true);
   });
+
+  it("pin 5: the vitest coverage-gate surface — the §20 no-coverage-threshold row closed (the measured-minus-headroom form, scoped to the unit tier's own seam surface)", () => {
+    // Session 98 — the coverage-gate closure. The §20 known-issues register
+    // carried "No numeric coverage threshold | Coverage discipline is
+    // convention, not gate | Open (`vitest --coverage` + thresholds when the
+    // suite grows)" through 97 sessions while the corpus-count family pinned
+    // the TEST COUNT and the pad-coverage contract pinned the seam-to-test
+    // FILE mapping — never the line-level truth. The suite at 346 tests
+    // measured 92.01/88.80/92.15/95.81 (stmts/branches/funcs/lines) on
+    // src/lib; the thresholds below are that measurement minus ~2 points of
+    // refactor headroom. The include surface is deliberately src/lib/** —
+    // the unit tier's seam surface; components/app routes are the E2E
+    // tier's surface (§14's three-tier law), and a threshold over them
+    // would fail by design (the tier-mismatch trap).
+    const covBlock = vitestConfig.match(/coverage\s*:\s*\{([\s\S]*?)\n\s*\},?\n/);
+    expect(
+      covBlock,
+      "vitest.config.ts must carry the coverage block — the §20 row's closure is a config gate, not a convention (the block's removal is the §20 regression: every test still green, the coverage discipline gone)",
+    ).not.toBeNull();
+    const cov = covBlock?.[1] ?? "";
+
+    // The provider: v8 (the @vitest/coverage-v8 package — the declared +
+    // installed coherence below).
+    expect(
+      /provider\s*:\s*"v8"/.test(cov),
+      'the coverage block must carry provider: "v8" — the provider package is the gate\'s engine',
+    ).toBe(true);
+
+    // The include surface: exactly the unit tier's seam surface.
+    expect(
+      /include\s*:\s*\[\s*"src\/lib\/\*\*"\s*\]/.test(cov),
+      'the coverage include must be exactly ["src/lib/**"] — the unit tier\'s seam surface; a broader include (src/**) scopes the threshold to the E2E tier\'s surface and fails by design (the tier-mismatch trap), a narrower one silently unscopes seams',
+    ).toBe(true);
+
+    // The thresholds: the measured-minus-headroom form, each value named.
+    const thresholds: Record<string, number> = { statements: 90, branches: 85, functions: 90, lines: 93 };
+    for (const [key, value] of Object.entries(thresholds)) {
+      const tm = cov.match(new RegExp(`${key}\\s*:\\s*(\\d+)`));
+      expect(
+        tm !== null && Number(tm[1]) === value,
+        `the coverage thresholds must carry ${key}: ${value} — the measured-at-s98 minus-headroom calibration (measured ${key === "statements" ? "92.01" : key === "branches" ? "88.80" : key === "functions" ? "92.15" : "95.81"}); a weakened threshold is the gate present but toothless (the P2 mutation class)`,
+      ).toBe(true);
+    }
+
+    // The script: the gate is runnable as its own gate-chain leg.
+    const scripts = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8")) as {
+      scripts?: Record<string, string>;
+    };
+    expect(
+      scripts?.scripts?.["test:coverage"] === "vitest run --coverage",
+      'package.json must carry "test:coverage": "vitest run --coverage" — the coverage gate\'s own command (the §15 local gate chain\'s leg)',
+    ).toBe(true);
+
+    // The provider-package coherence: declared in devDependencies AND
+    // installed (the runtime-read form — the a11y-gate contract's axe-core
+    // read established the precedent; this quoted reference is also the
+    // package's registration on the dependency-surface contract's census
+    // surface #5, the runtime-read class: vitest loads the provider by the
+    // `@vitest/coverage-${provider}` convention at --coverage time).
+    const pkgJson = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8")) as {
+      devDependencies?: Record<string, string>;
+    };
+    expect(
+      pkgJson?.devDependencies?.["@vitest/coverage-v8"] !== undefined,
+      "package.json devDependencies must declare @vitest/coverage-v8 — the provider package the coverage gate loads at runtime",
+    ).toBe(true);
+    const installed = JSON.parse(
+      readFileSync(path.join(repoRoot, "node_modules", "@vitest", "coverage-v8", "package.json"), "utf8"),
+    ) as { name?: string; version?: string };
+    expect(
+      installed?.name === "@vitest/coverage-v8",
+      "node_modules/@vitest/coverage-v8 must be installed (the declared-vs-installed coherence — a declared-but-missing provider fails the coverage run at --coverage time)",
+    ).toBe(true);
+  });
 });

@@ -15,6 +15,7 @@
     "db:reset": "DATABASE_URL='file:../db/custom.db' prisma migrate reset",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
@@ -43,6 +44,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^5.0.5",
     "axe-core": "^4.14.0",
     "eslint": "^9",
     "eslint-config-next": "^16.1.1",

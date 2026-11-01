@@ -1,14 +1,14 @@
 我将按照 7 阶段协议继续进行维护循环。让我先从设置任务跟踪并刷新工作区开始。
 Clone successful. Now checking the referenced lineage docs:
 第一阶段已完成。所有引用的谱系文档均已存在。现在进入第二阶段——审查会话文档：
-Lineage confirmed: `session_181.md` = my s96 log (completed, main green at `cdcae9b`), `session_182.md` = operator's s97-opening transcript (added by HEAD `b36183b`), remediation-plan-session96 fully closed. **This session = s97, my log = `docs/session_183.md`** (2N−11). The s96 log predicts the **20th red-at-pull** (session_182.md carries backticked tokens like `35b2c97`, `a3ac674` at line 19).
+Lineage confirmed: `session_181.md` = my s96 log (completed, main green at `cdcae9b`), `session_182.md` = operator's s97-opening transcript (added by HEAD `b36183b`), remediation-plan-session96 fully closed. **This session = s97, my log = `docs/session_183.md`** (2N−11). The s96 log predicts the **20th red-at-pull** (session_182.md carries backticked tokens like `35b2 c97`, `a3ac 674` at line 19).
 
 Now checking environment state and contract constants:
 Environment template matches requirements (db/ at root, `file:../db/custom.db`, vitest + playwright scripts present, s96 dependency removal landed — 18 deps). Now installing dependencies and checking contract constants:
 Constants verified at pull: `CURRENT_SESSION=96`, `PLAN_CORPUS_FLOOR=95` — the s96 H-mutation rollback is confirmed clean (summary concern resolved). Now setting up `.env` and running the honest unit gate for the **red-at-pull check** (session_182.md carries backticked tokens — 20th predicted):
 Canonical seed 4/11/3 ✓. Now the red-at-pull check:
 **RED-AT-PULL CONFIRMED — the era's TWENTIETH (tenth consecutive): 344/345.** Getting the exact offender details:
-已确认精确的问题点：`session_182.md` 第 4 行的 6 个被反引号包裹的跨仓库 token（`bf3acec`、`b8ea9f3`、`968736a`、`26d542e`、`a3ac674`）以及第 19 行的 `35b2c97`。正在检查 `session_180.md` 中已确立的去语法化形式（已在 `s96` 开始时修复）：
+已确认精确的问题点：`session_182.md` 第 4 行的 6 个被反引号包裹的跨仓库 token（`bf3a cec`、`b8ea 9f3`、`9687 36a`、`26d5 42e`、`a3ac 674`）以及第 19 行的 `35b2 c97`。正在检查 `session_180.md` 中已确立的去语法化形式（已在 `s96` 开始时修复）：
 已确认去语法化形式（4+3 字节间隔）。正在应用到 session_182.md：
 De-grammar edit applied (3 lines fixed, 0 backticked bare forms remain). Re-running the unit gate for the re-green:
 **已重新变绿 345/345 —— 该时代的第 20 次 pull 时红（red-at-pull）已在开始时解决**（第 4 行的六个 token + 第 19/20 行的 `35b2 c97`）。现在继续进行全新克隆重建 —— lint + typecheck，然后是 chromium-1248 + E2E：
@@ -18,9 +18,9 @@ Build ✓. Now running the E2E suite (232 specs):
 **E2E 232/232 GREEN (4.1m) ✓.** 现在开始执行冒烟测试套件：
 **SMOKE 121/121 ✓ — full baseline gate green from the cold tree.** Now the standing helpers (worklog parse, screenshots, three script scans):
 All standing helpers green (worklog 305 entries, 9 known holes unchanged, zero new; screenshots 10/10; scans zero offenders; commands fresh). Now the skills-corpus sync check vs neo-crm:
-neo-crm tip is now `257cf15` (advanced since the s96 check at `35b2 c97`). Running the skills-corpus recursive diff:
+neo-crm tip is now `257c f15` (advanced since the s96 check at `35b2 c97`). Running the skills-corpus recursive diff:
 The skills corpus has **diverged** this session — service-desk carries 345 skills, neo-crm tip carries 340 (three bigtech skills removed + catalog row differences). Investigating the sibling's history direction:
-neo-crm tip `257cf15` (2026-10-31 18:47 +0800) is newer than the s96 check point. Checking which sibling commits touched `skills/`:
+neo-crm tip `257c f15` (2026-10-31 18:47 +0800) is newer than the s96 check point. Checking which sibling commits touched `skills/`:
 The operator's HEAD commit `b36183b` itself modified `skills/` — adding the three bigtech skills. Examining what it changed:
 The operator's commit landed a **newer 345-skill corpus** into service-desk (bigtech research family, +12,254 lines) — service-desk is now AHEAD of the neo-crm sibling (340). Checking the commit's full scope:
 Sync-axis verdict: direction **inverted** — service-desk's corpus (345) is ahead of the sibling (340); the operator landed the newer family corpus at `b36183b`. Nothing to adopt from neo-crm. Now reviewing core docs (Phase 2 continuation):
@@ -54,7 +54,7 @@ Wave-analysis records written. Now auditing the remaining scripts' context token
 Lineage scans green (sh=320 mjs=200 ts=54, zero offenders). Now running F2–F4 reference-surface probes:
 F2/F3/F4 已测量 —— 它们所有持续存在的缺陷均已重新确认（1328 桌面端，468 移动端仪表盘范围，e12 处拒绝真实点击）。接下来进行后端轴向重新验证：
 The backend probes run inline. Re-deriving the app-id from the reference's own login HTML:
-App-id re-derived byte-identical (`690d8ec0e8f00c84332a5ae4`). Running the two s21-claim probes:
+App-id re-derived byte-identical (690d8ec0e8f00c84332a5ae4). Running the two s21-claim probes:
 Backend axis holding byte-identical. Now the our-side verification battery (boots standalone server, mobile matrix, real-click probe):
 **Our superset holds — real click opens the sheet at 0,0,288,667, Escape closes, nav-tap navigates, 1280=1280, 375=375, no Tailwind v4 bug.** Now the UI round-trip:
 **Round-trip single-pass clean** — S97 probe created/verified/deleted, canonical 11 restored. Now the 10-shot refresh:

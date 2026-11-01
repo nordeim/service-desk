@@ -234,11 +234,18 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // hits) + the BIN_ALIASES command bridge (typescript → tsc) + the
     // runtime-read quoted surface (axe-core read by the a11y gates);
     // bun-types removed after 97 sessions of zero resolutions — the
-    // same-file extension form, 45 files UNCHANGED). A suite
+    // same-file extension form, 45 files UNCHANGED); 347 after
+    // the s98 coverage-gate extension (the SAME file extended — pin 5 in
+    // tests/gate-config-contract.test.ts: the vitest coverage-gate surface,
+    // the §20 known-issues register's no-coverage-threshold row closed —
+    // the coverage block (provider v8 + the src/lib/** include surface +
+    // the 90/85/90/93 measured-minus-headroom thresholds) + the
+    // test:coverage script + the @vitest/coverage-v8 declared-and-installed
+    // coherence — the same-file extension form, 45 files UNCHANGED). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(346);
+    expect(Number(n)).toBe(347);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s95 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
