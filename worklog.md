@@ -4938,3 +4938,19 @@ Work Log:
 Stage Summary:
 - Session 98's P1 closed: the coverage-gate axis (lesson 152 — a coverage threshold scoped to the surface the WRONG tier tests fails by design; the unit tier's gate pins the unit tier's seam surface, and the calibration is measured-minus-headroom, never the raw measurement; the registration doctrine — a runtime-loaded-by-tooling package registers on the census's runtime-read surface, the census catch at install time the guard working, not an obstacle)
 - The corpus at 347 unit (45 files) / 232 E2E / 121 smoke, the coverage gate green at 92.01/88.80/92.15/95.81 vs the 90/85/90/93 thresholds, seed 4/11/3; the fresh figures frozen: the entry index-BKhnHaM4.js 200/98400 + the login CSS index-BHjkUcdg.css 200/908386 (the 64th-wave entry BKhnHaM4 the LAST RECORDED)
+
+---
+Task ID: 305-s98
+Agent: main (Super Z) — session 98
+Task: Session-98 closeout — the RETURN-GREEN push (the single-push form) + the plan fully checked
+
+Work Log:
+- The remediation commit 3037d9e (33 files: the era's TWENTY-FIRST red-at-pull resolved at the open (the de-grammar edit on session_184.md — eleven backticked cross-repo tokens across five lines, byte-spaced + the bare app-id) + the P1 fix (the @vitest/coverage-v8 install + the vitest.config.ts coverage block + the test:coverage script + pin 5 in the gate-config contract + the coverage-artifact eslint ignore) + the corpus move 346->347 + the claim-site lockstep + the 11 s98 scripts + the docs alignment + session_185.md + the worklog task 304)
+- The SSH infrastructure REBUILT this session (the workspace reset took the venv + the shim — the era's fourth rebuild, from the skill's Appendix A form, paramiko 5.1.0; the fingerprint byte-identical to the rotation record: SHA256:4FSV1Prot+Fe4gAmr8dWn63nrKiPv2A+nJw30h7oo+8 — the operator's key unchanged this rotation window; the authentication itself the authoritative verification)
+- The calibrated CI read on the operator's 869d0dc BEFORE the push: run #41265091605 measured FAILED (both controls read correctly first — the known-green #177 38875997857 COMPLETED_SUCCESSFULLY + the known-red 38948165037 FAILED) — the red window confirmed open before the push closed it
+- Push ONE (the remediation — and the ONLY push needed): the dry-run GREEN first (869d0dc..3037d9e negotiated), then the real push via the wrapper; remote verified: refs/heads/main @ 3037d9e == local HEAD; the tracking ref synced
+- CI run #41270126534 on 3037d9e: COMPLETED_SUCCESSFULLY — THE PUSH RETURNED MAIN TO GREEN IN ONE PUSH (the single-push form, the s89-s97 precedent: the date-bump doctrine applied at the source — all four dated docs carried 2026-11-01 at the remediation commit, the same-day form, so the CI docdate pin passed)
+- The closeout: the plan's section-6 ticked + this push entry + the closeout commit
+
+Stage Summary:
+- Session 98 complete: the coverage-gate axis closed (lesson 152 — the tier-mismatch trap + the measured-minus-headroom calibration + the runtime-read registration doctrine), the corpus at 347 unit (45 files) / 232 E2E / 121 smoke with the coverage gate green at 92.01/88.80/92.15/95.81 vs 90/85/90/93, the 80th sweep the SIXTY-FOURTH-wave zero-delta re-hash (the era's sixth; the fresh figures frozen: the entry index-BKhnHaM4.js 200/98400 + the login CSS index-BHjkUcdg.css 200/908386), the skills corpus IN SYNC (the first fully-in-sync reading of the era), the era's twenty-first red-at-pull closed by the RETURN-GREEN push, main green at 3037d9e
