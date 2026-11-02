@@ -241,11 +241,19 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // the coverage block (provider v8 + the src/lib/** include surface +
     // the 90/85/90/93 measured-minus-headroom thresholds) + the
     // test:coverage script + the @vitest/coverage-v8 declared-and-installed
-    // coherence — the same-file extension form, 45 files UNCHANGED). A suite
+    // coherence — the same-file extension form, 45 files UNCHANGED); 348
+    // after the s99 security-floor extension (pin 4 in
+    // tests/dependency-surface-contract.test.ts: the installed next
+    // >= 16.4.1 — the October 14, 2026 out-of-band patched release closing
+    // GHSA-673q-mjm6-r5xr + GHSA-2464-fhr4-w9xw + GHSA-p3m5-59mp-jv5r on
+    // the direct runtime dependency (16.4.0->16.4.3 via the package
+    // manager) + the declared-spec-admits-the-floor assertion — the
+    // vulnerable-direct-dependency class, the censuses' third genus —
+    // the same-file extension form, 45 files UNCHANGED). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(347);
+    expect(Number(n)).toBe(348);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s95 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {

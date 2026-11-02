@@ -104,12 +104,89 @@ import path from "node:path";
 // allowlist keys name packages as DOCUMENTATION, and counting them would
 // let a re-added dependency hide behind the pin's own text (the s96
 // mutation-battery observation).
+//
+// ---------------------------------------------------------------------------
+// Session 99 — pin 4 (the security-floor surface, the third genus: a
+// DECLARED-AND-USED dependency sitting inside a known-advisory version
+// range). The measured find (bun audit at the s99 open): next 16.4.0 sat
+// inside the advisory range >=16.0.0 <=16.4.0 for all three advisories of
+// the October 14, 2026 out-of-band security release — GHSA-673q-mjm6-r5xr
+// (CRITICAL, CVSS 9.5: unauthenticated RCE in `use cache` functions
+// returning typed arrays; Vercel's guidance: upgrade immediately even if
+// the app has no such functions), GHSA-2464-fhr4-w9xw / CVE-2026-96889
+// (CRITICAL, CVSS 9.5: unauthenticated RCE in the Image Optimization API
+// when SVG files are used — a librsvg use-after-free through sharp's
+// prebuilt binaries on glibc-based Linux; a public PoC exists), and
+// GHSA-p3m5-59mp-jv5r (HIGH: DoS in App Router using Server Actions). All
+// three patched in 16.4.1 (the Active LTS out-of-band release).
+//
+// The exposure census measured honestly on THIS codebase: no `use cache`
+// functions, no cacheComponents, no Server Actions (mutations are route
+// handlers), no next/image usage, and sharp already resolves 0.35.5 (the
+// advisory's own documented workaround) — practical exploitability LOW,
+// the version-floor defect REAL: the s96/s97 censuses watch UNUSED
+// entries; nothing anywhere watched VULNERABLE ones. The drift scenario:
+// a future `bun update` pin, a lockfile regeneration, or a rollback —
+// each can land the tree back inside an advisory range through every
+// standing gate (the corpus pins watch test counts; the version-contract
+// pins the seven DOCUMENTED packages' exact figures only — a next bump
+// inside the ^16 range moves silently).
+//
+// The pin: the runtime-read floor (the s97 pin-3 precedent's form — read
+// the INSTALLED package.json, not the declaration): installed next must
+// be >= NEXT_SECURITY_FLOOR (16.4.1, raised deliberately whenever a new
+// advisory lands — the floor is a security contract, not a style
+// preference), and the DECLARED spec must admit the floor (an exact pin
+// below the floor or a tilde-narrowed range fails closed). The floor was
+// observed RED at birth against the 16.4.0 tree (the TDD form) before
+// the bump closed it.
+// ---------------------------------------------------------------------------
 
 const repoRoot = path.resolve(import.meta.dirname, "..");
 
 const pkg = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8"));
 const dependencies: Record<string, string> = pkg.dependencies ?? {};
 const allDeclared = new Set([...Object.keys(dependencies), ...Object.keys(pkg.devDependencies ?? {})]);
+
+/**
+ * The security floor for the `next` runtime dependency (session 99, pin 4).
+ * 16.4.1 = the October 14, 2026 out-of-band patched release covering
+ * GHSA-673q-mjm6-r5xr (critical, use-cache RCE), GHSA-2464-fhr4-w9xw /
+ * CVE-2026-96889 (critical, Image-Optimization SVG RCE), and
+ * GHSA-p3m5-59mp-jv5r (high, Server Actions DoS). Raise the floor
+ * DELIBERATELY when a new advisory lands — never lower it to pass.
+ */
+const NEXT_SECURITY_FLOOR = "16.4.1";
+
+/** Parse "16.4.3" into [16, 4, 3] for numeric comparison. */
+function versionParts(v: string): [number, number, number] {
+  const m = v.trim().match(/^(\d+)\.(\d+)\.(\d+)/);
+  if (!m) return [0, 0, 0];
+  return [Number(m[1]), Number(m[2]), Number(m[3])];
+}
+
+function cmpVersion(a: [number, number, number], b: [number, number, number]): number {
+  return a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+}
+
+/**
+ * Does the DECLARED spec admit versions >= the floor? Handles the plain
+ * shapes a solo-operator package.json plausibly carries (exact, caret,
+ * tilde, >=); anything exotic FAILS CLOSED so a human looks at it.
+ */
+function specAdmitsFloor(spec: string, floor: [number, number, number]): boolean {
+  const m = spec.trim().match(/^(>=|[~^]?)v?(\d+)\.(\d+)\.(\d+)/);
+  if (!m) return false;
+  const anchor: [number, number, number] = [Number(m[2]), Number(m[3]), Number(m[4])];
+  if (m[1] === ">=") return cmpVersion(anchor, floor) >= 0;
+  if (m[1] === "^") return anchor[0] === floor[0]; // caret admits the whole major
+  if (m[1] === "~") {
+    // tilde admits [anchor.major.anchor.minor.x] — the floor fits only if
+    // the anchor is at or below the floor within the same minor band.
+    return anchor[0] === floor[0] && anchor[1] === floor[1] && anchor[2] <= floor[2];
+  }
+  return cmpVersion(anchor, floor) >= 0; // exact pin: must itself be >= the floor
+}
 
 /**
  * Packages with NO direct import anywhere yet REQUIRED at runtime by the
@@ -313,5 +390,54 @@ describe("session 96 + 97: the dependency-surface pins (the package.json honesty
       );
     }
     expect(offenders.length).toBe(0);
+  });
+
+  it("pin 4: the security floor — the installed next is at or above 16.4.1 (the October 14, 2026 out-of-band patched release: GHSA-673q-mjm6-r5xr + GHSA-2464-fhr4-w9xw + GHSA-p3m5-59mp-jv5r all patched) and the declared spec admits the floor (the vulnerable-direct-dependency class: the s96/s97 censuses watch UNUSED entries, nothing watched VULNERABLE ones)", () => {
+    // The runtime-read form (the s97 pin-3 / axe-core precedent): the
+    // INSTALLED package.json is the truth a server actually runs — the
+    // declaration alone can drift from the lockfile and back.
+    const installed = JSON.parse(
+      readFileSync(path.join(repoRoot, "node_modules", "next", "package.json"), "utf8"),
+    ) as { version?: string };
+    const installedVersion = installed.version ?? "0.0.0";
+    const floorParts = versionParts(NEXT_SECURITY_FLOOR);
+    const installedParts = versionParts(installedVersion);
+    if (cmpVersion(installedParts, floorParts) < 0) {
+      throw new Error(
+        `next ${installedVersion} is BELOW the security floor ${NEXT_SECURITY_FLOOR} — the tree sits inside a known-advisory range (the October 14, 2026 out-of-band release: GHSA-673q-mjm6-r5xr critical use-cache RCE, GHSA-2464-fhr4-w9xw critical Image-Optimization SVG RCE, GHSA-p3m5-59mp-jv5r high Server-Actions DoS). ` +
+          `Raise the dependency past the floor via the package manager (bun update next) and re-run the audit — never lower the floor to pass.`,
+      );
+    }
+    expect(cmpVersion(installedParts, floorParts)).toBeGreaterThanOrEqual(0);
+
+    // The declaration must admit the floor too: an exact pin below the
+    // floor or a tilde-narrowed range re-lands the tree inside the
+    // advisory range at the next clean install, even with a stale
+    // lockfile hiding it from the frozen-install gate.
+    const declared = dependencies["next"];
+    if (typeof declared !== "string" || !specAdmitsFloor(declared, floorParts)) {
+      throw new Error(
+        `the declared next spec (${String(declared)}) does not admit the security floor ${NEXT_SECURITY_FLOOR} — a narrowed declaration re-lands the tree inside the advisory range at the next clean install. ` +
+          `Widen the spec (the caret form admits the whole patched major) via the package manager.`,
+      );
+    }
+    expect(specAdmitsFloor(declared ?? "", floorParts)).toBe(true);
+
+    // The floor's VALUE is held at a second surface (the s98 threshold-pin
+    // form applied to the security genus): the AGENTS Session-99 contracts
+    // section names the floor figure, and this coherence assertion holds
+    // the doc figure == the constant — a weakened constant (or a drifted
+    // doc) breaks the coherence and bites HERE, so the gate can never be
+    // silently softened from either side.
+    const agents = readFileSync(path.join(repoRoot, "AGENTS.md"), "utf8");
+    const s99Match = agents.match(/## Session-99 contracts[\s\S]*?the security floor \*\*(\d+\.\d+\.\d+)\*\*/);
+    const docFloor = s99Match?.[1];
+    if (docFloor !== NEXT_SECURITY_FLOOR) {
+      throw new Error(
+        `the security floor's two surfaces disagree: the constant ${NEXT_SECURITY_FLOOR} vs the AGENTS Session-99 section's ${String(docFloor)} — a security floor softened on either surface (the constant weakened to pass, the doc drifted) is the gate-present-but-toothless class. ` +
+          `Raise BOTH surfaces together, deliberately, when a new advisory lands.`,
+      );
+    }
+    expect(docFloor).toBe(NEXT_SECURITY_FLOOR);
   });
 });
