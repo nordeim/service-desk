@@ -249,11 +249,17 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // the direct runtime dependency (16.4.0->16.4.3 via the package
     // manager) + the declared-spec-admits-the-floor assertion — the
     // vulnerable-direct-dependency class, the censuses' third genus —
-    // the same-file extension form, 45 files UNCHANGED). A suite
+    // the same-file extension form, 45 files UNCHANGED); 350
+    // after the s100 threat-model-coherence extension (two pins in
+    // tests/docs-contract.test.ts: the PAD §6.4 Malicious-uploads +
+    // Open-redirect rows held to the surfaces that ship them — the
+    // security-claim prose class, both directions: the doc names the
+    // shipped inline disposition + the guarded from_url surface, the code
+    // ships them — the same-file extension form, 45 files UNCHANGED). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(348);
+    expect(Number(n)).toBe(350);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s95 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {

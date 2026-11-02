@@ -13,7 +13,7 @@ Canonical seed 4/11/3 verified. Now the red-at-pull check — the unit gate on t
 Build ✓, chromium-1248 reinstalled. Now the E2E suite (232 specs, ~4 min).
 Full baseline gate GREEN from the cold tree. Now the standing helpers.
 All standing helpers green. Now clone neo-crm for the skills-corpus sync check and the tech-stack pattern review the user requested.
-neo-crm tip is `6372207` (advanced since the s98 check at `efe14e7`). Running the skills-corpus sync check.
+neo-crm tip is `6372 207` (advanced since the s98 check at `efe14 e7`). Running the skills-corpus sync check.
 Skills corpus: **IN SYNC** (zero deltas, catalogs byte-identical). Now a targeted review of the neo-crm architecture docs for tech-stack patterns (per the user's instruction).
 neo-crm patterns confirmed (same family stack: Next 16 + React 19 + Prisma/SQLite + Tailwind v4 CSS-first, the db-path seam, the mobile-drawer doctrine — all already embodied and pinned in service-desk). Now the 81st parity sweep. Let me study the s98 sweep scripts.
 Let me probe the reference site's current figures to detect whether a 65th wave has landed (vs the frozen s98 closeout figures: entry `index-BKhnHaM4.js` 200/98400, CSS `index-BHjkUcdg.css` 200/908386).
@@ -37,7 +37,7 @@ Now run the F1 reference sweep + wave analysis (the 65th-wave measurement).
 **The 65th wave measured:** 737→736 basenames, 15 added / 16 removed (all platform-infrastructure), 435 re-hashed / 286 hash-stable; entry −180 bytes; CSS +4998 bytes; logoutReturnPath hash-stable the 82nd session. Let me record these measured figures in the wave-analysis docstring.
 Now update the ref-sweep header with the measured wave figures, then run the F2–F4 surface probes.
 F2–F4 measured — all their known defects persist (desktop 1328, mobile-dashboard 468, toast blocking, real-click refusal at e12). Now the backend-axis re-verification (the two s21 claims). Let me find those probes.
-App-id re-derived byte-identical: `690d8ec0e8f00c84332a5ae4`. Now the two backend probes on the s91-derived path shape — let me find the path shape from the worklog.
+App-id re-derived byte-identical: `690d8ec0 e8f00c84332a5ae4`. Now the two backend probes on the s91-derived path shape — let me find the path shape from the worklog.
 Probe 1 holds byte-identical (400 + FastAPI envelope). Probe 2 reads 405 — the path shape may differ. Let me check the recorded s21 path.
 Backend axis re-verified HOLDING byte-identical (400 + FastAPI envelope; 200 + anti-enumeration shape on the hyphenated path — my first 405 was a probe-shape error, not drift). Now the our-side verification battery.
 Our-side superset HOLDS: 1280=1280, 375=375, REAL click opens the sheet at 0,0,288,667 (byte-identical to s41–s98 records), Escape closes, nav-tap navigates — no Tailwind v4 bug. Now the UI round-trip with the S99 probe.
