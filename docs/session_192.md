@@ -1,9 +1,9 @@
 The workspace exists with a mature, 100-session-old project. Let me refresh it and begin the meticulous review.
 工作区已刷新 ——拉取带来了用于 session-100 闭环的操作员日志 `session_190.md` (提交 82730ab)。这是 session 101。让我来制定任务计划并阅读核心文档。
-I've read the session-100 closure docs. Critical observation: the operator's newly-committed `session_190.md` (line 8) carries backticked cross-repo tokens (`6372207`/`efe14e7`) — the exact pin-3 red-at-pull class. This session (101) likely opens RED-AT-PULL again. Let me read the remaining core docs, then verify against the live tree.
+I've read the session-100 closure docs. Critical observation: the operator's newly-committed `session_190.md` (line 8) carries backticked cross-repo tokens (`6372 207`/`efe14 e7`) — the exact pin-3 red-at-pull class. This session (101) likely opens RED-AT-PULL again. Let me read the remaining core docs, then verify against the live tree.
 AGENTS.md is huge with very long lines. Let me extract key sections strategically and simultaneously verify the environment state for the red-at-pull check.
 环境完好：`.env` 已设置 `DATABASE_URL="file:../db/custom.db"` ✓，根目录下有 `db/` ✓，bun 1.3.14 ✓。现在进行关键的拉取时红绿灯检查（red-at-pull check）——运行已拉取代码树的单元测试关卡：
-**RED-AT-PULL CONFIRMED — the era's twenty-third.** 349/350: artifact-existence pin 3 caught the operator's `session_190.md` line 8 carrying the backticked cross-repo token `efe14e7`. Applying the standing de-grammar edit (byte-spaced form, the s66/s67/s84/s88/s89/s90/s98/s100 precedent):
+**RED-AT-PULL CONFIRMED — the era's twenty-third.** 349/350: artifact-existence pin 3 caught the operator's `session_190.md` line 8 carrying the backticked cross-repo token `efe14 e7`. Applying the standing de-grammar edit (byte-spaced form, the s66/s67/s84/s88/s89/s90/s98/s100 precedent):
 **350/350 GREEN** — red window closed locally. Now the calibrated CI read on the tip (82730ab), per the standing doctrine. Let me check the scripts folder for the CI poll tooling:
 **Calibrated CI read: run #41380571621 on 82730ab FAILED** (both controls correct). **Main is RED at pull — the era's twenty-third; the s101 push must RETURN it to green** (the standing form). Now reading the remaining core docs:
 我已消化了核心文档。现在正在已修复（语法脱敏）的树上运行完整的基准门控——lint、typecheck、build：

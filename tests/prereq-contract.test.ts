@@ -86,3 +86,94 @@ describe("the prerequisites contract (session 51)", () => {
     ).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Session 102 — the fresh-clone E2E-browser prerequisite pins (P1: the
+// s51 prerequisites genus extended to the E2E tier)
+//
+// Contract under test: every local doc names EXACTLY ONE prerequisite for
+// the E2E gate — "a prior build" — but on a fresh clone the E2E gate fails
+// on INFRASTRUCTURE before any test runs: `browserType.launch: Executable
+// doesn't exist at ~/.cache/ms-playwright/...`. The causal mechanism:
+// `bun install` does NOT download the Playwright browser, because Bun
+// skips dependency postinstall scripts unless the package is listed in
+// package.json's `trustedDependencies` — and playwright is NOT trusted
+// (the list carries the prisma family + unrs-resolver only). The one-time
+// `bunx playwright install chromium` is the real fresh-clone prerequisite,
+// and the CI workflow has known it since session 45 (its e2e job runs
+// `bunx playwright install --with-deps chromium` before the suite) — but
+// the local docs never said it. The gap survived 51 sessions because every
+// post-s51 session ran on a warm workspace (the browser cache persists
+// outside the repo); only a reset window can surface it — measured live at
+// the s102 open (the era's first reset since s100): bun install → build →
+// test:e2e errored browserType.launch across every spec until the browser
+// install landed, the re-run then reading 232/232 green.
+//
+// Pin style: two-sided (the s51 doctrine):
+//   Pin A (the ground truth — the causal mechanism): playwright is NOT in
+//   trustedDependencies (so `bun install` alone never lands the browser)
+//   AND the CI e2e job installs the browser explicitly before the suite
+//   (the workflow's own knowledge of the prerequisite).
+//   Pin B (the doc side — the claim coherence): the README Testing section
+//   AND the AGENTS commands row name the one-time fresh-clone browser
+//   bootstrap at their test:e2e claim sites.
+//
+// Either drift direction bites: a doc that drops the prerequisite fails
+// pin B; a workflow/toolchain change that alters the mechanism (playwright
+// moving into trustedDependencies, or CI dropping its explicit install)
+// fails pin A — forcing the doc line and the mechanism to move together.
+// ---------------------------------------------------------------------------
+
+describe("the prerequisites contract (session 102 — the fresh-clone E2E-browser leg)", () => {
+  it("pin A: the ground truth — bun install never lands the Playwright browser (playwright NOT in trustedDependencies) and the CI e2e job installs it explicitly before the suite", () => {
+    const pkg = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8")) as {
+      trustedDependencies?: string[];
+    };
+    const trusted = pkg.trustedDependencies ?? [];
+    // The causal mechanism: Bun skips untrusted postinstall scripts, and
+    // the Playwright browser download lives in playwright's postinstall.
+    // If playwright ever moves into trustedDependencies, `bun install`
+    // would start auto-downloading the browser — the doc line (pin B) and
+    // this pin must then be revisited together.
+    expect(
+      trusted.some((t) => t === "playwright" || t === "@playwright/test"),
+      "playwright must NOT be in package.json trustedDependencies (the s102 mechanism: Bun skips untrusted postinstalls, so `bun install` alone never lands the Playwright browser — the fresh-clone prerequisite is the explicit one-time install; if this pin ever fails because playwright WAS trusted, the README/AGENTS doc lines and this contract must move together)",
+    ).toBe(false);
+    // The CI workflow's own knowledge: the e2e job installs the browser
+    // explicitly between the artifact restore and the suite.
+    const ci = readFileSync(path.join(repoRoot, ".github", "workflows", "ci.yml"), "utf8");
+    const installIdx = ci.indexOf("bunx playwright install --with-deps chromium");
+    const suiteIdx = ci.indexOf("bun run test:e2e");
+    expect(installIdx, "the CI e2e job must carry the explicit Playwright browser install (`bunx playwright install --with-deps chromium`) — the workflow has known the fresh-clone prerequisite since session 45; dropping it would break CI on every cold runner").toBeGreaterThanOrEqual(0);
+    expect(
+      suiteIdx > installIdx,
+      "the CI e2e job must install the Playwright browser BEFORE running the suite (the browser install precedes `bun run test:e2e` in ci.yml — the ordering is the prerequisite made visible)",
+    ).toBe(true);
+  });
+
+  it("pin B: the local docs name the one-time fresh-clone browser bootstrap at their test:e2e claim sites (the README Testing section + the AGENTS commands row)", () => {
+    const readme = readFileSync(path.join(repoRoot, "README.md"), "utf8");
+    // The README Testing section's test:e2e site: the command row plus its
+    // trailing comment block must name the browser install.
+    const e2eIdx = readme.indexOf("bun run test:e2e");
+    expect(e2eIdx, "the README Testing section must carry the test:e2e command (a dropped E2E claim site fails loudly — the dropped-site doctrine)").toBeGreaterThanOrEqual(0);
+    // The claim window: the test:e2e row plus its comment lines (through the
+    // next command row — the same fenced block).
+    const windowEnd = readme.indexOf("bun run test:coverage", e2eIdx);
+    const claimWindow = readme.slice(e2eIdx, windowEnd > e2eIdx ? windowEnd : e2eIdx + 2000);
+    expect(
+      /bunx playwright install chromium/.test(claimWindow),
+      "the README Testing section's test:e2e site must name the one-time fresh-clone browser bootstrap (`bunx playwright install chromium`) — `bun install` alone never lands the Playwright browser (Bun skips untrusted postinstalls), so a fresh clone following only the documented prerequisites hits browserType.launch: Executable doesn't exist (the 51-session drift the s102 open measured live)",
+    ).toBe(true);
+    // The AGENTS commands row: the test:e2e row must name it too.
+    const agents = readFileSync(path.join(repoRoot, "AGENTS.md"), "utf8");
+    const rowIdx = agents.indexOf("| `bun run test:e2e` |");
+    expect(rowIdx, "the AGENTS commands table must carry the test:e2e row (the dropped-site doctrine)").toBeGreaterThanOrEqual(0);
+    const rowEnd = agents.indexOf("\n", rowIdx);
+    const row = agents.slice(rowIdx, rowEnd > rowIdx ? rowEnd : rowIdx + 2000);
+    expect(
+      /bunx playwright install chromium/.test(row),
+      "the AGENTS commands row for test:e2e must name the one-time fresh-clone browser bootstrap (`bunx playwright install chromium`) — the commands table is the agent-facing prerequisites surface; the silent 'requires a prior build' clause is the exact drift class this pin closes",
+    ).toBe(true);
+  });
+});

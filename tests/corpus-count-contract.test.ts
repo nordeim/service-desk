@@ -261,11 +261,20 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // >= 4.6.6 — the GHSA-mrhx-c7xc-m3w5 advisory, in-range-closable via
     // the resolutions mechanism (the lockfile edge 4.6.5->4.6.7, the
     // audit census 3->2) + the declared-resolutions surface + the PAD §10
-    // row coherence — the same-file extension form, 45 files UNCHANGED). A suite
+    // row coherence — the same-file extension form, 45 files UNCHANGED); 353
+    // after the s102 fresh-clone E2E-browser prerequisite extension (two
+    // pins in tests/prereq-contract.test.ts: the ground-truth side —
+    // playwright NOT in trustedDependencies (Bun skips untrusted
+    // postinstalls, so `bun install` never lands the browser) + the CI
+    // e2e job's explicit `bunx playwright install --with-deps chromium`
+    // — and the doc side — the README Testing section + the AGENTS
+    // commands row naming the one-time fresh-clone browser bootstrap at
+    // their test:e2e claim sites; the same-file extension form, 45 files
+    // UNCHANGED). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(351);
+    expect(Number(n)).toBe(353);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s95 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
