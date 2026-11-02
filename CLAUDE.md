@@ -2,7 +2,7 @@
 IMPORTANT: File is read fresh for every conversation. Be brief and practical.
 project_type: nextjs-single-app
 version: 1.0.0
-last_updated: 2026-11-02
+last_updated: 2026-11-03
 ---
 
 # ServiceDesk — IT Support Portal
