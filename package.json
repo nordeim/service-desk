@@ -59,5 +59,8 @@
     "@prisma/engines",
     "prisma",
     "unrs-resolver"
-  ]
+  ],
+  "resolutions": {
+    "zod": "4.6.7"
+  }
 }

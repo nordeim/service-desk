@@ -255,11 +255,17 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // Open-redirect rows held to the surfaces that ship them — the
     // security-claim prose class, both directions: the doc names the
     // shipped inline disposition + the guarded from_url surface, the code
-    // ships them — the same-file extension form, 45 files UNCHANGED). A suite
+    // ships them — the same-file extension form, 45 files UNCHANGED); 351
+    // after the s101 transitive-security-floor extension (pin 5 in
+    // tests/dependency-surface-contract.test.ts: the installed zod
+    // >= 4.6.6 — the GHSA-mrhx-c7xc-m3w5 advisory, in-range-closable via
+    // the resolutions mechanism (the lockfile edge 4.6.5->4.6.7, the
+    // audit census 3->2) + the declared-resolutions surface + the PAD §10
+    // row coherence — the same-file extension form, 45 files UNCHANGED). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(350);
+    expect(Number(n)).toBe(351);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s95 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {

@@ -142,6 +142,45 @@ import path from "node:path";
 // the bump closed it.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Session 101 — pin 5 (the transitive security floor, the fourth genus: an
+// IN-RANGE-CLOSABLE transitive advisory — the s99 floor form extended past
+// the direct runtime surface). The measured find (bun audit + the declared
+// ranges at the s101 open): the dev-toolchain transitive trio the s99
+// closure left documented-only carried zod <4.6.6 (GHSA-mrhx-c7xc-m3w5,
+// high — "Zod can exhaust memory while validating oversized constrained
+// collections") via eslint-config-next › eslint-plugin-react-hooks, whose
+// declared range is ^3.25.0 || ^4.0.0 — which ADMITS the patched 4.6.6+.
+// The advisory was never major-locked; the lockfile edge had merely gone
+// stale at 4.6.5. The PAD §10 row's status clause ("the fixes ride the
+// eslint-family/prisma-7 majors") was one-third false: a when-it-closes
+// claim is a claim like any other, and this one named the wrong mechanism
+// for one of its three legs two sessions after it was written.
+//
+// The closure (measured live, every path probed): `bun update zod` ADDS a
+// direct dependency (the s96 unused-dependency class regression — zod is
+// imported nowhere in src/tests/scripts; caught at the diff and reverted);
+// `bun update eslint-config-next` re-installs the same version and does
+// NOT re-resolve the stale edge. The surgical closure is the RESOLUTIONS
+// mechanism: the declared constraint field {"zod": "4.6.7"} in
+// package.json + `bun install` — the package manager alone moves the
+// lockfile edge 4.6.5→4.6.7 and the audit census 3→2 (minimatch's
+// ^3.1.5/^10.2.2 ranges and deepmerge-ts's exact 7.1.5 @prisma/config pin
+// remain genuinely major-locked — those two legs the row's claim is TRUE
+// for). The pin was observed RED at birth against the reverted pre-fix
+// tree (zod 4.6.5 installed, no resolutions field, the stale row) before
+// the fix was restored — the TDD form.
+//
+// The three surfaces held: (a) the runtime-read floor (the installed zod
+// read LIVE from node_modules — the s97 pin-3 / s99 pin-4 precedent);
+// (b) the declared surface (the resolutions field must carry a zod entry
+// admitting the floor — dropping the field fails the pin even before the
+// lockfile regresses); (c) the doc coherence (the PAD §10 dev-transitive
+// row must name the advisory floor figure AND the resolutions mechanism —
+// the stale "the fixes ride the eslint-family/prisma-7 majors" clause can
+// never return, the s100 two-sided prose form).
+// ---------------------------------------------------------------------------
+
 const repoRoot = path.resolve(import.meta.dirname, "..");
 
 const pkg = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8"));
@@ -157,6 +196,18 @@ const allDeclared = new Set([...Object.keys(dependencies), ...Object.keys(pkg.de
  * DELIBERATELY when a new advisory lands — never lower it to pass.
  */
 const NEXT_SECURITY_FLOOR = "16.4.1";
+
+/**
+ * The security floor for the TRANSITIVE zod dependency (session 101,
+ * pin 5 — the in-range-closable class). 4.6.6 = the patched release
+ * covering GHSA-mrhx-c7xc-m3w5 (high: "Zod can exhaust memory while
+ * validating oversized constrained collections"), arriving via
+ * eslint-config-next › eslint-plugin-react-hooks (declared range
+ * ^3.25.0 || ^4.0.0 — the fix is in-range, held by the resolutions
+ * field). Raise the floor DELIBERATELY when a new advisory lands —
+ * never lower it to pass.
+ */
+const ZOD_SECURITY_FLOOR = "4.6.6";
 
 /** Parse "16.4.3" into [16, 4, 3] for numeric comparison. */
 function versionParts(v: string): [number, number, number] {
@@ -439,5 +490,66 @@ describe("session 96 + 97: the dependency-surface pins (the package.json honesty
       );
     }
     expect(docFloor).toBe(NEXT_SECURITY_FLOOR);
+  });
+
+  it("pin 5: the transitive security floor — the installed zod is at or above 4.6.6 (GHSA-mrhx-c7xc-m3w5: memory exhaustion validating oversized constrained collections — patched in 4.6.6) and the resolutions field declares it (the in-range-closable transitive class: the s99 floor pinned the DIRECT runtime surface; the transitive dev surface stayed documented-only, and the s101 audit measured its when-it-closes claim one-third false — the zod range admitted the fix all along, the lockfile edge was merely stale)", () => {
+    // (a) The runtime-read form (the s97 pin-3 / s99 pin-4 precedent):
+    // the INSTALLED package.json is the truth — the declaration and the
+    // lockfile can each drift from what a tool actually loads.
+    const installedZod = JSON.parse(
+      readFileSync(path.join(repoRoot, "node_modules", "zod", "package.json"), "utf8"),
+    ) as { version?: string };
+    const zodVersion = installedZod.version ?? "0.0.0";
+    const zodFloorParts = versionParts(ZOD_SECURITY_FLOOR);
+    const zodParts = versionParts(zodVersion);
+    if (cmpVersion(zodParts, zodFloorParts) < 0) {
+      throw new Error(
+        `zod ${zodVersion} is BELOW the transitive security floor ${ZOD_SECURITY_FLOOR} (GHSA-mrhx-c7xc-m3w5: memory exhaustion validating oversized constrained collections, patched in 4.6.6; the advisory arrives via eslint-config-next › eslint-plugin-react-hooks, whose ^3.25.0 || ^4.0.0 range ADMITS the fix — this is the in-range-closable class, never a wait-for-the-major class). ` +
+          `Restore the resolutions field ("resolutions": {"zod": "^4.6.6 or later"}) and run bun install so the package manager moves the lockfile edge — never lower the floor to pass.`,
+      );
+    }
+    expect(cmpVersion(zodParts, zodFloorParts)).toBeGreaterThanOrEqual(0);
+
+    // (b) The declared surface: the resolutions field is the constraint
+    // that holds the edge — dropping it (or narrowing it below the floor)
+    // re-lands the stale 4.6.5 resolution at the next clean install, even
+    // with the current lockfile hiding it from the frozen-install gate.
+    const resolutions = (pkg as { resolutions?: Record<string, string> }).resolutions ?? {};
+    const declaredZod = resolutions["zod"];
+    if (typeof declaredZod !== "string" || !specAdmitsFloor(declaredZod, zodFloorParts)) {
+      throw new Error(
+        `the resolutions field must carry a zod entry admitting the transitive security floor ${ZOD_SECURITY_FLOOR} (found: ${String(declaredZod)}) — the resolutions mechanism is the surgical closure for an in-range-closable transitive advisory (a named bun update would ADD an unused direct dependency, the s96 class regression; a parent-chain update does not re-resolve the stale edge). ` +
+          `Declare "resolutions": {"zod": "..."} at or above the floor and run bun install.`,
+      );
+    }
+    expect(specAdmitsFloor(declaredZod ?? "", zodFloorParts)).toBe(true);
+
+    // (c) The doc coherence (the s100 two-sided prose form): the PAD §10
+    // dev-transitive row is the advisory register's live surface — it
+    // must name the advisory floor figure AND the resolutions mechanism
+    // (the shipped closure), and the stale when-it-closes clause can
+    // never return.
+    const padText = readFileSync(path.join(repoRoot, "Project_Architecture_Document.md"), "utf8");
+    const rowMatch = padText.match(/^\| LOW \| Dev-toolchain transitive advisories.*$/m);
+    if (!rowMatch) {
+      throw new Error(
+        "the PAD §10 dev-transitive advisories row is missing — the advisory register's live surface must exist for pin 5 to hold it to the shipped closure.",
+      );
+    }
+    const row = rowMatch[0];
+    const staleClause = "the fixes ride the eslint-family/prisma-7 majors";
+    if (row.includes(staleClause)) {
+      throw new Error(
+        `the PAD §10 dev-transitive row still carries the stale when-it-closes clause — the zod leg's fix never rode a major (the declared range admitted 4.6.6+; the s101 closure is the resolutions mechanism). ` +
+          `Rewrite the row to the shipped truth: the zod leg CLOSED at the resolutions mechanism, the minimatch/deepmerge-ts legs the genuinely major-locked duo.`,
+      );
+    }
+    if (!row.includes(ZOD_SECURITY_FLOOR) || !row.includes("resolutions")) {
+      throw new Error(
+        `the PAD §10 dev-transitive row must name the zod advisory floor figure ${ZOD_SECURITY_FLOOR} AND the resolutions mechanism — the register's live surface held to the shipped closure (the s100 two-sided prose form: the doc names the shipped property, the code ships it).`,
+      );
+    }
+    expect(row.includes(ZOD_SECURITY_FLOOR)).toBe(true);
+    expect(row.includes("resolutions")).toBe(true);
   });
 });

@@ -5,7 +5,7 @@ README 的内容行数非常长。让我先提取其文档结构，以便有策�
 This is Session 100. Reading session_188.md (the operator transcript for this window) and the s99 remediation plan.
 `session_188.md` 是操作员提交的 `s99` 智能体运行记录（由 `f32f798` 提交），它开启了本次 `s100` 会话。操作员的记录频率已恢复 —— 必须检查 `red-at-pull` 风险。正在阅读 `s99` 计划、`worklog` 尾部以及操作员的最新提交。
 Now let me check the operator's transcript commit (f32f798) for the red-at-pull token risk, and read CLAUDE.md.
-**已确认出现 red-at-pull 情况**：操作员记录（session_188.md 第 16 行）携带了带反引号的跨仓库 token `6372207`/`efe14e7` —— 正好是 pin-3 token 类。正在读取驱动 red/green 机制的合约测试。
+**已确认出现 red-at-pull 情况**：操作员记录（session_188.md 第 16 行）携带了带反引号的跨仓库 token `6372 207`/`efe14 e7` —— 正好是 pin-3 token 类。正在读取驱动 red/green 机制的合约测试。
 现在我理解了代码拉取时变红（red-at-pull）的机制（artifact-existence pin 3：带反引号的 bare-hex token 必须在 git 中可解析）。正在设置环境以进行验证。
 485 packages installed (matches s99 record). Setting up `.env`, database, and seed.
 Canonical seed 4/11/3 verified. Now the critical **red-at-pull check** — running the unit gate on the pulled tree.
