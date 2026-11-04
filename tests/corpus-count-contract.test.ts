@@ -100,6 +100,14 @@ const UNIT_FAMILY_SHAPES: { doc: string; re: RegExp }[] = [
   { doc: "PAD", re: /`bun run test` — (\d{2,4})\//g }, // §7.4 checklist
   { doc: "SKILL", re: /project_state: (\d{2,4}) unit/g }, // project_state
   { doc: "SKILL", re: /Vitest — (\d{2,4}) unit tests/g }, // Appendix A
+  // S104 (the P2 find, the s94 grammar-orphan genus): the SKILL §2 Tech
+  // Stack table's test rows — "| Unit tests | Vitest | <version> | N tests;"
+  // — carried the session-1-era "50 tests" for 103 sessions because the
+  // collocation matched no family grammar (a figure whose collocation
+  // matches no family grammar moves at nobody's command — the s94 lesson,
+  // the CLAUDE header-prose precedent). The grammar joins the family so
+  // the site can never drift at nobody's command again.
+  { doc: "SKILL", re: /\| Unit tests \| Vitest \| [^|]+\| (\d{2,4}) tests/g }, // §2 tech-stack row
 ];
 
 /**
@@ -170,11 +178,11 @@ function expectConsistent(
 }
 
 describe("the corpus-count consistency contract (session 48)", () => {
-  it("the unit-test count: every live claim site names ONE number (9 sites across the five docs — the stale '54' in the SKILL appendix can never return)", () => {
+  it("the unit-test count: every live claim site names ONE number (10 sites across the five docs since s104 — the stale '54' in the SKILL appendix and the session-1-era '50 tests' in its §2 tech-stack table can never return)", () => {
     // The family shapes live in UNIT_FAMILY_SHAPES (shared with the s50
     // BRIDGE pin — extracted so the two pins can never drift apart).
     const values = collectFamily(UNIT_FAMILY_SHAPES);
-    const n = expectConsistent("the unit count", values, 9);
+    const n = expectConsistent("the unit count", values, 10);
     // The current canonical (runtime-verified every session's gate): 288
     // after the s63 worklog pin 4; 291 after the s64 commands-surface pins
     // (the new tests/commands-contract.test.ts — 3 pins: the documented
@@ -273,11 +281,18 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // UNCHANGED). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
-    // fails the gate itself.
-    expect(Number(n)).toBe(354);
+    // fails the gate itself. 356 after the s104 SKILL color-token
+    // coherence extension (two pins in tests/docs-contract.test.ts: pin D
+    // — every §4.1/§19 color-token claim equals the shipped globals.css
+    // :root literal, the twelve stale slate-family values standing 95
+    // sessions behind the §19 header's own 'verified against the file'
+    // claim — + the dropped-site floor holding the s9-flipped
+    // load-bearing rows; the stale-verified-claim class, the same-file
+    // extension form, 45 files UNCHANGED).
+    expect(Number(n)).toBe(356);
   });
 
-  it("the E2E-test count: every live claim site names ONE number (11 sites since s95 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
+  it("the E2E-test count: every live claim site names ONE number (12 sites since s104 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) and the s104 §2 row joined after its 103-session grammar-orphan drift (11→12) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
     const values = collectFamily([
       { doc: "README", re: /%2B%20(\d{2,4})%20E2E/g }, // the badge
       { doc: "README", re: /(\d{2,4}) Playwright E2E tests/g }, // verification
@@ -294,8 +309,14 @@ describe("the corpus-count consistency contract (session 48)", () => {
       // one live E2E claim site the family never covered. Added so the
       // drift class can never return.
       { doc: "PAD", re: /`bun run test:e2e` — (\d{2,4})\//g }, // the §7.4 checklist
+      // S104 (the P2 find, the s94 grammar-orphan genus): the SKILL §2
+      // tech-stack E2E row — "| E2E tests | Playwright (Chromium) |
+      // <version> | N tests;" — carried the session-1-era "46 tests" for
+      // 103 sessions; the grammar joins the family (the same closure as
+      // the unit-side §2 row above).
+      { doc: "SKILL", re: /\| E2E tests \| Playwright \(Chromium\) \| [^|]+\| (\d{2,4}) tests/g }, // §2 tech-stack row
     ]);
-    const n = expectConsistent("the E2E count", values, 11);
+    const n = expectConsistent("the E2E count", values, 12);
     expect(Number(n)).toBe(233);
   });
 

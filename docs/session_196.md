@@ -3,7 +3,7 @@ The core docs are massive (300KB–1.1MB each). I'll read the recent session doc
 Now let me check the worklog tail and key facts from the big docs.
 I now understand the project state. This is session 103 (s103) of a long-running remediation project. The operator's transcript (session_194.md) was committed at the tip. Let me check for the known "red-at-pull" pattern and set up the environment.
 Canonical seed 4/11/3 ✓. Now the critical **red-at-pull check** — running the unit gate on the pulled tree:
-**RED-AT-PULL CONFIRMED — the era's twenty-fifth.** 352/353: pin 3 caught `` `efe14e7` `` in session_194.md line 9 (the operator's transcript carrying the cross-repo neo-crm token — the standing s84+ class). Applying the standing de-grammar edit (byte-spaced form):
+**RED-AT-PULL CONFIRMED — the era's twenty-fifth.** 352/353: pin 3 caught `` `efe14 e7` `` in session_194.md line 9 (the operator's transcript carrying the cross-repo neo-crm token — the standing s84+ class). Applying the standing de-grammar edit (byte-spaced form):
 **353/353 GREEN** — red window closed locally. Now the calibrated CI read on the tip (fa686d7):
 **MAIN IS RED AT PULL — run #41736208034 on fa686d7 FAILED (both controls correct).** Let me verify the failure is the known operator-transcript class, not something new:
 The e2e job was skipped (`needs: verify`) — the verify job failed at Unit tests, the known operator-transcript class. **The s103 push must RETURN main to green (the era's twenty-fifth red-at-pull).**

@@ -263,3 +263,158 @@ describe("the PAD §6.4 threat-model coherence pins (session 100)", () => {
     ).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Session 104 — the SKILL color-token coherence pin (pin D: the
+// stale-verified-claim class — a doc's "verified against the file" claim
+// whose verification outlived the file's own measured change)
+//
+// Contract under test: the service-desk_SKILL.md — the doc whose Purpose
+// line claims "a single-source-of-truth reference for any coding agent
+// working on this codebase" — carried TWELVE stale hex values across its
+// two token-claim sites (§4.1's Token-architecture excerpt + §19's Color
+// Reference table) while §19's own header said "verified against the
+// file". The dating (git history): the stale slate-family values
+// (#f8fafc/#0f172a/#f1f5f9/#e2e8f0/#64748b…) date from the session-2-era
+// SKILL; the session-9 token diff (the "stock shadcn token block" commit)
+// rewrote src/app/globals.css to the reference's measured stock-zinc
+// family AND updated the doc surfaces where the flipped tokens render
+// (CLAUDE's Tailwind section, README's Design System table, the PAD §5.2,
+// and the SKILL's own --primary/--ring rows) — but the SKILL's excerpt
+// and the render-nowhere rows (the file's own comment: "the remaining
+// stock flips render nowhere today — kept in stock parity so a future
+// component cannot silently reintroduce the divergence") kept the
+// pre-s9 slate values. The drift stood 95 sessions (s9→s104) while every
+// gate stayed green: no pin family reads doc-side color claims against
+// the code-side tokens.
+//
+// The teeth: an agent theming a new component from the
+// single-source-of-truth doc would reintroduce exactly the
+// slate-vs-zinc divergence the s9 closure deliberately foreclosed.
+//
+// Pin style: bidirectional doc↔code coherence (the s100 two-sided form):
+//   1. doc→code: every `--token: #hex` claim the SKILL makes (in §4.1's
+//      fenced excerpt and §19's table) must equal the globals.css :root
+//      light value for that token — either drift direction bites, forcing
+//      same-commit lockstep;
+//   2. the dropped-site floor: the load-bearing flipped rows (the s9
+//      token-diff set the §19 table documents) must still exist in the
+//      table — deleting the rows to dodge the coherence check fails
+//      loudly (the dropped-site doctrine).
+//
+// Deliberate scope: the SKILL's table is SELECTIVE (it documents a subset
+// of the file's tokens — popover/secondary-foreground/sidebar-accent etc.
+// render nowhere and are not documented); the pin holds coherence for
+// every claim the doc DOES make, never enumeration completeness of the
+// file (the s48 lesson: pin the claims, not the universe). The dark
+// block is out of scope by the table's own header ("light palette").
+// ---------------------------------------------------------------------------
+
+describe("the SKILL color-token coherence contract (session 104)", () => {
+  /** Parse the globals.css :root (light) block into a token→hex map. */
+  function globalsRootLight(): Map<string, string> {
+    const css = readFileSync(path.join(repoRoot, "src", "app", "globals.css"), "utf8");
+    const start = css.indexOf(":root {");
+    if (start < 0) throw new Error("globals.css must carry the :root block");
+    const rest = css.slice(start + ":root {".length);
+    const end = rest.indexOf("}");
+    if (end < 0) throw new Error("the :root block must close");
+    const block = rest.slice(0, end);
+    const map = new Map<string, string>();
+    for (const m of block.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})/g)) {
+      map.set(m[1], m[2].toLowerCase());
+    }
+    if (map.size < 20) {
+      throw new Error(`the :root block must carry at least 20 literal-hex tokens — found ${map.size} (the literal-hex rule is load-bearing: no var() chains, no oklch)`);
+    }
+    return map;
+  }
+
+  /**
+   * Extract the SKILL's token→hex claims as PER-SITE tuples (a site that
+   * re-plants a stale value must bite even when the other site is
+   * correct — a Map keyed by token would let §19's claim shadow §4.1's
+   * and the shadowed stale value would pass silently, the exact
+   * lenient-read trap the pin exists to close). Two site shapes:
+   *   §4.1's fenced excerpt: `--token: #hex;` pairs;
+   *   §19's table rows: | `--token` | `#hex` | … (compound rows carry a
+   *   second `--token: #hex` inline in the value cell).
+   */
+  function skillTokenClaims(): { site: string; token: string; hex: string }[] {
+    const skill = readFileSync(path.join(repoRoot, "service-desk_SKILL.md"), "utf8");
+    const claims: { site: string; token: string; hex: string }[] = [];
+    // §4.1: the Token-architecture fenced block (§4.1 through the end of
+    // its first fence — the excerpt ends before §4.2).
+    const s41Start = skill.indexOf("### 4.1 Token architecture");
+    if (s41Start < 0) throw new Error("the SKILL must carry the §4.1 Token architecture heading (a dropped section fails loudly)");
+    const s41End = skill.indexOf("### 4.2", s41Start);
+    const s41 = skill.slice(s41Start, s41End > s41Start ? s41End : s41Start + 4000);
+    for (const m of s41.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})/g)) {
+      claims.push({ site: "§4.1", token: m[1], hex: m[2].toLowerCase() });
+    }
+    // §19: the Color Reference table (the heading through the next ##).
+    const s19Start = skill.indexOf("## 19. Color Reference");
+    if (s19Start < 0) throw new Error("the SKILL must carry the §19 Color Reference heading (a dropped section fails loudly)");
+    const s19End = skill.indexOf("\n## ", s19Start + 1);
+    const s19 = skill.slice(s19Start, s19End > s19Start ? s19End : s19Start + 6000);
+    for (const line of s19.split("\n")) {
+      if (!line.startsWith("| `--")) continue;
+      // Compound rows: every `--name` is followed (before the next
+      // `--name`) by the first #hex in between.
+      const parts = line.split(/(?=`--)/);
+      for (const part of parts) {
+        const tok = /^`?--([a-z0-9-]+)/.exec(part.replace(/^\|\s*/, ""));
+        if (!tok) continue;
+        const hex = /#([0-9a-fA-F]{6})/.exec(part);
+        if (hex) claims.push({ site: "§19", token: tok[1], hex: `#${hex[1].toLowerCase()}` });
+      }
+    }
+    if (claims.length < 10) {
+      throw new Error(`the SKILL's token-claim sites must carry at least 10 claims — found ${claims.length} (§4.1 + §19 are the single-source-of-truth doc's color surface)`);
+    }
+    return claims;
+  }
+
+  it("pin D: every SKILL color-token claim equals the globals.css :root value — the twelve stale slate-family values (the 95-session drift the §19 header's own 'verified against the file' claim laundered) can never return", () => {
+    const file = globalsRootLight();
+    const claims = skillTokenClaims();
+    const offenders: string[] = [];
+    for (const { site, token, hex } of claims) {
+      const actual = file.get(token);
+      if (actual === undefined) {
+        offenders.push(`--${token} (${hex}, ${site}): no such token in globals.css :root`);
+      } else if (actual !== hex) {
+        offenders.push(`--${token} (${site}): SKILL claims ${hex}, globals.css ships ${actual}`);
+      }
+    }
+    expect(
+      offenders,
+      "every color-token claim in the SKILL (§4.1's excerpt + §19's table) must equal the shipped globals.css :root value — the doc's 'verified against the file' header is a claim, and a claim that outlives the file's own change is the s9→s104 drift class (an agent theming from the single-source-of-truth doc would reintroduce the slate-vs-zinc divergence the s9 closure foreclosed)",
+    ).toEqual([]);
+  });
+
+  it("pin D floor: the SKILL §19 table still documents the s9-flipped load-bearing rows — deleting the rows to dodge the coherence check fails loudly (the dropped-site doctrine)", () => {
+    const claims = skillTokenClaims();
+    // The s9 token-diff set the §19 table documents: the tokens whose
+    // stock-zinc values the session-9 diff established (and whose stale
+    // slate forms the s104 fix swept).
+    const loadBearing = [
+      "background",
+      "foreground",
+      "card-foreground",
+      "sidebar-foreground",
+      "primary-foreground",
+      "secondary",
+      "muted",
+      "muted-foreground",
+      "accent",
+      "border",
+    ];
+    const s19Tokens = new Set(claims.filter((c) => c.site === "§19").map((c) => c.token));
+    const missing = loadBearing.filter((t) => !s19Tokens.has(t));
+    expect(
+      missing,
+      "the SKILL §19 Color Reference table must keep documenting the s9-flipped load-bearing tokens — a dropped row shrinks the doc's color surface silently (the dropped-site doctrine: the coherence pin guards the rows that EXIST, this floor guards that they exist)",
+    ).toEqual([]);
+  });
+});
