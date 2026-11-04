@@ -9,8 +9,16 @@ function Label({ className, ...props }: React.ComponentProps<typeof LabelPrimiti
   return (
     <LabelPrimitive.Root
       data-slot="label"
+      // The reference's shared Label class set (measured on its label chunk:
+      // `text-sm font-medium leading-none peer-disabled:cursor-not-allowed
+      // peer-disabled:opacity-70` — no display-changing class). The stock
+      // shadcn form carried `flex items-center gap-2`, which renders the
+      // label block-level and ignores the container's text-align — the
+      // s103 login label-alignment parity fix: the label must inherit the
+      // container's alignment (centered on the login card, left on the
+      // submit form), byte-parity with the reference's rendering.
       className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         className,
       )}
       {...props}

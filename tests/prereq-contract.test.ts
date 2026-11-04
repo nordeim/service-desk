@@ -176,4 +176,30 @@ describe("the prerequisites contract (session 102 — the fresh-clone E2E-browse
       "the AGENTS commands row for test:e2e must name the one-time fresh-clone browser bootstrap (`bunx playwright install chromium`) — the commands table is the agent-facing prerequisites surface; the silent 'requires a prior build' clause is the exact drift class this pin closes",
     ).toBe(true);
   });
+
+  // -------------------------------------------------------------------------
+  // Session 103 — pin C: the SKILL's own E2E-prerequisite site (the fifth
+  // doc site of the s102 fresh-clone class — the s102 closure fixed four
+  // sites and pinned two, but the service-desk_SKILL.md §11 Pre-Ship
+  // Checklist — the doc whose purpose line claims single-source-of-truth
+  // status and whose §11 header says "every commit" — still named EXACTLY
+  // ONE prerequisite at its test:e2e claim site ("needs the prior build"),
+  // the same silent claim the s102 audit closed everywhere else. The
+  // single-source-of-truth doc is the WORST place for the drift class: it
+  // is the first doc a new agent is told to read.
+  // -------------------------------------------------------------------------
+  it("pin C: the SKILL §11 pre-ship checklist names the one-time fresh-clone browser bootstrap at its test:e2e claim site (the single-source-of-truth doc cannot carry the silent prerequisite)", () => {
+    const skill = readFileSync(path.join(repoRoot, "service-desk_SKILL.md"), "utf8");
+    // The §11 Pre-Ship Checklist's bash block: the test:e2e row.
+    const e2eIdx = skill.indexOf("bun run test:e2e");
+    expect(e2eIdx, "the SKILL §11 pre-ship checklist must carry the test:e2e command (a dropped E2E claim site fails loudly — the dropped-site doctrine)").toBeGreaterThanOrEqual(0);
+    // The claim window: the test:e2e row through the next command row (the
+    // same fenced block — the checklist's own gate list).
+    const windowEnd = skill.indexOf("bash scripts/smoke-test.sh", e2eIdx);
+    const claimWindow = skill.slice(e2eIdx, windowEnd > e2eIdx ? windowEnd : e2eIdx + 2000);
+    expect(
+      /bunx playwright install chromium/.test(claimWindow),
+      "the SKILL §11 pre-ship checklist's test:e2e site must name the one-time fresh-clone browser bootstrap (`bunx playwright install chromium`) — the s102 closure fixed the README/AGENTS/CLAUDE/PAD sites but missed the SKILL's own checklist; a single-source-of-truth doc that names only 'the prior build' re-opens the fresh-clone drift class for every agent that trusts it (the 51-session drift's own genus, the fifth site)",
+    ).toBe(true);
+  });
 });

@@ -274,7 +274,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
     // fails the gate itself.
-    expect(Number(n)).toBe(353);
+    expect(Number(n)).toBe(354);
   });
 
   it("the E2E-test count: every live claim site names ONE number (11 sites since s95 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
@@ -296,7 +296,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "PAD", re: /`bun run test:e2e` — (\d{2,4})\//g }, // the §7.4 checklist
     ]);
     const n = expectConsistent("the E2E count", values, 11);
-    expect(Number(n)).toBe(232);
+    expect(Number(n)).toBe(233);
   });
 
   it("the parity-pins count: README's feature-table claim matches CLAUDE's measured figure (the '163 vs 164' partial-update drift closed)", () => {
@@ -311,7 +311,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "CLAUDE", re: /visual-parity\.spec\.ts` \((\d{2,4}) tests\)/g },
     ]);
     const n = expectConsistent("the parity count", values, 3);
-    expect(Number(n)).toBe(164);
+    expect(Number(n)).toBe(165);
   });
 
   it("the smoke-steps count: every live claim site names ONE number (5 sites — the stale '11-step' in the SKILL appendix can never return; the s92 bridge: the script's own SMOKE_EXPECTED literal joined the family)", () => {

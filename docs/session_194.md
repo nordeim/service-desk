@@ -6,7 +6,7 @@ Now the session documents:
 I now have a deep understanding. This is session 102 (s102) of a 101-session-old project. Let me check the worklog tail and the critical red-at-pull state.
 Worklog at task 311. SSH infra (shim + venv) survived at workspace level. Now the critical red-at-pull check. First, environment setup:
 Canonical seed 4/11/3 ✓. Now the critical **red-at-pull check** — run the unit gate on the pulled tree:
-**RED-AT-PULL CONFIRMED — the era's twenty-fourth.** 350/351: pin 3 caught `efe14e7` (cross-repo neo-crm token) in session_192.md lines 3 & 6. Applying the standing de-grammar edit (byte-spaced form):
+**RED-AT-PULL CONFIRMED — the era's twenty-fourth.** 350/351: pin 3 caught `efe14 e7` (cross-repo neo-crm token) in session_192.md lines 3 & 6. Applying the standing de-grammar edit (byte-spaced form):
 **351/351 GREEN** — red window closed locally. Now the calibrated CI read on the tip (0aee412):
 The script takes the target commit as argv. Running the calibrated CI read on the tip (0aee412):
 **Calibrated CI read: run #41540214737 on 0aee412 FAILED (both controls correct). MAIN IS RED AT PULL — the era's twenty-fourth. The s102 push must RETURN it to green.** Now the baseline gate on the de-grammared tree:

@@ -2911,3 +2911,58 @@ test.describe("session 18: the favicon asset truth (the s17 doctrine extended to
     expect(magic, "PNG magic bytes on the favicon body").toBe("89504e470d0a1a0a");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Session-103 contracts (docs/remediation-plan-session103.md) — the login
+// label-alignment parity fix. The reference's shared Label component renders
+// display: inline (measured on the reference DOM: the plain label chunk's
+// class set `text-sm font-medium leading-none peer-disabled:cursor-not-allowed
+// peer-disabled:opacity-70` — no display-changing class), so the label box
+// hugs its text and the login form container's text-align: center centers it
+// (their Email label measured x=621 w=39 against the input x=456 w=368 —
+// both centered at ~640). Our stock shadcn label carried
+// `flex items-center gap-2` — a block-level box spanning the input's full
+// width with its content packed at flex-start, ignoring the container's
+// centering (measured x=456 w=368, left-aligned). The s102 login-pair VLM
+// read laundered the standing diff as LAYOUT-OK; the s103 login-pair
+// trigger (the era's 23rd login-CSS rotation) re-verified the pairs with
+// fresh eyes and caught it — the fix moves the shared primitive to the
+// reference's exact class form.
+// ---------------------------------------------------------------------------
+
+test.describe("session 103: the shared-Label rendering contract (the login label-alignment parity fix)", () => {
+  test("the login form's labels render the reference's inline form — centered over their inputs, not flex-stretched", async ({ page }) => {
+    await page.goto("/login");
+
+    for (const field of ["email", "password"]) {
+      const label = page.locator(`label[for=${field}]`);
+      await expect(label).toHaveCount(1);
+
+      // The shared-Label display contract: inline, like the reference —
+      // a flex label is block-level, spans the input's full width, and
+      // packs its content at flex-start (the container's text-align
+      // centering ignored).
+      const display = await label.evaluate((el) => getComputedStyle(el).display);
+      expect(
+        display,
+        `the ${field} label must render display: inline (the reference's shared-Label form — the stock shadcn \`flex items-center\` label is block-level and renders left-aligned inside the reference's centered login card)`,
+      ).toBe("inline");
+
+      // The centering contract: the label's horizontal center aligns with
+      // its input's horizontal center (the reference's measured geometry:
+      // label ~640.5 vs input ~640 on the 1280 viewport).
+      const centers = await label.evaluate((el) => {
+        const input = document.getElementById(el.getAttribute("for") ?? "");
+        if (!input) return null;
+        const lr = el.getBoundingClientRect();
+        const ir = input.getBoundingClientRect();
+        return { labelCenter: lr.x + lr.width / 2, inputCenter: ir.x + ir.width / 2 };
+      });
+      expect(centers, `the ${field} label must resolve its paired input`).not.toBeNull();
+      expect(
+        Math.abs(centers!.labelCenter - centers!.inputCenter),
+        `the ${field} label's center must align with its input's center (the reference's centered-over-input contract — the label inherits the container's text-align: center)`,
+      ).toBeLessThan(2);
+    }
+  });
+});
