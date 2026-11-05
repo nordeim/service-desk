@@ -2966,3 +2966,56 @@ test.describe("session 103: the shared-Label rendering contract (the login label
     }
   });
 });
+
+test.describe("session 106: the desktop sidebar panel contract (the wrong-at-birth closure)", () => {
+  test("the desktop sidebar panel renders the reference's flat #fafafa background (the laundered gradient show-through closed)", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    // The gap div IS the panel after the s106 fix (the stock/reference
+    // `flex h-full w-full flex-col bg-sidebar` classes landed on it): the
+    // reference's own panel measured live at exactly #fafafa
+    // (rgb(250,250,250)) flat at every probed point — while the pre-fix
+    // transparent gap div let the app-wide page gradient show through
+    // (pixels (251,252,253)→(253,253,254), the laundered standing diff
+    // every lenient VLM pass recorded LAYOUT-OK over).
+    const panel = page.locator("[data-sidebar=gap]");
+    await expect(panel).toHaveCSS("background-color", "rgb(250, 250, 250)");
+  });
+
+  test("the desktop nav buttons stay inside the sidebar border (the 24px overflow closed — the panel's w-full geometry)", async ({ page }) => {
+    await page.goto("/dashboard");
+
+    // The reference's own geometry (live-measured): the panel w-full of the
+    // 256px container minus the 1px border = 255px; the nav buttons 215px
+    // wide with the right edge at x=235 — 20px of breathing room inside the
+    // panel. The pre-fix form: the gap div content-sized at 299.625px, the
+    // buttons 260px with the right edge at x=280 — 24px PAST the border,
+    // the active item's cyan→blue gradient painting into the main content
+    // strip (and the invisible 300px structure capturing main-content
+    // clicks via elementFromPoint).
+    const edges = await page.evaluate(() => {
+      const btn = document.querySelector("[data-sidebar=menu-button]");
+      const panel = document.querySelector("[data-sidebar=gap]");
+      const container = document.querySelector("[data-slot=sidebar]");
+      if (!btn || !panel || !container) return null;
+      const b = btn.getBoundingClientRect();
+      const p = panel.getBoundingClientRect();
+      const c = container.getBoundingClientRect();
+      return {
+        btnRight: b.x + b.width,
+        panelWidth: p.width,
+        containerRight: c.x + c.width,
+      };
+    });
+    expect(edges, "the sidebar panel/button/container elements must resolve").not.toBeNull();
+    expect(Math.round(edges!.panelWidth), "the panel is w-full of the container minus the 1px border — the reference's 255px panel").toBe(255);
+    expect(
+      edges!.btnRight,
+      "the first nav button's right edge must stay inside the sidebar border (the reference's own button right edge: 235, inside its 255px panel — the pre-fix form crossed the border by 24px)",
+    ).toBeLessThanOrEqual(edges!.containerRight);
+    expect(
+      Math.round(edges!.btnRight),
+      "the reference's own button bounds (the 215px button, right edge 235 — the panel's w-full constraining the flex column's content sizing)",
+    ).toBe(235);
+  });
+});

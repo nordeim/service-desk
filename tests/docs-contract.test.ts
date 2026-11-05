@@ -601,3 +601,181 @@ describe("the SKILL color-reference completeness + dark-palette contract (sessio
     ).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Session 106 — the sidebar-panel + PAD-inline-figure coherence pins
+// (the wrong-at-birth class: the desktop sidebar's inner structure shipped
+// mangled at the initial commit — the stock/reference panel classes
+// (`flex h-full w-full flex-col bg-sidebar`) replaced by a bare
+// `h-full flex flex-col` gap div — and stood 105 sessions with every gate
+// green: the background face (the page gradient showing through the
+// transparent panel where the reference renders its flat #fafafa), the
+// geometry face (the content-sized 299.625px column overflowing the 256px
+// container — the nav buttons crossing the border by 24px), and the
+// interaction face (elementFromPoint beyond the border hitting sidebar
+// group-content divs) were all invisible to every pin family: no gate read
+// the panel background, the panel width, or the button bounds.
+//
+// Pin style: the s100 two-surface form (doc claim ↔ shipped code) for the
+// panel; the inline-figure live-value form for the PAD §7.1 rows; the
+// named-file floor form for the PAD §3.2 tree.
+// ---------------------------------------------------------------------------
+
+const sidebarSource = readFileSync(
+  path.join(repoRoot, "src", "components", "ui", "sidebar.tsx"),
+  "utf8",
+);
+const skillDoc = readFileSync(path.join(repoRoot, "service-desk_SKILL.md"), "utf8");
+
+describe("the sidebar-panel + PAD coherence pins (session 106)", () => {
+  it("pin F: the SKILL §4.3 sidebar-panel row is coherent at BOTH surfaces — the row names the #fafafa/255px panel AND the shipped gap div carries the panel classes (the wrong-at-birth mangled structure can never return)", () => {
+    // Doc side: the §4.3 parity table must carry the sidebar panel row
+    // naming the reference's measured panel (the flat #fafafa + the 255px
+    // width) — and its Where-pinned cell must name a REAL standing pin,
+    // never the session-era "computed-style probe" that read nothing.
+    const row = skillDoc
+      .split("\n")
+      .find((l) => l.startsWith("| Sidebar panel background"));
+    expect(
+      row,
+      "the SKILL §4.3 parity table must carry the 'Sidebar panel background' row (the dropped-site doctrine — the row is the doc surface of the s106 closure)",
+    ).toBeTruthy();
+    expect(
+      row as string,
+      "the §4.3 sidebar row must name the flat #fafafa panel + the 255px width (the reference's own live-measured panel: rgb(250,250,250) uniform, w-full of the 256px container minus the 1px border)",
+    ).toMatch(/#fafafa/);
+    expect(
+      row as string,
+      "the §4.3 sidebar row must name the 255px panel width (the reference's measured geometry)",
+    ).toMatch(/255px/);
+    expect(
+      row as string,
+      "the §4.3 sidebar row's Where-pinned cell must name the session-106 E2E pins (the visual-parity session-106 block) — the pre-fix 'computed-style probe' named a session-era probe that read nothing, the s104 false-verification class",
+    ).toMatch(/session 106|s106/i);
+
+    // Code side: the shipped gap div must carry the panel classes — the
+    // stock/reference `w-full` (the width constraint: without it the flex
+    // column sizes content-driven at its min-content and overflows the
+    // 256px container — the measured 299.625px form) + `bg-sidebar` (the
+    // flat #fafafa panel over the app-wide gradient wrapper).
+    const gapLine = sidebarSource
+      .split("\n")
+      .find((l) => l.includes('data-sidebar="gap"'));
+    expect(
+      gapLine,
+      "sidebar.tsx's desktop branch must carry the data-sidebar=\"gap\" div (the panel carrier after the s106 fix)",
+    ).toBeTruthy();
+    expect(
+      (gapLine as string).includes("w-full"),
+      "the gap div must carry w-full — the panel's width constraint (the pre-fix bare h-full flex flex-col let the column size content-driven at 299.625px, overflowing the 256px container and pushing the nav buttons 24px past the border)",
+    ).toBe(true);
+    expect(
+      (gapLine as string).includes("bg-sidebar"),
+      "the gap div must carry bg-sidebar — the flat #fafafa panel (the pre-fix transparent form let the app-wide page gradient show through where the reference renders its flat panel)",
+    ).toBe(true);
+  });
+
+  it("pin G: the PAD §7.1's corpus-count + plan-status row descriptions carry the LIVE figures — the family floors (10/12/3/5) + the live plan corpus floor, the stale inline figures can never return", () => {
+    // The live values the rows must name (read from the shipped constants,
+    // never re-hardcoded here twice): the corpus-count family floors and
+    // the plan-status corpus floor.
+    const corpusCount = readFileSync(
+      path.join(repoRoot, "tests", "corpus-count-contract.test.ts"),
+      "utf8",
+    );
+    const planStatus = readFileSync(
+      path.join(repoRoot, "tests", "plan-status-contract.test.ts"),
+      "utf8",
+    );
+    const unitFloor = Number(
+      corpusCount.match(/expectConsistent\("the unit count", values, (\d+)\)/)?.[1],
+    );
+    const e2eFloor = Number(
+      corpusCount.match(/expectConsistent\("the E2E count", values, (\d+)\)/)?.[1],
+    );
+    const parityFloor = Number(
+      corpusCount.match(/expectConsistent\("the parity count", values, (\d+)\)/)?.[1],
+    );
+    const smokeFloor = Number(
+      corpusCount.match(/expectConsistent\("the smoke count", values, (\d+)\)/)?.[1],
+    );
+    const planFloor = Number(
+      planStatus.match(/const PLAN_CORPUS_FLOOR = (\d+);/)?.[1],
+    );
+    expect(
+      [unitFloor, e2eFloor, parityFloor, smokeFloor, planFloor].every((n) => n > 0),
+      "the live floor constants must resolve (a renamed constant is a grammar failure, never a pass)",
+    ).toBe(true);
+
+    // Doc side: the PAD §7.1 corpus-count row's description must name the
+    // live family floors — the s55/s92-era stale figures ("9 sites"/"10"/
+    // "4", the row's own smoky sibling at row 502 saying "FIFTH live claim
+    // site") were the unmeasured prose surface.
+    const corpusRow = padLive
+      .split("\n")
+      .find((l) => l.includes("s48 corpus-count consistency pins"));
+    expect(
+      corpusRow,
+      "the PAD §7.1 must carry the s48 corpus-count row (the dropped-site doctrine)",
+    ).toBeTruthy();
+    expect(
+      corpusRow as string,
+      `the corpus-count row's description must name the LIVE family floors: unit (${unitFloor} sites) / e2e (${e2eFloor}) / parity (${parityFloor}) / smoke-steps (${smokeFloor}) — the stale '9 sites'/'10'/'4' inline figures contradicted both the shipped constants and the PAD's own row 502`,
+    ).toMatch(new RegExp(`unit \\(${unitFloor} sites\\) / e2e \\(${e2eFloor}\\) / parity \\(${parityFloor}\\) / smoke-steps \\(${smokeFloor}\\)`));
+
+    // Doc side: the PAD §7.1 plan-status row's description must name the
+    // live corpus floor — the s55-era "53" stood through 49 corpus moves.
+    const planRow = padLive
+      .split("\n")
+      .find((l) => l.includes("s55 plan-status pins"));
+    expect(
+      planRow,
+      "the PAD §7.1 must carry the s55 plan-status row (the dropped-site doctrine)",
+    ).toBeTruthy();
+    expect(
+      planRow as string,
+      `the plan-status row's description must name the LIVE corpus floor (${planFloor}) — the stale 'corpus floor 53' stood 49 corpus moves un-read`,
+    ).toMatch(new RegExp(`corpus floor ${planFloor}`));
+  });
+
+  it("pin H: the PAD §3.2 directory tree names the load-bearing surfaces — the s33 catch-all route, the head-facing assets, the ticket-details-view, the three src/lib seams, and the e2e census specs (the stale session-1 snapshot can never return)", () => {
+    // The §3.2 tree slice (the code block between the §3.2 heading and the
+    // next ### heading).
+    const treeStart = padLive.indexOf("### 3.2 Annotated Directory Structure");
+    const treeEnd = padLive.indexOf("###", treeStart + 10);
+    expect(treeStart, "the PAD must carry the §3.2 heading").toBeGreaterThanOrEqual(0);
+    const tree = padLive.slice(treeStart, treeEnd);
+
+    // The load-bearing entries the tree must name — each one pinned
+    // elsewhere in the corpus (the §6.1/§7.1 rows lean on them), each one
+    // missing from the session-1 snapshot.
+    const mustName: { entry: string; why: string }[] = [
+      { entry: "[[...path]]/route.ts", why: "the s33 catch-all 404 contract — the PAD's own §6.1/§7.1 rows lean on it" },
+      { entry: "sitemap.ts", why: "the head-facing SEO asset (route-head pinned)" },
+      { entry: "robots.ts", why: "the head-facing SEO asset" },
+      { entry: "manifest.json/route.ts", why: "the PWA manifest surface (s11)" },
+      { entry: "not-found.tsx", why: "the designed 404 page (s4)" },
+      { entry: "ticket-details-view.tsx", why: "the detail surface's client view" },
+      { entry: "api-methods.ts", why: "the src/lib seam (pinned by api-methods.test.ts)" },
+      { entry: "redirect.ts", why: "the src/lib seam (the s100 pin B surface)" },
+      { entry: "route-head.ts", why: "the src/lib seam (route-head.test.ts)" },
+      { entry: "a11y.spec.ts", why: "the e2e census spec (s89)" },
+      { entry: "touch-floor.spec.ts", why: "the e2e census spec (s90)" },
+      { entry: "visible-focus.spec.ts", why: "the e2e census spec (s91)" },
+      { entry: "visual-parity.spec.ts", why: "the e2e parity spec (165→167 tests)" },
+    ];
+    const missing = mustName.filter(({ entry }) => !tree.includes(entry)).map(({ entry, why }) => `${entry} (${why})`);
+    expect(
+      missing,
+      "the PAD §3.2 tree must name every load-bearing surface — the session-1 snapshot missed the s33 catch-all route, the head-facing assets, the census specs, and the pinned src/lib seams while §7.1 correctly tabulated them (the SIZE/ENUMERATION shape swept by no pin — the s106 P2b closure)",
+    ).toEqual([]);
+
+    // The tree must also name the CURRENT structure shape, not the
+    // session-1 4-file listing: the standing check-*.py helpers the PAD
+    // itself cites elsewhere.
+    expect(
+      tree.includes("check-worklog.py") || /check-\*\.py|check-\{worklog/.test(tree),
+      "the §3.2 scripts/ block must name the standing check-*.py helpers (the 881-file scripts/ surface — the session-1 snapshot named 4 files)",
+    ).toBe(true);
+  });
+});

@@ -281,7 +281,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // UNCHANGED). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
-    // fails the gate itself. 359 after the s105 color-reference
+    // fails the gate itself. 362 after the s106 sidebar-panel
     // completeness + dark-palette coherence extension (three pins in
     // tests/docs-contract.test.ts: pin E — the §19 light-table set
     // equality both directions, the '(Complete)' title held to its word;
@@ -290,7 +290,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // pin P2 — the muted render-claim two-surface coherence; the
     // unmeasured-surface class, the same-file extension form, 45 files
     // UNCHANGED).
-    expect(Number(n)).toBe(359);
+    expect(Number(n)).toBe(362);
   });
 
   it("the E2E-test count: every live claim site names ONE number (12 sites since s104 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) and the s104 §2 row joined after its 103-session grammar-orphan drift (11→12) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
@@ -318,7 +318,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "SKILL", re: /\| E2E tests \| Playwright \(Chromium\) \| [^|]+\| (\d{2,4}) tests/g }, // §2 tech-stack row
     ]);
     const n = expectConsistent("the E2E count", values, 12);
-    expect(Number(n)).toBe(233);
+    expect(Number(n)).toBe(235);
   });
 
   it("the parity-pins count: README's feature-table claim matches CLAUDE's measured figure (the '163 vs 164' partial-update drift closed)", () => {
@@ -333,7 +333,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
       { doc: "CLAUDE", re: /visual-parity\.spec\.ts` \((\d{2,4}) tests\)/g },
     ]);
     const n = expectConsistent("the parity count", values, 3);
-    expect(Number(n)).toBe(165);
+    expect(Number(n)).toBe(167);
   });
 
   it("the smoke-steps count: every live claim site names ONE number (5 sites — the stale '11-step' in the SKILL appendix can never return; the s92 bridge: the script's own SMOKE_EXPECTED literal joined the family)", () => {

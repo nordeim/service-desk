@@ -7,10 +7,10 @@ Now the state is clear:
 - `9ad3015` — **operator's new commit** (heinazhik, Nov 4 12:55 +0800): added `docs/session_198.md` (127 lines) — the s104 operator transcript
 
 So the s104 cycle is fully closed on the remote, the operator has posted the s104 transcript, and this instruction — referencing session_197/plan-104/worklog/session_198 — is the **s105 session kickoff**. Let me set up the todo plan and read the key docs.
-`session_198.md` is the operator's s104 transcript — it confirms s104 fully closed (both CI runs green, keys shredded) and points to s105 duties in `session_197.md`. I can also see the s84 token class (`efe14e7`) at line 10 of the transcript — the expected red-at-pull #27 seed. Let me read the s105 duties, worklog tail, and plan-104 §6.
+`session_198.md` is the operator's s104 transcript — it confirms s104 fully closed (both CI runs green, keys shredded) and points to s105 duties in `session_197.md`. I can also see the s84 token class (`efe14 e7`) at line 10 of the transcript — the expected red-at-pull #27 seed. Let me read the s105 duties, worklog tail, and plan-104 §6.
 I now have the full s105 duties picture from session_197.md's tail:
 
-1. **Red-at-pull #27 expected**: pin 3 catching `efe14e7` at session_198.md line 10 (the operator's cadence continued)
+1. **Red-at-pull #27 expected**: pin 3 catching `efe14 e7` at session_198.md line 10 (the operator's cadence continued)
 2. **Paired bump**: CURRENT_SESSION 104→105 (both contract files) + PLAN_CORPUS_FLOOR 103→104
 3. **87th parity sweep** — 70th-wave watch (entry 6xnUqbWf 200/100538, CSS BVWWKVEJ 200/917016)
 4. **Own-side audit → a NEW axis or honest minor** (s104 closed the color-token coherence axis)
@@ -21,11 +21,11 @@ Repo layout is flat (src/ at root, db/ at root), bun 1.3.14 available. Now the b
 Install complete (485 packages). Now the .env with a fresh AUTH_SECRET, db push + seed (canonical 4/11/3), and playwright browsers.
 Canonical seed restored (4/11/3). Now playwright browsers and the critical **red-at-pull observation** — running the unit suite on the pulled tree:
 Browser landed. Now the **red-at-pull check** — the unit gate on the pulled tree:
-**RED-AT-PULL CONFIRMED — the era's TWENTY-SEVENTH.** 355/356: pin 3 caught `efe14e7` in session_198.md at lines 10 **and** 12 (two sites this window). Applying the standing de-grammar edit (byte-spaced form):
+**RED-AT-PULL CONFIRMED — the era's TWENTY-SEVENTH.** 355/356: pin 3 caught `efe14 e7` in session_198.md at lines 10 **and** 12 (two sites this window). Applying the standing de-grammar edit (byte-spaced form):
 Both sites de-grammared. Re-running the unit gate, then the calibrated CI read on tip `9ad3015`:
 **356/356 GREEN** — local red window closed. Now the calibrated CI read (controls first, then the tip's run):
 The script is target-parameterized. Running the calibrated read for tip `9ad3015`:
-**MAIN RED AT PULL — run #41776072380 on `9ad3015` FAILED** (both controls read correctly first). The era's **twenty-seventh** red-at-pull, the known operator-transcript class (pin 3, the two `efe14e7` sites — the local de-grammar edit already closed the local window 356/356). The s105 push must RETURN main to green — the standing form.
+**MAIN RED AT PULL — run #41776072380 on `9ad3015` FAILED** (both controls read correctly first). The era's **twenty-seventh** red-at-pull, the known operator-transcript class (pin 3, the two `efe14 e7` sites — the local de-grammar edit already closed the local window 356/356). The s105 push must RETURN main to green — the standing form.
 
 Now the baseline gate: lint → typecheck → build:
 Lint ✓ typecheck ✓ build ✓. Now the E2E suite (233, ~4.3m) — foreground since background processes die between tool calls:
@@ -33,7 +33,7 @@ Lint ✓ typecheck ✓ build ✓. Now the E2E suite (233, ~4.3m) — foreground 
 **SMOKE 121/121 GREEN** ✓. Now coverage + the standing helpers:
 Coverage green (92.01/88.8/92.15/95.81 — the standing figures). Now the standing helpers:
 All helpers green (worklog: the 9 known pre-existing holes only, zero new). Now the skills-corpus sync check vs the neo-crm sibling (the 8th consecutive reading):
-**Skills corpus IN SYNC** — the eighth consecutive reading (sibling at tip `36aee3e`, zero deltas, catalogs byte-identical). The baseline gate is fully green.
+**Skills corpus IN SYNC** — the eighth consecutive reading (sibling at tip `36aee 3e`, zero deltas, catalogs byte-identical). The baseline gate is fully green.
 
 Now the **87th parity sweep**. Let me study the s104 sweep script and run it live:
 The entry rotated — `index-DyOb2xUE.js` (836 chunkrefs vs baseline 832). A **seventieth wave may have landed**. Running the wave analysis:

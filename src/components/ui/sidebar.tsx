@@ -226,7 +226,16 @@ function Sidebar({
       )}
       {...props}
     >
-      <div data-sidebar="gap" className="h-full flex flex-col">
+      {/* Session 106 (the wrong-at-birth closure): this div IS the panel —
+          the stock/reference `flex h-full w-full flex-col bg-sidebar`
+          classes landed on it. Without w-full the flex column sizes
+          content-driven (measured 299.625px min-content) and overflows the
+          256px container — the nav buttons crossed the sidebar border by
+          24px; without bg-sidebar the app-wide page gradient showed
+          through where the reference renders its flat #fafafa panel
+          (measured live both sides). Pinned by the visual-parity
+          session-106 block + the docs-contract pin F. */}
+      <div data-sidebar="gap" className="flex h-full w-full flex-col bg-sidebar">
         {children}
       </div>
     </div>
