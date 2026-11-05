@@ -290,7 +290,7 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // pin P2 — the muted render-claim two-surface coherence; the
     // unmeasured-surface class, the same-file extension form, 45 files
     // UNCHANGED).
-    expect(Number(n)).toBe(362);
+    expect(Number(n)).toBe(364);
   });
 
   it("the E2E-test count: every live claim site names ONE number (12 sites since s104 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) and the s104 §2 row joined after its 103-session grammar-orphan drift (11→12) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {
@@ -327,12 +327,23 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // the pin holds the DOC sites consistent — CLAUDE carries the figure
     // twice (the "(N tests, M of them" form + the "spec (N tests)" form),
     // README once (the feature table). The s48 fix: 163 → 164.
+    // S107 (the P1a find, the s94/s104 grammar-orphan genus): the README
+    // E2E-notes line — "tests/e2e/visual-parity.spec.ts` (N tests) pins
+    // the session-2 through session-18 remediation contracts" — carried
+    // the session-18-era 164 through BOTH the s103 (164→165) and the s106
+    // (165→167) parity moves: the collocation ("visual-parity.spec.ts`
+    // (N tests)") matches no family grammar (the family read the feature
+    // table + CLAUDE ×2 — this E2E-notes site was never enumerated), so
+    // the figure drifted at nobody's command for two corpus moves. The
+    // grammar joins the family so the site can never drift at nobody's
+    // command again (the s104 §2-row precedent).
     const values = collectFamily([
       { doc: "README", re: /(\d{2,4}) E2E parity tests/g },
+      { doc: "README", re: /visual-parity\.spec\.ts` \((\d{2,4}) tests\)/g }, // the E2E-notes line (the s107 grammar extension)
       { doc: "CLAUDE", re: /\(\d{2,4} tests, (\d{2,4}) of them the visual-parity/g },
       { doc: "CLAUDE", re: /visual-parity\.spec\.ts` \((\d{2,4}) tests\)/g },
     ]);
-    const n = expectConsistent("the parity count", values, 3);
+    const n = expectConsistent("the parity count", values, 4);
     expect(Number(n)).toBe(167);
   });
 

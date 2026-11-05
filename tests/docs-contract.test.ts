@@ -779,3 +779,107 @@ describe("the sidebar-panel + PAD coherence pins (session 106)", () => {
     ).toBe(true);
   });
 });
+
+describe("the grammar-orphan coherence pins (session 107)", () => {
+  it("pin I: the header-prose session figure is coherent — the SKILL Purpose line's 'N-session remediation ledger' names the LIVE closed-out session count read from the plan-status contract (the lesson-148 'likeliest grammar gap' class: a prose session figure no pin reads drifted at nobody's command)", () => {
+    // S107 (the P1b find, the s94/s104 grammar-orphan genus): the SKILL's
+    // line-17 Purpose line — "…parity contract, and lesson learned across
+    // the N-session remediation ledger" — carried "104" through the s105
+    // and s106 sessions: NO pin anywhere reads a prose session count (the
+    // corpus-count families read test counts; the doc-enumeration pins
+    // read file existence), so the figure drifted at nobody's command
+    // while the SKILL's own frontmatter description said "session-106" —
+    // two figures disagreeing inside ONE file. The ground truth is read
+    // LIVE from the plan-status contract's CURRENT_SESSION (never
+    // re-hardcoded here twice): the closed-out ledger count is
+    // CURRENT_SESSION − 1 (the running session not yet in the ledger).
+    const planStatus = readFileSync(
+      path.join(repoRoot, "tests", "plan-status-contract.test.ts"),
+      "utf8",
+    );
+    const liveSession = Number(
+      planStatus.match(/const CURRENT_SESSION = (\d+);/)?.[1],
+    );
+    expect(
+      liveSession > 0,
+      "the live CURRENT_SESSION constant must resolve (a renamed constant is a grammar failure, never a pass)",
+    ).toBe(true);
+    const closedOut = liveSession - 1;
+
+    // Doc side: the Purpose line must name the live count.
+    const purposeLine = skillDoc
+      .split("\n")
+      .find((l) => l.includes("-session remediation ledger"));
+    expect(
+      purposeLine,
+      "the SKILL must carry the Purpose line's remediation-ledger figure (the dropped-site doctrine — deleting the line to dodge the coherence check fails loudly)",
+    ).toBeTruthy();
+    const figure = /across the (\d{2,4})-session remediation ledger/.exec(
+      purposeLine as string,
+    )?.[1];
+    expect(
+      figure,
+      "the Purpose line's session figure must be present in the 'across the N-session remediation ledger' form",
+    ).toBeTruthy();
+    expect(
+      Number(figure),
+      `the Purpose line's session figure must name the LIVE closed-out session count (${closedOut} — read from the plan-status CURRENT_SESSION, never re-hardcoded): the stale '104' stood through the s105 + s106 sessions at nobody's command`,
+    ).toBe(closedOut);
+
+    // The second surface: the frontmatter description's session claim —
+    // a DIFFERENT-by-design figure from the Purpose line's ledger count:
+    // the description names the RUNNING session (the distilling session —
+    // "Distilled through the session-N remediation", bumped every
+    // session's docs-alignment), the Purpose line names the closed-out
+    // ledger (N−1). Both are held LIVE: the description == CURRENT_SESSION
+    // at every CI-visible commit state (the paired bump and the
+    // description bump land in the same session's commits).
+    const descriptionSession = /Distilled through the session-(\d+) remediation/.exec(
+      skillDoc,
+    )?.[1];
+    expect(
+      descriptionSession,
+      "the SKILL description must carry the 'Distilled through the session-N remediation' form",
+    ).toBeTruthy();
+    expect(
+      Number(descriptionSession),
+      `the SKILL description's session figure must name the RUNNING session (${liveSession}) while the Purpose line names the closed-out ledger (${closedOut}) — two LIVE-read figures, each held to its own convention; a description figure below the running session is a stale distillation claim`,
+    ).toBe(liveSession);
+  });
+
+  it("pin I-b: the README E2E-notes line's scope label names the live spec scope — the 'session-2 through session-18' label over a spec that now carries the s103 + s106 blocks can never return (the same grammar-orphan genus, the scope-label face)", () => {
+    // S107 (the P2a find): the same README line that carried the stale
+    // (164 tests) figure — its scope label "pins the session-2 through
+    // session-18 remediation contracts" names a spec that now carries the
+    // s103 label-alignment block + the s106 sidebar-panel block (the spec
+    // has grown twice since the label was written; the CLAUDE parallel
+    // text names the s103 addition). The live scope is read from the
+    // corpus-count family's own parity figure era: the spec's block set
+    // spans sessions 2–106.
+    const readme = readFileSync(path.join(repoRoot, "README.md"), "utf8");
+    const notesLine = readme
+      .split("\n")
+      .find((l) => l.includes("visual-parity.spec.ts` ("));
+    expect(
+      notesLine,
+      "the README must carry the E2E-notes visual-parity line (the dropped-site doctrine)",
+    ).toBeTruthy();
+    expect(
+      (notesLine as string).includes("session-2 through session-106"),
+      "the E2E-notes scope label must name the live spec scope (session-2 through session-106 — the s103 + s106 blocks are pinned in the spec; a scope label older than the spec's own blocks is a stale claim)",
+    ).toBe(true);
+
+    // The PAD §7.1 visual-parity row's scope label (the P2b face).
+    const padRow = padLive
+      .split("\n")
+      .find((l) => l.includes("visual-parity.spec.ts") && l.includes("| 1 | 167 |"));
+    expect(
+      padRow,
+      "the PAD §7.1 must carry the visual-parity row (the dropped-site doctrine)",
+    ).toBeTruthy();
+    expect(
+      (padRow as string).includes("session-2 through session-106"),
+      "the PAD §7.1 visual-parity row's scope label must name the live spec scope (session-2 through session-106)",
+    ).toBe(true);
+  });
+});

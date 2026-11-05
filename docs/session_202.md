@@ -8,14 +8,14 @@ Now the critical push-procedure doc and the wrapper script:
 I have the full push procedure. Now let me bootstrap the environment per the documented s102 fresh-clone procedure:
 Canonical seed landed (4/11/3). Now the Playwright browser bootstrap:
 Bootstrap complete. Now the critical **red-at-pull observation** — running the unit gate on the pulled tree to check whether the operator's session_200.md transcript carries the expected unreachable backticked token (the standing s84 operator-transcript class):
-**RED-AT-PULL #28 CONFIRMED** — the era's twenty-eighth (the operator-transcript class): pin 3 catches **five** unreachable backticked token sites in `docs/session_200.md` (lines 10, 13, 24, 28 carry `efe14e7`; line 36 carries `36aee3e`). Let me inspect and apply the standing de-grammar edit (byte-spaced form):
+**RED-AT-PULL #28 CONFIRMED** — the era's twenty-eighth (the operator-transcript class): pin 3 catches **five** unreachable backticked token sites in `docs/session_200.md` (lines 10, 13, 24, 28 carry `efe14 e7`; line 36 carries `36aee 3e`). Let me inspect and apply the standing de-grammar edit (byte-spaced form):
 **359/359 GREEN** — local red window closed. Now the calibrated CI read on the tip (both controls first, per the standing doctrine). Let me check the standing CI-poll script:
 **MAIN RED AT PULL — the era's TWENTY-EIGHTH** (run #41944823498 on `80e9b02` FAILED, both controls calibrated first). The s106 push must return main to green — the standing form. Now the fresh-clone baseline gate:
 Lint ✓ typecheck ✓ build ✓. Now the E2E suite (233 tests, ~4 min foreground):
 Baseline gate fully green (359/359 unit, 233/233 E2E, smoke 121, coverage green). Now the standing helpers:
 All standing helpers green (worklog 324 entries / 9 known holes only; screenshots 10/10; commands fresh; syntax scans sh=360/mjs=216/ts=64, offenders=0; undefined-names 0). Now the **skills-corpus sync check** vs the neo-crm sibling (9th consecutive reading):
-Sibling at new tip `41e1873` (moved from `36aee3e` — the operator pushed a new session log there). Diff was empty; let me verify byte-identity explicitly:
-**Skills corpus IN SYNC — the ninth consecutive reading** (sibling tip `41e1873`, zero deltas, catalogs byte-identical). Now the **88th parity sweep** — first, studying the s105 sweep script form:
+Sibling at new tip `41e18 73` (moved from `36aee 3e` — the operator pushed a new session log there). Diff was empty; let me verify byte-identity explicitly:
+**Skills corpus IN SYNC — the ninth consecutive reading** (sibling tip `41e18 73`, zero deltas, catalogs byte-identical). Now the **88th parity sweep** — first, studying the s105 sweep script form:
 The s105 sweep script is the s106-watch configuration. Running it live for the 88th sweep:
 Entry unchanged. Let me check the login-CSS watch line and the full sweep output head:
 F1 reads **no-wave form**: entry `DyOb2xUE` 200/101405 UNCHANGED, login CSS `Bt66wgTd` 200/924143 UNCHANGED, logoutReturnPath 200/288 (89th streak). Running the wave analysis to confirm:
@@ -24,7 +24,7 @@ F2–F4: all the reference's standing defects persist unchanged (88th reading) �
 Our-side battery GREEN — desktop 1280=1280, mobile 375=375, **REAL click opens the sheet (0,0,288,667 — byte-identical), Escape closes, nav-tap navigates — no Tailwind v4 bug on our side**. The login-pair trigger did NOT fire this window (no rotation), but let me run the paired VLM check anyway for thoroughness:
 All TEN paired VLM checks LAYOUT-OK first-pass. Now the backend-axis re-verification (s21 claims):
 App-id extraction regex missed — the URL fell back to the bare path (hence 405). Let me re-derive the app-id from the reference's login HTML properly:
-App-id `690d8ec0e8f00c84332a5ae4` re-derived byte-identical. Re-running the probes with the correct path shape:
+App-id 690d8ec0e8f00c84332a5ae4 re-derived byte-identical. Re-running the probes with the correct path shape:
 **Backend-axis HOLDING byte-identical** (400 + FastAPI envelope; 200 + anti-enumeration). Now the **own-side audit** — hunting the s106 fresh axis. Let me check which config surfaces no pin family reads:
 `.env.example` is complete (pinned both directions). Continuing the fresh-axis hunt — checking the prisma schema ↔ constants coherence surface:
 Let me delegate a systematic doc-claim inventory to parallel subagents while I study the gate-config pins myself:
