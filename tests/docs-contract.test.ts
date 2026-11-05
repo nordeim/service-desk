@@ -352,10 +352,17 @@ describe("the SKILL color-token coherence contract (session 104)", () => {
     for (const m of s41.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})/g)) {
       claims.push({ site: "§4.1", token: m[1], hex: m[2].toLowerCase() });
     }
-    // §19: the Color Reference table (the heading through the next ##).
+    // §19: the Color Reference table (the heading through the next ## —
+    // S105: the LIGHT-TABLE span ends at the dark-palette marker instead:
+    // the §19 extension adds a dark subsection whose rows are DARK-site
+    // claims (read by pin E-dark, never here — a dark row checked against
+    // the :root light map would RED forever, the site-shadowing trap the
+    // per-SITE tuple form exists to prevent).
     const s19Start = skill.indexOf("## 19. Color Reference");
     if (s19Start < 0) throw new Error("the SKILL must carry the §19 Color Reference heading (a dropped section fails loudly)");
-    const s19End = skill.indexOf("\n## ", s19Start + 1);
+    const darkMarkerIdx = skill.indexOf("\n**The dark palette", s19Start);
+    const s19NextHeading = skill.indexOf("\n## ", s19Start + 1);
+    const s19End = darkMarkerIdx > s19Start ? darkMarkerIdx : s19NextHeading;
     const s19 = skill.slice(s19Start, s19End > s19Start ? s19End : s19Start + 6000);
     for (const line of s19.split("\n")) {
       if (!line.startsWith("| `--")) continue;
@@ -416,5 +423,181 @@ describe("the SKILL color-token coherence contract (session 104)", () => {
       missing,
       "the SKILL §19 Color Reference table must keep documenting the s9-flipped load-bearing tokens — a dropped row shrinks the doc's color surface silently (the dropped-site doctrine: the coherence pin guards the rows that EXIST, this floor guards that they exist)",
     ).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session 105 — the color-reference COMPLETENESS + dark-palette coherence
+// pins (the P1: the unmeasured-surface class) + the muted render-claim pin
+// (the P2: the stale inert-set claim)
+//
+// Contract under test — the P1: the SKILL §19 is titled "Color Reference
+// (Complete)" while its light table documented 24 of the 35 :root custom
+// properties (eleven undocumented + --radius absent) and the ENTIRE
+// 27-token .dark palette was undocumented (the SKILL carried no dark mention
+// at all). The .dark block itself is the session-1 custom navy/cyan family —
+// the s9 token diff was :root-scoped BY DESIGN, and its one dark decision
+// ("the .dark block stays ours — documented divergence, the reference has no
+// dark mode") was recorded ONLY in the s9 plan file: the same divergence
+// class the s9 diff swept from the light block stood in the dark block of
+// the SAME FILE for 104 sessions with every gate green, while the reference's
+// own CSS ships the stock-zinc shadcn dark block (measured live at s105:
+// 31 HSL tokens incl. the chart family + the --sidebar-background naming).
+// A completeness claim is a claim like any other (the lesson-158 form one
+// level deeper): the coverage must be measured, and a set-equality pin holds
+// it.
+//
+// The P2: globals.css's own comment claimed the inert stock set
+// "(secondary/muted/sidebar-*) render nowhere today" — FALSE for the muted
+// family: --muted-foreground renders as the stock form placeholders' color
+// (placeholder:text-muted-foreground in the shared Input/Textarea since the
+// initial commit — measured live rgb(115,115,115) on the mytickets/submitticket
+// surfaces; the auth pages override with placeholder:text-slate-600). The
+// s9 inert-set classification was wrong at birth for this family — the class
+// list was never checked for a render surface. The pin holds the claim at
+// BOTH surfaces: the doc names the placeholder, and the shared Input ships
+// the class (the s100 two-surface form).
+// ---------------------------------------------------------------------------
+
+describe("the SKILL color-reference completeness + dark-palette contract (session 105)", () => {
+  /** Parse the globals.css :root block into a token→raw-value map (EVERY custom property, any value form — --radius is a rem literal). */
+  function globalsRootAll(): Map<string, string> {
+    const css = readFileSync(path.join(repoRoot, "src", "app", "globals.css"), "utf8");
+    const start = css.indexOf(":root {");
+    if (start < 0) throw new Error("globals.css must carry the :root block");
+    const rest = css.slice(start + ":root {".length);
+    const end = rest.indexOf("}");
+    if (end < 0) throw new Error("the :root block must close");
+    const map = new Map<string, string>();
+    for (const m of rest.slice(0, end).matchAll(/--([a-z0-9-]+):\s*([^;]+);/g)) {
+      map.set(m[1], m[2].trim());
+    }
+    if (map.size < 30) {
+      throw new Error(`the :root block must carry at least 30 custom properties — found ${map.size} (the literal-hex palette + the --radius documentation token)`);
+    }
+    return map;
+  }
+
+  /** Parse the globals.css .dark block into a token→hex map. */
+  function globalsDark(): Map<string, string> {
+    const css = readFileSync(path.join(repoRoot, "src", "app", "globals.css"), "utf8");
+    const start = css.indexOf("\n.dark {");
+    if (start < 0) throw new Error("globals.css must carry the .dark block");
+    const rest = css.slice(start + "\n.dark {".length);
+    const end = rest.indexOf("}");
+    if (end < 0) throw new Error("the .dark block must close");
+    const map = new Map<string, string>();
+    for (const m of rest.slice(0, end).matchAll(/--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})/g)) {
+      map.set(m[1], m[2].toLowerCase());
+    }
+    if (map.size < 20) {
+      throw new Error(`the .dark block must carry at least 20 literal-hex tokens — found ${map.size}`);
+    }
+    return map;
+  }
+
+  /**
+   * The §19 section split at the dark-palette marker (the s105 extension
+   * shape): the LIGHT span (the heading through the marker) and the DARK
+   * span (the marker through the next ## heading).
+   */
+  function s19Spans(): { light: string; dark: string } {
+    const skill = readFileSync(path.join(repoRoot, "service-desk_SKILL.md"), "utf8");
+    const s19Start = skill.indexOf("## 19. Color Reference");
+    if (s19Start < 0) throw new Error("the SKILL must carry the §19 Color Reference heading");
+    const marker = "\n**The dark palette";
+    const markerIdx = skill.indexOf(marker, s19Start);
+    if (markerIdx < 0) {
+      throw new Error("the SKILL §19 must carry the dark-palette subsection (the '**The dark palette' marker) — the s105 completeness closure requires the dark family documented (the dropped-site doctrine)");
+    }
+    const nextHeading = skill.indexOf("\n## ", markerIdx);
+    return {
+      light: skill.slice(s19Start, markerIdx),
+      dark: skill.slice(markerIdx, nextHeading > markerIdx ? nextHeading : markerIdx + 6000),
+    };
+  }
+
+  it("pin E: the §19 light table is COMPLETE — every :root custom property documented, no phantoms (the '(Complete)' title held to its word; the eleven-token gap + the missing --radius row can never return)", () => {
+    const root = globalsRootAll();
+    const rootTokens = new Set([...root.keys()]);
+    // every backticked `--token` mention in the light span (the table rows'
+    // name cells + the compound value cells like `--muted-foreground: #737373`)
+    const documented = new Set<string>();
+    for (const m of s19Spans().light.matchAll(/`(--[a-z0-9-]+)[^`]*`/g)) {
+      documented.add(m[1].slice(2));
+    }
+    expect(
+      documented.size,
+      "the §19 light table must document a substantial token set (a shrunk table fails loudly before the set diff)",
+    ).toBeGreaterThanOrEqual(20);
+    const missing = [...rootTokens].filter((t) => !documented.has(t));
+    const phantoms = [...documented].filter((t) => !rootTokens.has(t));
+    expect(
+      { missing, phantoms },
+      "the §19 light table must document EVERY :root custom property and NO phantom tokens — the section's own title claims '(Complete)': a completeness claim is a claim like any other (the s105 finding: eleven tokens + --radius undocumented behind the title for 104 sessions; an agent theming from the doc cannot see the tokens the table omits)",
+    ).toEqual({ missing: [], phantoms: [] });
+  });
+
+  it("pin E-dark: the §19 dark subsection documents every .dark token at the shipped literal — the s9-recorded divergence surfaced and pinned (a stale dark row bites even when the light table is correct — the per-SITE form)", () => {
+    const dark = globalsDark();
+    const span = s19Spans().dark;
+    // the same row grammar as pin D's §19 parser (compound rows carry a
+    // second `--token: #hex` inline in the value cell)
+    const claims: { token: string; hex: string }[] = [];
+    for (const line of span.split("\n")) {
+      if (!line.startsWith("| `--")) continue;
+      const parts = line.split(/(?=`--)/);
+      for (const part of parts) {
+        const tok = /^`?--([a-z0-9-]+)/.exec(part.replace(/^\|\s*/, ""));
+        if (!tok) continue;
+        const hex = /#([0-9a-fA-F]{6})/.exec(part);
+        if (hex) claims.push({ token: tok[1], hex: `#${hex[1].toLowerCase()}` });
+      }
+    }
+    expect(
+      claims.length,
+      "the §19 dark subsection must document the .dark family's values (a table without value claims is prose, not a reference)",
+    ).toBeGreaterThanOrEqual(20);
+    const offenders: string[] = [];
+    const claimed = new Set(claims.map((c) => c.token));
+    for (const [token, hex] of dark) {
+      if (!claimed.has(token)) {
+        offenders.push(`--${token}: documented NOWHERE in the dark subsection (ships ${hex})`);
+      }
+    }
+    for (const { token, hex } of claims) {
+      const actual = dark.get(token);
+      if (actual === undefined) {
+        offenders.push(`--${token} (${hex}): no such token in globals.css .dark`);
+      } else if (actual !== hex) {
+        offenders.push(`--${token}: SKILL claims ${hex}, globals.css .dark ships ${actual}`);
+      }
+    }
+    expect(
+      offenders,
+      "every §19 dark-subsection claim must equal the shipped globals.css .dark literal, and every .dark token must be documented — the dark family is the s9-recorded divergence ('the .dark block stays ours'), and the s105 closure surfaces + pins it: a future dark-mode toggle activates THIS family (the reference's own CSS ships the stock-zinc dark block — measured live s105), so the doc and the file must move together",
+    ).toEqual([]);
+  });
+
+  it("pin P2: the muted-foreground render claim is coherent at BOTH surfaces — the §19 row names the placeholder surface AND the shared Input ships the class (the stale 'renders nowhere' inert-set claim can never return)", () => {
+    // Doc side: the §19 muted row must name the placeholder render surface.
+    const row = s19Spans().light
+      .split("\n")
+      .find((l) => l.startsWith("| `--muted") || l.startsWith("| `--muted-foreground"));
+    expect(
+      row,
+      "the §19 light table must carry the --muted/--muted-foreground row (the dropped-site doctrine)",
+    ).toBeTruthy();
+    expect(
+      row as string,
+      "the §19 muted row must NAME the placeholder render surface — --muted-foreground renders as the stock form placeholders' color (placeholder:text-muted-foreground, measured rgb(115,115,115) on the mytickets/submitticket surfaces; the auth pages override with slate-600): the s105 P2 closed the 'renders nowhere' claim that was wrong at birth (the class list was never checked for a render surface)",
+    ).toMatch(/placeholder/i);
+    // Code side: the shared Input must ship the class (the render mechanism
+    // the row names — removing the class breaks the claim's other surface).
+    const input = readFileSync(path.join(repoRoot, "src", "components", "ui", "input.tsx"), "utf8");
+    expect(
+      input.includes("placeholder:text-muted-foreground"),
+      "src/components/ui/input.tsx must carry placeholder:text-muted-foreground — the §19 row's named render mechanism (a class removal silently invalidates the doc's render claim, the s100 two-surface form)",
+    ).toBe(true);
   });
 });

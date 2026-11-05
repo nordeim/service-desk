@@ -85,10 +85,16 @@
      neutral-200; --foreground rendered slate-900 badge text vs their
      near-black; --sidebar-ring made nav focus rings cyan vs their blue-500.
      The cyan→blue motif lives in the explicit utilities (from-cyan-500,
-     text-cyan-700, ring-cyan-500…), NEVER in these tokens. The remaining
-     stock flips (secondary/muted/sidebar-*) render nowhere today (unused
-     components / defeated by call-site classes) — kept in stock parity so a
-     future component cannot silently reintroduce the divergence. */
+     text-cyan-700, ring-cyan-500…), NEVER in these tokens. The inert-set
+     render audit (s105, measured live): secondary/secondary-foreground +
+     the sidebar-* family (primary/accent/border) render nowhere (unused
+     variants / unused components / defeated by call-site classes) — but
+     --muted-foreground RENDERS as the stock form placeholders' color
+     (placeholder:text-muted-foreground in the shared Input/Textarea;
+     rgb(115,115,115) measured on the mytickets-search/submitticket
+     surfaces; the auth pages override with placeholder:text-slate-600).
+     Kept in stock parity so a future component cannot silently
+     reintroduce the divergence. */
   --background: #ffffff;
   --foreground: #0a0a0a;
   --card: #ffffff;
@@ -139,7 +145,11 @@
   --sidebar-border: #e5e7eb;
   --sidebar-ring: #3b82f6;
 
-  /* Reference app's custom properties. */
+  /* Session-1 CUSTOM tokens kept for documentation (the s105 measured
+     attribution — NOT the reference's: none of these ship in any of the
+     reference's CSS files). Unmapped in @theme inline below, so NO utility
+     class reads them — the visible cyan/amber/emerald surfaces come from
+     Tailwind's built-in palette utilities, never these variables. */
   --navy-950: #0a1628;
   --navy-900: #0f2744;
   --navy-800: #1a3a5c;
@@ -149,6 +159,17 @@
   --emerald-500: #10b981;
 }
 
+/* The DARK palette — the session-1 custom navy/cyan family, a DELIBERATE
+   divergence the s9 token diff recorded in its plan ("the .dark block
+   stays ours — the reference has no dark mode") and the s105 closure
+   surfaces here: the reference's own CSS ships the stock-zinc shadcn dark
+   block (measured live s105: 31 HSL tokens incl. the chart family + the
+   --sidebar-background naming) — inert on BOTH sides (neither site ships
+   a dark-mode toggle; nothing sets the .dark class, so no dark surface
+   ever renders; the stock components' dark: variants activate only under
+   the class). Pinned doc↔code by tests/docs-contract.test.ts pin E-dark
+   since s105 — the values below are the single source of truth for what
+   a future dark-mode toggle would render. */
 .dark {
   --background: #0a1628;
   --foreground: #e2e8f0;

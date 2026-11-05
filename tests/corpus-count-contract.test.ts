@@ -281,15 +281,16 @@ describe("the corpus-count consistency contract (session 48)", () => {
     // UNCHANGED). A suite
     // change without the doc move fails
     // the consistency check above; a doc move without the suite change
-    // fails the gate itself. 356 after the s104 SKILL color-token
-    // coherence extension (two pins in tests/docs-contract.test.ts: pin D
-    // — every §4.1/§19 color-token claim equals the shipped globals.css
-    // :root literal, the twelve stale slate-family values standing 95
-    // sessions behind the §19 header's own 'verified against the file'
-    // claim — + the dropped-site floor holding the s9-flipped
-    // load-bearing rows; the stale-verified-claim class, the same-file
-    // extension form, 45 files UNCHANGED).
-    expect(Number(n)).toBe(356);
+    // fails the gate itself. 359 after the s105 color-reference
+    // completeness + dark-palette coherence extension (three pins in
+    // tests/docs-contract.test.ts: pin E — the §19 light-table set
+    // equality both directions, the '(Complete)' title held to its word;
+    // pin E-dark — the §19 dark subsection's per-row values equal to the
+    // .dark literals, the s9-recorded deliberate divergence surfaced;
+    // pin P2 — the muted render-claim two-surface coherence; the
+    // unmeasured-surface class, the same-file extension form, 45 files
+    // UNCHANGED).
+    expect(Number(n)).toBe(359);
   });
 
   it("the E2E-test count: every live claim site names ONE number (12 sites since s104 — the stale '57' and '# 107 E2E' ×2 in the SKILL can never return, the PAD §7.4 checklist line joined the family after its s89 drift, the CLAUDE header-prose line joined after its s94 drift, and the s95 dedup dropped the s14-duplicated SKILL Appendix gate-comment site the family had double-counted (12→11) and the s104 §2 row joined after its 103-session grammar-orphan drift (11→12) — the major-only-prose class: a figure whose collocation matches no family grammar moves at nobody's command)", () => {

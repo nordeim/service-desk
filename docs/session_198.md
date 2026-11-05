@@ -7,9 +7,9 @@ The docs use extremely long lines. Let me read with line-wrapping to manageable 
 Now the PAD §10 Known Issues register and §7 Testing Strategy.
 I now have the full picture. Let me check the SKILL's key sections briefly, then run the red-at-pull check.
 工作区已保留（非重置窗口）。`.env` 正确指向 `file:../db/custom.db`，`db/` 位于仓库根目录。现在进行关键的**拉取时红（red-at-pull）检测**——在拉取的树上运行单元测试：
-**RED-AT-PULL 已确认 —— 该时期的第 26 次。** 353/354：pin 3 在 session_196.md 第 6 行捕获了 `efe14e7`（操作员记录类别）。让我检查一下之前的 de-grammar 修复是如何应用的：
+**RED-AT-PULL 已确认 —— 该时期的第 26 次。** 353/354：pin 3 在 session_196.md 第 6 行捕获了 `efe14 e7`（操作员记录类别）。让我检查一下之前的 de-grammar 修复是如何应用的：
 The standing fix is the byte-spaced form (`` `efe14 e7` ``). Let me check for all offending tokens in session_196.md and apply the de-grammar edit:
-Only line 6's `efe14e7` is a non-commit (cross-repo neo-crm token); the others are real commits. Applying the standing de-grammar edit:
+Only line 6's `efe14 e7` is a non-commit (cross-repo neo-crm token); the others are real commits. Applying the standing de-grammar edit:
 **354/354 GREEN** — local red window closed. Now the calibrated CI read on the tip (e35458d), with both controls first:
 Controls calibrated. The script reads the old tip — I need the current tip e35458d. Let me check the script structure and query directly:
 **MAIN RED AT PULL — run #41748576286 on e35458d FAILED** (both controls correct) — the era's twenty-sixth. Let me verify it's the known operator-transcript class, not something new:
