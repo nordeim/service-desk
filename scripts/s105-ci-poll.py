@@ -69,13 +69,13 @@ def main() -> int:
         verdict = classify(fetch(f"https://github.com/nordeim/service-desk/actions/runs/{found}"))
         print(f"attempt {attempt}: {verdict}")
         if verdict == "COMPLETED_SUCCESSFULLY":
-            print(f"VERDICT: run #{found} on {target} COMPLETED SUCCESSFULLY (the calibrated green signature) — THE PUSH RETURNED MAIN TO GREEN (the s91 RETURN-GREEN form — the session opened red-at-pull, the era's TWENTY-SIXTH red-at-pull (the operator's transcript commit e35458d re-introducing the s84 token class at the continued cadence — run #41748576286 FAILED at the open), and the push closes the red window the transcript opened)")
+            print(f"VERDICT: run #{found} on {target} COMPLETED SUCCESSFULLY (the calibrated green signature) — THE PUSH RETURNED MAIN TO GREEN (the s91 RETURN-GREEN form — the session opened red-at-pull, the era's TWENTY-SEVENTH red-at-pull (the operator's transcript commit 9ad3015 re-introducing the s84 token class at the continued cadence, the token at TWO sites — run #41776072380 FAILED at the open), and the push closes the red window the transcript opened)")
             return 0
         if verdict == "CANCELLED":
             print(f"VERDICT: run #{found} CANCELLED")
             return 1
         if verdict == "FAILED":
-            print(f"VERDICT: run #{found} on {target} FAILED — investigate (main was RED at pull — the era's TWENTY-SIXTH red-at-pull (the operator's transcript commit e35458d, the s84 recurring class at the continued cadence); the push's duty: RETURN-GREEN — the red window EXISTS; a FAILED push FAILS to close it)")
+            print(f"VERDICT: run #{found} on {target} FAILED — investigate (main was RED at pull — the era's TWENTY-SEVENTH red-at-pull (the operator's transcript commit 9ad3015, the s84 recurring class at the continued cadence, the token at TWO sites); the push's duty: RETURN-GREEN — the red window EXISTS; a FAILED push FAILS to close it)")
             return 2
         if verdict.startswith("UNCLASSIFIED"):
             print("VERDICT: completed with a non-success conclusion — investigate")
