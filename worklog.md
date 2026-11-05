@@ -5214,3 +5214,18 @@ Stage Summary:
 - Session 106's P1 closed: the sidebar-panel coherence axis (lesson 160 — a wrong-at-birth structure can stand a hundred sessions green when no gate reads the surface it breaks: pin the rendered geometry (the computed style + the bounds), not just the classes you meant to ship; the simulation-first form)
 - The P2 closed: the PAD coherence ride-along (the §7.1 inline figures held to the LIVE constants + the §3.2 tree's named-file floor)
 - The corpus at 362 unit (45 files) / 235 E2E / 167 parity / 121 smoke, the coverage gate green, the audit census 2 (the duo documented), seed 4/11/3; the standing figures frozen: the entry index-DyOb2xUE.js 200/101405 + the CSS index-Bt66wgTd.css 200/924143 (the 70th-wave entry the LAST RECORDED)
+
+---
+Task ID: 321-s106
+Agent: main (Super Z) — session 106
+Task: Session-106 closeout — the RETURN-GREEN push (single-step, first push green) + the plan fully checked
+
+Work Log:
+- The remediation commit 64bdcea (34 files: the five pins (E2E pins 1+2 + F/G/H) + the one-line sidebar-panel fix + the paired bumps + the corpus lockstep + the PAD fixes + the six refreshed screenshots + the thirteen s106 scripts + the plan + the session log + the worklog task 320)
+- THE PUSH: the dry-run GREEN first (80e9b02..64bdcea negotiated, remote untouched), then the real push via the wrapper; the key's ed25519 fingerprint computed at the write (SHA256:4FSV1Prot+Fe4gAmr8dWn63nrKiPv2A+nJw30h7oo+8 — the s92–s100 rotation record's key, a rotation from the s105 record's IFhAk23t key); the paramiko ssh shim deployed per the runbook Appendix A (no OpenSSH binary in this sandbox); the remote verified: refs/heads/main @ 64bdcea == local HEAD; the tracking ref synced; both keys shredded post-push
+- CI run #41953830500 on 64bdcea: COMPLETED_SUCCESSFULLY — THE PUSH RETURNED MAIN TO GREEN IN ONE STEP (the standing form: the session opened red-at-pull — the era's TWENTY-EIGHTH, the operator's 80e9b02, the tokens at FIVE sites — run #41944823498 FAILED at the open; the push closes the red window the transcript opened; both controls calibrated first: the known-green #177 + the known-red)
+- The closeout: the plan's §6 boxes ticked with the verified record + this push entry + the closeout commit (the ci-poll success-branch verdict-line context fixed to the s106 form — the same hand-audit-miss class the s105 session recorded honestly) + the closeout push + its own CI read (the calibrated form)
+
+Stage Summary:
+- Session 106 complete: the sidebar-panel coherence axis closed (lesson 160 — the wrong-at-birth class: pin the rendered geometry, not just the classes you meant to ship; the simulation-first form) + the PAD coherence ride-along closed (the §7.1 inline figures + the §3.2 tree)
+- Main is green at the remediation push; the corpus at 362 unit / 235 E2E / 167 parity / 121 smoke; the evidence refreshed with the honest predicted-set correction (the frame-content assumption class) + the VLM email-truncation reading refuted by the pixel evidence

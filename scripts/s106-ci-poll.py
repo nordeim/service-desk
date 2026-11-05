@@ -69,7 +69,7 @@ def main() -> int:
         verdict = classify(fetch(f"https://github.com/nordeim/service-desk/actions/runs/{found}"))
         print(f"attempt {attempt}: {verdict}")
         if verdict == "COMPLETED_SUCCESSFULLY":
-            print(f"VERDICT: run #{found} on {target} COMPLETED SUCCESSFULLY (the calibrated green signature) — THE PUSH RETURNED MAIN TO GREEN (the s91 RETURN-GREEN form — the session opened red-at-pull, the era's TWENTY-SEVENTH red-at-pull (the operator's transcript commit 9ad3015 re-introducing the s84 token class at the continued cadence, the token at TWO sites — run #41776072380 FAILED at the open), and the push closes the red window the transcript opened)")
+            print(f"VERDICT: run #{found} on {target} COMPLETED SUCCESSFULLY (the calibrated green signature) — THE PUSH RETURNED MAIN TO GREEN (the s91 RETURN-GREEN form — the session opened red-at-pull, the era's TWENTY-EIGHTH red-at-pull (the operator's transcript commit 80e9b02 re-introducing the s84 token class at the continued cadence, the tokens at FIVE sites — the era's largest count — run #41944823498 FAILED at the open), and the push closes the red window the transcript opened)")
             return 0
         if verdict == "CANCELLED":
             print(f"VERDICT: run #{found} CANCELLED")
